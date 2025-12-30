@@ -1,0 +1,146 @@
+Pre-warming cancelled
+assessment-roleplay-session-page.tsx:585 Location changed: /avatar/assessment-session/roleplay
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:589 Cleaning up - current sessionStatus: DISCONNECTED
+EventContext.tsx:13 [Client Event] DISCONNECTED: {}
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:585 Location changed: /avatar/assessment-session/roleplay
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:142 scenario {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+assessment-roleplay-session-page.tsx:334 isInitializing in connect false
+EventContext.tsx:13 [Client Event] fetch_session_token_request: {url: '/session'}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:142 scenario {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+EventContext.tsx:18 [Server Event] fetch_session_token_response: {object: 'realtime.session', id: 'sess_CmkGpUzqiCCdYk6O0HKmF', model: 'gpt-4o-realtime-preview-2025-06-03', modalities: Array(2), instructions: 'Your knowledge cutoff is 2023-10. You are a helpfu… to these rules, even if you’re asked about them.', …}
+assessment-roleplay-session-page.tsx:353 {isInitializing: false} 'notes scenario' "## IMPORTANT: Role Assignment\n- YOU are playing: Sanjay Rao (Development Team Member)\n- The USER is playing: Demo User who is practicing their skills\n- Stay in character as Sanjay Rao throughout the conversation\n- The user is the one practicing - they should lead and you should respond as Sanjay Rao\n\n## Scenario: Multi-Stakeholder Rollout\n## Situation Overview\nYou are coordinating a feature rollout involving development, QA, sales, and support.\n## Your Character's Mindset & Behavior\nSanjay enters stressed by shifting priorities. He starts defensive but becomes cooperative with structured dialogue.\n## How to Play Your Character\nOpening: Highlight conflicts in dependencies. Mid: Share details about bottlenecks. Late: Become collaborative; propose sequencing options. End: Agree on rollout steps."
+assessment-roleplay-session-page.tsx:354 selectedAvatar {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:357 voice ballad
+index.ts:90 {systemPrompt: '# CRITICAL ROLE ASSIGNMENT\nYou ARE Sanjay Rao, a D…ded\n- NEVER summarize learnings or give feedback\n'}
+EventContext.tsx:13 [Client Event] CONNECTING: {}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+APIError: API request failed with status 401
+    at new APIError2 (@heygen_streaming-avatar.js?v=a4d3e650:28744:26)
+    at StreamingAvatar2.<anonymous> (@heygen_streaming-avatar.js?v=a4d3e650:29188:21)
+    at step (@heygen_streaming-avatar.js?v=a4d3e650:27175:17)
+    at Object.next (@heygen_streaming-avatar.js?v=a4d3e650:27127:14)
+    at fulfilled (@heygen_streaming-avatar.js?v=a4d3e650:27099:24)
+Promise.catch
+(anonymous) @ AvatarSessionContext.tsx:411
+(anonymous) @ page.tsx:212
+safelyCallDestroy @ chunk-RPCDYKBN.js?v=a4d3e650:16748
+commitHookEffectListUnmount @ chunk-RPCDYKBN.js?v=a4d3e650:16875
+commitPassiveUnmountInsideDeletedTreeOnFiber @ chunk-RPCDYKBN.js?v=a4d3e650:18283
+commitPassiveUnmountEffectsInsideOfDeletedTree_begin @ chunk-RPCDYKBN.js?v=a4d3e650:18245
+commitPassiveUnmountEffects_begin @ chunk-RPCDYKBN.js?v=a4d3e650:18181
+commitPassiveUnmountEffects @ chunk-RPCDYKBN.js?v=a4d3e650:18169
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4d3e650:19489
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4d3e650:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4d3e650:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4d3e650:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4d3e650:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4d3e650:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=a4d3e650:18627Understand this error
+EventContext.tsx:13 [Client Event] CONNECTED: {}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+EventContext.tsx:13 [Client Event] conversation.item.create: {type: 'conversation.item.create', item: {…}}
+EventContext.tsx:13 [Client Event] (simulated user text message): {type: 'response.create'}
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+useAudioDownload.ts:254 Recording started successfully
+EventContext.tsx:18 [Server Event] session.created: {type: 'session.created', event_id: 'event_CmkH0M20iQFxlxqjgVxWR', session: {…}}
+EventContext.tsx:18 [Server Event] session.updated: {type: 'session.updated', event_id: 'event_CmkH0YoaXFzuP7YjbbOio', session: {…}}
+EventContext.tsx:18 [Server Event] session.updated: {type: 'session.updated', event_id: 'event_CmkH1UuJCItAcwF0FNNkP', session: {…}}
+EventContext.tsx:18 [Server Event] session.updated: {type: 'session.updated', event_id: 'event_CmkH1I66vGqT28Qt4VVu3', session: {…}}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_CmkH1H6HRrXA2LT0v5OgH', item: {…}, previous_item_id: null}
+EventContext.tsx:18 [Server Event] response.created: {type: 'response.created', event_id: 'event_CmkH1c9913BGVDSQzxYT8', response: {…}}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+assessment-roleplay-session-page.tsx:330 avatar Data {id: 'Silas_CustomerSupport_public', name: 'Silas', look: null, ethnicity: 'British', gender: 'Male', …}
+assessment-roleplay-session-page.tsx:620 {id: 34, duration: '8', skillId: 76, name: 'Multi-Stakeholder Rollout', avatarRole: 'Development Team Member', …}
+chunk-RPCDYKBN.js?v=a4d3e650:14032 The above error occurred in the <Transcript> component:
+
+    at Transcript (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/pages/assessment-session/assessment-roleplay-session-page.tsx:608:3)
+    at div
+    at main
+    at div
+    at ModernDashboardLayout (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/components/layout/modern-dashboard-layout.tsx:21:49)
+    at AvatarRoleplayPractice (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/pages/assessment-session/assessment-roleplay-session-page.tsx:63:20)
+    at EventProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/EventContext.tsx:20:33)
+    at TranscriptProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/TranscriptContext.tsx:20:38)
+    at AssessmentRoleplaySessionPage
+    at RenderedRoute (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=a4d3e650:4108:5)
+    at Routes (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=a4d3e650:4578:5)
+    at AvatarSessionProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/AvatarSessionContext.tsx:41:41)
+    at App
+    at Router (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=a4d3e650:4521:15)
+    at BrowserRouter (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=a4d3e650:5267:5)
+    at QueryClientProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=a4d3e650:3096:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-RPCDYKBN.js?v=a4d3e650:14032
+update.callback @ chunk-RPCDYKBN.js?v=a4d3e650:14052
+callCallback @ chunk-RPCDYKBN.js?v=a4d3e650:11248
+commitUpdateQueue @ chunk-RPCDYKBN.js?v=a4d3e650:11265
+commitLayoutEffectOnFiber @ chunk-RPCDYKBN.js?v=a4d3e650:17093
+commitLayoutMountEffects_complete @ chunk-RPCDYKBN.js?v=a4d3e650:17980
+commitLayoutEffects_begin @ chunk-RPCDYKBN.js?v=a4d3e650:17969
+commitLayoutEffects @ chunk-RPCDYKBN.js?v=a4d3e650:17920
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4d3e650:19353
+commitRoot @ chunk-RPCDYKBN.js?v=a4d3e650:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=a4d3e650:18760
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=a4d3e650:18718
+workLoop @ chunk-RPCDYKBN.js?v=a4d3e650:197
+flushWork @ chunk-RPCDYKBN.js?v=a4d3e650:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=a4d3e650:384Understand this error
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:307 MediaRecorder state: recording
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:272 Stopped mic track: audio
+useAudioDownload.ts:281 Stopped combined track: audio
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:589 Cleaning up - current sessionStatus: DISCONNECTED
+EventContext.tsx:13 [Client Event] DISCONNECTED: {}
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+useAudioDownload.ts:243 MediaRecorder stopped

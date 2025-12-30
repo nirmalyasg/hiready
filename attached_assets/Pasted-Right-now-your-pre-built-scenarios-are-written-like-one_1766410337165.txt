@@ -1,0 +1,226 @@
+Right now your pre-built scenarios are written like “one fixed story” (often assuming a manager-level user). To make them work for junior → senior manager → CEO without duplicating 10 versions manually, you need to reframe each scenario as a flexible scenario template with persona overlays that change stakes, authority, language, and success criteria.
+
+Below is a practical framework + naming system + minimal product changes your dev can implement while keeping your current DB/API structure largely intact.
+
+1) Reframe every pre-built scenario as: Core + Persona Overlay
+A. Core Scenario (never changes)
+
+This is the “truth” of the situation. It should be written so it applies to anyone.
+
+Core should include only:
+
+Context: where/when, what happened, why it matters
+
+Counter-persona: who the other person is + what they care about
+
+Tension: what makes it hard (emotion, conflict, uncertainty, constraints)
+
+Objective: what “good” looks like (the outcome)
+
+Mode: explore/persuade/resolve/reflect/challenge
+
+Skill lens: linked skills
+
+✅ Keep this stable and role-agnostic.
+
+B. Persona Overlay (changes based on who the user is)
+
+Persona overlays modify the same scenario for different user types.
+
+For each scenario, define 3–4 user levels:
+
+IC / Junior Associate
+
+Manager
+
+Senior Leader / Director
+
+Executive / CXO
+
+Each overlay changes:
+
+Authority & constraints
+
+what they can approve / commit / promise
+
+Stakes
+
+local impact vs business-wide / reputational risk
+
+Tone expectations
+
+deferential vs firm vs diplomatic
+
+Success criteria
+
+what “win” means at that level
+
+Typical mistakes
+
+juniors over-explain, leaders under-empathize, execs over-assert, etc.
+
+Avatar behavior intensity
+
+how hard the pushback is and what triggers escalation
+
+✅ This is how “Angry customer” becomes 4 different real conversations without rewriting from scratch.
+
+2) What changes in the app flow (small, high leverage)
+Current flow
+
+Practice → pick scenario → pick avatar → pre-session (tone/persona/language) → session
+
+Enhanced flow (minimal change)
+
+Practice → pick scenario → “Who are you in this situation?” (persona overlay) → pick avatar → pre-session → session
+
+Persona overlay selector UI (very small)
+
+Level: IC / Manager / Senior Leader / Executive
+
+Function (optional): Sales / Support / Ops / Product / HR
+
+Relationship (optional): First-time / existing / strategic
+
+Authority boundary toggle: “I can approve refund/discount” Yes/No
+
+3) How the avatar gets tailored (exactly what to do)
+
+When user selects a persona overlay:
+
+you do NOT create a new scenario
+
+you generate a runtime session instruction pack by combining:
+core scenario + persona overlay + tone/persona + culture style + language
+
+What actually changes in conversation
+
+Example: “Handling Upset Customer”
+
+Junior associate: customer pressures for refund; user must de-escalate + follow policy + escalate properly
+
+Manager: customer demands manager; user can offer options; must retain + manage policy exceptions
+
+CEO: strategic client threatens churn + public escalation; user must preserve relationship + commit next steps without overpromising
+
+Same scenario. Different stakes, authority, language, commitments, and counter-persona aggression.
+
+4) Minimal data model change (so it stays simple)
+
+You can keep your scenarios table and add just a few fields.
+
+Add to scenarios (minimal)
+
+scenario_key (text, unique, stable)
+
+short_title (text) — for card listing
+
+display_title (text) — for detail page
+
+tags (jsonb/text[]) — e.g., ["customer", "escalation", "refund"]
+
+persona_overlays (jsonb) — map of overlays
+
+persona_overlays JSON example
+
+{
+  "ic": {
+    "userRole": "Customer Support Associate",
+    "constraints": ["Cannot approve refund > $X", "Must follow policy"],
+    "successCriteria": ["De-escalate", "Gather facts", "Escalate correctly"],
+    "commonMistakes": ["Over-apologizing", "Overpromising", "Arguing policy"],
+    "avatarPushbackLevel": "high"
+  },
+  "manager": {...},
+  "exec": {...}
+}
+
+Add to transcripts (optional but recommended)
+
+session_config (jsonb) snapshot including selected overlay
+
+This helps analytics (“which overlay performs worse?”).
+
+5) Titles: rework to be “real conversation situations” (simple rule)
+
+Your current names like “Emergency Product Fix” feel like a case study, not a conversation.
+
+Title formula (works extremely well)
+
+[Moment] with [Counterparty] about [Issue]
+or
+[Action] when [Pressure]
+
+Examples:
+
+“Customer Escalation: Refund Demand After Service Failure”
+
+“Manager Pushback: Why Was the Deadline Missed?”
+
+“Stakeholder Challenge: ‘I Don’t Buy Your Plan’”
+
+Your CSV example conversions (a few)
+
+Handling Upset Customer → “Angry Customer Escalation: Refund vs Policy”
+
+Missed Deadline Review → “Manager Confrontation: Missed Deadline and No Escalation”
+
+Unclear Project Scope → “Scope Chaos Meeting: Reset Expectations and Ownership”
+
+Cross-Functional Conflict → “Cross-Team Clash: Priorities, Credit, and Accountability”
+
+Negotiating Vendor Pricing → “Vendor Negotiation: Price Increase Without Value”
+
+Saving a Risky Renewal → “Renewal on the Line: Client Threatening to Leave”
+
+Do this across the catalog and the library instantly feels “real”.
+
+6) What you should rewrite in each scenario (to make it flexible)
+
+Right now, many of your context/instructions embed fixed details like:
+
+“Arjun enters anxious…”
+
+very specific role assumptions
+
+one style of language
+
+Rewrite guideline
+
+Split scenario text into:
+
+Core (role-neutral)
+
+Overlay blocks (IC/Manager/Exec)
+
+Avatar behavior rules (how they respond, what triggers escalation)
+
+Win conditions (what ends the session successfully)
+
+Do NOT hardcode one person’s emotions in the main context. Put it under overlay or avatar rules.
+
+7) Where this connects to your existing code (small change points)
+
+In /avatar/practice you currently just list scenarios and navigate by scenarioId.
+
+Add one small step after scenario selection:
+
+on scenario details (or avatar-select page), show Persona Overlay selector
+
+store selection in URL param (e.g. ?scenarioId=12&overlay=ic) or sessionStorage
+
+pass it to pre-session and session start
+
+backend merges overlay into instructions/context sent to the avatar
+
+That’s it. No redesign required.
+
+8) Outcome: what you get after doing this
+
+One scenario becomes 4 persona-accurate versions
+
+Scenario library scales without ballooning content workload
+
+Titles become clickable and “oh yes I need this” real
+
+Analytics becomes meaningful (persona segments, difficulty tuning)

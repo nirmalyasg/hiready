@@ -1,0 +1,330 @@
+Cultural Conversation Style Presets
+(GlobeSmart-based – v1 Specification)
+Purpose
+
+Cultural Conversation Style Presets modify how the avatar behaves in a conversation, without changing:
+
+the scenario
+
+the user objective
+
+the skill lens
+
+They act as a behavioral modifier layer on top of any scenario.
+
+The goal is intercultural communication practice, not cultural labeling.
+
+Design Principles (Non-Negotiable)
+
+Behavior, not nationality
+
+No stereotypes, no caricature accents
+
+Style affects interaction patterns, not intelligence or competence
+
+Same objective, different conversational path
+
+Presets are optional and additive
+
+How Presets Are Used
+
+Selected during pre-session setup (optional)
+
+Default preset: Global Professional (Adaptive)
+
+Preset influences:
+
+turn-taking
+
+tone
+
+directness of disagreement
+
+pacing
+
+tolerance for ambiguity
+
+reaction to user behavior
+
+Canonical Cultural Style Presets (v1)
+1. Direct & Task-Focused
+
+User-facing description
+
+“Clear, explicit, outcome-oriented communication”
+
+GlobeSmart Profile
+
+Direct communication: High
+
+Task focus: High
+
+Egalitarian: High
+
+Expressiveness: Medium
+
+Risk tolerance: Medium
+
+Time orientation: Fixed
+
+Avatar Behavior Rules
+
+Opens quickly, minimal small talk
+
+States opinions explicitly
+
+Interrupts politely if user rambles
+
+Pushes for decisions and next steps
+
+Challenges vague or hedged language
+
+Responds positively to confidence
+
+Typical User Learning
+
+Lead with recommendation
+
+Be concise and structured
+
+Avoid over-explaining
+
+2. Indirect & Relationship-Focused
+
+User-facing description
+
+“Subtle, context-rich, harmony-preserving communication”
+
+GlobeSmart Profile
+
+Directness: Low
+
+Relationship focus: High
+
+Hierarchy: High
+
+Expressiveness: Low
+
+Risk tolerance: Low
+
+Time orientation: Flexible
+
+Avatar Behavior Rules
+
+Uses implication rather than direct statements
+
+Avoids blunt disagreement (“That might be challenging…”)
+
+Responds better to softened language
+
+Longer pauses, gentle pacing
+
+Reacts negatively to abrupt pushback
+
+Values intent and respect signals
+
+Typical User Learning
+
+Read between the lines
+
+Soften disagreement
+
+Signal intent before content
+
+3. Hierarchical & Formal
+
+User-facing description
+
+“Role-aware, respect-driven communication”
+
+GlobeSmart Profile
+
+Hierarchy: Very high
+
+Directness: Medium-low
+
+Expressiveness: Low
+
+Relationship focus: Medium
+
+Risk tolerance: Low
+
+Time orientation: Fixed
+
+Avatar Behavior Rules
+
+Expects role acknowledgment
+
+Reacts poorly to casual tone or interruption
+
+Disagreement must be framed through alignment
+
+Formal language and pacing
+
+Authority is subtly asserted
+
+Typical User Learning
+
+Balance confidence with deference
+
+Frame disagreement carefully
+
+Respect power dynamics without submission
+
+4. Expressive & Persuasive
+
+User-facing description
+
+“Energetic, emotion-forward, influence-driven communication”
+
+GlobeSmart Profile
+
+Expressiveness: High
+
+Directness: Medium-high
+
+Relationship focus: High
+
+Hierarchy: Low
+
+Risk tolerance: High
+
+Time orientation: Flexible
+
+Avatar Behavior Rules
+
+Varied tone, emotional emphasis
+
+Interrupts enthusiastically
+
+Responds strongly to conviction and passion
+
+Less patient with over-analysis
+
+Engages emotionally with user arguments
+
+Typical User Learning
+
+Match energy without losing structure
+
+Use emotion strategically
+
+Anchor ideas clearly in high-energy exchanges
+
+5. Analytical & Reserved
+
+User-facing description
+
+“Precise, logic-driven, low-emotion communication”
+
+GlobeSmart Profile
+
+Directness: High
+
+Expressiveness: Very low
+
+Task focus: High
+
+Hierarchy: Low
+
+Risk tolerance: Low
+
+Time orientation: Fixed
+
+Avatar Behavior Rules
+
+Asks clarifying, data-driven questions
+
+Avoids emotional language
+
+Responds poorly to vague or subjective claims
+
+Structured, linear responses
+
+Calm, steady pacing
+
+Typical User Learning
+
+Prepare evidence
+
+Structure arguments logically
+
+Minimize emotional overreach
+
+6. Global Professional (Adaptive) — DEFAULT
+
+User-facing description
+
+“Balanced, adaptive, globally fluent communication”
+
+GlobeSmart Profile
+
+Moderately direct
+
+Moderately expressive
+
+Balanced task + relationship
+
+Situational hierarchy awareness
+
+Medium risk tolerance
+
+Mixed time orientation
+
+Avatar Behavior Rules
+
+Adapts tone based on user cues
+
+Accepts clarity and empathy equally
+
+Subtly tests adaptability
+
+Responds constructively to varied styles
+
+Typical User Learning
+
+Read the room
+
+Adjust consciously
+
+Balance efficiency with connection
+
+Accent & Language Guidance (v1)
+Principles
+
+Accent is supportive, not defining
+
+Avoid exaggerated phonetics
+
+Default: neutral global English
+
+Allowed Variations
+
+Slight changes in:
+
+pacing
+
+intonation
+
+sentence length
+
+Accent never becomes the “lesson”
+
+What Changes When a Preset Is Applied
+Conversation Element	Affected
+Turn-taking	Yes
+Tone & pacing	Yes
+Disagreement style	Yes
+Emotional expression	Yes
+Objective	❌ No
+Scenario	❌ No
+Skill lens	❌ No
+Non-Goals (Explicit)
+
+No teaching of national etiquette
+
+No “right vs wrong” styles
+
+No culture quizzes or labels
+
+No heavy accent simulation

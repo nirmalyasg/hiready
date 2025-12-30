@@ -1,0 +1,59 @@
+Avatar Practice Lab API server running on port 3001
+hitting avatar roles
+Error: All attempts to open a WebSocket to connect to the database failed. Please refer to https://github.com/neondatabase/serverless/blob/main/CONFIG.md#websocketconstructor-typeof-websocket--undefined. Details: fetch failed
+    at file:///home/runner/workspace/avatar-practice-lab-export/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/avatar-practice-lab-export/node_modules/src/neon-serverless/session.ts:62:18)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:2876:18)
+Error getting skills: Error: All attempts to open a WebSocket to connect to the database failed. Please refer to https://github.com/neondatabase/serverless/blob/main/CONFIG.md#websocketconstructor-typeof-websocket--undefined. Details: fetch failed
+    at file:///home/runner/workspace/avatar-practice-lab-export/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:65:20)
+GET /api/get-scenarios called with skillId: undefined, role: undefined, scenarioId: undefined
+Error getting scenarios: Error: All attempts to open a WebSocket to connect to the database failed. Please refer to https://github.com/neondatabase/serverless/blob/main/CONFIG.md#websocketconstructor-typeof-websocket--undefined. Details: fetch failed
+    at file:///home/runner/workspace/avatar-practice-lab-export/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:878:20)
+Error getting skills: Error: All attempts to open a WebSocket to connect to the database failed. Please refer to https://github.com/neondatabase/serverless/blob/main/CONFIG.md#websocketconstructor-typeof-websocket--undefined. Details: fetch failed
+    at file:///home/runner/workspace/avatar-practice-lab-export/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:65:20)
+GET /api/get-scenarios called with skillId: undefined, role: undefined, scenarioId: undefined
+Error getting scenarios: Error: All attempts to open a WebSocket to connect to the database failed. Please refer to https://github.com/neondatabase/serverless/blob/main/CONFIG.md#websocketconstructor-typeof-websocket--undefined. Details: fetch failed
+    at file:///home/runner/workspace/avatar-practice-lab-export/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:878:20)
+hitting avatar roles
+Error: All attempts to open a WebSocket to connect to the database failed. Please refer to https://github.com/neondatabase/serverless/blob/main/CONFIG.md#websocketconstructor-typeof-websocket--undefined. Details: fetch failed
+    at file:///home/runner/workspace/avatar-practice-lab-export/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/avatar-practice-lab-export/node_modules/src/neon-serverless/session.ts:62:18)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:2876:18)
+hitting avatar roles
+Error: All attempts to open a WebSocket to connect to the database failed. Please refer to https://github.com/neondatabase/serverless/blob/main/CONFIG.md#websocketconstructor-typeof-websocket--undefined. Details: fetch failed
+    at file:///home/runner/workspace/avatar-practice-lab-export/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/avatar-practice-lab-export/node_modules/src/neon-serverless/session.ts:62:18)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:2876:18)
+hitting avatar roles
+Error: All attempts to open a WebSocket to connect to the database failed. Please refer to https://github.com/neondatabase/serverless/blob/main/CONFIG.md#websocketconstructor-typeof-websocket--undefined. Details: fetch failed
+    at file:///home/runner/workspace/avatar-practice-lab-export/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/avatar-practice-lab-export/node_modules/src/neon-serverless/session.ts:62:18)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:2876:18)
+Error getting skills: Error: All attempts to open a WebSocket to connect to the database failed. Please refer to https://github.com/neondatabase/serverless/blob/main/CONFIG.md#websocketconstructor-typeof-websocket--undefined. Details: fetch failed
+    at file:///home/runner/workspace/avatar-practice-lab-export/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:65:20)
+Error getting skills: Error: All attempts to open a WebSocket to connect to the database failed. Please refer to https://github.com/neondatabase/serverless/blob/main/CONFIG.md#websocketconstructor-typeof-websocket--undefined. Details: fetch failed
+    at file:///home/runner/workspace/avatar-practice-lab-export/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:65:20)
+Error getting skills: Error: All attempts to open a WebSocket to connect to the database failed. Please refer to https://github.com/neondatabase/serverless/blob/main/CONFIG.md#websocketconstructor-typeof-websocket--undefined. Details: fetch failed
+    at file:///home/runner/workspace/avatar-practice-lab-export/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:65:20)
+Error getting skills: Error: All attempts to open a WebSocket to connect to the database failed. Please refer to https://github.com/neondatabase/serverless/blob/main/CONFIG.md#websocketconstructor-typeof-websocket--undefined. Details: fetch failed
+    at file:///home/runner/workspace/avatar-practice-lab-export/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:65:20)

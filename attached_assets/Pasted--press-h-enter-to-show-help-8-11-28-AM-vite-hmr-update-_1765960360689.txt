@@ -1,0 +1,15 @@
+  ➜  press h + enter to show help
+8:11:28 AM [vite] hmr update /ui/pages/practice/pre-session/page.tsx, /ui/styles/globals.css
+8:11:33 AM [vite] hmr update /ui/pages/practice/pre-session/page.tsx, /ui/styles/globals.css (x2)
+8:26:14 AM [vite] hmr update /ui/pages/practice/custom-scenario/page.tsx, /ui/styles/globals.css
+8:26:25 AM [vite] hmr update /ui/pages/practice/custom-scenario/page.tsx, /ui/styles/globals.css (x2)
+8:26:37 AM [vite] hmr update /ui/pages/practice/custom-scenario/page.tsx, /ui/styles/globals.css (x3)
+8:26:59 AM [vite] hmr update /ui/pages/practice/custom-scenario/page.tsx, /ui/styles/globals.css (x4)
+8:27:30 AM [vite] hmr update /ui/pages/practice/custom-scenario/page.tsx, /ui/styles/globals.css (x5)
+8:28:12 AM [vite] hmr update /ui/pages/practice/custom-scenario/page.tsx, /ui/styles/globals.css (x6)
+8:28:49 AM [vite] hmr update /ui/styles/globals.css, /ui/pages/practice/custom-scenario/page.tsx, /ui/pages/session-analysis/session-analysis-page.tsx, /ui/pages/practice/pre-session/page.tsx, /ui/pages/assessment-session/assessment-roleplay-session-page.tsx, /ui/components/InteractiveAvatar.tsx
+8:28:49 AM [vite] hmr invalidate /ui/components/InteractiveAvatar.tsx Could not Fast Refresh ("generateUniqueId" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+8:28:49 AM [vite] hmr update /ui/styles/globals.css, /ui/pages/assessment-session/assessment-roleplay-session-page.tsx, /ui/pages/practice/session/page.tsx
+8:29:11 AM [vite] hmr update /ui/styles/globals.css, /ui/pages/practice/custom-scenario/page.tsx, /ui/pages/session-analysis/session-analysis-page.tsx, /ui/pages/practice/pre-session/page.tsx, /ui/pages/assessment-session/assessment-roleplay-session-page.tsx, /ui/components/InteractiveAvatar.tsx
+8:29:12 AM [vite] hmr invalidate /ui/components/InteractiveAvatar.tsx Could not Fast Refresh ("generateUniqueId" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+8:29:12 AM [vite] hmr update /ui/styles/globals.css, /ui/pages/assessment-session/assessment-roleplay-session-page.tsx, /ui/pages/practice/session/page.tsx

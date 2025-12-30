@@ -1,0 +1,139 @@
+PI Key exists: true, length: 54
+Calling HeyGen streaming.create_token endpoint...
+streaming.create_token response status: 200
+✅ Token created successfully via streaming.create_token
+GET /api/get-scenarios called with skillId: null, role: null, scenarioId: 51
+GET /api/get-scenarios called with skillId: null, role: null, scenarioId: 51
+File info: {
+  originalname: 'ai_roleplay_1766489873213.wav',
+  mimetype: 'audio/wav',
+  size: 6382124,
+  bufferSize: 6382124,
+  path: '/home/runner/workspace/avatar-practice-lab-export/api/uploads/file-1766489873742-260242599.wav'
+}
+Temporary file cleaned up: /home/runner/workspace/avatar-practice-lab-export/api/uploads/file-1766489873742-260242599.wav
+[Activity Tracking] Activity tracking not available, skipping
+=== 🚀 Save transcript API endpoint called ===
+🔍 Parsing request JSON...
+📝 Using transcript ID: tr_mjiigrzo_qfyivl
+🔍 Normalizing data for database...
+📝 First message structure: {"speaker":"user","text":"hi","timestamp":"2025-12-","createdAt":1766489857338}
+🔍 Saving transcript with ID: tr_mjiigrzo_qfyivl
+📝 Creating new roleplay session for HeyGen session: 83
+📝 Created roleplay session with ID: 84
+📝 Creating new transcript with ID: tr_mjiigrzo_qfyivl
+📝 Saving 2 messages for transcript tr_mjiigrzo_qfyivl
+📝 Updated roleplay session 84 with transcript_id: tr_mjiigrzo_qfyivl
+Transcript messages: {
+  "id": "msg_mjiigsjj_mpl6d2",
+  "transcriptId": "tr_mjiigrzo_qfyivl",
+  "messages": [
+    {
+      "text": "hi",
+      "speaker": "user",
+      "createdAt": 1766489857338,
+      "timestamp": "2025-12-"
+    },
+    {
+      "text": "Good morning. I believe we need to address the current approach to operations. From my perspective, the path we've laid out is the only viable one to ensure delivery. What are your thoughts on this matter?",
+      "speaker": "assistant",
+      "createdAt": 1766489860337,
+      "timestamp": "2025-12-"
+    }
+  ],
+  "createdAt": "2025-12-23T11:38:02.239Z"
+}
+New Analysis result: {
+  "overallScore": 75,
+  "talkTime": {
+    "userTime": 5,
+    "otherTime": 95,
+    "userPercentage": 5
+  },
+  "wordChoice": {
+    "fillerWords": [
+      {
+        "word": "um",
+        "count": 2,
+        "percentage": 2,
+        "timestamps": [
+          10,
+          45
+        ]
+      }
+    ],
+    "weakWords": [
+      {
+        "word": "believe",
+        "count": 1,
+        "percentage": 1,
+        "timestamps": [
+          15
+        ]
+      }
+    ],
+    "sentenceOpeners": [
+      {
+        "opener": "I believe",
+        "count": 1
+      },
+      {
+        "opener": "From my perspective",
+        "count": 1
+      }
+    ]
+  },
+  "listening": {
+    "activeListening": true,
+    "engagementLevel": 8,
+    "questionsAsked": 1,
+    "acknowledgments": 2,
+    "interruptions": 0
+  },
+  "delivery": {
+    "averagePacing": 120,
+    "pacingVariation": [
+      {
+        "timestamp": 5,
+        "wpm": 110
+      },
+      {
+        "timestamp": 15,
+        "wpm": 130
+      }
+    ],
+    "tone": [
+      "assertive",
+      "collaborative"
+    ],
+    "pauseCount": 3,
+    "averagePauseLength": 1.5
+  },
+  "feedback": {
+    "strengths": [
+      "Clear articulation of thoughts",
+      "Engagement with the topic"
+    ],
+    "growthAreas": [
+      "Reduce filler words",
+      "Increase user talk time"
+    ],
+    "followUpQuestions": [
+      "What specific challenges do you foresee with the current approach?",
+      "How can we improve the engagement of all team members?"
+    ],
+    "summary": "The conversation was focused on operational strategies with a clear articulation of the assistant's perspective. The user had minimal input, suggesting a need for more balanced participation.",
+    "pronunciation": {
+      "issues": [
+        "None"
+      ],
+      "suggestions": [
+        "Maintain current clarity"
+      ]
+    }
+  }
+}
+Session analysis - scenarioId: 51, customScenarioId: null, context: true, isImpromptu: false, personaLevel: manager
+Performing skill dimension assessment for 1 skills with persona overlay: People Manager / Team Lead
+Saved 1 skill assessments for session 84
+Completed skill dimension assessment: 1 skills assessed

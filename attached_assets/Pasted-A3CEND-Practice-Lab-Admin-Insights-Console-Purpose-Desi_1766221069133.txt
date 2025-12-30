@@ -1,0 +1,463 @@
+A3CEND Practice Lab – Admin & Insights Console
+Purpose & Design Philosophy
+Why this admin console exists
+
+Protect margins (HeyGen + OpenAI + Tavily costs)
+
+Understand real usage vs intended usage
+
+Identify what actually drives retention
+
+Improve content quality (scenarios, prompts, avatars)
+
+Detect failure modes early (drop-offs, bad sessions)
+
+Design principles
+
+Decision-oriented, not vanity metrics
+
+Drill-down first, charts second
+
+Every graph answers a “what should we change?” question
+
+Admin ≠ power user → simple, structured, explainable
+
+SECTION 1: GLOBAL ADMIN DASHBOARD (Overview)
+Page: /admin/overview
+
+This is your daily check-in page.
+
+A. Platform Health Snapshot (Top Row)
+
+KPIs (last 24h / 7d / 30d toggle)
+
+Metric	Why it matters
+DAU / WAU / MAU	Habit formation
+Avg sessions per active user	Stickiness
+Avg session duration	Engagement quality
+% sessions completed vs abandoned	UX friction
+Error rate (session failures)	Reliability
+B. Cost & Margin Snapshot (Critical)
+
+Cost cards (real-time / daily)
+
+Metric	Source
+HeyGen minutes used	Streaming cost
+OpenAI tokens (input/output)	LLM cost
+Whisper minutes	STT cost
+Tavily searches	Research cost
+Cost per session	Core unit economics
+Cost per retained user (7d)	Sustainability
+
+⚠️ Highlight anomalies automatically
+Example: “Yesterday’s cost per session ↑ 32% due to long sessions”
+
+C. Usage Mix (High-level)
+
+Pie / stacked bars:
+
+Sessions by mode:
+
+Built-in scenarios
+
+Custom scenarios
+
+Presentations
+
+Think-it-through / Impromptu
+
+Sessions by language
+
+Sessions by persona type (manager, sales, general)
+
+Why: shows where product value actually lives.
+
+SECTION 2: USER ACTIVITY & BEHAVIOR
+Page: /admin/users
+
+This is where insights live.
+
+A. User Table (Primary View)
+
+Each row = one user.
+
+Columns
+
+User ID / Email
+
+Role / Org (if applicable)
+
+First session date
+
+Last active
+
+Total sessions
+
+Avg sessions per week
+
+Preferred mode
+
+Avg session duration
+
+Drop-off rate
+
+Lifetime cost
+
+Retention tag (High / Medium / Low)
+
+Clickable → User Detail View
+
+B. User Detail Page
+1. Session Timeline
+
+Chronological view:
+
+Mode used
+
+Scenario/topic
+
+Duration
+
+Completion status
+
+Cost of session
+
+Score (if applicable)
+
+🔴 Flag sessions that:
+
+ended early
+
+had errors
+
+exceeded cost threshold
+
+2. Behavior Profile (Auto-generated)
+
+Example:
+
+“User prefers Think-it-through mode, uses app mostly between 9–10 AM, drops off after 2 minutes when sessions exceed 5 minutes.”
+
+This can be AI-generated weekly for admins.
+
+3. Conversation Style Summary
+
+Aggregated across sessions:
+
+Talk/listen ratio
+
+Average pacing
+
+Filler words trend
+
+Assertiveness trend
+
+Why: helps you see if analysis features are meaningful.
+
+SECTION 3: SESSION & FLOW ANALYTICS
+Page: /admin/sessions
+A. Session Funnel
+
+For each entry point:
+
+Step	Drop-off %
+Landing → Start	
+Mode selection	
+Pre-session setup	
+Avatar loaded	
+Session started	
+Session completed	
+Analysis viewed	
+
+Segmentable by
+
+mode
+
+device
+
+language
+
+avatar
+
+region
+
+This tells you where UX is leaking users.
+
+B. Session Quality Index (SQI)
+
+A composite score (internal only):
+
+Completion
+
+Duration ≥ expected
+
+Analysis viewed
+
+Retry / continue clicked
+
+Flag:
+
+“Low-quality sessions” clusters
+
+Scenarios causing repeated failures
+
+SECTION 4: SCENARIO & CONTENT PERFORMANCE
+Page: /admin/content
+
+This is where you improve learning quality.
+
+A. Scenario Performance Table
+
+For each scenario:
+
+Metric	Why
+Starts	Demand
+Completion %	Engagement
+Avg duration	Depth
+Avg score	Difficulty
+Retry rate	Practice value
+Drop-off time	UX clarity
+Cost per completion	Efficiency
+
+🔴 Auto-flag:
+
+high drop-off
+
+low completion
+
+high cost + low reuse
+
+B. Custom Scenario Insights
+
+Track:
+
+% sessions using custom scenarios
+
+Avg custom scenario duration
+
+Most common themes (AI-clustered)
+
+Scenarios saved & reused
+
+Why: validates personalization strategy.
+
+C. Topic & Research Effectiveness (Impromptu Mode)
+
+For impromptu speaking:
+
+Topics with research injected vs not
+
+Avg duration difference
+
+Question depth (AI heuristic)
+
+User satisfaction proxy (continue / retry)
+
+This tells you if Tavily is worth the cost.
+
+SECTION 5: AVATAR & PERSONA PERFORMANCE
+Page: /admin/avatars
+A. Avatar Usage Stats
+
+For each avatar:
+
+Sessions started
+
+Completion %
+
+Avg duration
+
+Drop-off rate
+
+User return rate after using avatar
+
+Why: some avatars perform better psychologically.
+
+B. Persona & Style Impact
+
+Track:
+
+Persona type → session success
+
+Cultural style presets → completion & retry
+
+Tone settings → session duration
+
+This helps you prune or improve personas.
+
+SECTION 6: COST & API MANAGEMENT
+Page: /admin/costs
+
+This page saves money.
+
+A. Cost Breakdown (Filterable)
+
+By:
+
+user
+
+mode
+
+scenario
+
+avatar
+
+org
+
+time period
+
+Example view:
+
+“Top 10 most expensive sessions this week”
+
+B. Budget Guards & Alerts
+
+Admin-configurable:
+
+Max cost per session
+
+Max daily cost per org
+
+Max research calls per user/day
+
+Auto-fallback rules (e.g., disable research if cost spikes)
+
+Alerts:
+
+Slack / email / in-app
+
+C. Cost vs Value Scatter Plot
+
+X-axis: cost per session
+Y-axis: retention / completion
+
+This tells you:
+
+“What is expensive but worth it?”
+
+SECTION 7: INSIGHTS & ROADMAP INPUT
+Page: /admin/insights
+
+This is strategic gold.
+
+A. Auto-Generated Weekly Insights (AI)
+
+Examples:
+
+“Users who start with Think-it-through mode are 2.3× more likely to return.”
+
+“Sales scenarios have higher retry rates but also higher cost.”
+
+“Sessions longer than 6 mins show diminishing returns.”
+
+B. Product Opportunity Signals
+
+Tracked automatically:
+
+Frequently typed but unsupported intents
+
+Repeated custom scenario themes
+
+Failed user objectives
+
+High-interest topics with no built-in scenarios
+
+These directly inform:
+
+new scenarios
+
+new features
+
+prompt improvements
+
+SECTION 8: ADMIN UX DESIGN (Very Important)
+Navigation Structure
+
+Left sidebar:
+
+Overview
+
+Users
+
+Sessions
+
+Content
+
+Avatars & Personas
+
+Costs
+
+Insights
+
+Settings
+
+UX Guidelines
+
+Default to tables with filters
+
+Every chart clickable → underlying data
+
+Explain metrics inline (tooltips)
+
+Red/yellow/green indicators, not raw numbers
+
+SECTION 9: DATA YOU MUST TRACK (Summary Checklist)
+User-level
+
+sessions started / completed
+
+mode usage
+
+retention
+
+lifetime cost
+
+preferred patterns
+
+Session-level
+
+duration
+
+cost
+
+failure reason
+
+completion
+
+analysis viewed
+
+retry / continue
+
+Content-level
+
+scenario performance
+
+custom vs built-in usage
+
+topic popularity
+
+drop-off points
+
+Cost-level
+
+per-API usage
+
+per-session cost
+
+per-user cost
+
+anomalies
+
+Final Guiding Principle (Share this with your team)
+
+If the admin dashboard doesn’t help you decide what to fix next week, it’s the wrong dashboard.
+
+If you want next, I can:
+
+design wireframe-level admin screens
+
+define exact DB fields & events to log
+
+propose AI insight prompts for the Insights page
+
+This admin console will quietly become one of your strongest competitive advantages.

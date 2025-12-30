@@ -1,0 +1,211 @@
+1) You are NOT actually injecting “research” into the conversation prompt
+
+You have a solid Tavily integration (searchTopic, formatResearchForPrompt, shouldResearchTopic) — but in the page you shared (IntentEntryPage) you are only:
+
+choosing category/topic
+
+building a ConversationBlueprint
+
+navigating to /avatar/practice/pre-session?...&mode=coaching&category=...&topic=...&language=...
+
+✅ That creates a blueprint (persona, tension, etc.)
+❌ But there is no research call made here, and no evidence you pass the formatted research into:
+
+the pre-session “instructions”
+
+the session start payload
+
+the system prompt / role prompt used for the avatar conversation
+
+So the avatar never receives facts, names, or specific anchors.
+
+Minimal fix
+
+At the point you start a coaching session, do:
+
+shouldResearchTopic(selectedTopic, selectedCategory)
+
+if true → call backend /api/avatar/research-topic (or reuse your existing search function server-side)
+
+inject formatResearchForPrompt(research) into the scenario instructions / sessionConfig.
+
+2) Your blueprint is too “general” for specificity
+
+Even without Tavily, your blueprint’s counter-persona is:
+
+archetype: "idealistic_thinker",
+caresAbout: "understanding different perspectives",
+pressureResponse: "asks_questions",
+trigger: "surface_level_thinking"
+
+
+This is fine, but it doesn’t force specificity.
+
+You’re not giving:
+
+2–3 “angles” the avatar should bring up
+
+a stance (pro/anti/nuanced) to challenge
+
+a list of “facts the avatar knows”
+
+So the avatar plays it safe.
+
+Minimal fix
+
+Extend the blueprint with discussion scaffolding (still small change):
+
+discussionAngles: string[] (3 bullets)
+
+probingQuestions: string[] (5 starter questions)
+
+userPromptGoal: "clarify_position" | "test_assumptions" | "debate" | "summarize" (default clarify)
+
+Even if you don’t add new fields, you can put this into scenarioSummary text.
+
+3) You might be passing the blueprint via URL and losing it / truncating it
+
+You are doing:
+
+const blueprintParam = encodeURIComponent(JSON.stringify(blueprint));
+navigate(`/avatar/practice/pre-session?...&blueprint=${blueprintParam}&...`)
+
+
+This is fragile because:
+
+URL length limits vary (~2k–8k+ depending browser/proxy)
+
+you will eventually blow this up when you add research text or even long topics
+
+truncation = partial JSON = blueprint parse failure downstream → fallback generic prompts
+
+Even today, some topics might cause the blueprint param to get cut if the URL already has other params.
+
+Minimal fix (no redesign)
+
+Instead of passing the full blueprint in URL:
+
+store blueprint in sessionStorage with a generated key, pass only blueprintId in URL
+
+Example:
+
+sessionStorage.setItem("blueprint:<uuid>", JSON.stringify(blueprint))
+
+navigate with ?blueprintId=<uuid>
+
+This alone improves reliability.
+
+4) The real missing piece: “instructions” used by the avatar are not topic-specific
+
+In your overall platform, your avatar behavior depends heavily on:
+
+context
+
+instructions
+
+scenario text
+
+But in the Impromptu mode, I don’t see you setting any real “instructions” besides the blueprint structure.
+
+If your runtime prompt is something like:
+
+“You are a thoughtful discussion partner…”
+
+…it will always be generic.
+
+Minimal fix
+
+Generate an Instruction Block at runtime that includes:
+
+the blueprint summary
+
+topic research facts (from Tavily)
+
+style rule: be specific, reference 3–5 concrete details, ask informed follow-ups
+
+guardrails: don’t fabricate
+
+You already wrote a good formatting function. The key is: actually attach it to the conversation prompt.
+
+5) Your Tavily “reliability” rule may be too permissive (causing vague “answers”)
+
+You treat Tavily as reliable if:
+
+Boolean(response.answer?.trim()) || sources.length > 0;
+
+
+Sometimes Tavily returns:
+
+thin summaries
+
+or sources with shallow content
+
+Then your “facts” section is still generic.
+
+Minimal fix
+
+Add a quality gate:
+
+require either:
+
+answer length > X characters (say 300)
+
+OR at least 2 sources with content length > 200 each
+Otherwise: ask Tavily with searchDepth: "advanced" or maxResults: 8, or return “no research”.
+
+This increases specificity.
+
+6) Your “Topic categories” are not being used to control the conversation style tightly
+
+You pass category into the URL and you have a coachingContext, but your blueprint always sets:
+
+context: "reflective_coaching"
+
+conversationMode: "explore"
+
+userObjective: "reflect"
+
+So even if the user picks “Current Affairs” or “Business”, it is always framed as reflective exploration. That creates broad, safe questions.
+
+Minimal fix
+
+Map category → mode defaults:
+
+current-affairs: conversationMode: "challenge" + userObjective: "form_position"
+
+business: explore → resolve (end with “what would you do?”)
+
+technology: challenge + structured_reasoning
+
+sports: explore + debate_light
+
+Again, no new flow—just a few per-category defaults.
+
+What to tell your developer (short, actionable checklist)
+A) Ensure topic research is actually used
+
+Add a server endpoint (or existing middleware step) that:
+
+calls shouldResearchTopic
+
+calls Tavily if true
+
+returns researchPromptBlock = formatResearchForPrompt(research)
+
+When starting the avatar session, inject researchPromptBlock into the system prompt / instructions.
+
+B) Fix blueprint transport reliability
+
+Stop sending full JSON in query string
+
+Use sessionStorage or server-created draft record + pass ID
+
+C) Improve specificity even without research
+
+Add “discussion angles” + “starter probing questions” derived from category + topic
+
+D) Improve category-to-style defaults
+
+current affairs should feel sharper
+
+business should feel more action/decision oriented

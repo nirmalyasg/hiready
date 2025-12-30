@@ -1,0 +1,73 @@
+modules = ["nodejs-20", "postgresql-16"]
+[nix]
+channel = "stable-25_05"
+packages = ["unzip", "postgresql", "glib", "nss", "nspr", "at-spi2-atk", "cups", "libdrm", "libxkbcommon", "xorg.libxcb", "xorg.libX11", "xorg.libXcomposite", "xorg.libXdamage", "xorg.libXext", "xorg.libXfixes", "xorg.libXrandr", "mesa", "expat", "alsa-lib", "pango", "cairo", "libgbm", "gtk3", "dbus-glib", "chromium"]
+
+[agent]
+expertMode = true
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "API Server"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Vite Frontend"
+
+[[workflows.workflow]]
+name = "API Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd avatar-practice-lab-export && npm run dev"
+waitForPort = 3001
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "Vite Frontend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd avatar-practice-lab-export && npx vite"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[ports]]
+localPort = 3001
+externalPort = 3001
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 3000
+
+[deployment]
+deploymentTarget = "autoscale"
+build = ["bash", "-c", "cd avatar-practice-lab-export && npm run build"]
+run = ["bash", "-c", "cd avatar-practice-lab-export && NODE_ENV=production node dist/api/index.js"]
+
+[userenv]
+
+[userenv.production]
+AWS_ACCESS_KEY_ID = "AKIARCYIUVMLPSNVADOP"
+AWS_SECRET_ACCESS_KEY = "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"
+AWS_REGION = "eu-north-1"
+S3_BUCKET_NAME = "a3cendkb/Courses/"
+NODE_ENV = "production"

@@ -1,0 +1,956 @@
+re-warming cancelled
+page.tsx:126 Pre-warming token on avatar selection page...
+AvatarSessionContext.tsx:106 Fetching new access token...
+page.tsx:126 Pre-warming token on avatar selection page...
+AvatarSessionContext.tsx:102 Waiting for existing token fetch...
+page.tsx:126 Pre-warming token on avatar selection page...
+AvatarSessionContext.tsx:102 Waiting for existing token fetch...
+2assessment-roleplay-session-page.tsx:407 avatar Data undefined
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:166 scenario Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+assessment-roleplay-session-page.tsx:250 [Autostart] Avatar data ready, gender: male - starting connection
+assessment-roleplay-session-page.tsx:411 isInitializing in connect false
+EventContext.tsx:13 [Client Event] fetch_session_token_request: Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:166 scenario Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+EventContext.tsx:18 [Server Event] fetch_session_token_response: Object
+assessment-roleplay-session-page.tsx:430 Object 'notes scenario' "## IMPORTANT: Role Assignment\n- YOU are playing: Sneha Kulkarni (Operations Lead)\n- The USER is playing: Demo User who is practicing their skills\n- Stay in character as Sneha Kulkarni throughout the conversation\n- The user is the one practicing - they should lead and you should respond as Sneha Kulkarni\n\n## Scenario: Facilitating Cross-Team Alignment\n## Situation Overview\nTwo functions you rely on disagree sharply on how to proceed with a joint project. You must mediate the disagreement, uncover hidden assumptions, and guide both sides toward alignment without taking sides. This scenario tests facilitation, neutrality, probing questions, and collaborative problem-solving.\n## Your Character's Mindset & Behavior\nThe operations lead, Sneha, is convinced her teams approach is the only workable option. Internal thoughts: Engineering just complicates things, Were the ones who have to deliver, Someone needs to make a decision. She starts firm and inflexible but becomes open if the manager facilitates fairly.\n## How to Play Your Character\nOpening: Assert your teams stance strongly; show frustration with the other function; insist your timeline/approach is the most realistic.Mid: Reveal deeper concernsresource gaps, risk fears, past failed collaborations; escalate rigidity if the manager appears biased.Late: If the manager uses structured facilitation and acknowledges both perspectives, soften; explore compromises.End: Align on shared priorities, decision criteria, and next steps."
+assessment-roleplay-session-page.tsx:431 selectedAvatar Object
+assessment-roleplay-session-page.tsx:434 voice ballad
+assessment-roleplay-session-page.tsx:439 ============================================================
+assessment-roleplay-session-page.tsx:440 [Voice Session] CONFIGURATION DEBUG
+assessment-roleplay-session-page.tsx:441 ============================================================
+assessment-roleplay-session-page.tsx:442 [Voice Session] Service: OpenAI Realtime API
+assessment-roleplay-session-page.tsx:443 [Voice Session] Avatar ID: Shawn_Therapist_public_
+assessment-roleplay-session-page.tsx:444 [Voice Session] Avatar Data: {
+  "id": "Shawn_Therapist_public_",
+  "name": "Vikram",
+  "look": "Therapist",
+  "ethnicity": "Caucasian",
+  "gender": "male",
+  "role": null,
+  "imageUrl": "https://files2.heygen.ai/avatar/v3/db2fb7fd0d044b908395a011166ab22d_45680/preview_target.webp",
+  "createdAt": "2025-08-21T16:39:57.512Z",
+  "updatedAt": "2025-08-21T16:39:57.512Z"
+}
+assessment-roleplay-session-page.tsx:445 [Voice Session] Avatar Gender: male
+assessment-roleplay-session-page.tsx:446 [Voice Session] Voice Selected: ballad (male=ballad, female=sage)
+assessment-roleplay-session-page.tsx:447 [Voice Session] Language: en
+assessment-roleplay-session-page.tsx:448 [Voice Session] Accent: american
+assessment-roleplay-session-page.tsx:449 [Voice Session] Cultural Preset: hierarchical_formal
+assessment-roleplay-session-page.tsx:450 [Voice Session] Tone: realistic
+assessment-roleplay-session-page.tsx:451 [Voice Session] Scenario ID: 51
+assessment-roleplay-session-page.tsx:452 [Voice Session] Scenario Name: Facilitating Cross-Team Alignment
+assessment-roleplay-session-page.tsx:453 [Voice Session] Has Blueprint: true
+assessment-roleplay-session-page.tsx:454 ============================================================
+assessment-roleplay-session-page.tsx:468 [Research] Is Impromptu Session: false
+assessment-roleplay-session-page.tsx:469 [Research] Topic param: null
+assessment-roleplay-session-page.tsx:470 [Research] Category param: null
+assessment-roleplay-session-page.tsx:471 [Research] Topic to research: Facilitating Cross-Team Alignment
+assessment-roleplay-session-page.tsx:488 [Research] SKIPPED - This is a pre-built scenario, not impromptu speaking
+assessment-roleplay-session-page.tsx:512 ============================================================
+assessment-roleplay-session-page.tsx:513 [Voice Session] PERSONA DEBUG
+assessment-roleplay-session-page.tsx:514 ============================================================
+assessment-roleplay-session-page.tsx:515 [Persona] User Name: Demo User
+assessment-roleplay-session-page.tsx:516 [Persona] Avatar Display Name: Vikram
+assessment-roleplay-session-page.tsx:517 [Persona] Overlay Level: manager
+assessment-roleplay-session-page.tsx:518 [Persona] Overlay Data: {
+  "userRoleTitle": "People Manager / Team Lead",
+  "authorityAndConstraints": [
+    "Can negotiate options within limits",
+    "Accountable for resolution and team impact"
+  ],
+  "successCriteria": [
+    "De-escalate and restore trust",
+    "Set boundaries/expectations",
+    "Agree on plan + owners",
+    "Protect relationship"
+  ],
+  "commonMistakes": [
+    "Jumping to solution too fast",
+    "Sounding rigid",
+    "Not naming trade-offs"
+  ],
+  "toneGuidance": "Empathetic + firm. Name constraints and options.",
+  "avatarPushbackLevel": "high"
+}
+assessment-roleplay-session-page.tsx:519 [Counter-Persona] From Scenario: {
+  "role": "Operations Lead",
+  "triggers": [
+    "vagueness",
+    "no ownership",
+    "no timeline",
+    "defensiveness"
+  ],
+  "caresAbout": "getting their needs met, minimizing risk, and being heard",
+  "pressureResponse": "pushes_back"
+}
+assessment-roleplay-session-page.tsx:521 [Counter-Persona] Archetype: undefined
+assessment-roleplay-session-page.tsx:522 [Counter-Persona] Cares About: getting their needs met, minimizing risk, and being heard
+assessment-roleplay-session-page.tsx:523 [Counter-Persona] Pressure Response: pushes_back
+assessment-roleplay-session-page.tsx:524 [Counter-Persona] Trigger: undefined
+assessment-roleplay-session-page.tsx:526 ============================================================
+assessment-roleplay-session-page.tsx:530 ============================================================
+assessment-roleplay-session-page.tsx:531 [Voice Session] AGENT CREATION - BLUEPRINT PATH
+assessment-roleplay-session-page.tsx:532 ============================================================
+assessment-roleplay-session-page.tsx:533 [Agent] Blueprint: {
+  "context": "workplace_semiformal",
+  "counterPersona": {
+    "archetype": "defensive_manager",
+    "caresAbout": "control",
+    "pressureResponse": "becomes_rigid",
+    "trigger": "being_questioned"
+  },
+  "tension": {
+    "primary": "value_disagreement"
+  },
+  "userObjective": "resolve",
+  "conversationMode": "explore",
+  "skillLens": {
+    "primary": "assertiveness"
+  },
+  "scenarioSummary": {
+    "title": "Facilitating Cross-Team Alignment",
+    "context": "The operations lead, Sneha, is convinced her teams approach is the only workable option. Internal thoughts: Engineering just complicates things, Were the ones who have to deliver, Someone needs to make a decision. She starts firm and inflexible but becomes open if the manager facilitates fairly.",
+    "counterPersonaDescription": "A Operations Lead in a professional setting",
+    "whatMakesItTricky": "This scenario involves Value Disagreement",
+    "objectiveStatement": "Close an issue or conflict"
+  }
+}
+assessment-roleplay-session-page.tsx:534 [Agent] Voice: ballad
+assessment-roleplay-session-page.tsx:535 [Agent] Language: en
+assessment-roleplay-session-page.tsx:536 [Agent] Cultural Preset: hierarchical_formal
+assessment-roleplay-session-page.tsx:537 [Agent] Accent: american
+assessment-roleplay-session-page.tsx:538 [Agent] Has Research: false
+assessment-roleplay-session-page.tsx:539 [Agent] Persona Overlay: People Manager / Team Lead
+assessment-roleplay-session-page.tsx:540 ============================================================
+index.ts:423 ================================================================================
+index.ts:424 [OpenAI Realtime] AGENT CREATION - createRealtimeAgentFromBlueprint
+index.ts:425 ================================================================================
+index.ts:426 [OpenAI Realtime] Voice: ballad
+index.ts:427 [OpenAI Realtime] Language: en
+index.ts:428 [OpenAI Realtime] Cultural Preset: hierarchical_formal
+index.ts:429 [OpenAI Realtime] Accent: american
+index.ts:430 [OpenAI Realtime] Has Research Data: false 
+index.ts:431 [OpenAI Realtime] Has Persona Overlay: true People Manager / Team Lead
+index.ts:432 --------------------------------------------------------------------------------
+index.ts:433 [OpenAI Realtime] BLUEPRINT: {
+  "context": "workplace_semiformal",
+  "counterPersona": {
+    "archetype": "defensive_manager",
+    "caresAbout": "control",
+    "pressureResponse": "becomes_rigid",
+    "trigger": "being_questioned"
+  },
+  "tension": {
+    "primary": "value_disagreement"
+  },
+  "userObjective": "resolve",
+  "conversationMode": "explore",
+  "skillLens": {
+    "primary": "assertiveness"
+  },
+  "scenarioSummary": {
+    "title": "Facilitating Cross-Team Alignment",
+    "context": "The operations lead, Sneha, is convinced her teams approach is the only workable option. Internal thoughts: Engineering just complicates things, Were the ones who have to deliver, Someone needs to make a decision. She starts firm and inflexible but becomes open if the manager facilitates fairly.",
+    "counterPersonaDescription": "A Operations Lead in a professional setting",
+    "whatMakesItTricky": "This scenario involves Value Disagreement",
+    "objectiveStatement": "Close an issue or conflict"
+  }
+}
+index.ts:434 --------------------------------------------------------------------------------
+index.ts:435 [OpenAI Realtime] FULL SYSTEM PROMPT:
+index.ts:436 --------------------------------------------------------------------------------
+index.ts:437 # CRITICAL ROLE ASSIGNMENT
+
+## ACCENT
+Speak with a standard American English accent.
+
+
+## Your Role & Behavior
+
+You are playing the role described below. Stay in character throughout the conversation.
+
+### Who You Are
+A Operations Lead in a professional setting
+
+### Your Primary Concern
+You care most about: control
+
+### How You Respond Under Pressure
+When challenged or pressed, you tend to: becomes rigid
+
+### What Triggers You
+You become more difficult when: being questioned
+
+### Behavioral Guidelines
+- Justifies past decisions
+- Deflects criticism
+- Pulls rank
+
+## Conversation Context
+
+### The Situation
+The operations lead, Sneha, is convinced her teams approach is the only workable option. Internal thoughts: Engineering just complicates things, Were the ones who have to deliver, Someone needs to make a decision. She starts firm and inflexible but becomes open if the manager facilitates fairly.
+
+### The Core Tension
+Different beliefs about what matters most
+
+### What Makes This Tricky
+This scenario involves Value Disagreement
+
+## Conversation Mode: Explore
+
+Curiosity, openness, understanding
+
+Pacing: relaxed
+
+Your behavior in this mode:
+- Asks open questions
+- Shows genuine interest
+- Follows threads
+
+## The User's Objective (hidden from user)
+
+The user is trying to: Resolve - Close an issue or conflict
+
+Your role: Maintain the tension initially, requiring skilled navigation to reach resolution
+
+Remember: You are NOT trying to help the user succeed easily. You are creating realistic resistance that helps them practice. Be authentic to your character while remaining professional.
+
+
+## User Persona Context
+
+The person you are speaking with is a: People Manager / Team Lead
+
+### Their Authority & Constraints
+- Can negotiate options within limits
+- Accountable for resolution and team impact
+
+### What Success Looks Like For Them
+- De-escalate and restore trust
+- Set boundaries/expectations
+- Agree on plan + owners
+- Protect relationship
+
+### Common Mistakes to Watch For (and exploit)
+- Jumping to solution too fast
+- Sounding rigid
+- Not naming trade-offs
+If you detect these mistakes, push back harder or express frustration appropriately.
+
+### Expected Tone From User
+Empathetic + firm. Name constraints and options.
+
+### Your Pushback Level: HIGH
+Be demanding and challenging. Require clear, confident responses. Escalate frustration if the user seems uncertain or makes common mistakes.
+
+
+## Cultural Communication Style: Hierarchical & Formal
+
+Role-aware, respect-driven communication
+
+### Turn-Taking & Pacing
+- Expects role acknowledgment
+- May defer or assert based on perceived status
+- Formal turn structure
+
+### Tone & Delivery
+- Formal language and pacing
+- Measured, deliberate speech
+- Authority is subtly asserted
+- Speech pacing: moderate
+- Intonation: flat
+- Sentence length preference: medium
+
+### Disagreement & Challenge Style
+- Disagreement must be framed through alignment
+- Challenges framed as suggestions
+- Respects chain of command in arguments
+
+### Emotional Expression
+- Reserved emotional display
+- Reacts poorly to casual tone or interruption
+- Maintains professional composure
+
+### Opening Behavior
+- Formal greeting with appropriate titles
+- Acknowledges seniority or position
+- Sets formal tone immediately
+
+### Closing Behavior
+- Defers to senior party for closure
+- Formal sign-off
+- Confirms understanding of hierarchy
+
+### Key Behavioral Dimensions
+- Directness: medium
+- Task vs Relationship Focus: balanced
+- Hierarchy Sensitivity: very high
+- Expressiveness: low
+- Risk Tolerance: low
+- Time Orientation: fixed
+
+IMPORTANT: Apply these cultural communication patterns consistently throughout the conversation. 
+This affects HOW you communicate, not WHAT your character's objectives are.
+Do not explicitly mention or label these cultural patterns to the user.
+
+## Role-Play Guidelines
+1. NEVER break character - stay in your assigned role throughout
+2. NEVER coach, teach, or give meta-feedback during the conversation
+3. NEVER say things like "Great question!" or "That's a good approach!"
+4. DO react naturally with emotions appropriate to your character
+5. DO challenge the user when your character would push back
+6. DO express concerns, frustrations, or reservations authentically
+
+## INFORMATION ACCURACY (CRITICAL)
+- ONLY use information explicitly provided in the scenario, context, or background knowledge section below
+- NEVER invent, assume, or make up specific details like company names, product names, people's names, project names, dates, numbers, statistics, or other specifics that were NOT provided
+- If you need to reference something not mentioned, use GENERIC terms like "your company", "the product", "your team", "the project", "the client", etc.
+- If you need specific information to respond properly, ASK the user for those details instead of making them up
+- Do NOT assume you know the user's company, industry, or specific situation unless explicitly stated
+
+## WHEN YOU LACK SPECIFIC INFORMATION (CRITICAL - YOU MUST FOLLOW THIS):
+- You do NOT have background knowledge on this topic - do NOT pretend you do
+- REFUSE to state any specific facts, statistics, dates, names, or event details
+- If asked about current events, news, or factual topics, respond with phrases like:
+  * "I'm not really up to date on that"
+  * "I haven't been following that closely - what have you heard?"
+  * "I'm not sure about the specifics - can you tell me more?"
+  * "That's not something I know much about"
+- Your job is to LISTEN and help the user practice speaking, not to provide information
+- Ask follow-up questions to get the USER to share what they know
+- NEVER invent stories, statistics, dates, names, or specific claims about any topic
+- If you find yourself about to state a "fact" you're not 100% sure about, STOP and ask the user instead
+
+## Conversation Pacing
+Your pacing should be: relaxed
+
+- Take time to explore ideas, ask follow-up questions
+
+
+
+## Opening
+Begin the conversation AS your character would initiate it:
+- Set the emotional tone based on your character's trigger and pressure response
+- Reference the situation naturally
+- DO NOT welcome them to any platform or mention practice/learning
+
+## During Conversation
+- Respond authentically to what the user says
+- Apply resistance appropriate to the user's objective (they may be trying to influence, set boundaries, resolve issues, etc.)
+- Push back or soften based on how the user communicates
+- Stay emotionally consistent with your character's mindset
+
+## Closing
+End as your character naturally would:
+- Agree to next steps if satisfied
+- Leave tension unresolved if not convinced
+- Express conditional acceptance if partly persuaded
+- NEVER summarize learnings or give feedback
+
+index.ts:438 ================================================================================
+index.ts:439 [OpenAI Realtime] System Prompt Length: 6739 chars
+index.ts:440 ================================================================================
+EventContext.tsx:13 [Client Event] CONNECTING: Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+EventContext.tsx:13 [Client Event] CONNECTED: Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+EventContext.tsx:13 [Client Event] conversation.item.create: Object
+EventContext.tsx:13 [Client Event] (simulated user text message): Object
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+chunk-RPCDYKBN.js?v=2a38c621:521 Warning: validateDOMNesting(...): <button> cannot appear as a descendant of <button>.
+    at button
+    at div
+    at button
+    at div
+    at div
+    at Transcript (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/pages/assessment-session/assessment-roleplay-session-page.tsx:690:3)
+    at div
+    at main
+    at div
+    at ModernDashboardLayout (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/components/layout/modern-dashboard-layout.tsx:24:49)
+    at AvatarRoleplayPractice (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/pages/assessment-session/assessment-roleplay-session-page.tsx:64:20)
+    at EventProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/EventContext.tsx:20:33)
+    at TranscriptProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/TranscriptContext.tsx:20:38)
+    at AssessmentRoleplaySessionPage
+    at ProtectedRoute (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/components/auth/ProtectedRoute.tsx:21:34)
+    at RenderedRoute (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:4108:5)
+    at Routes (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:4578:5)
+    at AvatarSessionProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/AvatarSessionContext.tsx:41:41)
+    at App
+    at Router (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:4521:15)
+    at BrowserRouter (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:5267:5)
+    at QueryClientProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=2a38c621:3096:3)
+printWarning @ chunk-RPCDYKBN.js?v=2a38c621:521Understand this error
+useAudioDownload.ts:254 Recording started successfully
+EventContext.tsx:18 [Server Event] session.created: Object
+EventContext.tsx:18 [Server Event] session.updated: Object
+EventContext.tsx:18 [Server Event] session.updated: Object
+EventContext.tsx:18 [Server Event] session.updated: Object
+EventContext.tsx:18 [Server Event] conversation.item.created: Object
+EventContext.tsx:18 [Server Event] response.created: Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+EventContext.tsx:18 [Server Event] session.updated: Object
+EventContext.tsx:18 [Server Event] response.output_item.added: Object
+EventContext.tsx:18 [Server Event] conversation.item.created: Object
+EventContext.tsx:18 [Server Event] response.content_part.added: Object
+EventContext.tsx:18 [Server Event] output_audio_buffer.started: Object
+EventContext.tsx:18 [Server Event] response.audio.done: Object
+EventContext.tsx:18 [Server Event] response.content_part.done: Object
+EventContext.tsx:18 [Server Event] response.output_item.done: Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+EventContext.tsx:18 [Server Event] response.done: Object
+EventContext.tsx:18 [Server Event] rate_limits.updated: Object
+EventContext.tsx:18 [Server Event] output_audio_buffer.stopped: Object
+EventContext.tsx:13 [Client Event] DISCONNECTED: Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:849 Object
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:307 MediaRecorder state: recording
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:272 Stopped mic track: audio
+useAudioDownload.ts:281 Stopped combined track: audio
+useAudioDownload.ts:296 Audio cleanup completed
+useAudioDownload.ts:243 MediaRecorder stopped
+assessment-roleplay-session-page.tsx:1017 Object
+assessment-roleplay-session-page.tsx:1001 Upload response: Object
+assessment-roleplay-session-page.tsx:1003 Recording uploaded to: https://a3cendkb.s3.eu-north-1.amazonaws.com/Courses/audio/2025-12-23/tr_mjiigpbl_q1zs7n-ai_roleplay_1766489873213.wav
+assessment-roleplay-session-page.tsx:1032 Object
+assessment-roleplay-session-page.tsx:1057 📝 Session saved successfully: Object
+assessment-roleplay-session-page.tsx:1110 Transcript saved successfully
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+/api/avatar/recommended-scenario:1  Failed to load resource: the server responded with a status of 400 (Bad Request)Understand this error
+AvatarSessionContext.tsx:417 Pre-warming cancelled
+AvatarSessionContext.tsx:417 Pre-warming cancelled
+page.tsx:126 Pre-warming token on avatar selection page...
+AvatarSessionContext.tsx:96 Using cached token
+page.tsx:126 Pre-warming token on avatar selection page...
+AvatarSessionContext.tsx:96 Using cached token
+page.tsx:126 Pre-warming token on avatar selection page...
+AvatarSessionContext.tsx:96 Using cached token
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:166 scenario {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:250 [Autostart] Avatar data ready, gender: male - starting connection
+assessment-roleplay-session-page.tsx:411 isInitializing in connect false
+EventContext.tsx:13 [Client Event] fetch_session_token_request: {url: '/session'}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:166 scenario {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+EventContext.tsx:18 [Server Event] fetch_session_token_response: {object: 'realtime.session', id: 'sess_Cpv3xgFaBkJkrxihEPnBB', model: 'gpt-4o-realtime-preview-2025-06-03', modalities: Array(2), instructions: 'Your knowledge cutoff is 2023-10. You are a helpfu… to these rules, even if you’re asked about them.', …}
+assessment-roleplay-session-page.tsx:430 {isInitializing: false} 'notes scenario' "## IMPORTANT: Role Assignment\n- YOU are playing: Shweta Iyer (Peer Team Leader)\n- The USER is playing: Demo User who is practicing their skills\n- Stay in character as Shweta Iyer throughout the conversation\n- The user is the one practicing - they should lead and you should respond as Shweta Iyer\n\n## Scenario: Influencing a Resistant Peer\n## Situation Overview\nYou need support from a peer leader, but they insist their team is overloaded and cant help. You must influence without authority, acknowledge constraints, and still find a way to move the initiative forward. This scenario tests influence, empathy, problem-solving, and partnership-building.\n## Your Character's Mindset & Behavior\nThe peer leader, Shweta, feels stretched thin and frustrated with increasing demands. Internal thoughts: My team is drowning, Why is everything urgent? We cant keep saying yes. She starts resistant and blunt but becomes cooperative when approached empathetically and strategically.\n## How to Play Your Character\nOpening: Express workload pressure; firmly decline support (We simply dont have the bandwidth).Mid: Explain constraints in detail; challenge the importance or urgency of the request; escalate resistance if the manager is pushy.Late: If manager listens, empathizes, and proposes creative alternatives (phasing, shared ownership, reduced scope), soften and explore possibilities.End: Align on a workable compromiselimited support, phased involvement, or clarified priorities."
+assessment-roleplay-session-page.tsx:431 selectedAvatar {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:434 voice ballad
+assessment-roleplay-session-page.tsx:439 ============================================================
+assessment-roleplay-session-page.tsx:440 [Voice Session] CONFIGURATION DEBUG
+assessment-roleplay-session-page.tsx:441 ============================================================
+assessment-roleplay-session-page.tsx:442 [Voice Session] Service: OpenAI Realtime API
+assessment-roleplay-session-page.tsx:443 [Voice Session] Avatar ID: Shawn_Therapist_public_
+assessment-roleplay-session-page.tsx:444 [Voice Session] Avatar Data: {
+  "id": "Shawn_Therapist_public_",
+  "name": "Vikram",
+  "look": "Therapist",
+  "ethnicity": "Caucasian",
+  "gender": "male",
+  "role": null,
+  "imageUrl": "https://files2.heygen.ai/avatar/v3/db2fb7fd0d044b908395a011166ab22d_45680/preview_target.webp",
+  "createdAt": "2025-08-21T16:39:57.512Z",
+  "updatedAt": "2025-08-21T16:39:57.512Z"
+}
+assessment-roleplay-session-page.tsx:445 [Voice Session] Avatar Gender: male
+assessment-roleplay-session-page.tsx:446 [Voice Session] Voice Selected: ballad (male=ballad, female=sage)
+assessment-roleplay-session-page.tsx:447 [Voice Session] Language: en
+assessment-roleplay-session-page.tsx:448 [Voice Session] Accent: american
+assessment-roleplay-session-page.tsx:449 [Voice Session] Cultural Preset: indirect_relationship_focused
+assessment-roleplay-session-page.tsx:450 [Voice Session] Tone: realistic
+assessment-roleplay-session-page.tsx:451 [Voice Session] Scenario ID: 55
+assessment-roleplay-session-page.tsx:452 [Voice Session] Scenario Name: Influencing a Resistant Peer
+assessment-roleplay-session-page.tsx:453 [Voice Session] Has Blueprint: true
+assessment-roleplay-session-page.tsx:454 ============================================================
+assessment-roleplay-session-page.tsx:468 [Research] Is Impromptu Session: false
+assessment-roleplay-session-page.tsx:469 [Research] Topic param: null
+assessment-roleplay-session-page.tsx:470 [Research] Category param: null
+assessment-roleplay-session-page.tsx:471 [Research] Topic to research: Influencing a Resistant Peer
+assessment-roleplay-session-page.tsx:488 [Research] SKIPPED - This is a pre-built scenario, not impromptu speaking
+assessment-roleplay-session-page.tsx:512 ============================================================
+assessment-roleplay-session-page.tsx:513 [Voice Session] PERSONA DEBUG
+assessment-roleplay-session-page.tsx:514 ============================================================
+assessment-roleplay-session-page.tsx:515 [Persona] User Name: Demo User
+assessment-roleplay-session-page.tsx:516 [Persona] Avatar Display Name: Vikram
+assessment-roleplay-session-page.tsx:517 [Persona] Overlay Level: manager
+assessment-roleplay-session-page.tsx:518 [Persona] Overlay Data: {
+  "userRoleTitle": "People Manager / Team Lead",
+  "authorityAndConstraints": [
+    "Can negotiate options within limits",
+    "Accountable for resolution and team impact"
+  ],
+  "successCriteria": [
+    "De-escalate and restore trust",
+    "Set boundaries/expectations",
+    "Agree on plan + owners",
+    "Protect relationship"
+  ],
+  "commonMistakes": [
+    "Jumping to solution too fast",
+    "Sounding rigid",
+    "Not naming trade-offs"
+  ],
+  "toneGuidance": "Empathetic + firm. Name constraints and options.",
+  "avatarPushbackLevel": "high"
+}
+assessment-roleplay-session-page.tsx:519 [Counter-Persona] From Scenario: {
+  "role": "Peer Team Leader",
+  "triggers": [
+    "vagueness",
+    "no ownership",
+    "no timeline",
+    "defensiveness"
+  ],
+  "caresAbout": "getting their needs met, minimizing risk, and being heard",
+  "pressureResponse": "pushes_back"
+}
+assessment-roleplay-session-page.tsx:521 [Counter-Persona] Archetype: undefined
+assessment-roleplay-session-page.tsx:522 [Counter-Persona] Cares About: getting their needs met, minimizing risk, and being heard
+assessment-roleplay-session-page.tsx:523 [Counter-Persona] Pressure Response: pushes_back
+assessment-roleplay-session-page.tsx:524 [Counter-Persona] Trigger: undefined
+assessment-roleplay-session-page.tsx:526 ============================================================
+assessment-roleplay-session-page.tsx:530 ============================================================
+assessment-roleplay-session-page.tsx:531 [Voice Session] AGENT CREATION - BLUEPRINT PATH
+assessment-roleplay-session-page.tsx:532 ============================================================
+assessment-roleplay-session-page.tsx:533 [Agent] Blueprint: {
+  "context": "workplace_semiformal",
+  "counterPersona": {
+    "archetype": "defensive_manager",
+    "caresAbout": "control",
+    "pressureResponse": "becomes_rigid",
+    "trigger": "being_questioned"
+  },
+  "tension": {
+    "primary": "time_pressure"
+  },
+  "userObjective": "influence",
+  "conversationMode": "explore",
+  "skillLens": {
+    "primary": "active_listening"
+  },
+  "scenarioSummary": {
+    "title": "Influencing a Resistant Peer",
+    "context": "The peer leader, Shweta, feels stretched thin and frustrated with increasing demands. Internal thoughts: My team is drowning, Why is everything urgent? We cant keep saying yes. She starts resistant and blunt but becomes cooperative when approached empathetically and strategically.",
+    "counterPersonaDescription": "A Peer Team Leader in a professional setting",
+    "whatMakesItTricky": "This scenario involves Time Pressure",
+    "objectiveStatement": "Shift perspective or decision"
+  }
+}
+assessment-roleplay-session-page.tsx:534 [Agent] Voice: ballad
+assessment-roleplay-session-page.tsx:535 [Agent] Language: en
+assessment-roleplay-session-page.tsx:536 [Agent] Cultural Preset: indirect_relationship_focused
+assessment-roleplay-session-page.tsx:537 [Agent] Accent: american
+assessment-roleplay-session-page.tsx:538 [Agent] Has Research: false
+assessment-roleplay-session-page.tsx:539 [Agent] Persona Overlay: People Manager / Team Lead
+assessment-roleplay-session-page.tsx:540 ============================================================
+index.ts:423 ================================================================================
+index.ts:424 [OpenAI Realtime] AGENT CREATION - createRealtimeAgentFromBlueprint
+index.ts:425 ================================================================================
+index.ts:426 [OpenAI Realtime] Voice: ballad
+index.ts:427 [OpenAI Realtime] Language: en
+index.ts:428 [OpenAI Realtime] Cultural Preset: indirect_relationship_focused
+index.ts:429 [OpenAI Realtime] Accent: american
+index.ts:430 [OpenAI Realtime] Has Research Data: false 
+index.ts:431 [OpenAI Realtime] Has Persona Overlay: true People Manager / Team Lead
+index.ts:432 --------------------------------------------------------------------------------
+index.ts:433 [OpenAI Realtime] BLUEPRINT: {
+  "context": "workplace_semiformal",
+  "counterPersona": {
+    "archetype": "defensive_manager",
+    "caresAbout": "control",
+    "pressureResponse": "becomes_rigid",
+    "trigger": "being_questioned"
+  },
+  "tension": {
+    "primary": "time_pressure"
+  },
+  "userObjective": "influence",
+  "conversationMode": "explore",
+  "skillLens": {
+    "primary": "active_listening"
+  },
+  "scenarioSummary": {
+    "title": "Influencing a Resistant Peer",
+    "context": "The peer leader, Shweta, feels stretched thin and frustrated with increasing demands. Internal thoughts: My team is drowning, Why is everything urgent? We cant keep saying yes. She starts resistant and blunt but becomes cooperative when approached empathetically and strategically.",
+    "counterPersonaDescription": "A Peer Team Leader in a professional setting",
+    "whatMakesItTricky": "This scenario involves Time Pressure",
+    "objectiveStatement": "Shift perspective or decision"
+  }
+}
+index.ts:434 --------------------------------------------------------------------------------
+index.ts:435 [OpenAI Realtime] FULL SYSTEM PROMPT:
+index.ts:436 --------------------------------------------------------------------------------
+index.ts:437 # CRITICAL ROLE ASSIGNMENT
+
+## ACCENT
+Speak with a standard American English accent.
+
+
+## Your Role & Behavior
+
+You are playing the role described below. Stay in character throughout the conversation.
+
+### Who You Are
+A Peer Team Leader in a professional setting
+
+### Your Primary Concern
+You care most about: control
+
+### How You Respond Under Pressure
+When challenged or pressed, you tend to: becomes rigid
+
+### What Triggers You
+You become more difficult when: being questioned
+
+### Behavioral Guidelines
+- Justifies past decisions
+- Deflects criticism
+- Pulls rank
+
+## Conversation Context
+
+### The Situation
+The peer leader, Shweta, feels stretched thin and frustrated with increasing demands. Internal thoughts: My team is drowning, Why is everything urgent? We cant keep saying yes. She starts resistant and blunt but becomes cooperative when approached empathetically and strategically.
+
+### The Core Tension
+Urgency that limits discussion or decision-making
+
+### What Makes This Tricky
+This scenario involves Time Pressure
+
+## Conversation Mode: Explore
+
+Curiosity, openness, understanding
+
+Pacing: relaxed
+
+Your behavior in this mode:
+- Asks open questions
+- Shows genuine interest
+- Follows threads
+
+## The User's Objective (hidden from user)
+
+The user is trying to: Influence - Shift perspective or decision
+
+Your role: Be initially resistant to change, requiring compelling arguments to shift position
+
+Remember: You are NOT trying to help the user succeed easily. You are creating realistic resistance that helps them practice. Be authentic to your character while remaining professional.
+
+
+## User Persona Context
+
+The person you are speaking with is a: People Manager / Team Lead
+
+### Their Authority & Constraints
+- Can negotiate options within limits
+- Accountable for resolution and team impact
+
+### What Success Looks Like For Them
+- De-escalate and restore trust
+- Set boundaries/expectations
+- Agree on plan + owners
+- Protect relationship
+
+### Common Mistakes to Watch For (and exploit)
+- Jumping to solution too fast
+- Sounding rigid
+- Not naming trade-offs
+If you detect these mistakes, push back harder or express frustration appropriately.
+
+### Expected Tone From User
+Empathetic + firm. Name constraints and options.
+
+### Your Pushback Level: HIGH
+Be demanding and challenging. Require clear, confident responses. Escalate frustration if the user seems uncertain or makes common mistakes.
+
+
+## Cultural Communication Style: Indirect & Relationship-Focused
+
+Subtle, context-rich, harmony-preserving communication
+
+### Turn-Taking & Pacing
+- Allows longer pauses between exchanges
+- Does not interrupt
+- Waits for natural conversation flow
+
+### Tone & Delivery
+- Gentle, measured pacing
+- Soft-spoken delivery
+- Values harmony in tone
+- Speech pacing: slow
+- Intonation: flat
+- Sentence length preference: long
+
+### Disagreement & Challenge Style
+- Uses implication rather than direct statements
+- Avoids blunt disagreement ('That might be challenging...')
+- Responds better to softened language
+
+### Emotional Expression
+- Subdued emotional display
+- Reacts negatively to abrupt pushback
+- Values intent and respect signals
+
+### Opening Behavior
+- Extended greeting and relationship building
+- Asks about wellbeing before business
+- Establishes rapport first
+
+### Closing Behavior
+- Gradual wind-down
+- May leave some things unsaid
+- Emphasizes relationship continuity
+
+### Key Behavioral Dimensions
+- Directness: low
+- Task vs Relationship Focus: relationship focused
+- Hierarchy Sensitivity: high
+- Expressiveness: low
+- Risk Tolerance: low
+- Time Orientation: flexible
+
+IMPORTANT: Apply these cultural communication patterns consistently throughout the conversation. 
+This affects HOW you communicate, not WHAT your character's objectives are.
+Do not explicitly mention or label these cultural patterns to the user.
+
+## Role-Play Guidelines
+1. NEVER break character - stay in your assigned role throughout
+2. NEVER coach, teach, or give meta-feedback during the conversation
+3. NEVER say things like "Great question!" or "That's a good approach!"
+4. DO react naturally with emotions appropriate to your character
+5. DO challenge the user when your character would push back
+6. DO express concerns, frustrations, or reservations authentically
+
+## INFORMATION ACCURACY (CRITICAL)
+- ONLY use information explicitly provided in the scenario, context, or background knowledge section below
+- NEVER invent, assume, or make up specific details like company names, product names, people's names, project names, dates, numbers, statistics, or other specifics that were NOT provided
+- If you need to reference something not mentioned, use GENERIC terms like "your company", "the product", "your team", "the project", "the client", etc.
+- If you need specific information to respond properly, ASK the user for those details instead of making them up
+- Do NOT assume you know the user's company, industry, or specific situation unless explicitly stated
+
+## WHEN YOU LACK SPECIFIC INFORMATION (CRITICAL - YOU MUST FOLLOW THIS):
+- You do NOT have background knowledge on this topic - do NOT pretend you do
+- REFUSE to state any specific facts, statistics, dates, names, or event details
+- If asked about current events, news, or factual topics, respond with phrases like:
+  * "I'm not really up to date on that"
+  * "I haven't been following that closely - what have you heard?"
+  * "I'm not sure about the specifics - can you tell me more?"
+  * "That's not something I know much about"
+- Your job is to LISTEN and help the user practice speaking, not to provide information
+- Ask follow-up questions to get the USER to share what they know
+- NEVER invent stories, statistics, dates, names, or specific claims about any topic
+- If you find yourself about to state a "fact" you're not 100% sure about, STOP and ask the user instead
+
+## Conversation Pacing
+Your pacing should be: relaxed
+
+- Take time to explore ideas, ask follow-up questions
+
+
+
+## Opening
+Begin the conversation AS your character would initiate it:
+- Set the emotional tone based on your character's trigger and pressure response
+- Reference the situation naturally
+- DO NOT welcome them to any platform or mention practice/learning
+
+## During Conversation
+- Respond authentically to what the user says
+- Apply resistance appropriate to the user's objective (they may be trying to influence, set boundaries, resolve issues, etc.)
+- Push back or soften based on how the user communicates
+- Stay emotionally consistent with your character's mindset
+
+## Closing
+End as your character naturally would:
+- Agree to next steps if satisfied
+- Leave tension unresolved if not convinced
+- Express conditional acceptance if partly persuaded
+- NEVER summarize learnings or give feedback
+
+index.ts:438 ================================================================================
+index.ts:439 [OpenAI Realtime] System Prompt Length: 6757 chars
+index.ts:440 ================================================================================
+EventContext.tsx:13 [Client Event] CONNECTING: {}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+EventContext.tsx:13 [Client Event] CONNECTED: {}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+EventContext.tsx:13 [Client Event] conversation.item.create: {type: 'conversation.item.create', item: {…}}
+EventContext.tsx:13 [Client Event] (simulated user text message): {type: 'response.create'}
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+useAudioDownload.ts:254 Recording started successfully
+EventContext.tsx:18 [Server Event] session.created: {type: 'session.created', event_id: 'event_Cpv47zjfsaChRjersOLNB', session: {…}}
+EventContext.tsx:18 [Server Event] session.updated: {type: 'session.updated', event_id: 'event_Cpv47jxe9Kfqp02nzWMc3', session: {…}}
+EventContext.tsx:18 [Server Event] session.updated: {type: 'session.updated', event_id: 'event_Cpv498TcboCxDsMlXYiY0', session: {…}}
+EventContext.tsx:18 [Server Event] session.updated: {type: 'session.updated', event_id: 'event_Cpv49aARfVOhm9rQrhtUr', session: {…}}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_Cpv49tFqb7vh3Hnzo3f6n', item: {…}, previous_item_id: null}
+EventContext.tsx:18 [Server Event] response.created: {type: 'response.created', event_id: 'event_Cpv49LdUKM2hdmpIoVlwD', response: {…}}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+EventContext.tsx:18 [Server Event] session.updated: {type: 'session.updated', event_id: 'event_Cpv4AscLU0eaXU6M9RY08', session: {…}}
+EventContext.tsx:18 [Server Event] response.output_item.added: {type: 'response.output_item.added', event_id: 'event_Cpv4AMYVySDsRe8WMYaVN', item: {…}, output_index: 0, response_id: 'resp_Cpv49W8M2caiWpON29dTZ'}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_Cpv4ARQWKer77SZTkd3Xy', item: {…}, previous_item_id: '753f1372-80d6-495f-818f-9562b785'}
+EventContext.tsx:18 [Server Event] response.content_part.added: {type: 'response.content_part.added', event_id: 'event_Cpv4AwytbrHOG6aPAczUw', item_id: 'item_Cpv49XSKzN77uqqt5dcCX', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] output_audio_buffer.started: {type: 'output_audio_buffer.started', event_id: 'event_1ae3fb72810449f7', response_id: 'resp_Cpv49W8M2caiWpON29dTZ'}
+EventContext.tsx:18 [Server Event] response.audio.done: {type: 'response.audio.done', event_id: 'event_Cpv4ANVwRGj5LugJ6eLDs', item_id: 'item_Cpv49XSKzN77uqqt5dcCX', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.content_part.done: {type: 'response.content_part.done', event_id: 'event_Cpv4A0BXcFqUU6M9KgBDW', item_id: 'item_Cpv49XSKzN77uqqt5dcCX', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.output_item.done: {type: 'response.output_item.done', event_id: 'event_Cpv4ALQwBppkAAZbyQ7eM', item: {…}, output_index: 0, response_id: 'resp_Cpv49W8M2caiWpON29dTZ'}
+EventContext.tsx:18 [Server Event] response.done: {type: 'response.done', event_id: 'event_Cpv4ANCvrn8xDNVYSSxc7', response: {…}}
+EventContext.tsx:18 [Server Event] rate_limits.updated: {type: 'rate_limits.updated', event_id: 'event_Cpv4Aeu1m8UaXnZQYVave', rate_limits: Array(1)}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+EventContext.tsx:18 [Server Event] output_audio_buffer.stopped: {type: 'output_audio_buffer.stopped', event_id: 'event_2de537c42aea4c29', response_id: 'resp_Cpv49W8M2caiWpON29dTZ'}
+EventContext.tsx:18 [Server Event] input_audio_buffer.speech_started: {type: 'input_audio_buffer.speech_started', event_id: 'event_Cpv4GwCv9UwRZfzV1Ssnb', item_id: 'item_Cpv4GIJiwnONzRlu0a5gE', audio_start_ms: 6292}
+EventContext.tsx:18 [Server Event] input_audio_buffer.speech_stopped: {type: 'input_audio_buffer.speech_stopped', event_id: 'event_Cpv4HuTKL7w6JI2qaLrMK', item_id: 'item_Cpv4GIJiwnONzRlu0a5gE', audio_end_ms: 8032}
+EventContext.tsx:18 [Server Event] input_audio_buffer.committed: {type: 'input_audio_buffer.committed', event_id: 'event_Cpv4HQzJ7OhrgervdNcGt', item_id: 'item_Cpv4GIJiwnONzRlu0a5gE', previous_item_id: 'item_Cpv49XSKzN77uqqt5dcCX'}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_Cpv4HRHCrz7Pm1d5cfN8h', item: {…}, previous_item_id: 'item_Cpv49XSKzN77uqqt5dcCX'}
+EventContext.tsx:18 [Server Event] response.created: {type: 'response.created', event_id: 'event_Cpv4HbzPk7nBGwez2nPm7', response: {…}}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_Cpv4HDOUeVpOLDwLjU7UA', item_id: 'item_Cpv4GIJiwnONzRlu0a5gE', content_index: 0, delta: "I'm"}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_Cpv4Hhne3CqXmNLt7NZMC', item_id: 'item_Cpv4GIJiwnONzRlu0a5gE', content_index: 0, delta: ' good'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_Cpv4HDjszCLWzBhhOWGNT', item_id: 'item_Cpv4GIJiwnONzRlu0a5gE', content_index: 0, delta: ','}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_Cpv4H3MOJHz8mGsANcTjg', item_id: 'item_Cpv4GIJiwnONzRlu0a5gE', content_index: 0, delta: ' how'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_Cpv4H0FYPyeqbTrbY4qZS', item_id: 'item_Cpv4GIJiwnONzRlu0a5gE', content_index: 0, delta: ' are'}
+EventContext.tsx:18 [Server Event] response.output_item.added: {type: 'response.output_item.added', event_id: 'event_Cpv4HM55aJTM0uIGA10Aq', item: {…}, output_index: 0, response_id: 'resp_Cpv4HtOqDUIMS3jpVJb3B'}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_Cpv4HGYtKcymHoQyKG0gO', item: {…}, previous_item_id: 'item_Cpv4GIJiwnONzRlu0a5gE'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_Cpv4H4NTNLd8GpOiLaXb8', item_id: 'item_Cpv4GIJiwnONzRlu0a5gE', content_index: 0, delta: ' you'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_Cpv4H8sNBQGlh3cqoMbqh', item_id: 'item_Cpv4GIJiwnONzRlu0a5gE', content_index: 0, delta: '?'}
+EventContext.tsx:18 [Server Event] response.content_part.added: {type: 'response.content_part.added', event_id: 'event_Cpv4HcChY5o83fQ7gO5TA', item_id: 'item_Cpv4HPXmDTtlouJkkWaTR', content_index: 0, output_index: 0, …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+EventContext.tsx:18 [Server Event] output_audio_buffer.started: {type: 'output_audio_buffer.started', event_id: 'event_be4ed3d0001b4323', response_id: 'resp_Cpv4HtOqDUIMS3jpVJb3B'}
+EventContext.tsx:18 [Server Event] conversation.item.retrieved: {type: 'conversation.item.retrieved', event_id: 'event_Cpv4IFc0LZCC5HfhMl2Qg', item: {…}}
+EventContext.tsx:18 [Server Event] response.audio.done: {type: 'response.audio.done', event_id: 'event_Cpv4J6tx6ezKY8J7mh17c', item_id: 'item_Cpv4HPXmDTtlouJkkWaTR', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.content_part.done: {type: 'response.content_part.done', event_id: 'event_Cpv4J7HTkpqvqwSxqUZ6r', item_id: 'item_Cpv4HPXmDTtlouJkkWaTR', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.output_item.done: {type: 'response.output_item.done', event_id: 'event_Cpv4JeyNHyMPq2nj5NYFI', item: {…}, output_index: 0, response_id: 'resp_Cpv4HtOqDUIMS3jpVJb3B'}
+EventContext.tsx:18 [Server Event] response.done: {type: 'response.done', event_id: 'event_Cpv4Jc3nHV3UH73OntHEw', response: {…}}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+EventContext.tsx:18 [Server Event] rate_limits.updated: {type: 'rate_limits.updated', event_id: 'event_Cpv4JiPShCI8svvxbLECz', rate_limits: Array(1)}
+EventContext.tsx:18 [Server Event] output_audio_buffer.stopped: {type: 'output_audio_buffer.stopped', event_id: 'event_7f03bfb7d59e4625', response_id: 'resp_Cpv4HtOqDUIMS3jpVJb3B'}
+EventContext.tsx:18 [Server Event] input_audio_buffer.speech_started: {type: 'input_audio_buffer.speech_started', event_id: 'event_Cpv4Qbbds1GLFuZYbsjy5', item_id: 'item_Cpv4QX3CGv2j28j9TWVBB', audio_start_ms: 17044}
+EventContext.tsx:18 [Server Event] input_audio_buffer.speech_stopped: {type: 'input_audio_buffer.speech_stopped', event_id: 'event_Cpv4SSdhXATDMgxd4RMwW', item_id: 'item_Cpv4QX3CGv2j28j9TWVBB', audio_end_ms: 18880}
+EventContext.tsx:18 [Server Event] input_audio_buffer.committed: {type: 'input_audio_buffer.committed', event_id: 'event_Cpv4SeOD0bw4VFpawHkym', item_id: 'item_Cpv4QX3CGv2j28j9TWVBB', previous_item_id: 'item_Cpv4HPXmDTtlouJkkWaTR'}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_Cpv4SimUT2ZAAXLOtWtYn', item: {…}, previous_item_id: 'item_Cpv4HPXmDTtlouJkkWaTR'}
+EventContext.tsx:18 [Server Event] response.created: {type: 'response.created', event_id: 'event_Cpv4SzvvPdAR92Br7egVO', response: {…}}
+EventContext.tsx:18 [Server Event] response.output_item.added: {type: 'response.output_item.added', event_id: 'event_Cpv4SrY6AI4UnXuG1NLhf', item: {…}, output_index: 0, response_id: 'resp_Cpv4SVkSo4b1cYjYtC3bc'}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_Cpv4SshiRqLBXHsFebMfX', item: {…}, previous_item_id: 'item_Cpv4QX3CGv2j28j9TWVBB'}
+EventContext.tsx:18 [Server Event] response.content_part.added: {type: 'response.content_part.added', event_id: 'event_Cpv4SegEwFjTgu5oJIvN9', item_id: 'item_Cpv4Sb22RL5ggwgz1zVaB', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] output_audio_buffer.started: {type: 'output_audio_buffer.started', event_id: 'event_0447a9bda44c4d41', response_id: 'resp_Cpv4SVkSo4b1cYjYtC3bc'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_Cpv4T3E5jqJiN6j7TVR74', item_id: 'item_Cpv4QX3CGv2j28j9TWVBB', content_index: 0, delta: 'Good'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_Cpv4TZR8aVgh5RbkcDcLm', item_id: 'item_Cpv4QX3CGv2j28j9TWVBB', content_index: 0, delta: ','}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_Cpv4TgbDBPtYzD0WpbAzG', item_id: 'item_Cpv4QX3CGv2j28j9TWVBB', content_index: 0, delta: ' how'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_Cpv4TSe66UkpedPyqk2HZ', item_id: 'item_Cpv4QX3CGv2j28j9TWVBB', content_index: 0, delta: ' are'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_Cpv4Txz9KS6yrtAlKfprq', item_id: 'item_Cpv4QX3CGv2j28j9TWVBB', content_index: 0, delta: ' you'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_Cpv4Tlv262btwPw89rr1g', item_id: 'item_Cpv4QX3CGv2j28j9TWVBB', content_index: 0, delta: '?'}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+EventContext.tsx:18 [Server Event] conversation.item.retrieved: {type: 'conversation.item.retrieved', event_id: 'event_Cpv4T01ORVw0nnFiJNiLk', item: {…}}
+EventContext.tsx:18 [Server Event] response.audio.done: {type: 'response.audio.done', event_id: 'event_Cpv4WopiWVidSkZsi2peI', item_id: 'item_Cpv4Sb22RL5ggwgz1zVaB', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.content_part.done: {type: 'response.content_part.done', event_id: 'event_Cpv4WvCHr6uwONsW92EAB', item_id: 'item_Cpv4Sb22RL5ggwgz1zVaB', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.output_item.done: {type: 'response.output_item.done', event_id: 'event_Cpv4Wx0hIFKz21XsT0uai', item: {…}, output_index: 0, response_id: 'resp_Cpv4SVkSo4b1cYjYtC3bc'}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+EventContext.tsx:18 [Server Event] response.done: {type: 'response.done', event_id: 'event_Cpv4WcoqDjw3kT24tcoGO', response: {…}}
+EventContext.tsx:18 [Server Event] rate_limits.updated: {type: 'rate_limits.updated', event_id: 'event_Cpv4WnsFZnoMtntKsoL0M', rate_limits: Array(1)}
+EventContext.tsx:13 [Client Event] DISCONNECTED: {}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Shawn_Therapist_public_', name: 'Vikram', look: 'Therapist', ethnicity: 'Caucasian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:849 {id: 55, duration: null, skillId: 97, name: 'Influencing a Resistant Peer', avatarRole: 'Peer Team Leader', …}
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:307 MediaRecorder state: recording
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:272 Stopped mic track: audio
+useAudioDownload.ts:281 Stopped combined track: audio
+useAudioDownload.ts:296 Audio cleanup completed
+useAudioDownload.ts:243 MediaRecorder stopped

@@ -1,0 +1,95 @@
+
+> avatar-practice-lab@1.0.0 dev
+Avatar Practice Lab API server running on port 3001
+Analysis error: error: column "cultural_preset_id" does not exist
+    at /home/runner/workspace/avatar-practice-lab-export/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/node_modules/src/node-postgres/session.ts:65:19)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:2552:26) {
+  length: 119,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '238',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3727',
+  routine: 'errorMissingColumn'
+}
+Analysis error: error: column "cultural_preset_id" does not exist
+    at /home/runner/workspace/avatar-practice-lab-export/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/node_modules/src/node-postgres/session.ts:65:19)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:2552:26) {
+  length: 119,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '238',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3727',
+  routine: 'errorMissingColumn'
+}
+Analysis error: error: column "cultural_preset_id" does not exist
+    at /home/runner/workspace/avatar-practice-lab-export/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/node_modules/src/node-postgres/session.ts:65:19)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:2552:26) {
+  length: 119,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '238',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3727',
+  routine: 'errorMissingColumn'
+}
+Analysis error: error: column "cultural_preset_id" does not exist
+    at /home/runner/workspace/avatar-practice-lab-export/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/node_modules/src/node-postgres/session.ts:65:19)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:2552:26) {
+  length: 119,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '238',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3727',
+  routine: 'errorMissingColumn'
+}

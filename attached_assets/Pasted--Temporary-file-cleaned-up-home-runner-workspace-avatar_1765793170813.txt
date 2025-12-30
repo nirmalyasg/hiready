@@ -1,0 +1,61 @@
+}
+Temporary file cleaned up: /home/runner/workspace/avatar-practice-lab-export/api/uploads/file-1765793046708-331563184.wav
+Error inserting roleplay session: error: insert or update on table "users" violates foreign key constraint "users_auth_user_id_fkey"
+    at /home/runner/workspace/avatar-practice-lab-export/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/node_modules/src/node-postgres/session.ts:65:19)
+    at async Module.getOrCreateLegacyUser (/home/runner/workspace/avatar-practice-lab-export/api/storage.ts:68:21)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:2560:25) {
+  length: 262,
+  severity: 'ERROR',
+  code: '23503',
+  detail: 'Key (auth_user_id)=(1) is not present in table "auth_users".',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'users',
+  column: undefined,
+  dataType: undefined,
+  constraint: 'users_auth_user_id_fkey',
+  file: 'ri_triggers.c',
+  line: '2619',
+  routine: 'ri_ReportViolation'
+}
+✅ Found 17 transcripts for user 1
+GET /api/get-scenarios called with skillId: null, role: null, scenarioId: null
+GET /api/get-scenarios called with skillId: null, role: null, scenarioId: null
+File info: {
+  originalname: 'ai_roleplay_1765793156247.wav',
+  mimetype: 'audio/wav',
+  size: 2073644,
+  bufferSize: 2073644,
+  path: '/home/runner/workspace/avatar-practice-lab-export/api/uploads/file-1765793157044-564095850.wav'
+}
+Temporary file cleaned up: /home/runner/workspace/avatar-practice-lab-export/api/uploads/file-1765793157044-564095850.wav
+Error inserting roleplay session: error: insert or update on table "users" violates foreign key constraint "users_auth_user_id_fkey"
+    at /home/runner/workspace/avatar-practice-lab-export/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/node_modules/src/node-postgres/session.ts:65:19)
+    at async Module.getOrCreateLegacyUser (/home/runner/workspace/avatar-practice-lab-export/api/storage.ts:68:21)
+    at async <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:2560:25) {
+  length: 262,
+  severity: 'ERROR',
+  code: '23503',
+  detail: 'Key (auth_user_id)=(1) is not present in table "auth_users".',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'users',
+  column: undefined,
+  dataType: undefined,
+  constraint: 'users_auth_user_id_fkey',
+  file: 'ri_triggers.c',
+  line: '2619',
+  routine: 'ri_ReportViolation'
+}

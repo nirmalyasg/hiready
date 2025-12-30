@@ -1,0 +1,130 @@
+press h + enter to show help
+5:22:59 PM [vite] hmr update /ui/pages/practice/presentation/page.tsx, /ui/styles/globals.css
+5:23:29 PM [vite] hmr update /ui/pages/practice/presentation/page.tsx, /ui/styles/globals.css (x2)
+5:23:33 PM [vite] hmr update /ui/pages/practice/presentation/page.tsx, /ui/styles/globals.css (x3)
+5:23:36 PM [vite] hmr update /ui/pages/practice/presentation/page.tsx, /ui/styles/globals.css (x4)
+5:23:38 PM [vite] hmr update /ui/pages/practice/presentation/page.tsx, /ui/styles/globals.css (x5)
+5:24:11 PM [vite] hmr update /ui/App.tsx, /ui/styles/globals.css
+5:24:14 PM [vite] hmr update /ui/App.tsx, /ui/styles/globals.css (x2)
+5:42:50 PM [vite] hmr update /ui/pages/practice/presentation/session-page.tsx, /ui/styles/globals.css
+5:42:50 PM [vite] Internal server error: Failed to resolve import "react-pdf/dist/esm/Page/AnnotationLayer.css" from "ui/pages/practice/presentation/session-page.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/runner/workspace/avatar-practice-lab-export/ui/pages/practice/presentation/session-page.tsx:9:7
+  24 |  import InteractiveAvatar from "@/components/InteractiveAvatar";
+  25 |  import { pdfjs } from "react-pdf";
+  26 |  import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+     |          ^
+  27 |  import "react-pdf/dist/esm/Page/TextLayer.css";
+  28 |  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+      at TransformPluginContext._formatError (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 11)
+      at async TransformPluginContext.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+5:42:52 PM [vite] ✨ new dependencies optimized: react-pdf
+5:42:52 PM [vite] ✨ optimized dependencies changed. reloading
+5:42:53 PM [vite] Pre-transform error: Failed to resolve import "react-pdf/dist/esm/Page/AnnotationLayer.css" from "ui/pages/practice/presentation/session-page.tsx". Does the file exist?
+5:42:54 PM [vite] Internal server error: Failed to resolve import "react-pdf/dist/esm/Page/AnnotationLayer.css" from "ui/pages/practice/presentation/session-page.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/runner/workspace/avatar-practice-lab-export/ui/pages/practice/presentation/session-page.tsx:9:7
+  24 |  import InteractiveAvatar from "@/components/InteractiveAvatar";
+  25 |  import { pdfjs } from "react-pdf";
+  26 |  import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+     |          ^
+  27 |  import "react-pdf/dist/esm/Page/TextLayer.css";
+  28 |  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+      at TransformPluginContext._formatError (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 11)
+      at async TransformPluginContext.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+5:42:55 PM [vite] Internal server error: Failed to resolve import "react-pdf/dist/esm/Page/AnnotationLayer.css" from "ui/pages/practice/presentation/session-page.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/runner/workspace/avatar-practice-lab-export/ui/pages/practice/presentation/session-page.tsx:9:7
+  24 |  import InteractiveAvatar from "@/components/InteractiveAvatar";
+  25 |  import { pdfjs } from "react-pdf";
+  26 |  import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+     |          ^
+  27 |  import "react-pdf/dist/esm/Page/TextLayer.css";
+  28 |  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+      at TransformPluginContext._formatError (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 11)
+      at async TransformPluginContext.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24) (x2)
+5:42:55 PM [vite] Internal server error: Failed to resolve import "react-pdf/dist/esm/Page/AnnotationLayer.css" from "ui/pages/practice/presentation/session-page.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/runner/workspace/avatar-practice-lab-export/ui/pages/practice/presentation/session-page.tsx:9:7
+  24 |  import InteractiveAvatar from "@/components/InteractiveAvatar";
+  25 |  import { pdfjs } from "react-pdf";
+  26 |  import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+     |          ^
+  27 |  import "react-pdf/dist/esm/Page/TextLayer.css";
+  28 |  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+      at TransformPluginContext._formatError (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 11)
+      at async TransformPluginContext.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24) (x3)
+5:42:55 PM [vite] Internal server error: Failed to resolve import "react-pdf/dist/esm/Page/AnnotationLayer.css" from "ui/pages/practice/presentation/session-page.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/runner/workspace/avatar-practice-lab-export/ui/pages/practice/presentation/session-page.tsx:9:7
+  24 |  import InteractiveAvatar from "@/components/InteractiveAvatar";
+  25 |  import { pdfjs } from "react-pdf";
+  26 |  import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+     |          ^
+  27 |  import "react-pdf/dist/esm/Page/TextLayer.css";
+  28 |  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+      at TransformPluginContext._formatError (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 11)
+      at async TransformPluginContext.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24) (x4)
+5:42:55 PM [vite] Internal server error: Failed to resolve import "react-pdf/dist/esm/Page/AnnotationLayer.css" from "ui/pages/practice/presentation/session-page.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/runner/workspace/avatar-practice-lab-export/ui/pages/practice/presentation/session-page.tsx:9:7
+  24 |  import InteractiveAvatar from "@/components/InteractiveAvatar";
+  25 |  import { pdfjs } from "react-pdf";
+  26 |  import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+     |          ^
+  27 |  import "react-pdf/dist/esm/Page/TextLayer.css";
+  28 |  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+      at TransformPluginContext._formatError (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 11)
+      at async TransformPluginContext.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24) (x5)
+5:43:09 PM [vite] hmr update /ui/App.tsx, /ui/styles/globals.css
+5:43:49 PM [vite] hmr update /ui/App.tsx, /ui/styles/globals.css (x2)
+
+

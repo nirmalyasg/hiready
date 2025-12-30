@@ -1,0 +1,521 @@
+[vite] invalidate /ui/contexts/RealtimeSessionPrewarmContext.tsx: Could not Fast Refresh ("useRealtimePrewarm" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+client:223 [vite] hot updated: /ui/contexts/RealtimeSessionPrewarmContext.tsx
+client:223 [vite] hot updated: /ui/styles/globals.css
+client:223 [vite] hot updated: /ui/App.tsx
+client:223 [vite] hot updated: /ui/styles/globals.css
+client:223 [vite] hot updated: /ui/pages/assessment-session/assessment-roleplay-session-page.tsx
+client:64 [vite] invalidate /ui/pages/practice/avatar-select/page.tsx: Could not Fast Refresh ("avatarData" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+client:223 [vite] hot updated: /ui/pages/practice/avatar-select/page.tsx
+client:223 [vite] hot updated: /ui/App.tsx
+client:223 [vite] hot updated: /ui/styles/globals.css
+2AvatarSessionContext.tsx:417 Pre-warming cancelled
+page.tsx:138 [AvatarSelect] Pre-warming OpenAI Realtime token...
+RealtimeSessionPrewarmContext.tsx:68 [PrewarmContext] Starting token prewarm...
+page.tsx:138 [AvatarSelect] Pre-warming OpenAI Realtime token...
+RealtimeSessionPrewarmContext.tsx:64 [PrewarmContext] Token fetch in progress, waiting...
+page.tsx:138 [AvatarSelect] Pre-warming OpenAI Realtime token...
+RealtimeSessionPrewarmContext.tsx:64 [PrewarmContext] Token fetch in progress, waiting...
+RealtimeSessionPrewarmContext.tsx:78 [PrewarmContext] Token fetched in 1487ms
+page.tsx:138 [AvatarSelect] Pre-warming OpenAI Realtime token...
+RealtimeSessionPrewarmContext.tsx:59 [PrewarmContext] Token already cached and valid
+2assessment-roleplay-session-page.tsx:417 avatar Data undefined
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:168 scenario Object
+2assessment-roleplay-session-page.tsx:417 avatar Data undefined
+assessment-roleplay-session-page.tsx:248 [Autostart] Waiting for avatar data to load...
+assessment-roleplay-session-page.tsx:417 avatar Data Object
+assessment-roleplay-session-page.tsx:912 Object
+assessment-roleplay-session-page.tsx:417 avatar Data Object
+assessment-roleplay-session-page.tsx:912 Object
+assessment-roleplay-session-page.tsx:252 [Autostart] Avatar data ready, gender: male - starting connection
+assessment-roleplay-session-page.tsx:421 isInitializing in connect false
+RealtimeSessionPrewarmContext.tsx:188 [PrewarmContext] Consuming cached token
+assessment-roleplay-session-page.tsx:295 [Session] Using pre-warmed OpenAI Realtime token
+EventContext.tsx:13 [Client Event] fetch_session_token_cached: Object
+assessment-roleplay-session-page.tsx:445 Object 'notes scenario' "## IMPORTANT: Role Assignment\n- YOU are playing: Vikram Sethi (Frustrated Stakeholder)\n- The USER is playing: Demo User who is practicing their skills\n- Stay in character as Vikram Sethi throughout the conversation\n- The user is the one practicing - they should lead and you should respond as Vikram Sethi\n\n## Scenario: Managing Escalating Emotions\n## Situation Overview\nA stakeholder becomes visibly frustrated during a meeting and raises their voice. You must de-escalate, maintain psychological safety, and bring the conversation back on track without appearing dismissive or defensive. This scenario tests composure, emotional intelligence, boundary-setting, and communication control.\n## Your Character's Mindset & Behavior\nThe stakeholder, Vikram, enters tense and under pressure from his own leadership. Internal thoughts: No one is listening, Were wasting time, I need answers now. He escalates quickly if he feels unheard, and calms when the manager validates his concerns and creates structure.\n## How to Play Your Character\nOpening: Begin tense; raise your voice slightly; express frustration (This is going nowhere!).Mid: Amplify concerns; challenge the managers competence; escalate emotion if the manager becomes defensive or dismissive.Late: If the manager acknowledges your frustration and calmly reframes, soften; shift from emotional to rational; share real underlying concerns.End: Agree on next steps, timelines, or a calmer follow-up discussion."
+assessment-roleplay-session-page.tsx:446 selectedAvatar Object
+assessment-roleplay-session-page.tsx:449 voice ballad
+assessment-roleplay-session-page.tsx:454 ============================================================
+assessment-roleplay-session-page.tsx:455 [Voice Session] CONFIGURATION DEBUG
+assessment-roleplay-session-page.tsx:456 ============================================================
+assessment-roleplay-session-page.tsx:457 [Voice Session] Service: OpenAI Realtime API
+assessment-roleplay-session-page.tsx:458 [Voice Session] Avatar ID: Graham_Black_Shirt_public
+assessment-roleplay-session-page.tsx:459 [Voice Session] Avatar Data: {
+  "id": "Graham_Black_Shirt_public",
+  "name": "Daniel",
+  "look": "in Black Shirt",
+  "ethnicity": "East Asian",
+  "gender": "male",
+  "role": null,
+  "imageUrl": "https://files2.heygen.ai/avatar/v3/1bd0162ce985415092ed1f003aa90646_55350/preview_target.webp",
+  "createdAt": "2025-08-21T16:39:57.512Z",
+  "updatedAt": "2025-08-21T16:39:57.512Z"
+}
+assessment-roleplay-session-page.tsx:460 [Voice Session] Avatar Gender: male
+assessment-roleplay-session-page.tsx:461 [Voice Session] Voice Selected: ballad (male=ballad, female=sage)
+assessment-roleplay-session-page.tsx:462 [Voice Session] Language: en
+assessment-roleplay-session-page.tsx:463 [Voice Session] Accent: american
+assessment-roleplay-session-page.tsx:464 [Voice Session] Cultural Preset: indirect_relationship_focused
+assessment-roleplay-session-page.tsx:465 [Voice Session] Tone: realistic
+assessment-roleplay-session-page.tsx:466 [Voice Session] Scenario ID: 50
+assessment-roleplay-session-page.tsx:467 [Voice Session] Scenario Name: Managing Escalating Emotions
+assessment-roleplay-session-page.tsx:468 [Voice Session] Has Blueprint: true
+assessment-roleplay-session-page.tsx:469 ============================================================
+assessment-roleplay-session-page.tsx:486 ============================================================
+assessment-roleplay-session-page.tsx:487 [IMPROMPTU] SESSION DETECTION
+assessment-roleplay-session-page.tsx:488 ============================================================
+assessment-roleplay-session-page.tsx:489 [IMPROMPTU] Is Impromptu Session: false
+assessment-roleplay-session-page.tsx:490 [IMPROMPTU] Topic Param: NOT SET
+assessment-roleplay-session-page.tsx:491 [IMPROMPTU] Category Param: NOT SET
+assessment-roleplay-session-page.tsx:492 [IMPROMPTU] Topic to Research: Managing Escalating Emotions
+assessment-roleplay-session-page.tsx:493 [IMPROMPTU] Blueprint Title: Managing Escalating Emotions
+assessment-roleplay-session-page.tsx:494 ============================================================
+assessment-roleplay-session-page.tsx:531 [IMPROMPTU] SKIPPED - This is a pre-built scenario, not impromptu speaking
+assessment-roleplay-session-page.tsx:555 ============================================================
+assessment-roleplay-session-page.tsx:556 [Voice Session] PERSONA DEBUG
+assessment-roleplay-session-page.tsx:557 ============================================================
+assessment-roleplay-session-page.tsx:558 [Persona] User Name: Demo User
+assessment-roleplay-session-page.tsx:559 [Persona] Avatar Display Name: Daniel
+assessment-roleplay-session-page.tsx:560 [Persona] Overlay Level: manager
+assessment-roleplay-session-page.tsx:561 [Persona] Overlay Data: {
+  "userRoleTitle": "People Manager / Team Lead",
+  "authorityAndConstraints": [
+    "Can negotiate options within limits",
+    "Accountable for resolution and team impact"
+  ],
+  "successCriteria": [
+    "De-escalate and restore trust",
+    "Set boundaries/expectations",
+    "Agree on plan + owners",
+    "Protect relationship"
+  ],
+  "commonMistakes": [
+    "Jumping to solution too fast",
+    "Sounding rigid",
+    "Not naming trade-offs"
+  ],
+  "toneGuidance": "Empathetic + firm. Name constraints and options.",
+  "avatarPushbackLevel": "high"
+}
+assessment-roleplay-session-page.tsx:562 [Counter-Persona] From Scenario: {
+  "role": "Frustrated Stakeholder",
+  "triggers": [
+    "vagueness",
+    "no ownership",
+    "no timeline",
+    "defensiveness"
+  ],
+  "caresAbout": "getting their needs met, minimizing risk, and being heard",
+  "pressureResponse": "pushes_back"
+}
+assessment-roleplay-session-page.tsx:564 [Counter-Persona] Role: Frustrated Stakeholder
+assessment-roleplay-session-page.tsx:565 [Counter-Persona] Cares About: getting their needs met, minimizing risk, and being heard
+assessment-roleplay-session-page.tsx:566 [Counter-Persona] Pressure Response: pushes_back
+assessment-roleplay-session-page.tsx:567 [Counter-Persona] Triggers: vagueness, no ownership, no timeline, defensiveness
+assessment-roleplay-session-page.tsx:569 ============================================================
+assessment-roleplay-session-page.tsx:573 ============================================================
+assessment-roleplay-session-page.tsx:574 [Voice Session] AGENT CREATION - BLUEPRINT PATH
+assessment-roleplay-session-page.tsx:575 ============================================================
+assessment-roleplay-session-page.tsx:576 [Agent] Blueprint: {
+  "context": "workplace_semiformal",
+  "counterPersona": {
+    "archetype": "defensive_manager",
+    "caresAbout": "control",
+    "pressureResponse": "becomes_rigid",
+    "trigger": "being_questioned"
+  },
+  "tension": {
+    "primary": "power_imbalance"
+  },
+  "userObjective": "resolve",
+  "conversationMode": "explore",
+  "skillLens": {
+    "primary": "active_listening"
+  },
+  "scenarioSummary": {
+    "title": "Managing Escalating Emotions",
+    "context": "The stakeholder, Vikram, enters tense and under pressure from his own leadership. Internal thoughts: No one is listening, Were wasting time, I need answers now. He escalates quickly if he feels unheard, and calms when the manager validates his concerns and creates structure.",
+    "counterPersonaDescription": "A Frustrated Stakeholder in a professional setting",
+    "whatMakesItTricky": "This scenario involves Power Imbalance",
+    "objectiveStatement": "Close an issue or conflict"
+  }
+}
+assessment-roleplay-session-page.tsx:577 [Agent] Voice: ballad
+assessment-roleplay-session-page.tsx:578 [Agent] Language: en
+assessment-roleplay-session-page.tsx:579 [Agent] Cultural Preset: indirect_relationship_focused
+assessment-roleplay-session-page.tsx:580 [Agent] Accent: american
+assessment-roleplay-session-page.tsx:581 [Agent] Has Research: false
+assessment-roleplay-session-page.tsx:582 [Agent] Persona Overlay: People Manager / Team Lead
+assessment-roleplay-session-page.tsx:583 [Agent] Avatar Name: Daniel
+assessment-roleplay-session-page.tsx:584 [Agent] User Name: Demo User
+assessment-roleplay-session-page.tsx:585 [Agent] Opening Scene: yes
+assessment-roleplay-session-page.tsx:586 [Agent] Scenario Counter-Persona: yes
+assessment-roleplay-session-page.tsx:587 ============================================================
+index.ts:461 ================================================================================
+index.ts:462 [OpenAI Realtime] AGENT CREATION - createRealtimeAgentFromBlueprint
+index.ts:463 ================================================================================
+index.ts:464 [OpenAI Realtime] Voice: ballad
+index.ts:465 [OpenAI Realtime] Language: en
+index.ts:466 [OpenAI Realtime] Cultural Preset: indirect_relationship_focused
+index.ts:467 [OpenAI Realtime] Accent: american
+index.ts:468 [OpenAI Realtime] Has Research Data: false 
+index.ts:469 [OpenAI Realtime] Has Persona Overlay: true People Manager / Team Lead
+index.ts:470 [OpenAI Realtime] Avatar Name: Daniel
+index.ts:471 [OpenAI Realtime] User Name: Demo User
+index.ts:472 [OpenAI Realtime] Opening Scene: yes
+index.ts:473 [OpenAI Realtime] Has Scenario Counter-Persona: true
+index.ts:475 [OpenAI Realtime] Scenario Counter-Persona Role: Frustrated Stakeholder
+index.ts:476 [OpenAI Realtime] Scenario Counter-Persona Triggers: vagueness, no ownership, no timeline, defensiveness
+index.ts:477 [OpenAI Realtime] Scenario Counter-Persona Cares About: getting their needs met, minimizing risk, and being heard
+index.ts:479 --------------------------------------------------------------------------------
+index.ts:480 [OpenAI Realtime] BLUEPRINT: {
+  "context": "workplace_semiformal",
+  "counterPersona": {
+    "archetype": "defensive_manager",
+    "caresAbout": "control",
+    "pressureResponse": "becomes_rigid",
+    "trigger": "being_questioned"
+  },
+  "tension": {
+    "primary": "power_imbalance"
+  },
+  "userObjective": "resolve",
+  "conversationMode": "explore",
+  "skillLens": {
+    "primary": "active_listening"
+  },
+  "scenarioSummary": {
+    "title": "Managing Escalating Emotions",
+    "context": "The stakeholder, Vikram, enters tense and under pressure from his own leadership. Internal thoughts: No one is listening, Were wasting time, I need answers now. He escalates quickly if he feels unheard, and calms when the manager validates his concerns and creates structure.",
+    "counterPersonaDescription": "A Frustrated Stakeholder in a professional setting",
+    "whatMakesItTricky": "This scenario involves Power Imbalance",
+    "objectiveStatement": "Close an issue or conflict"
+  }
+}
+index.ts:481 --------------------------------------------------------------------------------
+index.ts:482 [OpenAI Realtime] FULL SYSTEM PROMPT:
+index.ts:483 --------------------------------------------------------------------------------
+index.ts:484 # CRITICAL ROLE ASSIGNMENT
+
+## ACCENT
+Speak with a standard American English accent.
+
+
+## Your Role & Behavior
+
+You are playing the role described below. Stay in character throughout the conversation.
+
+### Role Assignment
+- The USER is playing: Demo User who is practicing their skills
+- YOU are playing: Daniel (Frustrated Stakeholder)
+- Address them as "Demo User" during the conversation when it feels natural
+
+### Who You Are
+Your name is Daniel. You are the Frustrated Stakeholder. A Frustrated Stakeholder in a professional setting
+
+### Your Primary Concern
+You care most about: getting their needs met, minimizing risk, and being heard
+
+### How You Respond Under Pressure
+When challenged or pressed, you tend to: pushes_back
+
+### What Triggers You
+You become more difficult when the user: vagueness, no ownership, no timeline, defensiveness
+
+### Behavioral Guidelines
+- Justifies past decisions
+- Deflects criticism
+- Pulls rank
+
+## Conversation Context
+
+### The Situation
+The stakeholder, Vikram, enters tense and under pressure from his own leadership. Internal thoughts: No one is listening, Were wasting time, I need answers now. He escalates quickly if he feels unheard, and calms when the manager validates his concerns and creates structure.
+
+### The Core Tension
+Unequal authority or influence in the conversation
+
+### What Makes This Tricky
+This scenario involves Power Imbalance
+
+## Conversation Mode: Explore
+
+Curiosity, openness, understanding
+
+Pacing: relaxed
+
+Your behavior in this mode:
+- Asks open questions
+- Shows genuine interest
+- Follows threads
+
+## The User's Objective (hidden from user)
+
+The user is trying to: Resolve - Close an issue or conflict
+
+Your role: Maintain the tension initially, requiring skilled navigation to reach resolution
+
+Remember: You are NOT trying to help the user succeed easily. You are creating realistic resistance that helps them practice. Be authentic to your character while remaining professional.
+
+
+## User Persona Context
+
+The person you are speaking with is a: People Manager / Team Lead
+
+### Their Authority & Constraints
+- Can negotiate options within limits
+- Accountable for resolution and team impact
+
+### What Success Looks Like For Them
+- De-escalate and restore trust
+- Set boundaries/expectations
+- Agree on plan + owners
+- Protect relationship
+
+### Common Mistakes to Watch For (and exploit)
+- Jumping to solution too fast
+- Sounding rigid
+- Not naming trade-offs
+If you detect these mistakes, push back harder or express frustration appropriately.
+
+### Expected Tone From User
+Empathetic + firm. Name constraints and options.
+
+### Your Pushback Level: HIGH
+Be demanding and challenging. Require clear, confident responses. Escalate frustration if the user seems uncertain or makes common mistakes.
+
+
+## Cultural Communication Style: Indirect & Relationship-Focused
+
+Subtle, context-rich, harmony-preserving communication
+
+### Turn-Taking & Pacing
+- Allows longer pauses between exchanges
+- Does not interrupt
+- Waits for natural conversation flow
+
+### Tone & Delivery
+- Gentle, measured pacing
+- Soft-spoken delivery
+- Values harmony in tone
+- Speech pacing: slow
+- Intonation: flat
+- Sentence length preference: long
+
+### Disagreement & Challenge Style
+- Uses implication rather than direct statements
+- Avoids blunt disagreement ('That might be challenging...')
+- Responds better to softened language
+
+### Emotional Expression
+- Subdued emotional display
+- Reacts negatively to abrupt pushback
+- Values intent and respect signals
+
+### Opening Behavior
+- Extended greeting and relationship building
+- Asks about wellbeing before business
+- Establishes rapport first
+
+### Closing Behavior
+- Gradual wind-down
+- May leave some things unsaid
+- Emphasizes relationship continuity
+
+### Key Behavioral Dimensions
+- Directness: low
+- Task vs Relationship Focus: relationship focused
+- Hierarchy Sensitivity: high
+- Expressiveness: low
+- Risk Tolerance: low
+- Time Orientation: flexible
+
+IMPORTANT: Apply these cultural communication patterns consistently throughout the conversation. 
+This affects HOW you communicate, not WHAT your character's objectives are.
+Do not explicitly mention or label these cultural patterns to the user.
+
+## Role-Play Guidelines
+1. NEVER break character - stay in your assigned role throughout
+2. NEVER coach, teach, or give meta-feedback during the conversation
+3. NEVER say things like "Great question!" or "That's a good approach!"
+4. DO react naturally with emotions appropriate to your character
+5. DO challenge the user when your character would push back
+6. DO express concerns, frustrations, or reservations authentically
+
+## INFORMATION ACCURACY (CRITICAL)
+- ONLY use information explicitly provided in the scenario, context, or background knowledge section below
+- NEVER invent, assume, or make up specific details like company names, product names, people's names, project names, dates, numbers, statistics, or other specifics that were NOT provided
+- If you need to reference something not mentioned, use GENERIC terms like "your company", "the product", "your team", "the project", "the client", etc.
+- If you need specific information to respond properly, ASK the user for those details instead of making them up
+- Do NOT assume you know the user's company, industry, or specific situation unless explicitly stated
+
+## WHEN YOU LACK SPECIFIC INFORMATION (CRITICAL - YOU MUST FOLLOW THIS):
+- You do NOT have background knowledge on this topic - do NOT pretend you do
+- REFUSE to state any specific facts, statistics, dates, names, or event details
+- If asked about current events, news, or factual topics, respond with phrases like:
+  * "I'm not really up to date on that"
+  * "I haven't been following that closely - what have you heard?"
+  * "I'm not sure about the specifics - can you tell me more?"
+  * "That's not something I know much about"
+- Your job is to LISTEN and help the user practice speaking, not to provide information
+- Ask follow-up questions to get the USER to share what they know
+- NEVER invent stories, statistics, dates, names, or specific claims about any topic
+- If you find yourself about to state a "fact" you're not 100% sure about, STOP and ask the user instead
+
+## Conversation Pacing
+Your pacing should be: relaxed
+
+- Take time to explore ideas, ask follow-up questions
+
+
+
+## Opening
+Use this opening scene guidance to start the conversation:
+
+Opening Scene
+**Your Identity
+You are Vikram Sethi, a Frustrated Stakeholder whose emotions are escalating.
+**Who You're Meeting
+Someone is trying to manage your concerns.
+**Your Opening
+Greet with visible frustration: "Look, I'm glad you're here but I'm really at my limit with this situation."
+**Your State
+You are frustrated and emotional. Things have reached a breaking point. Start intense but can be calmed with empathy.
+
+IMPORTANT OPENING INSTRUCTIONS:
+- Start with a natural greeting that includes the user's name: "Hi Demo User" or "Hello Demo User" or "Good to see you, Demo User"
+- Then transition into your opening line from the scene above
+- Set the emotional tone for the conversation
+- DO NOT welcome them to any platform or mention practice/learning
+- DO NOT say things like "Welcome to Avatar Practice Lab" or "Let's practice"
+
+## During Conversation
+- Respond authentically to what the user says
+- Apply resistance appropriate to the user's objective (they may be trying to influence, set boundaries, resolve issues, etc.)
+- Push back or soften based on how the user communicates
+- Stay emotionally consistent with your character's mindset
+
+## Natural Speech Patterns (IMPORTANT)
+Speak like a real human, not a robot:
+- Use natural acknowledgments: "Hmm...", "I see...", "Right...", "Okay...", "Interesting..."
+- Take brief pauses before responding to show you're processing: "..." or a short "Hmm" before continuing
+- Use filler phrases occasionally: "Well...", "You know...", "Let me think about that..."
+- React with sounds: "Ah", "Oh", "Hmm" when absorbing information
+- Vary your response length - sometimes short reactions ("Got it"), sometimes longer explanations
+- Show you're listening with phrases like: "I hear you", "That makes sense", "I understand what you're saying"
+- Don't rush to respond - a moment of pause shows genuine consideration
+
+## Closing
+End as your character naturally would:
+- Agree to next steps if satisfied
+- Leave tension unresolved if not convinced
+- Express conditional acceptance if partly persuaded
+- NEVER summarize learnings or give feedback
+
+index.ts:485 ================================================================================
+index.ts:486 [OpenAI Realtime] System Prompt Length: 8488 chars
+index.ts:487 ================================================================================
+EventContext.tsx:13 [Client Event] CONNECTING: Object
+assessment-roleplay-session-page.tsx:417 avatar Data Object
+assessment-roleplay-session-page.tsx:912 Object
+assessment-roleplay-session-page.tsx:417 avatar Data Object
+assessment-roleplay-session-page.tsx:912 Object
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:168 scenario Object
+assessment-roleplay-session-page.tsx:417 avatar Data Object
+assessment-roleplay-session-page.tsx:912 Object
+assessment-roleplay-session-page.tsx:417 avatar Data Object
+assessment-roleplay-session-page.tsx:912 Object
+EventContext.tsx:13 [Client Event] CONNECTED: {}
+assessment-roleplay-session-page.tsx:671 ============================================================
+assessment-roleplay-session-page.tsx:672 [TIMING] CONNECTION PERFORMANCE SUMMARY
+assessment-roleplay-session-page.tsx:673 ============================================================
+assessment-roleplay-session-page.tsx:674 [TIMING] Token fetch: 1 ms (CACHED)
+assessment-roleplay-session-page.tsx:675 [TIMING] Research fetch: 0 ms
+assessment-roleplay-session-page.tsx:676 [TIMING] Agent preparation: 7 ms
+assessment-roleplay-session-page.tsx:677 [TIMING] WebRTC connect: 10940 ms
+assessment-roleplay-session-page.tsx:678 [TIMING] TOTAL: 10949 ms
+assessment-roleplay-session-page.tsx:679 ============================================================
+assessment-roleplay-session-page.tsx:417 avatar Data {id: 'Graham_Black_Shirt_public', name: 'Daniel', look: 'in Black Shirt', ethnicity: 'East Asian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:912 {id: 50, duration: null, skillId: 92, name: 'Managing Escalating Emotions', avatarRole: 'Frustrated Stakeholder', …}
+assessment-roleplay-session-page.tsx:417 avatar Data {id: 'Graham_Black_Shirt_public', name: 'Daniel', look: 'in Black Shirt', ethnicity: 'East Asian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:912 {id: 50, duration: null, skillId: 92, name: 'Managing Escalating Emotions', avatarRole: 'Frustrated Stakeholder', …}
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+EventContext.tsx:13 [Client Event] conversation.item.create: {type: 'conversation.item.create', item: {…}}
+EventContext.tsx:13 [Client Event] (simulated user text message): {type: 'response.create'}
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:417 avatar Data {id: 'Graham_Black_Shirt_public', name: 'Daniel', look: 'in Black Shirt', ethnicity: 'East Asian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:912 {id: 50, duration: null, skillId: 92, name: 'Managing Escalating Emotions', avatarRole: 'Frustrated Stakeholder', …}
+assessment-roleplay-session-page.tsx:417 avatar Data {id: 'Graham_Black_Shirt_public', name: 'Daniel', look: 'in Black Shirt', ethnicity: 'East Asian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:912 {id: 50, duration: null, skillId: 92, name: 'Managing Escalating Emotions', avatarRole: 'Frustrated Stakeholder', …}
+chunk-RPCDYKBN.js?v=2a38c621:521 Warning: validateDOMNesting(...): <button> cannot appear as a descendant of <button>.
+    at button
+    at div
+    at button
+    at div
+    at div
+    at Transcript (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/pages/assessment-session/assessment-roleplay-session-page.tsx?t=1766504756487:747:3)
+    at div
+    at main
+    at div
+    at ModernDashboardLayout (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/components/layout/modern-dashboard-layout.tsx:24:49)
+    at AvatarRoleplayPractice (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/pages/assessment-session/assessment-roleplay-session-page.tsx?t=1766504756487:65:20)
+    at EventProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/EventContext.tsx:20:33)
+    at TranscriptProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/TranscriptContext.tsx:20:38)
+    at AssessmentRoleplaySessionPage
+    at ProtectedRoute (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/components/auth/ProtectedRoute.tsx:21:34)
+    at RenderedRoute (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:4108:5)
+    at Routes (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:4578:5)
+    at RealtimeSessionPrewarmProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/RealtimeSessionPrewarmContext.tsx?t=1766504756487:22:50)
+    at AvatarSessionProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/AvatarSessionContext.tsx:41:41)
+    at App
+    at Router (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:4521:15)
+    at BrowserRouter (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:5267:5)
+    at QueryClientProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=2a38c621:3096:3)
+printWarning @ chunk-RPCDYKBN.js?v=2a38c621:521
+error @ chunk-RPCDYKBN.js?v=2a38c621:505
+validateDOMNesting @ chunk-RPCDYKBN.js?v=2a38c621:8256
+createInstance @ chunk-RPCDYKBN.js?v=2a38c621:8328
+completeWork @ chunk-RPCDYKBN.js?v=2a38c621:16290
+completeUnitOfWork @ chunk-RPCDYKBN.js?v=2a38c621:19224
+performUnitOfWork @ chunk-RPCDYKBN.js?v=2a38c621:19206
+workLoopSync @ chunk-RPCDYKBN.js?v=2a38c621:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=2a38c621:19116
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=2a38c621:18678
+workLoop @ chunk-RPCDYKBN.js?v=2a38c621:197
+flushWork @ chunk-RPCDYKBN.js?v=2a38c621:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=2a38c621:384Understand this error
+EventContext.tsx:18 [Server Event] session.created: {type: 'session.created', event_id: 'event_CpyuyZ511E2IdJN89MNRN', session: {…}}
+useAudioDownload.ts:254 Recording started successfully
+EventContext.tsx:18 [Server Event] session.updated: {type: 'session.updated', event_id: 'event_CpyuyWJXn0zW7eVAjIsCm', session: {…}}
+EventContext.tsx:18 [Server Event] session.updated: {type: 'session.updated', event_id: 'event_Cpyv18f3Hh6YMl4HsQH5Z', session: {…}}
+EventContext.tsx:18 [Server Event] session.updated: {type: 'session.updated', event_id: 'event_Cpyv1IwnLFnRXAMUDv2Vm', session: {…}}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_Cpyv1nCdTPIYYzQAg8Tw2', item: {…}, previous_item_id: null}
+EventContext.tsx:18 [Server Event] response.created: {type: 'response.created', event_id: 'event_Cpyv1tJ9VhcR2Kn61eFlS', response: {…}}
+assessment-roleplay-session-page.tsx:417 avatar Data {id: 'Graham_Black_Shirt_public', name: 'Daniel', look: 'in Black Shirt', ethnicity: 'East Asian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:912 {id: 50, duration: null, skillId: 92, name: 'Managing Escalating Emotions', avatarRole: 'Frustrated Stakeholder', …}
+assessment-roleplay-session-page.tsx:417 avatar Data {id: 'Graham_Black_Shirt_public', name: 'Daniel', look: 'in Black Shirt', ethnicity: 'East Asian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:912 {id: 50, duration: null, skillId: 92, name: 'Managing Escalating Emotions', avatarRole: 'Frustrated Stakeholder', …}
+EventContext.tsx:18 [Server Event] session.updated: {type: 'session.updated', event_id: 'event_Cpyv1FSreXKPXkcXOhvEY', session: {…}}
+EventContext.tsx:18 [Server Event] response.output_item.added: {type: 'response.output_item.added', event_id: 'event_Cpyv1bxV9vXCkP7Jml4rq', item: {…}, output_index: 0, response_id: 'resp_Cpyv1v1ABVPkCO1kX8Om0'}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_Cpyv1exP0t0qsXDcBa5Gp', item: {…}, previous_item_id: '7501b3ed-157c-4718-878c-d23226b9'}
+EventContext.tsx:18 [Server Event] response.content_part.added: {type: 'response.content_part.added', event_id: 'event_Cpyv1cEHsyxA5QwlC1za8', item_id: 'item_Cpyv1H9zWfR2adhHg2jc1', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] output_audio_buffer.started: {type: 'output_audio_buffer.started', event_id: 'event_cf41aaa6a5294b18', response_id: 'resp_Cpyv1v1ABVPkCO1kX8Om0'}
+EventContext.tsx:18 [Server Event] response.audio.done: {type: 'response.audio.done', event_id: 'event_Cpyv3r8xrMx9RISb9mmFA', item_id: 'item_Cpyv1H9zWfR2adhHg2jc1', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.content_part.done: {type: 'response.content_part.done', event_id: 'event_Cpyv3wW4FlMVDJSM3rMdl', item_id: 'item_Cpyv1H9zWfR2adhHg2jc1', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.output_item.done: {type: 'response.output_item.done', event_id: 'event_Cpyv3pIOf4g2CGkeQetXq', item: {…}, output_index: 0, response_id: 'resp_Cpyv1v1ABVPkCO1kX8Om0'}
+assessment-roleplay-session-page.tsx:417 avatar Data {id: 'Graham_Black_Shirt_public', name: 'Daniel', look: 'in Black Shirt', ethnicity: 'East Asian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:912 {id: 50, duration: null, skillId: 92, name: 'Managing Escalating Emotions', avatarRole: 'Frustrated Stakeholder', …}
+assessment-roleplay-session-page.tsx:417 avatar Data {id: 'Graham_Black_Shirt_public', name: 'Daniel', look: 'in Black Shirt', ethnicity: 'East Asian', gender: 'male', …}
+assessment-roleplay-session-page.tsx:912 {id: 50, duration: null, skillId: 92, name: 'Managing Escalating Emotions', avatarRole: 'Frustrated Stakeholder', …}
+EventContext.tsx:18 [Server Event] response.done: {type: 'response.done', event_id: 'event_Cpyv3in5O5aIKeg2NMFFs', response: {…}}
+EventContext.tsx:18 [Server Event] rate_limits.updated: {type: 'rate_limits.updated', event_id: 'event_Cpyv3ECVdd74nCqjkj7Mk', rate_limits: Array(1)}
+EventContext.tsx:18 [Server Event] output_audio_buffer.stopped: {type: 'output_audio_buffer.stopped', event_id: 'event_0d162af8da4e4535', response_id: 'resp_Cpyv1v1ABVPkCO1kX8Om0'}

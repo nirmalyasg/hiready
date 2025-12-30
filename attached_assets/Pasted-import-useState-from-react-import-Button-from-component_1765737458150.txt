@@ -1,0 +1,467 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+} from "recharts";
+
+import { AnalyticsDashboard } from "@/components/ai-session-analysis/analytics-dashboard";
+import { Plus, BarChart3, List } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
+export default function SessionAnalysisPage() {
+  const [searchParams] = useSearchParams();
+  const [currentSession, setCurrentSession] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<"dashboard" | "sessions">(
+    "dashboard",
+  );
+  const sessionType = searchParams.get("type");
+  const sessionId = searchParams.get("sid");
+  const transcriptId = searchParams.get("tid") || null;
+  const navigate = useNavigate();
+
+  //   const { data, isLoading } = useQuery({
+  //     queryKey: ["session-analysis", sessionId],
+  //     queryFn: async () => {
+  //       const response = await fetch(`/api/avatar/session-analysis/${sessionId}${transcriptId ? `?transcript=${transcriptId}` : ""}`
+  // );
+  //       const data = await response.json();
+  //       if (!response.ok) {
+  //         throw new Error(data?.error || data?.message);
+  //       }
+  //       return data?.data;
+  //     },
+  //   });
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["/api/avatar/session-analysis", transcriptId],
+    queryFn: async () => {
+      const response = await fetch("/api/avatar/session-analysis", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          transcriptId,
+          sessionId,
+          sessionType,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error || data?.message);
+      }
+      return data;
+    },
+    enabled: !!transcriptId, // ensures it only runs if transcriptId exists
+  });
+
+  const handleCreateNewSession = async () => {
+    navigate("/avatar/practice");
+  };
+
+  const handleSessionSelect = (session: any) => {
+    setCurrentSession(session);
+    setActiveTab("dashboard");
+  };
+
+  if (isLoading) {
+    return (
+      <ModernDashboardLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-muted-foreground">
+              Loading your sessions analysis...
+            </p>
+          </div>
+        </div>
+      </ModernDashboardLayout>
+    );
+  }
+  if (error) {
+    console.log("error", error);
+    return (
+      <ModernDashboardLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-500">
+              Error loading your sessions analysis...
+            </p>
+          </div>
+        </div>
+      </ModernDashboardLayout>
+    );
+  }
+  console.log("data", data);
+  function toSessionData(input) {
+    // const { session, transcript, analysis } = input;
+    const {
+      transcript: session = {},
+      transcriptMessage: transcript,
+      analysis,
+    } = input;
+
+    const sessionData = {
+      id: String(session.id),
+      transcript: transcript.messages.map((msg) => ({
+        speaker: msg.speaker,
+        text: msg.text,
+        timestamp: msg.timestamp,
+        createdAtMs: msg.createdAt,
+      })),
+      analytics: {
+        sessionId: String(analysis.sessionId),
+        overallScore: analysis.overallScore || 0,
+        totalDuration: session.duration,
+
+        talkTime: {
+          userTime: analysis.userTalkTime,
+          otherTime: analysis.otherTalkTime,
+          userPercentage: analysis.userTalkPercentage,
+        },
+
+        wordChoice: {
+          fillerWords: analysis.fillerWords.map((f) => ({
+            word: f.word,
+            count: f.count,
+            percentage: f.percentage,
+            timestamps: f.timestamps,
+          })),
+          weakWords: analysis.weakWords.map((w) => ({
+            word: w.word,
+            count: w.count,
+            percentage: w.percentage,
+            timestamps: w.timestamps,
+          })),
+          sentenceOpeners: analysis.sentenceOpeners.map((s) => ({
+            opener: s.opener,
+            count: s.count,
+          })),
+        },
+
+        listening: {
+          activeListening: analysis.activeListening,
+          engagementLevel: analysis.engagementLevel,
+          questionsAsked: analysis.questionsAsked,
+          acknowledgments: analysis.acknowledgments,
+          interruptions: analysis.interruptions,
+        },
+
+        delivery: {
+          averagePacing: analysis.averagePacing,
+          pacingVariation: analysis.pacingVariation.map((p) => ({
+            timestamp: p.timestamp,
+            wpm: p.wpm,
+          })),
+          tone: analysis.tone,
+          pauseCount: analysis.pauseCount,
+          averagePauseLength: analysis.averagePauseLength,
+        },
+
+        feedback: {
+          strengths: analysis.strengths,
+          growthAreas: analysis.growthAreas,
+          followUpQuestions: analysis.followUpQuestions,
+          summary: analysis.summary,
+          pronunciation: {
+            issues: analysis.pronunciationIssues,
+            suggestions: analysis.pronunciationSuggestions,
+          },
+        },
+      },
+      audioUrl: session.audioUrl || undefined,
+      createdAt: new Date(session.createdAt),
+      updatedAt: new Date(session.updatedAt),
+    };
+
+    return sessionData;
+  }
+
+  const sessionData = toSessionData(data);
+
+  console.log("session data", sessionData, "data", data);
+  return (
+    <ModernDashboardLayout>
+      <div className="">
+        {/* Header */}
+        <div className="border-b bg-card">
+          <div className="container mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <h1 className="text-xl font-semibold">Session Analysis</h1>
+                <div></div>
+                {/* <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
+                <TabsList>
+                  <TabsTrigger value="dashboard" className="flex items-center space-x-2">
+                    <BarChart3 className="w-4 h-4" />
+                    <span>Dashboard</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="sessions" className="flex items-center space-x-2">
+                    <List className="w-4 h-4" />
+                    <span>Sessions</span>
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs> */}
+              </div>
+              <Button
+                onClick={handleCreateNewSession}
+                className="flex items-center space-x-2"
+              >
+                <Plus className="w-4 h-4" />
+                <span>New Session</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="container mx-auto px-6 py-6">
+          {/* {sessionData && <SessionView sessionData={sessionData} />} */}
+          {sessionData && <AnalyticsDashboard sessionData={sessionData} />}
+          {/* {activeTab === "dashboard" && (
+          currentSession ? (
+            <AnalyticsDashboard sessionData={currentSession} />
+          ) : (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <BarChart3 className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No Session Selected</h3>
+                <p className="text-muted-foreground mb-6">
+                  Create a new session or select an existing one to view analytics.
+                </p>
+                <Button onClick={handleCreateNewSession}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create New Session
+                </Button>
+              </CardContent>
+            </Card>
+          )} */}
+        </div>
+      </div>
+    </ModernDashboardLayout>
+  );
+}
+function SessionView({ sessionData }) {
+  const COLORS = ["#3b82f6", "#f97316"];
+
+  return (
+    <Tabs defaultValue="transcript" className="w-full space-y-4">
+      <TabsList className="grid w-full grid-cols-4">
+        <TabsTrigger value="talktime">Talk Time</TabsTrigger>
+        <TabsTrigger value="delivery">Delivery</TabsTrigger>
+        <TabsTrigger value="feedback">Feedback</TabsTrigger>
+        <TabsTrigger value="transcript">Transcript</TabsTrigger>
+      </TabsList>
+
+      {/* Transcript */}
+      <TabsContent value="transcript">
+        <Card>
+          <CardHeader>
+            <CardTitle>Transcript</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 max-h-96 overflow-y-auto">
+            {/* {sessionData.transcript.map((msg, i) => (
+              <div key={i} className="text-sm">
+                <span className="font-bold mr-2">
+                  {msg.speaker === "user" ? "🧑 User" : "🤖 Assistant"}:
+                </span>
+                {msg.text}
+                <span className="ml-2 text-muted-foreground text-xs">
+                  ({msg.timestamp})
+                </span>
+              </div>
+            ))} */}
+            <div className="space-y-4">
+              {sessionData.transcript.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`flex ${msg.speaker === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`
+                      max-w-[75%] rounded-2xl px-4 py-2 shadow-sm
+                      ${
+                        msg.speaker === "user"
+                          ? "bg-blue-500 text-white rounded-br-none"
+                          : "bg-gray-100 text-gray-800 rounded-bl-none"
+                      }
+                    `}
+                  >
+                    <p className="text-sm">{msg.text}</p>
+                    <span className="block mt-1 text-xs opacity-70">
+                      {msg.speaker === "user" ? "User" : "Assistant"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      {/* Talk Time */}
+      <TabsContent value="talktime">
+        <Card>
+          <CardHeader>
+            <CardTitle>Talk Time Distribution</CardTitle>
+          </CardHeader>
+          <CardContent className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={[
+                    {
+                      name: "User",
+                      value: sessionData.analytics.talkTime.userTime,
+                    },
+                    {
+                      name: "Other",
+                      value: sessionData.analytics.talkTime.otherTime,
+                    },
+                  ]}
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={4}
+                  dataKey="value"
+                >
+                  {COLORS.map((color, idx) => (
+                    <Cell key={`cell-${idx}`} fill={color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      {/* Delivery */}
+      <TabsContent value="delivery">
+        <Card>
+          <CardHeader>
+            <CardTitle>Delivery Analysis</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm">
+              Tone:
+              {analytics.delivery.tone?.map((t) => (
+                <span className="font-medium  pr-1">{t}</span>
+              ))}
+            </p>
+            <p className="text-sm">
+              Average Pacing: {sessionData.analytics.delivery.averagePacing} wpm
+            </p>
+            <p className="text-sm">
+              Pauses: {sessionData.analytics.delivery.pauseCount} (avg{" "}
+              {sessionData.analytics.delivery.averagePauseLength}s)
+            </p>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={sessionData.analytics.delivery.pacingVariation}
+                >
+                  <XAxis dataKey="timestamp" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="wpm" stroke="#3b82f6" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      {/* Feedback */}
+      <TabsContent value="feedback">
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="strengths">
+            <AccordionTrigger>Strengths</AccordionTrigger>
+            <AccordionContent>
+              {sessionData.analytics.feedback.strengths.map((s, i) => (
+                <p key={i} className="text-sm">
+                  {s}
+                </p>
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="growthAreas">
+            <AccordionTrigger>Growth Areas</AccordionTrigger>
+            <AccordionContent>
+              {sessionData.analytics.feedback.growthAreas.map((g, i) => (
+                <p key={i} className="text-sm">
+                  {g}
+                </p>
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="followUp">
+            <AccordionTrigger>Follow-up Questions</AccordionTrigger>
+            <AccordionContent>
+              {sessionData.analytics.feedback.followUpQuestions.map((q, i) => (
+                <p key={i} className="text-sm">
+                  {q}
+                </p>
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+
+          {(sessionData.analytics.feedback.pronunciation.issues?.length > 0 ||
+            sessionData.analytics.feedback.pronunciation.suggestions?.length >
+              0) && (
+            <AccordionItem value="pronunciation">
+              <AccordionTrigger>Pronunciation</AccordionTrigger>
+              <AccordionContent>
+                {sessionData.analytics.feedback.pronunciation.issues.map(
+                  (issue, i) => (
+                    <p key={`issue-${i}`} className="text-sm">
+                      {issue}
+                    </p>
+                  ),
+                )}
+                {sessionData.analytics.feedback.pronunciation.suggestions.map(
+                  (sugg, i) => (
+                    <p
+                      key={`sugg-${i}`}
+                      className="text-sm text-muted-foreground"
+                    >
+                      {sugg}
+                    </p>
+                  ),
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          )}
+
+          <AccordionItem value="summary">
+            <AccordionTrigger>Summary</AccordionTrigger>
+            <AccordionContent>
+              <p className="text-sm">
+                {sessionData.analytics.feedback.summary}
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </TabsContent>
+    </Tabs>
+  );
+}

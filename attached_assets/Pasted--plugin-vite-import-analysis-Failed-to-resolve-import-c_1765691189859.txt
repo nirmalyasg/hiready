@@ -1,0 +1,20 @@
+[plugin:vite:import-analysis] Failed to resolve import "@/components/avatar-simulator/InteractiveAvatar" from "ui/pages/practice/session/page.tsx". Does the file exist?
+/home/runner/workspace/avatar-practice-lab-export/ui/pages/practice/session/page.tsx:5:30
+19 |  import { Button } from "@/components/ui/button";
+20 |  import { Link, useNavigate, useSearchParams } from "react-router-dom";
+21 |  import InteractiveAvatar from "@/components/avatar-simulator/InteractiveAvatar";
+   |                                 ^
+22 |  import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
+23 |  import { useAuth } from "@/hooks/use-auth";
+    at TransformPluginContext._formatError (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+    at TransformPluginContext.error (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+    at normalizeUrl (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+    at async Promise.all (index 6)
+    at async TransformPluginContext.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+    at async PluginContainer.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+    at async loadAndTransform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+    at async viteTransformMiddleware (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24
+Click outside, press Esc key, or fix the code to dismiss.
+You can also disable this overlay by setting server.hmr.overlay to false in vite.config.ts.

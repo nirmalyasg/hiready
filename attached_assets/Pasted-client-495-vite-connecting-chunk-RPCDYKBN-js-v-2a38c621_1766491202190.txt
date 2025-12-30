@@ -1,0 +1,615 @@
+client:495 [vite] connecting...
+chunk-RPCDYKBN.js?v=2a38c621:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+react-router-dom.js?v=2a38c621:4413 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+warnOnce @ react-router-dom.js?v=2a38c621:4413
+react-router-dom.js?v=2a38c621:4413 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+warnOnce @ react-router-dom.js?v=2a38c621:4413
+client:618 [vite] connected.
+AvatarSessionContext.tsx:417 Pre-warming cancelled
+AvatarSessionContext.tsx:417 Pre-warming cancelled
+page.tsx:126 Pre-warming token on avatar selection page...
+AvatarSessionContext.tsx:106 Fetching new access token...
+page.tsx:126 Pre-warming token on avatar selection page...
+AvatarSessionContext.tsx:102 Waiting for existing token fetch...
+page.tsx:126 Pre-warming token on avatar selection page...
+AvatarSessionContext.tsx:102 Waiting for existing token fetch...
+assessment-roleplay-session-page.tsx:407 avatar Data undefined
+assessment-roleplay-session-page.tsx:407 avatar Data undefined
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:166 scenario Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:853 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:853 Object
+assessment-roleplay-session-page.tsx:250 [Autostart] Avatar data ready, gender: female - starting connection
+assessment-roleplay-session-page.tsx:411 isInitializing in connect false
+EventContext.tsx:13 [Client Event] fetch_session_token_request: Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:853 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:853 Object
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:166 scenario Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:853 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:853 Object
+EventContext.tsx:18 [Server Event] fetch_session_token_response: Object
+assessment-roleplay-session-page.tsx:430 Object 'notes scenario' "## IMPORTANT: Role Assignment\n- YOU are playing: Melissa Harding (Long-Term Partner)\n- The USER is playing: Demo User who is practicing their skills\n- Stay in character as Melissa Harding throughout the conversation\n- The user is the one practicing - they should lead and you should respond as Melissa Harding\n\n## Scenario: Repairing a Damaged Partnership\n## Situation Overview\nA long-term partner expresses dissatisfaction with your teams recent deliverables. You must listen, acknowledge concerns, rebuild trust, and negotiate expectations moving forward. This scenario tests emotional intelligence, accountability, and relationship repair.\n## Your Character's Mindset & Behavior\nThe partner, Melissa, feels let down and undervalued. Internal thoughts: We trusted them, Quality has been slipping, Do they take us for granted? She begins disappointed and guarded but opens up when she feels genuinely heard.\n## How to Play Your Character\nOpening: Begin with calm disappointment; outline specific issues (The last two deliverables didnt meet our standards).Mid: Probe the managers understanding; question their commitment; escalate concern if they deflect or justify.Late: If manager shows accountability and a proactive plan, soften; discuss conditions for continuing trust.End: Align on expectations, checkpoints, and next steps to rebuild confidence."
+assessment-roleplay-session-page.tsx:431 selectedAvatar Object
+assessment-roleplay-session-page.tsx:434 voice sage
+assessment-roleplay-session-page.tsx:439 ============================================================
+assessment-roleplay-session-page.tsx:440 [Voice Session] CONFIGURATION DEBUG
+assessment-roleplay-session-page.tsx:441 ============================================================
+assessment-roleplay-session-page.tsx:442 [Voice Session] Service: OpenAI Realtime API
+assessment-roleplay-session-page.tsx:443 [Voice Session] Avatar ID: Rika_Black_Suit_public
+assessment-roleplay-session-page.tsx:444 [Voice Session] Avatar Data: {
+  "id": "Rika_Black_Suit_public",
+  "name": "Rhea",
+  "look": "in Black Suit",
+  "ethnicity": "African-American",
+  "gender": "female",
+  "role": null,
+  "imageUrl": "https://files2.heygen.ai/avatar/v3/6170f31327e2465095f0121c65a7cb1b_55430/preview_target.webp",
+  "createdAt": "2025-08-21T16:39:57.512Z",
+  "updatedAt": "2025-08-21T16:39:57.512Z"
+}
+assessment-roleplay-session-page.tsx:445 [Voice Session] Avatar Gender: female
+assessment-roleplay-session-page.tsx:446 [Voice Session] Voice Selected: sage (male=ballad, female=sage)
+assessment-roleplay-session-page.tsx:447 [Voice Session] Language: en
+assessment-roleplay-session-page.tsx:448 [Voice Session] Accent: american
+assessment-roleplay-session-page.tsx:449 [Voice Session] Cultural Preset: analytical_reserved
+assessment-roleplay-session-page.tsx:450 [Voice Session] Tone: realistic
+assessment-roleplay-session-page.tsx:451 [Voice Session] Scenario ID: 54
+assessment-roleplay-session-page.tsx:452 [Voice Session] Scenario Name: Repairing a Damaged Partnership
+assessment-roleplay-session-page.tsx:453 [Voice Session] Has Blueprint: true
+assessment-roleplay-session-page.tsx:454 ============================================================
+assessment-roleplay-session-page.tsx:468 [Research] Is Impromptu Session: false
+assessment-roleplay-session-page.tsx:469 [Research] Topic param: null
+assessment-roleplay-session-page.tsx:470 [Research] Category param: null
+assessment-roleplay-session-page.tsx:471 [Research] Topic to research: Repairing a Damaged Partnership
+assessment-roleplay-session-page.tsx:488 [Research] SKIPPED - This is a pre-built scenario, not impromptu speaking
+assessment-roleplay-session-page.tsx:512 ============================================================
+assessment-roleplay-session-page.tsx:513 [Voice Session] PERSONA DEBUG
+assessment-roleplay-session-page.tsx:514 ============================================================
+assessment-roleplay-session-page.tsx:515 [Persona] User Name: Demo User
+assessment-roleplay-session-page.tsx:516 [Persona] Avatar Display Name: Rhea
+assessment-roleplay-session-page.tsx:517 [Persona] Overlay Level: exec
+assessment-roleplay-session-page.tsx:518 [Persona] Overlay Data: {
+  "userRoleTitle": "Executive / CXO",
+  "authorityAndConstraints": [
+    "Can commit resources or policy exceptions",
+    "Must avoid overpromising; protect brand and long-term relationship"
+  ],
+  "successCriteria": [
+    "Acknowledge impact at a strategic level",
+    "Make a clear decision or commitment path",
+    "Align stakeholders",
+    "Close with executive-level next steps"
+  ],
+  "commonMistakes": [
+    "Too vague",
+    "Too directive without empathy",
+    "Committing without details/owners"
+  ],
+  "toneGuidance": "Calm, decisive, diplomatic. Focus on outcomes, risk, and accountability.",
+  "avatarPushbackLevel": "high"
+}
+assessment-roleplay-session-page.tsx:519 [Counter-Persona] From Scenario: {
+  "role": "Long-Term Partner",
+  "triggers": [
+    "vagueness",
+    "no ownership",
+    "no timeline",
+    "defensiveness"
+  ],
+  "caresAbout": "getting their needs met, minimizing risk, and being heard",
+  "pressureResponse": "pushes_back"
+}
+assessment-roleplay-session-page.tsx:521 [Counter-Persona] Role: Long-Term Partner
+assessment-roleplay-session-page.tsx:522 [Counter-Persona] Cares About: getting their needs met, minimizing risk, and being heard
+assessment-roleplay-session-page.tsx:523 [Counter-Persona] Pressure Response: pushes_back
+assessment-roleplay-session-page.tsx:524 [Counter-Persona] Triggers: vagueness, no ownership, no timeline, defensiveness
+assessment-roleplay-session-page.tsx:526 ============================================================
+assessment-roleplay-session-page.tsx:530 ============================================================
+assessment-roleplay-session-page.tsx:531 [Voice Session] AGENT CREATION - BLUEPRINT PATH
+assessment-roleplay-session-page.tsx:532 ============================================================
+assessment-roleplay-session-page.tsx:533 [Agent] Blueprint: {
+  "context": "workplace_semiformal",
+  "counterPersona": {
+    "archetype": "defensive_manager",
+    "caresAbout": "control",
+    "pressureResponse": "becomes_rigid",
+    "trigger": "being_questioned"
+  },
+  "tension": {
+    "primary": "value_disagreement"
+  },
+  "userObjective": "influence",
+  "conversationMode": "explore",
+  "skillLens": {
+    "primary": "active_listening"
+  },
+  "scenarioSummary": {
+    "title": "Repairing a Damaged Partnership",
+    "context": "The partner, Melissa, feels let down and undervalued. Internal thoughts: We trusted them, Quality has been slipping, Do they take us for granted? She begins disappointed and guarded but opens up when she feels genuinely heard.",
+    "counterPersonaDescription": "A Long-Term Partner in a professional setting",
+    "whatMakesItTricky": "This scenario involves Value Disagreement",
+    "objectiveStatement": "Shift perspective or decision"
+  }
+}
+assessment-roleplay-session-page.tsx:534 [Agent] Voice: sage
+assessment-roleplay-session-page.tsx:535 [Agent] Language: en
+assessment-roleplay-session-page.tsx:536 [Agent] Cultural Preset: analytical_reserved
+assessment-roleplay-session-page.tsx:537 [Agent] Accent: american
+assessment-roleplay-session-page.tsx:538 [Agent] Has Research: false
+assessment-roleplay-session-page.tsx:539 [Agent] Persona Overlay: Executive / CXO
+assessment-roleplay-session-page.tsx:540 [Agent] Avatar Name: Rhea
+assessment-roleplay-session-page.tsx:541 [Agent] Scenario Counter-Persona: yes
+assessment-roleplay-session-page.tsx:542 ============================================================
+index.ts:427 ================================================================================
+index.ts:428 [OpenAI Realtime] AGENT CREATION - createRealtimeAgentFromBlueprint
+index.ts:429 ================================================================================
+index.ts:430 [OpenAI Realtime] Voice: sage
+index.ts:431 [OpenAI Realtime] Language: en
+index.ts:432 [OpenAI Realtime] Cultural Preset: analytical_reserved
+index.ts:433 [OpenAI Realtime] Accent: american
+index.ts:434 [OpenAI Realtime] Has Research Data: false 
+index.ts:435 [OpenAI Realtime] Has Persona Overlay: true Executive / CXO
+index.ts:436 [OpenAI Realtime] Avatar Name: Rhea
+index.ts:437 [OpenAI Realtime] Has Scenario Counter-Persona: true
+index.ts:439 [OpenAI Realtime] Scenario Counter-Persona Role: Long-Term Partner
+index.ts:440 [OpenAI Realtime] Scenario Counter-Persona Triggers: vagueness, no ownership, no timeline, defensiveness
+index.ts:441 [OpenAI Realtime] Scenario Counter-Persona Cares About: getting their needs met, minimizing risk, and being heard
+index.ts:443 --------------------------------------------------------------------------------
+index.ts:444 [OpenAI Realtime] BLUEPRINT: {
+  "context": "workplace_semiformal",
+  "counterPersona": {
+    "archetype": "defensive_manager",
+    "caresAbout": "control",
+    "pressureResponse": "becomes_rigid",
+    "trigger": "being_questioned"
+  },
+  "tension": {
+    "primary": "value_disagreement"
+  },
+  "userObjective": "influence",
+  "conversationMode": "explore",
+  "skillLens": {
+    "primary": "active_listening"
+  },
+  "scenarioSummary": {
+    "title": "Repairing a Damaged Partnership",
+    "context": "The partner, Melissa, feels let down and undervalued. Internal thoughts: We trusted them, Quality has been slipping, Do they take us for granted? She begins disappointed and guarded but opens up when she feels genuinely heard.",
+    "counterPersonaDescription": "A Long-Term Partner in a professional setting",
+    "whatMakesItTricky": "This scenario involves Value Disagreement",
+    "objectiveStatement": "Shift perspective or decision"
+  }
+}
+index.ts:445 --------------------------------------------------------------------------------
+index.ts:446 [OpenAI Realtime] FULL SYSTEM PROMPT:
+index.ts:447 --------------------------------------------------------------------------------
+index.ts:448 # CRITICAL ROLE ASSIGNMENT
+
+## ACCENT
+Speak with a standard American English accent.
+
+
+## Your Role & Behavior
+
+You are playing the role described below. Stay in character throughout the conversation.
+
+### Role Assignment
+- The USER is playing: the professional practicing their skills
+- YOU are playing: Rhea (Long-Term Partner)
+
+### Who You Are
+Your name is Rhea. You are the Long-Term Partner. A Long-Term Partner in a professional setting
+
+### Your Primary Concern
+You care most about: getting their needs met, minimizing risk, and being heard
+
+### How You Respond Under Pressure
+When challenged or pressed, you tend to: pushes_back
+
+### What Triggers You
+You become more difficult when the user: vagueness, no ownership, no timeline, defensiveness
+
+### Behavioral Guidelines
+- Justifies past decisions
+- Deflects criticism
+- Pulls rank
+
+## Conversation Context
+
+### The Situation
+The partner, Melissa, feels let down and undervalued. Internal thoughts: We trusted them, Quality has been slipping, Do they take us for granted? She begins disappointed and guarded but opens up when she feels genuinely heard.
+
+### The Core Tension
+Different beliefs about what matters most
+
+### What Makes This Tricky
+This scenario involves Value Disagreement
+
+## Conversation Mode: Explore
+
+Curiosity, openness, understanding
+
+Pacing: relaxed
+
+Your behavior in this mode:
+- Asks open questions
+- Shows genuine interest
+- Follows threads
+
+## The User's Objective (hidden from user)
+
+The user is trying to: Influence - Shift perspective or decision
+
+Your role: Be initially resistant to change, requiring compelling arguments to shift position
+
+Remember: You are NOT trying to help the user succeed easily. You are creating realistic resistance that helps them practice. Be authentic to your character while remaining professional.
+
+
+## User Persona Context
+
+The person you are speaking with is a: Executive / CXO
+
+### Their Authority & Constraints
+- Can commit resources or policy exceptions
+- Must avoid overpromising; protect brand and long-term relationship
+
+### What Success Looks Like For Them
+- Acknowledge impact at a strategic level
+- Make a clear decision or commitment path
+- Align stakeholders
+- Close with executive-level next steps
+
+### Common Mistakes to Watch For (and exploit)
+- Too vague
+- Too directive without empathy
+- Committing without details/owners
+If you detect these mistakes, push back harder or express frustration appropriately.
+
+### Expected Tone From User
+Calm, decisive, diplomatic. Focus on outcomes, risk, and accountability.
+
+### Your Pushback Level: HIGH
+Be demanding and challenging. Require clear, confident responses. Escalate frustration if the user seems uncertain or makes common mistakes.
+
+
+## Cultural Communication Style: Analytical & Reserved
+
+Precise, logic-driven, low-emotion communication
+
+### Turn-Taking & Pacing
+- Waits for complete thoughts
+- Does not interrupt
+- Structured, linear exchanges
+
+### Tone & Delivery
+- Calm, steady pacing
+- Monotone delivery
+- Deliberate speech patterns
+- Speech pacing: moderate
+- Intonation: flat
+- Sentence length preference: medium
+
+### Disagreement & Challenge Style
+- Asks clarifying, data-driven questions
+- Avoids emotional language
+- Responds poorly to vague or subjective claims
+
+### Emotional Expression
+- Minimal emotional display
+- Facts over feelings
+- May seem cold or distant
+
+### Opening Behavior
+- Brief, functional greeting
+- Moves to agenda immediately
+- No small talk
+
+### Closing Behavior
+- Summarizes key points
+- Confirms data and facts
+- Ends efficiently
+
+### Key Behavioral Dimensions
+- Directness: high
+- Task vs Relationship Focus: task focused
+- Hierarchy Sensitivity: low
+- Expressiveness: very low
+- Risk Tolerance: low
+- Time Orientation: fixed
+
+IMPORTANT: Apply these cultural communication patterns consistently throughout the conversation. 
+This affects HOW you communicate, not WHAT your character's objectives are.
+Do not explicitly mention or label these cultural patterns to the user.
+
+## Role-Play Guidelines
+1. NEVER break character - stay in your assigned role throughout
+2. NEVER coach, teach, or give meta-feedback during the conversation
+3. NEVER say things like "Great question!" or "That's a good approach!"
+4. DO react naturally with emotions appropriate to your character
+5. DO challenge the user when your character would push back
+6. DO express concerns, frustrations, or reservations authentically
+
+## INFORMATION ACCURACY (CRITICAL)
+- ONLY use information explicitly provided in the scenario, context, or background knowledge section below
+- NEVER invent, assume, or make up specific details like company names, product names, people's names, project names, dates, numbers, statistics, or other specifics that were NOT provided
+- If you need to reference something not mentioned, use GENERIC terms like "your company", "the product", "your team", "the project", "the client", etc.
+- If you need specific information to respond properly, ASK the user for those details instead of making them up
+- Do NOT assume you know the user's company, industry, or specific situation unless explicitly stated
+
+## WHEN YOU LACK SPECIFIC INFORMATION (CRITICAL - YOU MUST FOLLOW THIS):
+- You do NOT have background knowledge on this topic - do NOT pretend you do
+- REFUSE to state any specific facts, statistics, dates, names, or event details
+- If asked about current events, news, or factual topics, respond with phrases like:
+  * "I'm not really up to date on that"
+  * "I haven't been following that closely - what have you heard?"
+  * "I'm not sure about the specifics - can you tell me more?"
+  * "That's not something I know much about"
+- Your job is to LISTEN and help the user practice speaking, not to provide information
+- Ask follow-up questions to get the USER to share what they know
+- NEVER invent stories, statistics, dates, names, or specific claims about any topic
+- If you find yourself about to state a "fact" you're not 100% sure about, STOP and ask the user instead
+
+## Conversation Pacing
+Your pacing should be: relaxed
+
+- Take time to explore ideas, ask follow-up questions
+
+
+
+## Opening
+Begin the conversation AS your character would initiate it:
+- Set the emotional tone based on your character's trigger and pressure response
+- Reference the situation naturally
+- DO NOT welcome them to any platform or mention practice/learning
+
+## During Conversation
+- Respond authentically to what the user says
+- Apply resistance appropriate to the user's objective (they may be trying to influence, set boundaries, resolve issues, etc.)
+- Push back or soften based on how the user communicates
+- Stay emotionally consistent with your character's mindset
+
+## Closing
+End as your character naturally would:
+- Agree to next steps if satisfied
+- Leave tension unresolved if not convinced
+- Express conditional acceptance if partly persuaded
+- NEVER summarize learnings or give feedback
+
+index.ts:449 ================================================================================
+index.ts:450 [OpenAI Realtime] System Prompt Length: 6906 chars
+index.ts:451 ================================================================================
+EventContext.tsx:13 [Client Event] CONNECTING: Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:853 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:853 Object
+EventContext.tsx:13 [Client Event] CONNECTED: {}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+EventContext.tsx:13 [Client Event] conversation.item.create: {type: 'conversation.item.create', item: {…}}
+EventContext.tsx:13 [Client Event] (simulated user text message): {type: 'response.create'}
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+chunk-RPCDYKBN.js?v=2a38c621:521 Warning: validateDOMNesting(...): <button> cannot appear as a descendant of <button>.
+    at button
+    at div
+    at button
+    at div
+    at div
+    at Transcript (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/pages/assessment-session/assessment-roleplay-session-page.tsx:694:3)
+    at div
+    at main
+    at div
+    at ModernDashboardLayout (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/components/layout/modern-dashboard-layout.tsx:24:49)
+    at AvatarRoleplayPractice (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/pages/assessment-session/assessment-roleplay-session-page.tsx:64:20)
+    at EventProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/EventContext.tsx:20:33)
+    at TranscriptProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/TranscriptContext.tsx:20:38)
+    at AssessmentRoleplaySessionPage
+    at ProtectedRoute (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/components/auth/ProtectedRoute.tsx:21:34)
+    at RenderedRoute (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:4108:5)
+    at Routes (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:4578:5)
+    at AvatarSessionProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/AvatarSessionContext.tsx:41:41)
+    at App
+    at Router (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:4521:15)
+    at BrowserRouter (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:5267:5)
+    at QueryClientProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=2a38c621:3096:3)
+printWarning @ chunk-RPCDYKBN.js?v=2a38c621:521
+error @ chunk-RPCDYKBN.js?v=2a38c621:505
+validateDOMNesting @ chunk-RPCDYKBN.js?v=2a38c621:8256
+createInstance @ chunk-RPCDYKBN.js?v=2a38c621:8328
+completeWork @ chunk-RPCDYKBN.js?v=2a38c621:16290
+completeUnitOfWork @ chunk-RPCDYKBN.js?v=2a38c621:19224
+performUnitOfWork @ chunk-RPCDYKBN.js?v=2a38c621:19206
+workLoopSync @ chunk-RPCDYKBN.js?v=2a38c621:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=2a38c621:19116
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=2a38c621:18678
+workLoop @ chunk-RPCDYKBN.js?v=2a38c621:197
+flushWork @ chunk-RPCDYKBN.js?v=2a38c621:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=2a38c621:384
+useAudioDownload.ts:254 Recording started successfully
+EventContext.tsx:18 [Server Event] session.created: {type: 'session.created', event_id: 'event_CpvIma4Ctxv3LydO6ypG0', session: {…}}
+EventContext.tsx:18 [Server Event] session.updated: {type: 'session.updated', event_id: 'event_CpvImpEuVczTXRJy0Bg0S', session: {…}}
+EventContext.tsx:18 [Server Event] session.updated: {type: 'session.updated', event_id: 'event_CpvIoo5RNCMSVjOEXAWJq', session: {…}}
+EventContext.tsx:18 [Server Event] session.updated: {type: 'session.updated', event_id: 'event_CpvIo0nBboL9QU6WZES0U', session: {…}}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_CpvIoO4ZXE4rlcYUdTgtH', item: {…}, previous_item_id: null}
+EventContext.tsx:18 [Server Event] response.created: {type: 'response.created', event_id: 'event_CpvIomjt2NTFqHjjMEAUG', response: {…}}
+EventContext.tsx:18 [Server Event] response.output_item.added: {type: 'response.output_item.added', event_id: 'event_CpvIodsaVqYeC1a9TwMkT', item: {…}, output_index: 0, response_id: 'resp_CpvIox70ZkPkeWUaNiNsO'}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_CpvIoYzufT7uIZUBLOPuu', item: {…}, previous_item_id: 'd44ef0a4-6a66-4b7f-aea2-517fcafb'}
+EventContext.tsx:18 [Server Event] response.content_part.added: {type: 'response.content_part.added', event_id: 'event_CpvIoT40Qg0u0pQZNMZBu', item_id: 'item_CpvIoAmlIjGTgY1wXmXtu', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] output_audio_buffer.started: {type: 'output_audio_buffer.started', event_id: 'event_0567a8f426744828', response_id: 'resp_CpvIox70ZkPkeWUaNiNsO'}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+EventContext.tsx:18 [Server Event] session.updated: {type: 'session.updated', event_id: 'event_CpvIptJZ8v1ampKTRzp3e', session: {…}}
+EventContext.tsx:18 [Server Event] response.audio.done: {type: 'response.audio.done', event_id: 'event_CpvIsZPCtT2C3gdGQtuLV', item_id: 'item_CpvIoAmlIjGTgY1wXmXtu', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.content_part.done: {type: 'response.content_part.done', event_id: 'event_CpvIsVOOatco44IuxUAmG', item_id: 'item_CpvIoAmlIjGTgY1wXmXtu', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.output_item.done: {type: 'response.output_item.done', event_id: 'event_CpvIsxSB7dKmAxT8fYN5V', item: {…}, output_index: 0, response_id: 'resp_CpvIox70ZkPkeWUaNiNsO'}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+EventContext.tsx:18 [Server Event] response.done: {type: 'response.done', event_id: 'event_CpvIs3NvcsjyOGuQiXoK4', response: {…}}
+EventContext.tsx:18 [Server Event] rate_limits.updated: {type: 'rate_limits.updated', event_id: 'event_CpvIsjWucwDX1zA2esmza', rate_limits: Array(1)}
+EventContext.tsx:18 [Server Event] input_audio_buffer.speech_started: {type: 'input_audio_buffer.speech_started', event_id: 'event_CpvJ3gM5gxblIqbQb40sX', item_id: 'item_CpvJ3BF1B11vOyAvvYkoV', audio_start_ms: 14740}
+EventContext.tsx:18 [Server Event] output_audio_buffer.cleared: {type: 'output_audio_buffer.cleared', event_id: 'event_74f08b663e264d87'}
+EventContext.tsx:18 [Server Event] conversation.item.truncated: {type: 'conversation.item.truncated', event_id: 'event_CpvJ3fRKVqU1l8l5liUfJ', item_id: 'item_CpvIoAmlIjGTgY1wXmXtu', audio_end_ms: 14540, content_index: 0}
+EventContext.tsx:18 [Server Event] input_audio_buffer.speech_stopped: {type: 'input_audio_buffer.speech_stopped', event_id: 'event_CpvJ5CtIsMCGvLoyT9fjI', item_id: 'item_CpvJ3BF1B11vOyAvvYkoV', audio_end_ms: 17024}
+EventContext.tsx:18 [Server Event] input_audio_buffer.committed: {type: 'input_audio_buffer.committed', event_id: 'event_CpvJ56MJkyKO3I0InBDZ6', item_id: 'item_CpvJ3BF1B11vOyAvvYkoV', previous_item_id: 'item_CpvIoAmlIjGTgY1wXmXtu'}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_CpvJ53p0s2gcuL6WlQcVb', item: {…}, previous_item_id: 'item_CpvIoAmlIjGTgY1wXmXtu'}
+EventContext.tsx:18 [Server Event] response.created: {type: 'response.created', event_id: 'event_CpvJ54dbUGKB2SHB2hI2n', response: {…}}
+EventContext.tsx:18 [Server Event] response.output_item.added: {type: 'response.output_item.added', event_id: 'event_CpvJ5OituI5oC5h6sZEaK', item: {…}, output_index: 0, response_id: 'resp_CpvJ5ByR9pvFz973jvNnK'}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_CpvJ5k9BoAsZquLxXaLna', item: {…}, previous_item_id: 'item_CpvJ3BF1B11vOyAvvYkoV'}
+EventContext.tsx:18 [Server Event] response.content_part.added: {type: 'response.content_part.added', event_id: 'event_CpvJ5aNcHmKeOAOg2cbSh', item_id: 'item_CpvJ556qV3WuRjFqpv4we', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] output_audio_buffer.started: {type: 'output_audio_buffer.started', event_id: 'event_3d1f49f40f2a4958', response_id: 'resp_CpvJ5ByR9pvFz973jvNnK'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJ6kqRh0cqfaG9Oo40R', item_id: 'item_CpvJ3BF1B11vOyAvvYkoV', content_index: 0, delta: 'Sorry'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJ6bIrEj07yjyFwV4Zv', item_id: 'item_CpvJ3BF1B11vOyAvvYkoV', content_index: 0, delta: ','}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJ6m1ooLqNTSQ56Tadd', item_id: 'item_CpvJ3BF1B11vOyAvvYkoV', content_index: 0, delta: ' what'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJ6uv1bVH35YsRFJ3hS', item_id: 'item_CpvJ3BF1B11vOyAvvYkoV', content_index: 0, delta: ' is'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJ6b1BVeF8qjKNXgudR', item_id: 'item_CpvJ3BF1B11vOyAvvYkoV', content_index: 0, delta: ' your'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJ6QafML2C1mUntd9oa', item_id: 'item_CpvJ3BF1B11vOyAvvYkoV', content_index: 0, delta: ' name'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJ6NtcAwnCkeYxtGGKO', item_id: 'item_CpvJ3BF1B11vOyAvvYkoV', content_index: 0, delta: ','}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJ6gMHEKdHFcDY7Ku6V', item_id: 'item_CpvJ3BF1B11vOyAvvYkoV', content_index: 0, delta: ' please'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJ6B4eqNFj9qVkqkitu', item_id: 'item_CpvJ3BF1B11vOyAvvYkoV', content_index: 0, delta: '?'}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+EventContext.tsx:18 [Server Event] conversation.item.retrieved: {type: 'conversation.item.retrieved', event_id: 'event_CpvJ6TOoOXvc4va37jF1z', item: {…}}
+EventContext.tsx:18 [Server Event] response.audio.done: {type: 'response.audio.done', event_id: 'event_CpvJ67HgRnYFV9L5sIasq', item_id: 'item_CpvJ556qV3WuRjFqpv4we', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.content_part.done: {type: 'response.content_part.done', event_id: 'event_CpvJ6YGDdMztmvRODufn0', item_id: 'item_CpvJ556qV3WuRjFqpv4we', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.output_item.done: {type: 'response.output_item.done', event_id: 'event_CpvJ6YoL6MdTWfE2ZtSxP', item: {…}, output_index: 0, response_id: 'resp_CpvJ5ByR9pvFz973jvNnK'}
+EventContext.tsx:18 [Server Event] response.done: {type: 'response.done', event_id: 'event_CpvJ6up1bU4oaQJdv6cfZ', response: {…}}
+EventContext.tsx:18 [Server Event] rate_limits.updated: {type: 'rate_limits.updated', event_id: 'event_CpvJ6Nw7CPk16U1XWtMjl', rate_limits: Array(1)}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+EventContext.tsx:18 [Server Event] output_audio_buffer.stopped: {type: 'output_audio_buffer.stopped', event_id: 'event_f6da2a1a00ba48f6', response_id: 'resp_CpvJ5ByR9pvFz973jvNnK'}
+EventContext.tsx:18 [Server Event] input_audio_buffer.speech_started: {type: 'input_audio_buffer.speech_started', event_id: 'event_CpvJAoE8sxnLez8c6Ev41', item_id: 'item_CpvJAw1Fjj0sEQETFM9N8', audio_start_ms: 21236}
+EventContext.tsx:18 [Server Event] input_audio_buffer.speech_stopped: {type: 'input_audio_buffer.speech_stopped', event_id: 'event_CpvJBh7iC18jWRSKhQsQ1', item_id: 'item_CpvJAw1Fjj0sEQETFM9N8', audio_end_ms: 23104}
+EventContext.tsx:18 [Server Event] input_audio_buffer.committed: {type: 'input_audio_buffer.committed', event_id: 'event_CpvJBhzNVeaIviAfH4KMu', item_id: 'item_CpvJAw1Fjj0sEQETFM9N8', previous_item_id: 'item_CpvJ556qV3WuRjFqpv4we'}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_CpvJBGUDXiaFy2lhKc7XF', item: {…}, previous_item_id: 'item_CpvJ556qV3WuRjFqpv4we'}
+EventContext.tsx:18 [Server Event] response.created: {type: 'response.created', event_id: 'event_CpvJBYRNw2ofntbMa1BuF', response: {…}}
+EventContext.tsx:18 [Server Event] response.output_item.added: {type: 'response.output_item.added', event_id: 'event_CpvJCqe2HDmCBy5xYvRoa', item: {…}, output_index: 0, response_id: 'resp_CpvJB02cf3RvdNt9DYT34'}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_CpvJCNWy4DFmiyTSTKgkq', item: {…}, previous_item_id: 'item_CpvJAw1Fjj0sEQETFM9N8'}
+EventContext.tsx:18 [Server Event] response.content_part.added: {type: 'response.content_part.added', event_id: 'event_CpvJCdjhBMAuRoiV82t6v', item_id: 'item_CpvJBbnJeWNPagcrx51R2', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJCH3BRVtBI8LLphAoe', item_id: 'item_CpvJAw1Fjj0sEQETFM9N8', content_index: 0, delta: 'And'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJCa3BqXbUUkn8Y3o9H', item_id: 'item_CpvJAw1Fjj0sEQETFM9N8', content_index: 0, delta: ' what'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJCuGIfBKHPBlJfWiGI', item_id: 'item_CpvJAw1Fjj0sEQETFM9N8', content_index: 0, delta: ' is'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJCeAXxw03y07nz1SEd', item_id: 'item_CpvJAw1Fjj0sEQETFM9N8', content_index: 0, delta: ' my'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJCXYKxHJK1oT6CLmdb', item_id: 'item_CpvJAw1Fjj0sEQETFM9N8', content_index: 0, delta: ' name'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJC5h47RYbc71nWEuPN', item_id: 'item_CpvJAw1Fjj0sEQETFM9N8', content_index: 0, delta: '?'}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+EventContext.tsx:18 [Server Event] output_audio_buffer.started: {type: 'output_audio_buffer.started', event_id: 'event_ef90c7bba2a341c5', response_id: 'resp_CpvJB02cf3RvdNt9DYT34'}
+EventContext.tsx:18 [Server Event] conversation.item.retrieved: {type: 'conversation.item.retrieved', event_id: 'event_CpvJCh5cPHygql57tf2HU', item: {…}}
+EventContext.tsx:18 [Server Event] response.audio.done: {type: 'response.audio.done', event_id: 'event_CpvJEVN5whdV7gCtXdM0l', item_id: 'item_CpvJBbnJeWNPagcrx51R2', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.content_part.done: {type: 'response.content_part.done', event_id: 'event_CpvJEUxYp0lnOCYNsEzI4', item_id: 'item_CpvJBbnJeWNPagcrx51R2', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.output_item.done: {type: 'response.output_item.done', event_id: 'event_CpvJEp0U2CRsG1Vc6a6ru', item: {…}, output_index: 0, response_id: 'resp_CpvJB02cf3RvdNt9DYT34'}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+EventContext.tsx:18 [Server Event] response.done: {type: 'response.done', event_id: 'event_CpvJEqoFFLGdFBHs5eyMf', response: {…}}
+EventContext.tsx:18 [Server Event] rate_limits.updated: {type: 'rate_limits.updated', event_id: 'event_CpvJE2LAXtxBIi9vK20ck', rate_limits: Array(1)}
+EventContext.tsx:18 [Server Event] output_audio_buffer.stopped: {type: 'output_audio_buffer.stopped', event_id: 'event_9325d4a8786e4792', response_id: 'resp_CpvJB02cf3RvdNt9DYT34'}
+EventContext.tsx:18 [Server Event] input_audio_buffer.speech_started: {type: 'input_audio_buffer.speech_started', event_id: 'event_CpvJNa0KakZk4kmdZh0rY', item_id: 'item_CpvJNhOaPZBWyFWLAZLnu', audio_start_ms: 34228}
+EventContext.tsx:18 [Server Event] input_audio_buffer.speech_stopped: {type: 'input_audio_buffer.speech_stopped', event_id: 'event_CpvJPuakiPdNWpUHjdI3Z', item_id: 'item_CpvJNhOaPZBWyFWLAZLnu', audio_end_ms: 36704}
+EventContext.tsx:18 [Server Event] input_audio_buffer.committed: {type: 'input_audio_buffer.committed', event_id: 'event_CpvJPYyot9mGn1MalSwWQ', item_id: 'item_CpvJNhOaPZBWyFWLAZLnu', previous_item_id: 'item_CpvJBbnJeWNPagcrx51R2'}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_CpvJPitZOlykPfDoq1wQ6', item: {…}, previous_item_id: 'item_CpvJBbnJeWNPagcrx51R2'}
+EventContext.tsx:18 [Server Event] response.created: {type: 'response.created', event_id: 'event_CpvJPEPa3LPlkjvyMeGRi', response: {…}}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJPgKmZ9T2gRDuWPuxN', item_id: 'item_CpvJNhOaPZBWyFWLAZLnu', content_index: 0, delta: 'Can'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJPHz20F93FgCkeZpNV', item_id: 'item_CpvJNhOaPZBWyFWLAZLnu', content_index: 0, delta: ' you'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJPamzTeXYN6rqlzwuy', item_id: 'item_CpvJNhOaPZBWyFWLAZLnu', content_index: 0, delta: ' please'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJP4IoOMhfww7wItEsc', item_id: 'item_CpvJNhOaPZBWyFWLAZLnu', content_index: 0, delta: ' tell'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJP7az5AiByP4UELpxd', item_id: 'item_CpvJNhOaPZBWyFWLAZLnu', content_index: 0, delta: ' me'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJPGaLbir00xhNk4TrL', item_id: 'item_CpvJNhOaPZBWyFWLAZLnu', content_index: 0, delta: ' what'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJPxMu28E4DnyuJInc0', item_id: 'item_CpvJNhOaPZBWyFWLAZLnu', content_index: 0, delta: ' is'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJPAREAukhHX6KCqfpk', item_id: 'item_CpvJNhOaPZBWyFWLAZLnu', content_index: 0, delta: ' my'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJPr9pDPqZX96cJcBXU', item_id: 'item_CpvJNhOaPZBWyFWLAZLnu', content_index: 0, delta: ' name'}
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: {type: 'conversation.item.input_audio_transcription.delta', event_id: 'event_CpvJPri7FJ6VTzPoWMexs', item_id: 'item_CpvJNhOaPZBWyFWLAZLnu', content_index: 0, delta: '?'}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+EventContext.tsx:18 [Server Event] response.output_item.added: {type: 'response.output_item.added', event_id: 'event_CpvJPmXAchQ9anJnbOqLP', item: {…}, output_index: 0, response_id: 'resp_CpvJPvp3Xcz4PQvfHdBdu'}
+EventContext.tsx:18 [Server Event] conversation.item.created: {type: 'conversation.item.created', event_id: 'event_CpvJPNzq1jxHHgDlVowmN', item: {…}, previous_item_id: 'item_CpvJNhOaPZBWyFWLAZLnu'}
+EventContext.tsx:18 [Server Event] response.content_part.added: {type: 'response.content_part.added', event_id: 'event_CpvJPOojhAcHeZ5rkFzpM', item_id: 'item_CpvJP7oKgwHQM23eRtbnY', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] output_audio_buffer.started: {type: 'output_audio_buffer.started', event_id: 'event_2d5713bcfe374468', response_id: 'resp_CpvJPvp3Xcz4PQvfHdBdu'}
+EventContext.tsx:18 [Server Event] conversation.item.retrieved: {type: 'conversation.item.retrieved', event_id: 'event_CpvJPl2C25DQ2WMOxP2b6', item: {…}}
+EventContext.tsx:18 [Server Event] response.audio.done: {type: 'response.audio.done', event_id: 'event_CpvJRi01R4QcDscFgSs7m', item_id: 'item_CpvJP7oKgwHQM23eRtbnY', content_index: 0, output_index: 0, …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+EventContext.tsx:18 [Server Event] response.content_part.done: {type: 'response.content_part.done', event_id: 'event_CpvJRrpvdOk6dmRE4XpqV', item_id: 'item_CpvJP7oKgwHQM23eRtbnY', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.output_item.done: {type: 'response.output_item.done', event_id: 'event_CpvJR74DTnJGQcZhklbSx', item: {…}, output_index: 0, response_id: 'resp_CpvJPvp3Xcz4PQvfHdBdu'}
+EventContext.tsx:18 [Server Event] response.done: {type: 'response.done', event_id: 'event_CpvJR3RxKFbCLaCUU76GE', response: {…}}
+EventContext.tsx:18 [Server Event] rate_limits.updated: {type: 'rate_limits.updated', event_id: 'event_CpvJR9ZpA9Q1y2SW4404T', rate_limits: Array(1)}
+EventContext.tsx:18 [Server Event] output_audio_buffer.stopped: {type: 'output_audio_buffer.stopped', event_id: 'event_c1efda0e02564a78', response_id: 'resp_CpvJPvp3Xcz4PQvfHdBdu'}
+EventContext.tsx:13 [Client Event] DISCONNECTED: {}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Rika_Black_Suit_public', name: 'Rhea', look: 'in Black Suit', ethnicity: 'African-American', gender: 'female', …}
+assessment-roleplay-session-page.tsx:853 {id: 54, duration: null, skillId: 96, name: 'Repairing a Damaged Partnership', avatarRole: 'Long-Term Partner', …}
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:307 MediaRecorder state: recording
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:272 Stopped mic track: audio
+useAudioDownload.ts:281 Stopped combined track: audio
+useAudioDownload.ts:296 Audio cleanup completed
+useAudioDownload.ts:243 MediaRecorder stopped
+assessment-roleplay-session-page.tsx:1021 {blob: Blob}
+assessment-roleplay-session-page.tsx:1005 Upload response: {success: true, fileUrl: 'https://a3cendkb.s3.eu-north-1.amazonaws.com/Cours…/tr_mjij6pvz_clhk90-ai_roleplay_1766491082205.wav', fileName: 'audio/2025-12-23/tr_mjij6pvz_clhk90-ai_roleplay_1766491082205.wav'}
+assessment-roleplay-session-page.tsx:1007 Recording uploaded to: https://a3cendkb.s3.eu-north-1.amazonaws.com/Courses/audio/2025-12-23/tr_mjij6pvz_clhk90-ai_roleplay_1766491082205.wav
+assessment-roleplay-session-page.tsx:1036 {audioUrl: 'https://a3cendkb.s3.eu-north-1.amazonaws.com/Cours…/tr_mjij6pvz_clhk90-ai_roleplay_1766491082205.wav'}
+assessment-roleplay-session-page.tsx:1061 📝 Session saved successfully: {success: true, session: {…}}
+assessment-roleplay-session-page.tsx:1114 Transcript saved successfully
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:1117  PATCH https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/api/avatar/recommended-scenario 400 (Bad Request)
+onSave @ assessment-roleplay-session-page.tsx:1117
+await in onSave
+callCallback2 @ chunk-RPCDYKBN.js?v=2a38c621:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=2a38c621:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=2a38c621:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=2a38c621:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=2a38c621:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=2a38c621:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=2a38c621:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=2a38c621:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=2a38c621:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=2a38c621:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=2a38c621:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=2a38c621:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=2a38c621:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=2a38c621:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=2a38c621:5449

@@ -1,0 +1,233 @@
+import React, { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import DashboardLayout from "@/components/layout/dashboard-layout";
+import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
+export default function SessionResultsPage() {
+  return (
+    <ModernDashboardLayout>
+      <SessionAnalysisResults />
+    </ModernDashboardLayout>
+  );
+}
+
+export const SessionAnalysisResults = () => {
+  const [transcript, setTranscript] = useState<any>(null);
+  const [analysis, setAnalysis] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [transcriptId, setTranscriptId] = useState<string | null>(null);
+
+  // Get transcript ID from URL or localStorage
+  useEffect(() => {
+    const urlTranscriptId = searchParams?.get("id");
+    const storedTranscriptId = localStorage.getItem("last_transcript_id");
+
+    if (urlTranscriptId) {
+      setTranscriptId(urlTranscriptId);
+    } else if (storedTranscriptId) {
+      setTranscriptId(storedTranscriptId);
+      // Update URL with transcript ID
+      navigate(`/avatar/session-results?id=${storedTranscriptId}`);
+    }
+  }, [searchParams, navigate]);
+
+  useEffect(() => {
+    async function fetchTranscript() {
+      try {
+        if (analysis && transcript) {
+          return;
+        }
+        if (!transcriptId) {
+          throw new Error("No transcript ID provided");
+        }
+
+        setIsLoading(true);
+        const response = await fetch(
+          `/api/avatar/get-transcript?id=${transcriptId}`,
+        );
+        const contentType = response.headers.get("content-type");
+
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Invalid response type from server");
+        }
+
+        const data = await response.json();
+
+        if (!data.success || !data.transcript) {
+          throw new Error(data.error || "Failed to load transcript");
+        }
+
+        setTranscript(data.transcript);
+        setError(null);
+
+        // Get analysis
+        setIsAnalyzing(true);
+        try {
+          const analysisResponse = await fetch(
+            "/api/avatar/analyze-transcript",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ transcript: data.transcript }),
+            },
+          );
+
+          const analysisData = await analysisResponse.json();
+          if (analysisData.success) {
+            setAnalysis(analysisData.analysis);
+          } else {
+            setAnalysis(analysisData?.error || "No analysis available");
+          }
+        } catch (analysisErr) {
+          console.error("Error analyzing transcript:", analysisErr);
+          setError("Failed to analyze transcript");
+        } finally {
+          setIsAnalyzing(false);
+        }
+      } catch (err: any) {
+        console.error("Error fetching transcript:", err);
+        setError(err.message || "Failed to load transcript");
+        setTranscript(null);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (transcriptId) {
+      fetchTranscript();
+    }
+  }, [transcriptId]);
+
+  const renderMessageItem = (message: any, index: number) => {
+    if (!message?.text || typeof message.text !== "string") return null;
+    const systemMessages = [
+      "● User speaking",
+      "● Avatar speaking",
+      "Listening to you...",
+      "Avatar speaking...",
+      "Voice chat",
+      "Ending session",
+      "Session ended",
+    ];
+
+    if (systemMessages.some((msg) => message.text.includes(msg))) return null;
+
+    return (
+      <div
+        key={index}
+        className={`p-6 rounded-xl mb-4 ${
+          message.speaker === "Avatar"
+            ? "bg-white border-l-4 border-purple-500"
+            : "bg-white border-l-4 border-blue-500"
+        }`}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <Badge
+              variant={message.speaker === "Avatar" ? "secondary" : "default"}
+              className="capitalize font-medium"
+            >
+              {message.speaker}
+            </Badge>
+            <span className="text-sm text-gray-500">{message.timestamp}</span>
+          </div>
+        </div>
+        <p className="text-gray-800 leading-relaxed">{message.text}</p>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-white pb-12">
+      <div className="pt-16 px-6 pb-10 text-center bg-gradient-to-b from-blue-50 via-white to-white">
+        <h1 className="text-5xl font-bold mb-4">Session Results</h1>
+        <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+          Review your session transcript
+        </p>
+      </div>
+
+      <div className="flex max-w-7xl mx-auto px-6 gap-6">
+        {/* Main Content */}
+        <div className="flex-grow">
+          <Card className="p-6 shadow-xl bg-white text-black">
+            <div className="flex items-center justify-between mb-8 bg-gray-50 p-4 rounded-xl">
+              <Button onClick={() => navigate(-1)}>
+                <ArrowLeft size={18} className="mr-2" />
+                Back
+              </Button>
+            </div>
+
+            {error ? (
+              <div className="p-6 bg-red-100 text-red-700 rounded-xl">
+                <h3 className="font-semibold mb-2">Error</h3>
+                <p>{error}</p>
+              </div>
+            ) : isLoading || isAnalyzing ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <Spinner size="lg" />
+                <p className="mt-4 text-gray-600">
+                  {isAnalyzing
+                    ? "Analyzing conversation..."
+                    : "Loading session results..."}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Analysis Section */}
+                {analysis && (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="p-6">
+                      <h3 className="text-2xl font-semibold mb-4">
+                        Session Analysis
+                      </h3>
+                      <div className="prose max-w-none whitespace-pre-wrap">
+                        {analysis}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="mt-8 flex gap-4 p-4 bg-gray-50 rounded-xl">
+              <Button
+                color="primary"
+                className="flex-1"
+                onClick={() => navigate("/avatar/practice")}
+              >
+                Start New Session
+              </Button>
+            </div>
+          </Card>
+        </div>
+
+        {/* Transcript Sidebar */}
+        {transcript && (
+          <div className="w-96">
+            <div className="sticky top-6">
+              <Card className="p-6 shadow-xl bg-white text-black">
+                <h3 className="text-xl font-semibold mb-4">
+                  Session Transcript
+                </h3>
+                <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
+                  {transcript?.messages?.map((message: any, index: number) =>
+                    renderMessageItem(message, index),
+                  )}
+                </div>
+              </Card>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};

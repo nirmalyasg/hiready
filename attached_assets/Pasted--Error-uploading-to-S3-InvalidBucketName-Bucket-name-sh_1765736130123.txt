@@ -1,0 +1,25 @@
+}
+Error uploading to S3: InvalidBucketName: Bucket name shouldn't contain '/', received 'a3cendkb/Courses/'
+    at /home/runner/workspace/avatar-practice-lab-export/node_modules/@aws-sdk/middleware-sdk-s3/dist-cjs/index.js:523:25
+    at /home/runner/workspace/avatar-practice-lab-export/node_modules/@aws-sdk/middleware-logger/dist-cjs/index.js:5:32
+    at S3Client.send (/home/runner/workspace/avatar-practice-lab-export/node_modules/@smithy/smithy-client/dist-cjs/index.js:45:20)
+    at Upload.__uploadUsingPut (/home/runner/workspace/avatar-practice-lab-export/node_modules/@aws-sdk/lib-storage/dist-cjs/index.js:264:57)
+    at Upload.__doConcurrentUpload (/home/runner/workspace/avatar-practice-lab-export/node_modules/@aws-sdk/lib-storage/dist-cjs/index.js:339:35)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Promise.all (index 0)
+    at async Upload.__doMultipartUpload (/home/runner/workspace/avatar-practice-lab-export/node_modules/@aws-sdk/lib-storage/dist-cjs/index.js:419:9)
+    at async Upload.done (/home/runner/workspace/avatar-practice-lab-export/node_modules/@aws-sdk/lib-storage/dist-cjs/index.js:238:16)
+    at async uploadFileToS3 (/home/runner/workspace/avatar-practice-lab-export/api/utils/s3.ts:42:3)
+Temporary file cleaned up: /home/runner/workspace/avatar-practice-lab-export/api/uploads/file-1765736119436-977242449.wav
+[Activity Tracking] Error creating AI scenario completion activity: TypeError: storage.createUserActivity is not a function
+    at <anonymous> (/home/runner/workspace/avatar-practice-lab-export/api/routes/avatar-simulator.ts:2542:47)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+=== 🚀 Save transcript API endpoint called ===
+🔍 Parsing request JSON...
+📝 Using transcript ID: tr_mj61p1oy_iuo23m
+🔍 Normalizing data for database...
+📝 First message structure: {"speaker":"user","text":"hi","timestamp":"2025-12-","createdAt":1765736108487}
+🔍 Saving transcript with ID: tr_mj61p1oy_iuo23m
+📝 Creating new roleplay session for HeyGen session: 2
+📝 Created roleplay session with ID: 3
+📝 Creating new transcript with ID: tr_mj61p1oy_iuo23m

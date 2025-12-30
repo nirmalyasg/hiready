@@ -1,0 +1,48 @@
+  VITE v5.4.21  ready in 210 ms
+
+  ➜  Local:   http://localhost:5000/
+  ➜  Network: http://172.31.87.34:5000/
+4:15:58 PM [vite] Pre-transform error: Failed to resolve import "@/hooks/use-toast" from "ui/pages/assessment-session/assessment-roleplay-session-page.tsx". Does the file exist?
+4:15:59 PM [vite] Internal server error: Failed to resolve import "@/hooks/use-toast" from "ui/pages/assessment-session/assessment-roleplay-session-page.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/runner/workspace/avatar-practice-lab-export/ui/pages/assessment-session/assessment-roleplay-session-page.tsx:49:25
+  41 |  import { LoadingSpinner } from "@/components/ui/loading-spinner";
+  42 |  import { generateUniqueId } from "@/components/InteractiveAvatar";
+  43 |  import { useToast } from "@/hooks/use-toast";
+     |                            ^
+  44 |  function AssessmentRoleplaySessionPage() {
+  45 |    return /* @__PURE__ */ jsxDEV(TranscriptProvider, { children: /* @__PURE__ */ jsxDEV(EventProvider, { children: /* @__PURE__ */ jsxDEV(AvatarRoleplayPractice, {}, void 0, false, {
+      at TransformPluginContext._formatError (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 20)
+      at async TransformPluginContext.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+4:16:02 PM [vite] Internal server error: Failed to resolve import "@/hooks/use-toast" from "ui/pages/assessment-session/assessment-roleplay-session-page.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/runner/workspace/avatar-practice-lab-export/ui/pages/assessment-session/assessment-roleplay-session-page.tsx:49:25
+  41 |  import { LoadingSpinner } from "@/components/ui/loading-spinner";
+  42 |  import { generateUniqueId } from "@/components/InteractiveAvatar";
+  43 |  import { useToast } from "@/hooks/use-toast";
+     |                            ^
+  44 |  function AssessmentRoleplaySessionPage() {
+  45 |    return /* @__PURE__ */ jsxDEV(TranscriptProvider, { children: /* @__PURE__ */ jsxDEV(EventProvider, { children: /* @__PURE__ */ jsxDEV(AvatarRoleplayPractice, {}, void 0, false, {
+      at TransformPluginContext._formatError (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 20)
+      at async TransformPluginContext.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///home/runner/workspace/avatar-practice-lab-export/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24) (x2)
+^[[1;2B^[[1;2B
+
+
+
+

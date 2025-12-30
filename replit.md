@@ -1,0 +1,82 @@
+# Avatar Practice Lab
+
+## Overview
+Avatar Practice Lab is a voice-first AI conversation platform for practicing real-life workplace communication skills using AI avatars. It provides scenario-based learning with post-session feedback, supporting intercultural communication and skill-based assessments. The platform leverages HeyGen for streaming avatars and OpenAI for conversation intelligence, aiming to enhance user communication proficiency in a safe and realistic environment.
+
+## User Preferences
+Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+### UI/UX Decisions
+- **Mobile Responsiveness**: Comprehensive mobile responsiveness across all pages, including a mobile hamburger menu, adaptive layouts, and app-like UX patterns such as fixed bottom action bars and progressive content disclosure.
+- **Admin Console**: A 6-page SaaS-style dashboard for analytics, user management, session tracking, content performance, avatar usage, and cost monitoring.
+- **Voice Input**: Redesigned voice input with flag-based language selection and auto-detection, supporting 22 languages including 8 Indian languages with code-mixing capabilities.
+
+### Technical Implementations
+- **Frontend**: React 18 (TypeScript), Vite, React Router DOM v6, React Query, React Context, Tailwind CSS, Radix UI.
+- **Backend**: Node.js (Express), TypeScript (ES modules) with RESTful API.
+- **Data Storage**: PostgreSQL (Neon serverless) with Drizzle ORM, AWS S3 for audio recordings and session artifacts.
+- **Real-time Capabilities**: OpenAI Agents SDK for real-time voice, HeyGen Streaming Avatar SDK for avatar streaming.
+- **Dual-Mode Avatar System**: Mode selector in pre-session page routes to Video mode (HeyGen streaming avatar) or Voice mode (OpenAI Realtime + TTS). Both paths use the shared `buildFullScenarioPrompt()` function in `ui/lib/conversation-framework.ts` for prompt parity including: role assignment, language rules, counter-persona behavior, persona overlay guidance, opening directive, and anti-hallucination safeguards.
+- **Authentication**: Custom username/password authentication with bcrypt hashing and PostgreSQL-backed session storage.
+
+### Feature Specifications
+- **Scenario-Based Learning**: Customizable scenarios with avatar preferences (persona, tone, cultural style).
+- **Persona Overlay System**: Role-based practice levels (IC/Junior, Manager, Director, CXO) that adjust avatar behavior (pushback level, expectations) and feedback interpretation. Each persona includes authority constraints, success criteria, common mistakes to watch for, and tone guidance. Stored in `persona_overlays` JSONB field on scenarios table.
+  - **Role-Level Auto-Mapping**: Users can type their job title (e.g., "Product Manager", "Software Engineer") and the system auto-detects the appropriate practice level using a dictionary of 77+ job titles with fuzzy matching. Supports exact matches, partial matches, and token-based matching with confidence scoring. Located in `ui/lib/role-level-mapping.ts`.
+  - **Dynamic Opening Directives**: Avatar greetings adapt contextually based on scenario mood (crisis, coaching, feedback, negotiation, conflict, formal_meeting, casual_check_in), counter-persona emotional state, and user practice level. The `buildOpeningDirective` helper in `ui/lib/conversation-framework.ts` generates natural opening lines that set realistic conversation tone.
+- **Cultural Communication Style Presets**: Modifies avatar behavior based on GlobeSmart-based presets (e.g., Direct & Task-Focused, Indirect & Relationship-Focused).
+- **Skill Framework Assessment**: Uses OpenAI GPT-4o to evaluate transcripts against predefined skill dimensions (e.g., Impromptu Communication, Effective Presentation, TKI, GROW, Emotional Intelligence), providing detailed feedback and scores.
+- **Analytics & Dashboards**: Comprehensive session analysis, practice dashboard with AI-recommended focus areas, and a results page for historical analytics and skill progression.
+- **Custom Scenarios**: Users can create, save, and have AI analyze custom scenarios for dynamic role generation, context, objectives, and automatic skill mapping.
+- **Impromptu Speaking**: Auto-categorization of topics, category-specific avatar conversation styles, and real-time fact enrichment using Tavily Search with anti-hallucination guardrails.
+- **Presentation Practice**: Skill-based assessment and document analysis for uploaded presentations, providing structure, clarity, and visual design feedback. Includes language selection (15 languages) with strict enforcement—avatars speak only in the chosen language and politely redirect users if they switch.
+- **Session Management**: Queue system for HeyGen, session timer with heartbeat monitoring, and pre-warming for reduced latency.
+- **Voice Connection Optimization**: `RealtimeSessionPrewarmContext` pre-warms OpenAI Realtime tokens and Tavily research during avatar selection, reducing connection latency by front-loading API calls before user clicks "Start". Performance instrumentation logs token fetch, research fetch, agent preparation, and WebRTC connection timings.
+- **Anti-Hallucination & Language Enforcement**: Avatars use only provided information, ask for clarification when details are missing, and strictly maintain the chosen language.
+
+## External Dependencies
+
+### Third-Party Services
+- **HeyGen**: Streaming avatar service.
+- **OpenAI**: AI models for conversation intelligence and analysis.
+- **Neon Database**: Serverless PostgreSQL hosting.
+- **AWS S3**: Cloud storage for audio recordings and session artifacts.
+- **Tavily Search API**: For real-time fact research in impromptu conversations.
+
+### Key NPM Packages
+- `@heygen/streaming-avatar`
+- `@openai/agents`
+- `drizzle-orm`
+- `@tanstack/react-query`
+- `framer-motion`
+- `react-speech-recognition`
+
+## Database Migration & Seeding
+
+### Commands
+- `npm run db:setup` - Run all migrations and seeds (use for fresh deployments)
+- `npm run db:migrate:sql` - Run only SQL migration files
+- `npm run db:seed` - Run only seed files
+- `npm run db:migrate` - Drizzle kit push (syncs schema.ts to database)
+
+### Migration Files
+Located in `database/migrations/`:
+- 001_create_tables.sql - Core tables (users, skills, scenarios, avatars, sessions, transcripts)
+- 002_fix_tables.sql - Table fixes
+- 003_skill_framework_assessment.sql - Skill assessment tables
+- 004_cultural_style_presets.sql - Cultural presets
+- 005_custom_scenario_roles.sql - Custom scenario roles
+- 006_presentation_scenarios.sql - Presentation practice tables
+- 007_admin_analytics_tables.sql - Admin console, analytics, and budget tracking tables
+
+### Seed Files
+Located in `database/seeds/`:
+- init.sql - Core data (users, skills, scenarios, avatars, admin settings, budget guards)
+- cultural_presets.sql - Cultural communication presets
+
+### Admin Console Access
+- Username: `admin`
+- Password: `admin123`
+- Route: `/admin`

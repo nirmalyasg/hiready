@@ -1,0 +1,497 @@
+2AvatarSessionContext.tsx:417 Pre-warming cancelled
+page.tsx:126 Pre-warming token on avatar selection page...
+AvatarSessionContext.tsx:106 Fetching new access token...
+page.tsx:126 Pre-warming token on avatar selection page...
+AvatarSessionContext.tsx:102 Waiting for existing token fetch...
+page.tsx:126 Pre-warming token on avatar selection page...
+AvatarSessionContext.tsx:102 Waiting for existing token fetch...
+2assessment-roleplay-session-page.tsx:407 avatar Data undefined
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:166 scenario Object
+2assessment-roleplay-session-page.tsx:407 avatar Data undefined
+assessment-roleplay-session-page.tsx:246 [Autostart] Waiting for avatar data to load...
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+assessment-roleplay-session-page.tsx:250 [Autostart] Avatar data ready, gender: female - starting connection
+assessment-roleplay-session-page.tsx:411 isInitializing in connect false
+EventContext.tsx:13 [Client Event] fetch_session_token_request: Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:166 scenario Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+EventContext.tsx:18 [Server Event] fetch_session_token_response: Object
+assessment-roleplay-session-page.tsx:430 Object 'notes scenario' "## IMPORTANT: Role Assignment\n- YOU are playing: Elena Rodriguez (Customer Under Pressure)\n- The USER is playing: Demo User who is practicing their skills\n- Stay in character as Elena Rodriguez throughout the conversation\n- The user is the one practicing - they should lead and you should respond as Elena Rodriguez\n\n## Scenario: Communicating Boundaries to a Customer\n## Situation Overview\nA customer demands an immediate solution that is operationally impossible given dependencies or quality risks. You must maintain trust, communicate boundaries effectively, and negotiate a realistic timeline. This scenario tests assertiveness, empathy, expectation-setting, and credibility under pressure.\n## Your Character's Mindset & Behavior\nThe customer, Elena, is under extreme business pressure. Internal thoughts: I promised my leadership this would be done, Delays will cost us money, You need to make this work. She starts demanding and impatient but responds positively to transparency and structured alternatives.\n## How to Play Your Character\nOpening: Begin firm and demanding; insist the solution must be delivered immediately; express urgency and pressure.Mid: Question the managers capability; escalate frustration if the manager is vague or avoids specifics; highlight business consequences.Late: If the manager communicates risks clearly and offers realistic phased options, soften; engage in negotiation.End: Align on a feasible timeline, SLAs, and update cadence."
+assessment-roleplay-session-page.tsx:431 selectedAvatar Object
+assessment-roleplay-session-page.tsx:434 voice sage
+assessment-roleplay-session-page.tsx:439 ============================================================
+assessment-roleplay-session-page.tsx:440 [Voice Session] CONFIGURATION DEBUG
+assessment-roleplay-session-page.tsx:441 ============================================================
+assessment-roleplay-session-page.tsx:442 [Voice Session] Service: OpenAI Realtime API
+assessment-roleplay-session-page.tsx:443 [Voice Session] Avatar ID: Katya_Black_Suit_public
+assessment-roleplay-session-page.tsx:444 [Voice Session] Avatar Data: {
+  "id": "Katya_Black_Suit_public",
+  "name": "Elena",
+  "look": "in Black Suit",
+  "ethnicity": "Indian",
+  "gender": "female",
+  "role": null,
+  "imageUrl": "https://files2.heygen.ai/avatar/v3/da5cba6bc7b34c5ea139f77da98fdc04_55370/preview_talk_1.webp",
+  "createdAt": "2025-08-21T16:39:57.512Z",
+  "updatedAt": "2025-08-21T16:39:57.512Z"
+}
+assessment-roleplay-session-page.tsx:445 [Voice Session] Avatar Gender: female
+assessment-roleplay-session-page.tsx:446 [Voice Session] Voice Selected: sage (male=ballad, female=sage)
+assessment-roleplay-session-page.tsx:447 [Voice Session] Language: en
+assessment-roleplay-session-page.tsx:448 [Voice Session] Accent: american
+assessment-roleplay-session-page.tsx:449 [Voice Session] Cultural Preset: indirect_relationship_focused
+assessment-roleplay-session-page.tsx:450 [Voice Session] Tone: realistic
+assessment-roleplay-session-page.tsx:451 [Voice Session] Scenario ID: 52
+assessment-roleplay-session-page.tsx:452 [Voice Session] Scenario Name: Communicating Boundaries to a Customer
+assessment-roleplay-session-page.tsx:453 [Voice Session] Has Blueprint: true
+assessment-roleplay-session-page.tsx:454 ============================================================
+assessment-roleplay-session-page.tsx:468 [Research] Is Impromptu Session: false
+assessment-roleplay-session-page.tsx:469 [Research] Topic param: null
+assessment-roleplay-session-page.tsx:470 [Research] Category param: null
+assessment-roleplay-session-page.tsx:471 [Research] Topic to research: Communicating Boundaries to a Customer
+assessment-roleplay-session-page.tsx:488 [Research] SKIPPED - This is a pre-built scenario, not impromptu speaking
+assessment-roleplay-session-page.tsx:512 ============================================================
+assessment-roleplay-session-page.tsx:513 [Voice Session] PERSONA DEBUG
+assessment-roleplay-session-page.tsx:514 ============================================================
+assessment-roleplay-session-page.tsx:515 [Persona] User Name: Demo User
+assessment-roleplay-session-page.tsx:516 [Persona] Avatar Display Name: Elena
+assessment-roleplay-session-page.tsx:517 [Persona] Overlay Level: manager
+assessment-roleplay-session-page.tsx:518 [Persona] Overlay Data: {
+  "userRoleTitle": "People Manager / Team Lead",
+  "authorityAndConstraints": [
+    "Can negotiate options within limits",
+    "Accountable for resolution and team impact"
+  ],
+  "successCriteria": [
+    "De-escalate and restore trust",
+    "Set boundaries/expectations",
+    "Agree on plan + owners",
+    "Protect relationship"
+  ],
+  "commonMistakes": [
+    "Jumping to solution too fast",
+    "Sounding rigid",
+    "Not naming trade-offs"
+  ],
+  "toneGuidance": "Empathetic + firm. Name constraints and options.",
+  "avatarPushbackLevel": "high"
+}
+assessment-roleplay-session-page.tsx:519 [Counter-Persona] From Scenario: {
+  "role": "Customer Under Pressure",
+  "triggers": [
+    "vagueness",
+    "no ownership",
+    "no timeline",
+    "defensiveness"
+  ],
+  "caresAbout": "getting their needs met, minimizing risk, and being heard",
+  "pressureResponse": "pushes_back"
+}
+assessment-roleplay-session-page.tsx:521 [Counter-Persona] Role: Customer Under Pressure
+assessment-roleplay-session-page.tsx:522 [Counter-Persona] Cares About: getting their needs met, minimizing risk, and being heard
+assessment-roleplay-session-page.tsx:523 [Counter-Persona] Pressure Response: pushes_back
+assessment-roleplay-session-page.tsx:524 [Counter-Persona] Triggers: vagueness, no ownership, no timeline, defensiveness
+assessment-roleplay-session-page.tsx:526 ============================================================
+assessment-roleplay-session-page.tsx:530 ============================================================
+assessment-roleplay-session-page.tsx:531 [Voice Session] AGENT CREATION - BLUEPRINT PATH
+assessment-roleplay-session-page.tsx:532 ============================================================
+assessment-roleplay-session-page.tsx:533 [Agent] Blueprint: {
+  "context": "workplace_semiformal",
+  "counterPersona": {
+    "archetype": "defensive_manager",
+    "caresAbout": "control",
+    "pressureResponse": "becomes_rigid",
+    "trigger": "being_questioned"
+  },
+  "tension": {
+    "primary": "misaligned_expectations"
+  },
+  "userObjective": "influence",
+  "conversationMode": "persuade",
+  "skillLens": {
+    "primary": "assertiveness"
+  },
+  "scenarioSummary": {
+    "title": "Communicating Boundaries to a Customer",
+    "context": "The customer, Elena, is under extreme business pressure. Internal thoughts: I promised my leadership this would be done, Delays will cost us money, You need to make this work. She starts demanding and impatient but responds positively to transparency and structured alternatives.",
+    "counterPersonaDescription": "A Customer Under Pressure in a professional setting",
+    "whatMakesItTricky": "This scenario involves Misaligned Expectations",
+    "objectiveStatement": "Shift perspective or decision"
+  }
+}
+assessment-roleplay-session-page.tsx:534 [Agent] Voice: sage
+assessment-roleplay-session-page.tsx:535 [Agent] Language: en
+assessment-roleplay-session-page.tsx:536 [Agent] Cultural Preset: indirect_relationship_focused
+assessment-roleplay-session-page.tsx:537 [Agent] Accent: american
+assessment-roleplay-session-page.tsx:538 [Agent] Has Research: false
+assessment-roleplay-session-page.tsx:539 [Agent] Persona Overlay: People Manager / Team Lead
+assessment-roleplay-session-page.tsx:540 [Agent] Avatar Name: Elena
+assessment-roleplay-session-page.tsx:541 [Agent] User Name: Demo User
+assessment-roleplay-session-page.tsx:542 [Agent] Opening Scene: yes
+assessment-roleplay-session-page.tsx:543 [Agent] Scenario Counter-Persona: yes
+assessment-roleplay-session-page.tsx:544 ============================================================
+index.ts:434 ================================================================================
+index.ts:435 [OpenAI Realtime] AGENT CREATION - createRealtimeAgentFromBlueprint
+index.ts:436 ================================================================================
+index.ts:437 [OpenAI Realtime] Voice: sage
+index.ts:438 [OpenAI Realtime] Language: en
+index.ts:439 [OpenAI Realtime] Cultural Preset: indirect_relationship_focused
+index.ts:440 [OpenAI Realtime] Accent: american
+index.ts:441 [OpenAI Realtime] Has Research Data: false 
+index.ts:442 [OpenAI Realtime] Has Persona Overlay: true People Manager / Team Lead
+index.ts:443 [OpenAI Realtime] Avatar Name: Elena
+index.ts:444 [OpenAI Realtime] User Name: Demo User
+index.ts:445 [OpenAI Realtime] Opening Scene: yes
+index.ts:446 [OpenAI Realtime] Has Scenario Counter-Persona: true
+index.ts:448 [OpenAI Realtime] Scenario Counter-Persona Role: Customer Under Pressure
+index.ts:449 [OpenAI Realtime] Scenario Counter-Persona Triggers: vagueness, no ownership, no timeline, defensiveness
+index.ts:450 [OpenAI Realtime] Scenario Counter-Persona Cares About: getting their needs met, minimizing risk, and being heard
+index.ts:452 --------------------------------------------------------------------------------
+index.ts:453 [OpenAI Realtime] BLUEPRINT: {
+  "context": "workplace_semiformal",
+  "counterPersona": {
+    "archetype": "defensive_manager",
+    "caresAbout": "control",
+    "pressureResponse": "becomes_rigid",
+    "trigger": "being_questioned"
+  },
+  "tension": {
+    "primary": "misaligned_expectations"
+  },
+  "userObjective": "influence",
+  "conversationMode": "persuade",
+  "skillLens": {
+    "primary": "assertiveness"
+  },
+  "scenarioSummary": {
+    "title": "Communicating Boundaries to a Customer",
+    "context": "The customer, Elena, is under extreme business pressure. Internal thoughts: I promised my leadership this would be done, Delays will cost us money, You need to make this work. She starts demanding and impatient but responds positively to transparency and structured alternatives.",
+    "counterPersonaDescription": "A Customer Under Pressure in a professional setting",
+    "whatMakesItTricky": "This scenario involves Misaligned Expectations",
+    "objectiveStatement": "Shift perspective or decision"
+  }
+}
+index.ts:454 --------------------------------------------------------------------------------
+index.ts:455 [OpenAI Realtime] FULL SYSTEM PROMPT:
+index.ts:456 --------------------------------------------------------------------------------
+index.ts:457 # CRITICAL ROLE ASSIGNMENT
+
+## ACCENT
+Speak with a standard American English accent.
+
+
+## Your Role & Behavior
+
+You are playing the role described below. Stay in character throughout the conversation.
+
+### Role Assignment
+- The USER is playing: Demo User who is practicing their skills
+- YOU are playing: Elena (Customer Under Pressure)
+
+### Who You Are
+Your name is Elena. You are the Customer Under Pressure. A Customer Under Pressure in a professional setting
+
+### Your Primary Concern
+You care most about: getting their needs met, minimizing risk, and being heard
+
+### How You Respond Under Pressure
+When challenged or pressed, you tend to: pushes_back
+
+### What Triggers You
+You become more difficult when the user: vagueness, no ownership, no timeline, defensiveness
+
+### Behavioral Guidelines
+- Justifies past decisions
+- Deflects criticism
+- Pulls rank
+
+## Conversation Context
+
+### The Situation
+The customer, Elena, is under extreme business pressure. Internal thoughts: I promised my leadership this would be done, Delays will cost us money, You need to make this work. She starts demanding and impatient but responds positively to transparency and structured alternatives.
+
+### The Core Tension
+Different assumptions about what should happen
+
+### What Makes This Tricky
+This scenario involves Misaligned Expectations
+
+## Conversation Mode: Persuade
+
+Framing, logic, emotional appeal
+
+Pacing: engaged
+
+Your behavior in this mode:
+- Presents counterpoints
+- Tests arguments
+- Requires convincing
+
+## The User's Objective (hidden from user)
+
+The user is trying to: Influence - Shift perspective or decision
+
+Your role: Be initially resistant to change, requiring compelling arguments to shift position
+
+Remember: You are NOT trying to help the user succeed easily. You are creating realistic resistance that helps them practice. Be authentic to your character while remaining professional.
+
+
+## User Persona Context
+
+The person you are speaking with is a: People Manager / Team Lead
+
+### Their Authority & Constraints
+- Can negotiate options within limits
+- Accountable for resolution and team impact
+
+### What Success Looks Like For Them
+- De-escalate and restore trust
+- Set boundaries/expectations
+- Agree on plan + owners
+- Protect relationship
+
+### Common Mistakes to Watch For (and exploit)
+- Jumping to solution too fast
+- Sounding rigid
+- Not naming trade-offs
+If you detect these mistakes, push back harder or express frustration appropriately.
+
+### Expected Tone From User
+Empathetic + firm. Name constraints and options.
+
+### Your Pushback Level: HIGH
+Be demanding and challenging. Require clear, confident responses. Escalate frustration if the user seems uncertain or makes common mistakes.
+
+
+## Cultural Communication Style: Indirect & Relationship-Focused
+
+Subtle, context-rich, harmony-preserving communication
+
+### Turn-Taking & Pacing
+- Allows longer pauses between exchanges
+- Does not interrupt
+- Waits for natural conversation flow
+
+### Tone & Delivery
+- Gentle, measured pacing
+- Soft-spoken delivery
+- Values harmony in tone
+- Speech pacing: slow
+- Intonation: flat
+- Sentence length preference: long
+
+### Disagreement & Challenge Style
+- Uses implication rather than direct statements
+- Avoids blunt disagreement ('That might be challenging...')
+- Responds better to softened language
+
+### Emotional Expression
+- Subdued emotional display
+- Reacts negatively to abrupt pushback
+- Values intent and respect signals
+
+### Opening Behavior
+- Extended greeting and relationship building
+- Asks about wellbeing before business
+- Establishes rapport first
+
+### Closing Behavior
+- Gradual wind-down
+- May leave some things unsaid
+- Emphasizes relationship continuity
+
+### Key Behavioral Dimensions
+- Directness: low
+- Task vs Relationship Focus: relationship focused
+- Hierarchy Sensitivity: high
+- Expressiveness: low
+- Risk Tolerance: low
+- Time Orientation: flexible
+
+IMPORTANT: Apply these cultural communication patterns consistently throughout the conversation. 
+This affects HOW you communicate, not WHAT your character's objectives are.
+Do not explicitly mention or label these cultural patterns to the user.
+
+## Role-Play Guidelines
+1. NEVER break character - stay in your assigned role throughout
+2. NEVER coach, teach, or give meta-feedback during the conversation
+3. NEVER say things like "Great question!" or "That's a good approach!"
+4. DO react naturally with emotions appropriate to your character
+5. DO challenge the user when your character would push back
+6. DO express concerns, frustrations, or reservations authentically
+
+## INFORMATION ACCURACY (CRITICAL)
+- ONLY use information explicitly provided in the scenario, context, or background knowledge section below
+- NEVER invent, assume, or make up specific details like company names, product names, people's names, project names, dates, numbers, statistics, or other specifics that were NOT provided
+- If you need to reference something not mentioned, use GENERIC terms like "your company", "the product", "your team", "the project", "the client", etc.
+- If you need specific information to respond properly, ASK the user for those details instead of making them up
+- Do NOT assume you know the user's company, industry, or specific situation unless explicitly stated
+
+## WHEN YOU LACK SPECIFIC INFORMATION (CRITICAL - YOU MUST FOLLOW THIS):
+- You do NOT have background knowledge on this topic - do NOT pretend you do
+- REFUSE to state any specific facts, statistics, dates, names, or event details
+- If asked about current events, news, or factual topics, respond with phrases like:
+  * "I'm not really up to date on that"
+  * "I haven't been following that closely - what have you heard?"
+  * "I'm not sure about the specifics - can you tell me more?"
+  * "That's not something I know much about"
+- Your job is to LISTEN and help the user practice speaking, not to provide information
+- Ask follow-up questions to get the USER to share what they know
+- NEVER invent stories, statistics, dates, names, or specific claims about any topic
+- If you find yourself about to state a "fact" you're not 100% sure about, STOP and ask the user instead
+
+## Conversation Pacing
+Your pacing should be: engaged
+
+
+
+
+
+## Opening
+Use this opening scene as your starting point:
+"## Opening Scene
+
+### Your Identity
+You are Elena Rodriguez, a Customer Under Pressure pushing for more than what's possible.
+
+### Who You're Meeting
+A vendor representative needs to set boundaries with you.
+
+### Your Opening
+Greet with urgency: "Thanks for the call. I really need this expedited - we're in a bind."
+
+### Your State
+You are under pressure and need results. You may push beyond reasonable limits. Start demanding but can accept reason."
+
+Deliver this opening naturally, in your own words, setting the emotional tone for the conversation.
+- DO NOT welcome them to any platform or mention practice/learning
+
+## During Conversation
+- Respond authentically to what the user says
+- Apply resistance appropriate to the user's objective (they may be trying to influence, set boundaries, resolve issues, etc.)
+- Push back or soften based on how the user communicates
+- Stay emotionally consistent with your character's mindset
+
+## Closing
+End as your character naturally would:
+- Agree to next steps if satisfied
+- Leave tension unresolved if not convinced
+- Express conditional acceptance if partly persuaded
+- NEVER summarize learnings or give feedback
+
+index.ts:458 ================================================================================
+index.ts:459 [OpenAI Realtime] System Prompt Length: 7425 chars
+index.ts:460 ================================================================================
+EventContext.tsx:13 [Client Event] CONNECTING: Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+EventContext.tsx:13 [Client Event] CONNECTED: Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+EventContext.tsx:13 [Client Event] conversation.item.create: Object
+EventContext.tsx:13 [Client Event] (simulated user text message): Object
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+chunk-RPCDYKBN.js?v=2a38c621:521 Warning: validateDOMNesting(...): <button> cannot appear as a descendant of <button>.
+    at button
+    at div
+    at button
+    at div
+    at div
+    at Transcript (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/pages/assessment-session/assessment-roleplay-session-page.tsx:698:3)
+    at div
+    at main
+    at div
+    at ModernDashboardLayout (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/components/layout/modern-dashboard-layout.tsx:24:49)
+    at AvatarRoleplayPractice (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/pages/assessment-session/assessment-roleplay-session-page.tsx:64:20)
+    at EventProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/EventContext.tsx:20:33)
+    at TranscriptProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/TranscriptContext.tsx:20:38)
+    at AssessmentRoleplaySessionPage
+    at ProtectedRoute (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/components/auth/ProtectedRoute.tsx:21:34)
+    at RenderedRoute (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:4108:5)
+    at Routes (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:4578:5)
+    at AvatarSessionProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/ui/contexts/AvatarSessionContext.tsx:41:41)
+    at App
+    at Router (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:4521:15)
+    at BrowserRouter (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=2a38c621:5267:5)
+    at QueryClientProvider (https://ba0014f3-aa06-4f08-a0c1-e260ce6c90af-00-2zyvpc8y15rqv.sisko.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=2a38c621:3096:3)
+printWarning @ chunk-RPCDYKBN.js?v=2a38c621:521Understand this error
+useAudioDownload.ts:254 Recording started successfully
+EventContext.tsx:18 [Server Event] session.created: Object
+EventContext.tsx:18 [Server Event] session.updated: Object
+EventContext.tsx:18 [Server Event] session.updated: Object
+EventContext.tsx:18 [Server Event] session.updated: Object
+EventContext.tsx:18 [Server Event] conversation.item.created: Object
+EventContext.tsx:18 [Server Event] response.created: Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+EventContext.tsx:18 [Server Event] session.updated: Object
+EventContext.tsx:18 [Server Event] response.output_item.added: Object
+EventContext.tsx:18 [Server Event] conversation.item.created: Object
+EventContext.tsx:18 [Server Event] response.content_part.added: Object
+EventContext.tsx:18 [Server Event] output_audio_buffer.started: Object
+EventContext.tsx:18 [Server Event] response.audio.done: Object
+EventContext.tsx:18 [Server Event] response.content_part.done: Object
+EventContext.tsx:18 [Server Event] response.output_item.done: Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+EventContext.tsx:18 [Server Event] response.done: Object
+EventContext.tsx:18 [Server Event] rate_limits.updated: Object
+EventContext.tsx:18 [Server Event] output_audio_buffer.stopped: Object
+EventContext.tsx:18 [Server Event] input_audio_buffer.speech_started: Object
+EventContext.tsx:18 [Server Event] input_audio_buffer.speech_stopped: Object
+EventContext.tsx:18 [Server Event] input_audio_buffer.committed: Object
+EventContext.tsx:18 [Server Event] conversation.item.created: Object
+EventContext.tsx:18 [Server Event] response.created: Object
+EventContext.tsx:18 [Server Event] response.output_item.added: Object
+EventContext.tsx:18 [Server Event] conversation.item.created: Object
+EventContext.tsx:18 [Server Event] response.content_part.added: Object
+EventContext.tsx:18 [Server Event] output_audio_buffer.started: Object
+EventContext.tsx:18 [Server Event] conversation.item.input_audio_transcription.delta: Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+assessment-roleplay-session-page.tsx:407 avatar Data Object
+assessment-roleplay-session-page.tsx:857 Object
+EventContext.tsx:18 [Server Event] conversation.item.retrieved: Object
+EventContext.tsx:18 [Server Event] response.audio.done: {type: 'response.audio.done', event_id: 'event_CpvgZRVSBqu89L5nAcsbW', item_id: 'item_CpvgWAT4lW4bwRbomKGyN', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.content_part.done: {type: 'response.content_part.done', event_id: 'event_CpvgZl87XQqepg7NVmGRR', item_id: 'item_CpvgWAT4lW4bwRbomKGyN', content_index: 0, output_index: 0, …}
+EventContext.tsx:18 [Server Event] response.output_item.done: {type: 'response.output_item.done', event_id: 'event_CpvgZsPbfMlB9dAOCqOZc', item: {…}, output_index: 0, response_id: 'resp_CpvgWu8AkQQPmrsRYaDNS'}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Katya_Black_Suit_public', name: 'Elena', look: 'in Black Suit', ethnicity: 'Indian', gender: 'female', …}
+assessment-roleplay-session-page.tsx:857 {id: 52, duration: null, skillId: 94, name: 'Communicating Boundaries to a Customer', avatarRole: 'Customer Under Pressure', …}
+assessment-roleplay-session-page.tsx:407 avatar Data {id: 'Katya_Black_Suit_public', name: 'Elena', look: 'in Black Suit', ethnicity: 'Indian', gender: 'female', …}
+assessment-roleplay-session-page.tsx:857 {id: 52, duration: null, skillId: 94, name: 'Communicating Boundaries to a Customer', avatarRole: 'Customer Under Pressure', …}
+EventContext.tsx:18 [Server Event] response.done: {type: 'response.done', event_id: 'event_CpvgZ3mlv90lH93txJE1c', response: {…}}
+EventContext.tsx:18 [Server Event] rate_limits.updated: {type: 'rate_limits.updated', event_id: 'event_CpvgZB5xnKUsqgR1EBdrd', rate_limits: Array(1)}
+EventContext.tsx:18 [Server Event] output_audio_buffer.stopped: {type: 'output_audio_buffer.stopped', event_id: 'event_c0e2051d96794b2b', response_id: 'resp_CpvgWu8AkQQPmrsRYaDNS'}
