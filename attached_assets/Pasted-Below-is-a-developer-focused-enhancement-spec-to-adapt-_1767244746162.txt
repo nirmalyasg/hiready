@@ -1,0 +1,716 @@
+Below is a developer-focused enhancement spec to adapt the existing Avatar Practice Lab into an Interview Practice Lab MVP, reusing as much as possible from the current flow (practice selection → avatar select → pre-session → session → analysis → results) and backend endpoints/analysis pipeline. 
+
+PRODUCT_DOCUMENTATION
+
+1) What stays the same (reuse)
+UI/UX flow (mostly unchanged)
+
+Keep the same high-level journey:
+
+Browse/select practice
+
+Choose avatar
+
+Pre-session setup
+
+Live voice session
+
+Session analysis + transcript
+
+Results history 
+
+PRODUCT_DOCUMENTATION
+
+Core realtime session engine
+
+Reuse:
+
+InteractiveAvatar (voice + HeyGen streaming + transcript capture) 
+
+PRODUCT_DOCUMENTATION
+
+Session timer (6-min default) + heartbeat + queue + pre-warming 
+
+PRODUCT_DOCUMENTATION
+
+Existing backend structure (Express routes, OpenAI client, S3 storage, Drizzle schema) 
+
+PRODUCT_DOCUMENTATION
+
+Existing API patterns
+
+Reuse the same pattern for:
+
+Start session / status / heartbeat / end 
+
+PRODUCT_DOCUMENTATION
+
+Transcript save + analysis generation endpoints 
+
+PRODUCT_DOCUMENTATION
+
+2) What changes conceptually (scenarios → roles + interview kits)
+
+Today the platform is scenario-based learning (scenario cards grouped by skills). 
+
+PRODUCT_DOCUMENTATION
+
+
+For interview prep, the equivalent is:
+
+New “Practice Catalog” concept
+
+Role Kits (built-in)
+Example: “Software Engineer (Campus)”, “Data Analyst (Entry)”, “Sales Executive (Graduate)”, “Customer Support (Entry)”, “Marketing Associate (Entry)”, etc.
+
+Interview Type (mode)
+
+HR
+
+Hiring Manager
+
+Technical
+
+Panel / Mixed
+
+Context Pack (user uploads)
+
+Resume (required)
+
+JD (optional but recommended)
+
+Company notes (optional)
+
+Interview profile (type/style/seniority)
+
+Result: “Pick a Role Kit → upload context → run an interview”.
+
+3) MVP scope (what you will actually build first)
+MVP must-have
+
+Upload Resume + JD (PDF/DOCX supported, store file + extracted text)
+
+Extract structured triggers (skills, projects, tenure, gaps, keywords)
+
+Generate an Interview Plan (phases + question patterns + probing rules)
+
+Run voice interview with avatar (same session)
+
+Produce analysis: fit + depth + structure + communication + role readiness, plus actionable next steps
+
+MVP explicitly NOT included (phase-2)
+
+Full coding execution sandbox / compiling untrusted code
+
+Video-based body language scoring
+
+Multi-round interview packages across days
+
+(But we’ll design the schema so you can add these later.)
+
+4) Required product enhancements (screens + logic)
+4.1 New/modified screens
+A) Replace “Scenario selection” with “Role Kit selection”
+
+Current: /avatar/practice lists scenarios with filters/search. 
+
+PRODUCT_DOCUMENTATION
+
+
+New: same page structure, but cards are Role Kits.
+
+Role Kit card fields
+
+Role name
+
+Level (Entry/Mid)
+
+Track tags (HR / Technical / Mixed)
+
+Skills focus
+
+Estimated duration
+
+B) New “Context Upload” step (between selection and avatar select)
+
+Add a page (or modal step) before avatar selection:
+
+Upload Resume (required)
+
+Upload JD (optional)
+
+Optional: paste company link/notes
+
+Interview profile: type + style + seniority
+
+C) Profile page (optional in MVP, recommended)
+
+“My Resume” (latest upload)
+
+Extracted highlights (skills/projects/gaps)
+
+Allow “replace resume”
+
+4.2 New backend logic modules
+Module 1: Document ingestion & parsing
+
+Store raw file in S3 (or DB + S3)
+
+Extract text
+
+Run “Resume Extractor” prompt to produce structured JSON
+
+Module 2: Interview Plan Generator (the realism engine)
+
+Generate:
+
+phases (warmup, resume deep-dive, role skills, scenario/case, wrap-up)
+
+question patterns seeded from extracted triggers + JD expectations
+
+probing rules (validate claims, depth checks, consistency checks, risk-area stress)
+
+Module 3: Interview Runtime Orchestrator
+
+During session:
+
+Maintain state: current phase, questions asked, what to probe next
+
+Convert transcript turns into next interviewer question
+
+Ensure it feels like a real interviewer (not random)
+
+Module 4: Interview Evaluation & Feedback
+
+After session:
+
+Score per dimension
+
+Create: “What went well”, “What’s risky”, “Suggested better answers”, “Practice tasks”
+
+5) Database: exact schema diff (additions + changes)
+
+Your current schema includes (at least) these concepts: users, skills, scenarios, personas, tones, avatars, sessions, transcripts, analysis, HeyGen sessions/queue. 
+
+PRODUCT_DOCUMENTATION
+
+5.1 Add new tables
+role_kits
+
+Stores built-in role catalog (replaces scenarios as primary catalog item).
+
+id (pk)
+
+name (e.g., “Software Engineer - Entry”)
+
+level (enum: entry/mid/senior)
+
+domain (e.g., software, analyst, sales)
+
+description
+
+default_interview_types (jsonb array: ["technical","hr"])
+
+default_rubric_id (fk → interview_rubrics.id)
+
+created_at, updated_at
+
+interview_rubrics
+
+Defines dimensions + scoring rules per role kit / interview type.
+
+id (pk)
+
+name
+
+dimensions (jsonb)
+Example:
+
+communication_clarity
+
+structure
+
+problem_solving
+
+technical_depth
+
+role_fit
+
+confidence & composure
+
+honesty/consistency
+
+scoring_guide (jsonb) (what 1/3/5 looks like per dimension)
+
+created_at, updated_at
+
+user_documents
+
+Stores resume/JD uploads.
+
+id (pk)
+
+user_id (fk users)
+
+doc_type (enum: resume, job_description, company_notes, other)
+
+file_name
+
+mime_type
+
+s3_url (or storage key)
+
+raw_text (text) (optional; could store extracted text separately)
+
+parsed_json (jsonb) (structured extraction)
+
+source_hash (text) (dedupe/versioning)
+
+created_at, updated_at
+
+user_profile_extracted
+
+Derived “interview profile data” from the latest resume.
+
+user_id (pk, fk users)
+
+latest_resume_doc_id (fk user_documents)
+
+headline (text)
+
+work_history (jsonb)
+
+projects (jsonb)
+
+skills_claimed (jsonb)
+
+risk_flags (jsonb) (gaps, switches, short tenure, etc.)
+
+updated_at
+
+interview_configs
+
+The user’s chosen interview settings for a session.
+
+id (pk)
+
+user_id
+
+role_kit_id
+
+resume_doc_id
+
+jd_doc_id (nullable)
+
+company_notes_doc_id (nullable)
+
+interview_type (enum: hr, hiring_manager, technical, panel)
+
+style (enum: friendly, neutral, stress)
+
+seniority (enum: entry, mid, senior)
+
+created_at
+
+interview_plans
+
+Generated plan used during runtime.
+
+id (pk)
+
+interview_config_id (fk)
+
+plan_json (jsonb) (phases, question patterns, probes)
+
+version (int)
+
+created_at
+
+interview_sessions
+
+Links existing roleplay_session to interview-specific context.
+
+id (pk)
+
+roleplay_session_id (fk roleplay_session)
+
+interview_config_id (fk interview_configs)
+
+interview_plan_id (fk interview_plans)
+
+rubric_id (fk interview_rubrics)
+
+status (enum: created, running, ended, analyzed)
+
+created_at, updated_at
+
+interview_artifacts (optional but helpful)
+
+Store structured outputs and “better answers”.
+
+id
+
+interview_session_id
+
+artifact_type (enum: improved_answers, question_list, action_plan)
+
+artifact_json (jsonb)
+
+created_at
+
+5.2 Modify existing tables (minimal changes)
+scenarios
+
+Option A (cleaner): keep as-is for legacy “conversation practice”, add a new nav route for interview product.
+Option B (fastest): add a column:
+
+scenario_type enum: workplace | interview_role_kit
+…but I recommend Option A to avoid mixing semantics.
+
+roleplay_session
+
+Add:
+
+session_type enum: workplace_practice | interview_practice (default existing)
+
+context_ref_id nullable (fk → interview_sessions.id or interview_configs.id)
+
+ai_session_analysis
+
+Add:
+
+analysis_type enum: workplace | interview
+
+rubric_scores jsonb
+
+recommendations jsonb
+
+This keeps the “analysis pipeline” consistent with /api/avatar/analyze-session. 
+
+PRODUCT_DOCUMENTATION
+
+6) API changes (extend existing endpoints)
+
+Your current API set includes scenario list, session start, transcription, analysis, transcript storage, etc. 
+
+PRODUCT_DOCUMENTATION
+
+6.1 New endpoints (Interview Prep)
+Role kit catalog
+
+GET /api/interview/role-kits
+
+GET /api/interview/role-kits/:id
+
+Document upload
+
+POST /api/interview/documents/upload (multipart)
+
+GET /api/interview/documents (list user docs)
+
+GET /api/interview/documents/:id
+
+Parse & extract
+
+POST /api/interview/documents/:id/parse
+Returns structured JSON extraction + stores in user_documents.parsed_json + updates user_profile_extracted.
+
+Create interview config
+
+POST /api/interview/config
+Body: roleKitId, resumeDocId, jdDocId?, companyNotesDocId?, interviewType, style, seniority
+
+Generate interview plan
+
+POST /api/interview/config/:id/plan
+Creates interview_plans row.
+
+Start interview session (wrapper)
+
+POST /api/interview/session/start
+
+Internally calls existing /api/avatar/session/start 
+
+PRODUCT_DOCUMENTATION
+
+Creates roleplay_session + interview_sessions
+
+Analyze interview session (wrapper or reuse)
+
+Option A: reuse /api/avatar/analyze-session with analysis_type=interview 
+
+PRODUCT_DOCUMENTATION
+
+Option B: POST /api/interview/session/:id/analyze which internally calls the same analysis logic.
+
+7) Prompt pack: exact system prompts (Interviewer, Evaluator, Feedback)
+
+You asked for system prompts for:
+
+Interviewer (runtime)
+
+Evaluator (scoring)
+
+Feedback writer (actionable output)
+
+Below are MVP-ready templates. (Store these as versioned templates so you can improve without DB migrations.)
+
+7.1 INTERVIEWER system prompt (runtime)
+You are an interviewer's voice for a job interview simulation.
+
+GOAL
+Run a realistic interview for the role kit and interview type provided. Ask high-signal questions, probe depth, and adapt based on the candidate’s answers.
+
+INPUTS YOU WILL RECEIVE
+1) roleKit: role name, level, focus areas
+2) interviewProfile: interviewType (HR/HiringManager/Technical/Panel), style (Friendly/Neutral/Stress), seniority
+3) candidateProfile: extracted resume JSON (work history, projects, skills, flags)
+4) jobDescription: extracted JD JSON (responsibilities, required skills, nice-to-have, signals)
+5) interviewPlan: phases + question patterns + probes (JSON)
+6) conversationSoFar: transcript so far
+
+BEHAVIOR RULES (IMPORTANT)
+- Do NOT ask random generic questions. Use interviewPlan and resume/JD triggers.
+- Follow phases in order unless a strong reason to probe immediately.
+- Universal heuristics:
+  1) Validate claims: ask "what you did" + "how" + "impact" + "evidence"
+  2) Probe depth: if answer is shallow, ask for specifics (numbers, tradeoffs, decisions)
+  3) Consistency check: cross-check against resume; clarify contradictions
+  4) Risk areas: respectfully test gaps, jumps, big claims, short tenures
+  5) Fit check: connect to role + company context; ask how they’ll handle likely situations
+- Keep questions crisp (1 question at a time).
+- Speak like a real interviewer (no coaching, no long lectures).
+- Style control:
+  - Friendly: encouraging, warm
+  - Neutral: professional, matter-of-fact
+  - Stress: skeptical, time-pressured, interruption allowed (but not rude/abusive)
+
+OUTPUT FORMAT (STRICT JSON)
+{
+  "phase": "string",
+  "question": "string",
+  "intent": "what this question is testing",
+  "expected_signal": "what a strong answer should include",
+  "followups": ["possible followups if needed"]
+}
+
+7.2 EVALUATOR system prompt (scoring)
+You are an interview evaluator.
+
+GOAL
+Score the candidate’s interview performance using the provided rubric. Be specific and evidence-based, quoting short transcript snippets as proof.
+
+INPUTS
+- rubric: dimensions + scoring guide
+- roleKit + interviewType
+- candidateProfile + jobDescription (for fit context)
+- transcript (full)
+- sessionMeta (talk time, filler words etc if available)
+
+SCORING RULES
+- Score each dimension 1–5.
+- Every score MUST include:
+  - evidence: 1–3 short excerpts (max ~20 words each)
+  - rationale: why this score
+  - improvement: one concrete suggestion
+- Also provide:
+  - top strengths (max 5)
+  - top risks (max 5)
+  - hire recommendation: Strong Yes / Yes / Lean Yes / Lean No / No
+  - confidence level: High/Med/Low (based on transcript coverage)
+
+OUTPUT FORMAT (STRICT JSON)
+{
+  "overall": { "recommendation": "...", "confidence": "...", "summary": "..." },
+  "dimension_scores": [
+    {
+      "dimension": "string",
+      "score": 1,
+      "evidence": ["...", "..."],
+      "rationale": "...",
+      "improvement": "..."
+    }
+  ],
+  "strengths": ["...", "..."],
+  "risks": ["...", "..."],
+  "role_fit_notes": ["...", "..."]
+}
+
+7.3 FEEDBACK WRITER system prompt (user-facing output)
+You are a career coach writing actionable feedback after an interview practice.
+
+GOAL
+Turn the evaluator JSON into a practical improvement plan.
+
+RULES
+- Keep it structured and specific.
+- Provide:
+  1) 3 key wins
+  2) 3 key improvements
+  3) rewrite 2 answers (better versions) using the candidate’s context
+  4) 7-day practice plan (10–15 min/day)
+- Do not shame. Be direct and helpful.
+- Avoid buzzwords.
+
+OUTPUT FORMAT (STRICT JSON)
+{
+  "wins": ["...", "...", "..."],
+  "improvements": ["...", "...", "..."],
+  "better_answers": [
+    { "question": "...", "better_answer": "..." },
+    { "question": "...", "better_answer": "..." }
+  ],
+  "practice_plan_7_days": [
+    { "day": 1, "task": "...", "time_minutes": 15 },
+    ...
+  ]
+}
+
+8) Interview frameworks & analysis structures (what replaces “skills/scenario analysis”)
+
+Your current analysis includes communication metrics + strengths/growth areas. 
+
+PRODUCT_DOCUMENTATION
+
+
+For interview prep, add interview-specific scoring on top of the same speech metrics.
+
+8.1 Default rubric (works across roles)
+
+Use these 8 dimensions for MVP (store in interview_rubrics.dimensions):
+
+Clarity & structure
+
+Depth (specifics, evidence)
+
+Problem solving approach (even for non-technical roles)
+
+Role fit (matching JD priorities)
+
+Confidence & composure
+
+Communication hygiene (filler, pace, rambling)
+
+Ownership & impact (what YOU did)
+
+Consistency & honesty (no contradictions)
+
+8.2 Role-specific overlays
+
+Each role_kit can override / weight a few dimensions:
+
+Software: technical depth + debugging + tradeoffs
+
+Sales: objection handling + persuasion + listening
+
+Analyst: structured thinking + data reasoning
+(Implement later; MVP can keep equal weighting.)
+
+9) “Tasks like coding” — how to do it in MVP without a full judge
+
+You asked: “what about tasks like coding where interviewer gives a task?”
+
+MVP approach (safe + fast)
+
+Do not execute code.
+Instead:
+
+Interviewer gives a small task (“write function / explain approach / dry run”)
+
+Candidate either:
+
+explains verbally, or
+
+types in a code editor
+
+Evaluator checks:
+
+correctness by reasoning, test cases mentally
+
+complexity discussion
+
+edge cases
+This is surprisingly effective for campus interviews.
+
+DB add (optional for MVP, good for phase-1.5)
+
+interview_task_submissions
+
+id
+
+interview_session_id
+
+task_type (coding/system_design/case)
+
+prompt
+
+candidate_response_text
+
+candidate_code (text)
+
+evaluator_notes (jsonb)
+
+created_at
+
+UI add
+
+A side panel code editor shown only when interviewer triggers a task_type=coding.
+
+10) Implementation plan (engineering checklist)
+Step 1 — Catalog
+
+Add role_kits table + seed 10–20 role kits
+
+Build UI list page using existing scenario list layout
+
+Step 2 — Uploads & extraction
+
+Add user_documents, user_profile_extracted
+
+Implement upload endpoint + parse endpoint
+
+Store parsed JSON
+
+Step 3 — Plan generation
+
+Add interview_configs, interview_plans
+
+Implement “create config → generate plan”
+
+Step 4 — Session wrapper
+
+Add interview_sessions
+
+Implement /api/interview/session/start that:
+
+creates interview_session rows
+
+calls existing /api/avatar/session/start 
+
+PRODUCT_DOCUMENTATION
+
+Step 5 — Analysis
+
+Extend analysis pipeline to handle analysis_type=interview
+
+Store rubric scores in ai_session_analysis (or new table)
+
+Step 6 — Results UI
+
+Update analysis page to show:
+
+overall recommendation + dimension scores
+
+rewritten answers
+
+7-day plan
+
+11) Notes on keeping the current system stable
+
+Keep current “workplace scenario practice” intact (existing customers).
+
+Add a top-level switch in UI: Practice Conversations vs Practice Interviews
+
+Keep HeyGen queue/timer as-is (no changes needed). 
+
+PRODUCT_DOCUMENTATION
