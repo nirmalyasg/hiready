@@ -71,6 +71,16 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { generateUniqueId } from "@/components/InteractiveAvatar";
 import { useToast } from "@/hooks/use-toast";
 import { useRealtimePrewarm } from "@/contexts/RealtimeSessionPrewarmContext";
+import {
+  buildFullInterviewPrompt,
+  buildRoleBasedInterviewPrompt,
+  getInterviewerPersona,
+  INTERVIEWER_CORE_SYSTEM,
+  type RoleKit,
+  type InterviewConfig,
+  type InterviewPlan,
+  type InterviewMode,
+} from "@/lib/interview-prompts";
 
 function AssessmentRoleplaySessionPage() {
   return (
@@ -93,17 +103,23 @@ interface InterviewSessionData {
     name: string;
     level: string;
     domain: string;
-    coreCompetencies: string[];
-    typicalQuestions: string[];
+    description?: string;
+    roleContext?: string;
+    coreCompetencies?: string[];
+    typicalQuestions?: string[];
+    skillsFocus?: string[];
+    defaultInterviewTypes?: string[];
+    estimatedDuration?: number;
   };
   config?: {
+    id?: number;
     interviewType: string;
     style: string;
     seniority: string;
   };
   plan?: {
-    phases: { name: string; duration: number; objectives: string[]; questionPatterns: string[] }[];
-    focusAreas: string[];
+    phases?: { name: string; duration: number; objectives?: string[]; questionPatterns?: string[] }[];
+    focusAreas?: string[];
   };
 }
 
@@ -251,13 +267,8 @@ const AvatarRoleplayPractice = () => {
   }, [isInterviewMode, interviewSessionId, interviewSession]);
   
   const getInterviewerRole = (type?: string): string => {
-    const roles: Record<string, string> = {
-      hr: "HR Recruiter",
-      hiring_manager: "Hiring Manager",
-      technical: "Technical Interviewer",
-      panel: "Interview Panel Lead",
-    };
-    return roles[type || "hr"] || "Interviewer";
+    const persona = getInterviewerPersona(type as InterviewConfig["interviewType"]);
+    return persona.title;
   };
   
   const buildInterviewContext = (session: InterviewSessionData): string => {
@@ -265,61 +276,91 @@ const AvatarRoleplayPractice = () => {
     const config = session.config;
     const plan = session.plan;
     
-    let context = `You are conducting a ${config?.interviewType || "job"} interview for a ${roleKit?.name || "position"} role.\n\n`;
-    
-    if (roleKit) {
-      context += `Role Details:\n`;
-      context += `- Position: ${roleKit.name}\n`;
-      context += `- Level: ${roleKit.level}\n`;
-      context += `- Domain: ${roleKit.domain}\n`;
-      if (roleKit.coreCompetencies?.length) {
-        context += `- Key Competencies: ${roleKit.coreCompetencies.join(", ")}\n`;
-      }
+    if (!roleKit || !config) {
+      return `You are conducting a job interview. Be professional and thorough.`;
     }
     
-    if (plan?.focusAreas?.length) {
-      context += `\nFocus Areas:\n${plan.focusAreas.map(a => `- ${a}`).join("\n")}\n`;
-    }
+    const mappedRoleKit: RoleKit = {
+      id: roleKit.id || 0,
+      name: roleKit.name || "Position",
+      level: (roleKit.level as "entry" | "mid" | "senior") || "entry",
+      domain: roleKit.domain || "general",
+      roleContext: roleKit.roleContext || roleKit.description || "",
+      skillsFocus: roleKit.skillsFocus || [],
+      coreCompetencies: roleKit.coreCompetencies || [],
+      typicalQuestions: roleKit.typicalQuestions || [],
+      defaultInterviewTypes: roleKit.defaultInterviewTypes || ["hr"],
+      estimatedDuration: roleKit.estimatedDuration || 360,
+    };
     
-    return context;
+    const mappedConfig: InterviewConfig = {
+      id: config.id || 0,
+      interviewType: (config.interviewType as "hr" | "hiring_manager" | "technical" | "panel") || "hr",
+      style: (config.style as "friendly" | "neutral" | "stress") || "neutral",
+      seniority: (config.seniority as "entry" | "mid" | "senior") || "entry",
+    };
+    
+    const mappedPlan: InterviewPlan = {
+      phases: plan?.phases?.map(p => ({
+        name: p.name,
+        duration: p.duration,
+        objectives: p.objectives || [],
+        questionPatterns: p.questionPatterns || [],
+      })) || [],
+      focusAreas: plan?.focusAreas || [],
+    };
+    
+    try {
+      return buildRoleBasedInterviewPrompt({
+        roleKit: mappedRoleKit,
+        config: mappedConfig,
+        plan: mappedPlan,
+      });
+    } catch (err) {
+      console.error("[Interview] Error building prompt:", err);
+      return `You are conducting a ${config.interviewType || "job"} interview for a ${roleKit.name || "position"} role. Be professional and thorough.`;
+    }
   };
   
   const buildInterviewInstructions = (session: InterviewSessionData): string => {
     const config = session.config;
-    const plan = session.plan;
     const roleKit = session.roleKit;
+    const plan = session.plan;
     
-    let instructions = `Conduct a professional ${config?.interviewType || ""} interview.\n\n`;
+    const persona = getInterviewerPersona((config?.interviewType as InterviewConfig["interviewType"]) || "hr");
     
-    const styleGuide: Record<string, string> = {
-      friendly: "Be warm and encouraging. Put the candidate at ease while still evaluating their capabilities.",
-      neutral: "Be professional and balanced. Ask probing follow-up questions to assess depth of knowledge.",
-      stress: "Be challenging and push back on answers. Test how the candidate handles pressure.",
-    };
-    
-    instructions += `Interview Style: ${styleGuide[config?.style || "neutral"] || styleGuide.neutral}\n\n`;
+    let instructions = `You are playing: ${persona.title}\n`;
+    instructions += `Opening Style: ${persona.openingStyle}\n`;
+    instructions += `Focus Areas: ${persona.focus}\n\n`;
     
     if (roleKit?.typicalQuestions?.length) {
-      instructions += `Sample Questions to Draw From:\n`;
-      roleKit.typicalQuestions.slice(0, 5).forEach((q, i) => {
+      instructions += `SAMPLE QUESTIONS TO DRAW FROM:\n`;
+      roleKit.typicalQuestions.slice(0, 7).forEach((q, i) => {
         instructions += `${i + 1}. ${q}\n`;
       });
       instructions += "\n";
     }
     
     if (plan?.phases?.length) {
-      instructions += `Interview Structure:\n`;
+      instructions += `INTERVIEW STRUCTURE:\n`;
       plan.phases.forEach((phase, i) => {
-        instructions += `${i + 1}. ${phase.name} (${phase.duration} min): ${phase.objectives.join("; ")}\n`;
+        const objectives = phase.objectives?.join("; ") || "General assessment";
+        instructions += `${i + 1}. ${phase.name} (${phase.duration} min): ${objectives}\n`;
       });
+      instructions += "\n";
     }
     
-    instructions += `\nGuidelines:\n`;
-    instructions += `- Start with a warm greeting and brief introduction\n`;
-    instructions += `- Ask behavioral questions (STAR format)\n`;
-    instructions += `- Probe for specific examples and quantifiable results\n`;
-    instructions += `- Allow candidate to ask questions at the end\n`;
-    instructions += `- Stay in character as the interviewer throughout\n`;
+    instructions += `PROBE AREAS:\n`;
+    persona.probeAreas.forEach(area => {
+      instructions += `- ${area}\n`;
+    });
+    
+    instructions += `\nCRITICAL RULES:\n`;
+    instructions += `- Ask only ONE question at a time\n`;
+    instructions += `- Probe for specifics when answers are vague (numbers, decisions, personal contribution)\n`;
+    instructions += `- Do NOT provide hints, coaching, or feedback during the interview\n`;
+    instructions += `- Stay in character as ${persona.title} throughout\n`;
+    instructions += `- Start with a warm greeting appropriate to ${persona.openingStyle} style\n`;
     
     return instructions;
   };
