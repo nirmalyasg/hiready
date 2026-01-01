@@ -616,6 +616,348 @@ export const customScenarioSkillMappingsRelations = relations(customScenarioSkil
 }));
 
 // =====================
+// Interview Practice Lab Tables
+// =====================
+
+// Role Kits - Pre-built interview role catalog (replaces scenarios for interview mode)
+export const roleKits = pgTable("role_kits", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  level: text("level")
+    .$type<"entry" | "mid" | "senior">()
+    .notNull()
+    .default("entry"),
+  domain: varchar("domain").notNull(),
+  description: text("description"),
+  defaultInterviewTypes: jsonb("default_interview_types").$type<string[]>().default(["hr", "technical"]),
+  defaultRubricId: integer("default_rubric_id"),
+  skillsFocus: jsonb("skills_focus").$type<string[]>(),
+  estimatedDuration: integer("estimated_duration").default(360),
+  trackTags: jsonb("track_tags").$type<string[]>(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Interview Rubrics - Defines dimensions and scoring rules
+export const interviewRubrics = pgTable("interview_rubrics", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  dimensions: jsonb("dimensions").$type<{
+    name: string;
+    description: string;
+    weight: number;
+  }[]>().notNull(),
+  scoringGuide: jsonb("scoring_guide").$type<{
+    dimension: string;
+    scores: {
+      score: number;
+      description: string;
+    }[];
+  }[]>().notNull(),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// User Documents - Resume/JD uploads
+export const userDocuments = pgTable("user_documents", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => authUsers.id, { onDelete: "cascade" }),
+  docType: text("doc_type")
+    .$type<"resume" | "job_description" | "company_notes" | "other">()
+    .notNull(),
+  fileName: varchar("file_name").notNull(),
+  mimeType: varchar("mime_type"),
+  s3Url: text("s3_url"),
+  rawText: text("raw_text"),
+  parsedJson: jsonb("parsed_json").$type<{
+    headline?: string;
+    workHistory?: {
+      company: string;
+      role: string;
+      duration: string;
+      highlights: string[];
+    }[];
+    projects?: {
+      name: string;
+      description: string;
+      technologies: string[];
+      impact: string;
+    }[];
+    skills?: string[];
+    education?: {
+      institution: string;
+      degree: string;
+      year: string;
+    }[];
+    certifications?: string[];
+    riskFlags?: {
+      type: string;
+      description: string;
+      severity: "low" | "medium" | "high";
+    }[];
+  }>(),
+  sourceHash: varchar("source_hash"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// User Profile Extracted - Derived interview profile from latest resume
+export const userProfileExtracted = pgTable("user_profile_extracted", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id")
+    .notNull()
+    .unique()
+    .references(() => authUsers.id, { onDelete: "cascade" }),
+  latestResumeDocId: integer("latest_resume_doc_id")
+    .references(() => userDocuments.id, { onDelete: "set null" }),
+  headline: text("headline"),
+  workHistory: jsonb("work_history").$type<{
+    company: string;
+    role: string;
+    duration: string;
+    highlights: string[];
+  }[]>(),
+  projects: jsonb("projects").$type<{
+    name: string;
+    description: string;
+    technologies: string[];
+    impact: string;
+  }[]>(),
+  skillsClaimed: jsonb("skills_claimed").$type<string[]>(),
+  riskFlags: jsonb("risk_flags").$type<{
+    type: string;
+    description: string;
+    severity: "low" | "medium" | "high";
+  }[]>(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Interview Configs - User's chosen interview settings for a session
+export const interviewConfigs = pgTable("interview_configs", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => authUsers.id, { onDelete: "cascade" }),
+  roleKitId: integer("role_kit_id")
+    .references(() => roleKits.id, { onDelete: "set null" }),
+  resumeDocId: integer("resume_doc_id")
+    .references(() => userDocuments.id, { onDelete: "set null" }),
+  jdDocId: integer("jd_doc_id")
+    .references(() => userDocuments.id, { onDelete: "set null" }),
+  companyNotesDocId: integer("company_notes_doc_id")
+    .references(() => userDocuments.id, { onDelete: "set null" }),
+  interviewType: text("interview_type")
+    .$type<"hr" | "hiring_manager" | "technical" | "panel">()
+    .notNull()
+    .default("hr"),
+  style: text("style")
+    .$type<"friendly" | "neutral" | "stress">()
+    .notNull()
+    .default("neutral"),
+  seniority: text("seniority")
+    .$type<"entry" | "mid" | "senior">()
+    .notNull()
+    .default("entry"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Interview Plans - AI-generated plan used during runtime
+export const interviewPlans = pgTable("interview_plans", {
+  id: serial("id").primaryKey(),
+  interviewConfigId: integer("interview_config_id")
+    .notNull()
+    .references(() => interviewConfigs.id, { onDelete: "cascade" }),
+  planJson: jsonb("plan_json").$type<{
+    phases: {
+      name: string;
+      duration: number;
+      objectives: string[];
+      questionPatterns: string[];
+    }[];
+    triggers: {
+      type: string;
+      source: string;
+      probeRules: string[];
+    }[];
+    focusAreas: string[];
+  }>().notNull(),
+  version: integer("version").default(1),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Interview Sessions - Links roleplay_session to interview-specific context
+export const interviewSessions = pgTable("interview_sessions", {
+  id: serial("id").primaryKey(),
+  roleplaySessionId: integer("roleplay_session_id")
+    .references(() => roleplaySession.id, { onDelete: "cascade" }),
+  interviewConfigId: integer("interview_config_id")
+    .notNull()
+    .references(() => interviewConfigs.id, { onDelete: "cascade" }),
+  interviewPlanId: integer("interview_plan_id")
+    .references(() => interviewPlans.id, { onDelete: "set null" }),
+  rubricId: integer("rubric_id")
+    .references(() => interviewRubrics.id, { onDelete: "set null" }),
+  status: text("status")
+    .$type<"created" | "running" | "ended" | "analyzed">()
+    .notNull()
+    .default("created"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Interview Analysis - Extended analysis for interview sessions
+export const interviewAnalysis = pgTable("interview_analysis", {
+  id: serial("id").primaryKey(),
+  interviewSessionId: integer("interview_session_id")
+    .notNull()
+    .references(() => interviewSessions.id, { onDelete: "cascade" }),
+  transcriptId: varchar("transcript_id")
+    .references(() => transcripts.id, { onDelete: "set null" }),
+  overallRecommendation: text("overall_recommendation")
+    .$type<"strong_yes" | "yes" | "lean_yes" | "lean_no" | "no">(),
+  confidenceLevel: text("confidence_level")
+    .$type<"high" | "medium" | "low">(),
+  summary: text("summary"),
+  dimensionScores: jsonb("dimension_scores").$type<{
+    dimension: string;
+    score: number;
+    evidence: string[];
+    rationale: string;
+    improvement: string;
+  }[]>(),
+  strengths: jsonb("strengths").$type<string[]>(),
+  risks: jsonb("risks").$type<string[]>(),
+  roleFitNotes: jsonb("role_fit_notes").$type<string[]>(),
+  betterAnswers: jsonb("better_answers").$type<{
+    question: string;
+    betterAnswer: string;
+  }[]>(),
+  practicePlan: jsonb("practice_plan").$type<{
+    day: number;
+    task: string;
+    timeMinutes: number;
+  }[]>(),
+  wins: jsonb("wins").$type<string[]>(),
+  improvements: jsonb("improvements").$type<string[]>(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Interview Artifacts - Store structured outputs
+export const interviewArtifacts = pgTable("interview_artifacts", {
+  id: serial("id").primaryKey(),
+  interviewSessionId: integer("interview_session_id")
+    .notNull()
+    .references(() => interviewSessions.id, { onDelete: "cascade" }),
+  artifactType: text("artifact_type")
+    .$type<"improved_answers" | "question_list" | "action_plan" | "transcript_highlights">()
+    .notNull(),
+  artifactJson: jsonb("artifact_json").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Interview Practice Lab Relations
+export const roleKitsRelations = relations(roleKits, ({ one }) => ({
+  defaultRubric: one(interviewRubrics, {
+    fields: [roleKits.defaultRubricId],
+    references: [interviewRubrics.id],
+  }),
+}));
+
+export const userDocumentsRelations = relations(userDocuments, ({ one }) => ({
+  user: one(authUsers, {
+    fields: [userDocuments.userId],
+    references: [authUsers.id],
+  }),
+}));
+
+export const userProfileExtractedRelations = relations(userProfileExtracted, ({ one }) => ({
+  user: one(authUsers, {
+    fields: [userProfileExtracted.userId],
+    references: [authUsers.id],
+  }),
+  latestResumeDoc: one(userDocuments, {
+    fields: [userProfileExtracted.latestResumeDocId],
+    references: [userDocuments.id],
+  }),
+}));
+
+export const interviewConfigsRelations = relations(interviewConfigs, ({ one, many }) => ({
+  user: one(authUsers, {
+    fields: [interviewConfigs.userId],
+    references: [authUsers.id],
+  }),
+  roleKit: one(roleKits, {
+    fields: [interviewConfigs.roleKitId],
+    references: [roleKits.id],
+  }),
+  resumeDoc: one(userDocuments, {
+    fields: [interviewConfigs.resumeDocId],
+    references: [userDocuments.id],
+  }),
+  jdDoc: one(userDocuments, {
+    fields: [interviewConfigs.jdDocId],
+    references: [userDocuments.id],
+  }),
+  companyNotesDoc: one(userDocuments, {
+    fields: [interviewConfigs.companyNotesDocId],
+    references: [userDocuments.id],
+  }),
+  plans: many(interviewPlans),
+  sessions: many(interviewSessions),
+}));
+
+export const interviewPlansRelations = relations(interviewPlans, ({ one }) => ({
+  config: one(interviewConfigs, {
+    fields: [interviewPlans.interviewConfigId],
+    references: [interviewConfigs.id],
+  }),
+}));
+
+export const interviewSessionsRelations = relations(interviewSessions, ({ one, many }) => ({
+  roleplaySession: one(roleplaySession, {
+    fields: [interviewSessions.roleplaySessionId],
+    references: [roleplaySession.id],
+  }),
+  config: one(interviewConfigs, {
+    fields: [interviewSessions.interviewConfigId],
+    references: [interviewConfigs.id],
+  }),
+  plan: one(interviewPlans, {
+    fields: [interviewSessions.interviewPlanId],
+    references: [interviewPlans.id],
+  }),
+  rubric: one(interviewRubrics, {
+    fields: [interviewSessions.rubricId],
+    references: [interviewRubrics.id],
+  }),
+  analysis: many(interviewAnalysis),
+  artifacts: many(interviewArtifacts),
+}));
+
+export const interviewAnalysisRelations = relations(interviewAnalysis, ({ one }) => ({
+  session: one(interviewSessions, {
+    fields: [interviewAnalysis.interviewSessionId],
+    references: [interviewSessions.id],
+  }),
+  transcript: one(transcripts, {
+    fields: [interviewAnalysis.transcriptId],
+    references: [transcripts.id],
+  }),
+}));
+
+export const interviewArtifactsRelations = relations(interviewArtifacts, ({ one }) => ({
+  session: one(interviewSessions, {
+    fields: [interviewArtifacts.interviewSessionId],
+    references: [interviewSessions.id],
+  }),
+}));
+
+// =====================
 // Admin Tables
 // =====================
 
@@ -857,6 +1199,17 @@ export const insertPresentationScenarioSchema = createInsertSchema(presentationS
 export const insertPresentationSessionSchema = createInsertSchema(presentationSessions).omit({ id: true, createdAt: true });
 export const insertPresentationFeedbackSchema = createInsertSchema(presentationFeedback).omit({ id: true, createdAt: true });
 
+// Interview Practice Lab Insert Schemas
+export const insertRoleKitSchema = createInsertSchema(roleKits).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertInterviewRubricSchema = createInsertSchema(interviewRubrics).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertUserDocumentSchema = createInsertSchema(userDocuments).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertUserProfileExtractedSchema = createInsertSchema(userProfileExtracted).omit({ id: true });
+export const insertInterviewConfigSchema = createInsertSchema(interviewConfigs).omit({ id: true, createdAt: true });
+export const insertInterviewPlanSchema = createInsertSchema(interviewPlans).omit({ id: true, createdAt: true });
+export const insertInterviewSessionSchema = createInsertSchema(interviewSessions).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertInterviewAnalysisSchema = createInsertSchema(interviewAnalysis).omit({ id: true, createdAt: true });
+export const insertInterviewArtifactSchema = createInsertSchema(interviewArtifacts).omit({ id: true, createdAt: true });
+
 // Admin Insert Schemas
 export const insertUserRoleSchema = createInsertSchema(userRoles).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertUserLoginEventSchema = createInsertSchema(userLoginEvents).omit({ id: true });
@@ -907,6 +1260,26 @@ export type PresentationScenario = typeof presentationScenarios.$inferSelect;
 export type InsertPresentationScenario = z.infer<typeof insertPresentationScenarioSchema>;
 export type PresentationFeedbackType = typeof presentationFeedback.$inferSelect;
 export type InsertPresentationFeedback = z.infer<typeof insertPresentationFeedbackSchema>;
+
+// Interview Practice Lab Types
+export type RoleKit = typeof roleKits.$inferSelect;
+export type InsertRoleKit = z.infer<typeof insertRoleKitSchema>;
+export type InterviewRubric = typeof interviewRubrics.$inferSelect;
+export type InsertInterviewRubric = z.infer<typeof insertInterviewRubricSchema>;
+export type UserDocument = typeof userDocuments.$inferSelect;
+export type InsertUserDocument = z.infer<typeof insertUserDocumentSchema>;
+export type UserProfileExtracted = typeof userProfileExtracted.$inferSelect;
+export type InsertUserProfileExtracted = z.infer<typeof insertUserProfileExtractedSchema>;
+export type InterviewConfig = typeof interviewConfigs.$inferSelect;
+export type InsertInterviewConfig = z.infer<typeof insertInterviewConfigSchema>;
+export type InterviewPlan = typeof interviewPlans.$inferSelect;
+export type InsertInterviewPlan = z.infer<typeof insertInterviewPlanSchema>;
+export type InterviewSession = typeof interviewSessions.$inferSelect;
+export type InsertInterviewSession = z.infer<typeof insertInterviewSessionSchema>;
+export type InterviewAnalysisType = typeof interviewAnalysis.$inferSelect;
+export type InsertInterviewAnalysis = z.infer<typeof insertInterviewAnalysisSchema>;
+export type InterviewArtifact = typeof interviewArtifacts.$inferSelect;
+export type InsertInterviewArtifact = z.infer<typeof insertInterviewArtifactSchema>;
 
 // Admin Types
 export type UserRole = typeof userRoles.$inferSelect;

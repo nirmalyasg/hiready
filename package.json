@@ -34,6 +34,7 @@
     "franc-min": "^6.2.0",
     "gender-detection-from-name": "^1.11.4",
     "jszip": "^3.10.1",
+    "mammoth": "^1.11.0",
     "marked": "^17.0.1",
     "md-to-pdf": "^5.2.5",
     "memoizee": "^0.4.17",

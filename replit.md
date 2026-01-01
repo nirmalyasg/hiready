@@ -33,6 +33,9 @@ Preferred communication style: Simple, everyday language.
 - **Impromptu Speaking**: Auto-categorization of topics, category-specific avatar conversation styles, and real-time fact enrichment using Tavily Search with anti-hallucination guardrails.
 - **Presentation Practice**: Skill-based assessment and document analysis for uploaded presentations, providing structure, clarity, and visual design feedback. Includes language selection (15 languages) with strict enforcement—avatars speak only in the chosen language and politely redirect users if they switch.
 - **Session Management**: Queue system for HeyGen, session timer with heartbeat monitoring, and pre-warming for reduced latency.
+- **Interview Practice Lab**: Realistic job interview practice with AI avatars. Users upload resume and job description, select from 15 pre-built role kits (Software Engineer, Data Analyst, Product Manager, UX Designer, Sales, Marketing, Operations, Consulting, Finance, HR, Recruiting, Engineering Management), and receive personalized interview plans. Post-session analysis includes 8-dimension rubric scoring (Clarity & Structure, Depth & Evidence, Problem Solving, Role Fit, Confidence & Composure, Communication Hygiene, Ownership & Impact, Consistency & Honesty), actionable feedback, improved answer examples, and a 7-day practice plan.
+  - **Interview API Routes**: Located in `api/routes/interview.ts` with endpoints for role kits, document upload/parsing, interview config, plan generation, session management, and analysis.
+  - **Interview Frontend Pages**: Role selection (`/interview`), context upload (`/interview/context`), pre-session plan preview (`/interview/pre-session`), and results analysis (`/interview/results`).
 - **Voice Connection Optimization**: `RealtimeSessionPrewarmContext` pre-warms OpenAI Realtime tokens and Tavily research during avatar selection, reducing connection latency by front-loading API calls before user clicks "Start". Performance instrumentation logs token fetch, research fetch, agent preparation, and WebRTC connection timings.
 - **Anti-Hallucination & Language Enforcement**: Avatars use only provided information, ask for clarification when details are missing, and strictly maintain the chosen language.
 
@@ -70,11 +73,13 @@ Located in `database/migrations/`:
 - 005_custom_scenario_roles.sql - Custom scenario roles
 - 006_presentation_scenarios.sql - Presentation practice tables
 - 007_admin_analytics_tables.sql - Admin console, analytics, and budget tracking tables
+- 008_interview_practice_lab.sql - Interview Practice Lab tables (role_kits, interview_rubrics, user_documents, user_profile_extracted, interview_configs, interview_plans, interview_sessions, interview_analysis, interview_artifacts)
 
 ### Seed Files
 Located in `database/seeds/`:
 - init.sql - Core data (users, skills, scenarios, avatars, admin settings, budget guards)
 - cultural_presets.sql - Cultural communication presets
+- interview_practice.sql - Interview Practice Lab data (15 role kits, 8-dimension rubric)
 
 ### Admin Console Access
 - Username: `admin`

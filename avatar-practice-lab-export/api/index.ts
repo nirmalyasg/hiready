@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { avatarSimulator } from "./routes/avatar-simulator.js";
 import { adminRouter } from "./routes/admin.js";
+import { interviewRouter } from "./routes/interview.js";
 import { setupAuth } from "./replitAuth.js";
 import dotenv from "dotenv";
 
@@ -42,6 +43,18 @@ async function startServer() {
 
   // Mount admin routes
   app.use("/api/admin", adminRouter);
+
+  // Middleware to populate req.user from session for interview routes
+  app.use("/api/interview", (req, res, next) => {
+    const sessionUser = (req.session as any)?.user;
+    if (sessionUser) {
+      req.user = sessionUser;
+    }
+    next();
+  });
+
+  // Mount interview practice routes
+  app.use("/api/interview", interviewRouter);
 
   // Health check
   app.get("/health", (req, res) => {

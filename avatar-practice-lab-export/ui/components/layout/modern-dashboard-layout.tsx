@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Target, BarChart3, User, LogOut, LogIn, Menu, X } from 'lucide-react';
+import { Home, Target, BarChart3, User, LogOut, LogIn, Menu, X, Briefcase } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import a3cendLogo from '@/assets/a3cend-logo.png';
@@ -17,6 +17,7 @@ export default function ModernDashboardLayout({ children }: ModernDashboardLayou
   const navItems = [
     { href: '/avatar/dashboard', label: 'Dashboard', icon: Home },
     { href: '/avatar/start', label: 'Practice', icon: Target },
+    { href: '/interview', label: 'Interview Prep', icon: Briefcase },
     { href: '/avatar/results', label: 'Results', icon: BarChart3 },
   ];
 
