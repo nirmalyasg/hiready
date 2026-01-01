@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, ChevronRight, Briefcase, GraduationCap, Code, LineChart, Users, Megaphone, Clock, ArrowRight, Building2 } from "lucide-react";
+import { Search, ChevronRight, Briefcase, GraduationCap, Code, LineChart, Users, Megaphone, Clock, ArrowRight, Building2, Upload, FileText } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -121,7 +121,7 @@ export default function InterviewPracticePage() {
   const domains = [...new Set(roleKits.map((kit) => kit.domain))];
 
   const handleSelectRole = (kit: RoleKit) => {
-    navigate(`/interview/context?roleKitId=${kit.id}`);
+    navigate(`/interview/config?roleKitId=${kit.id}`);
   };
 
   return (
@@ -154,7 +154,7 @@ export default function InterviewPracticePage() {
                     Choose Your Target Role
                   </h1>
                   <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                    Select a role to practice for. We'll customize your interview based on industry standards, then help you prepare with your resume and job description.
+                    Select a role to practice standard interview questions. Pick a role and start practicing right away!
                   </p>
                 </div>
 
@@ -175,6 +175,32 @@ export default function InterviewPracticePage() {
           </div>
 
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-6xl">
+            <Link
+              to="/interview/custom"
+              className="block mb-6 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl hover:border-emerald-300 hover:shadow-md transition-all group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                      Have a specific job in mind?
+                    </h3>
+                    <p className="text-sm text-slate-600">
+                      Upload your resume and job description for a personalized interview experience
+                    </p>
+                  </div>
+                </div>
+                <div className="hidden sm:flex items-center gap-2 text-emerald-600 font-medium">
+                  <Upload className="w-4 h-4" />
+                  <span>Custom Interview</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </Link>
+
             <div className="mb-5 flex flex-wrap gap-2">
               <Button
                 variant={selectedDomain === null ? "default" : "outline"}
@@ -300,7 +326,7 @@ export default function InterviewPracticePage() {
                               <span>{Math.round((kit.estimatedDuration || 360) / 60)} min</span>
                             </div>
                             <span className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 group-hover:gap-2 transition-all">
-                              Select Role
+                              Start Practice
                               <ArrowRight className="w-4 h-4" />
                             </span>
                           </div>
