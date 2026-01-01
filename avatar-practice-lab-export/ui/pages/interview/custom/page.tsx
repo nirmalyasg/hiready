@@ -1,21 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { ChevronRight, Upload, FileText, X, Check, AlertCircle, Loader2, Briefcase, Settings } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
 import MobileBottomNav from "@/components/layout/mobile-bottom-nav";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-
-interface RoleKit {
-  id: number;
-  name: string;
-  level: string;
-  domain: string;
-  description: string | null;
-  skillsFocus: string[] | null;
-}
 
 interface UploadedDoc {
   id: number;
@@ -25,13 +15,9 @@ interface UploadedDoc {
   parsed?: boolean;
 }
 
-export default function InterviewContextPage() {
-  const [searchParams] = useSearchParams();
-  const roleKitId = searchParams.get("roleKitId");
+export default function InterviewCustomPage() {
   const navigate = useNavigate();
 
-  const [roleKit, setRoleKit] = useState<RoleKit | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [resumeDoc, setResumeDoc] = useState<UploadedDoc | null>(null);
   const [jdDoc, setJdDoc] = useState<UploadedDoc | null>(null);
   const [uploading, setUploading] = useState<{ resume: boolean; jd: boolean }>({ resume: false, jd: false });
@@ -44,26 +30,6 @@ export default function InterviewContextPage() {
   const resumeInputRef = useRef<HTMLInputElement>(null);
   const jdInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const fetchRoleKit = async () => {
-      if (!roleKitId) {
-        setIsLoading(false);
-        return;
-      }
-      try {
-        const response = await fetch(`/api/interview/role-kits/${roleKitId}`);
-        const data = await response.json();
-        if (data.success) {
-          setRoleKit(data.roleKit);
-        }
-      } catch (error) {
-        console.error("Error fetching role kit:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchRoleKit();
-  }, [roleKitId]);
 
   const handleFileUpload = async (file: File, docType: "resume" | "job_description") => {
     const uploadKey = docType === "resume" ? "resume" : "jd";
@@ -138,12 +104,13 @@ export default function InterviewContextPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          roleKitId: roleKitId ? parseInt(roleKitId) : null,
+          roleKitId: null,
           resumeDocId: resumeDoc.id,
           jdDocId: jdDoc?.id || null,
           interviewType,
           style,
-          seniority: roleKit?.level || "entry",
+          seniority: "entry",
+          mode: "custom",
         }),
       });
 
@@ -165,16 +132,6 @@ export default function InterviewContextPage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <ModernDashboardLayout>
-        <div className="flex justify-center items-center h-screen">
-          <LoadingSpinner />
-        </div>
-      </ModernDashboardLayout>
-    );
-  }
-
   return (
     <ModernDashboardLayout>
       <div className="min-h-screen bg-gradient-to-b from-slate-50/80 to-white pb-24 sm:pb-8">
@@ -182,27 +139,23 @@ export default function InterviewContextPage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-4xl">
             <Link
               to="/interview"
-              className="inline-flex items-center text-slate-500 hover:text-indigo-600 mb-4 text-sm font-medium transition-colors group"
+              className="inline-flex items-center text-slate-500 hover:text-emerald-600 mb-4 text-sm font-medium transition-colors group"
             >
               <ChevronRight className="w-4 h-4 rotate-180 mr-1 group-hover:-translate-x-0.5 transition-transform" />
-              Back to Role Selection
+              Back to Interview Lab
             </Link>
             
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-                <Upload className="w-4 h-4 text-indigo-600" />
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <Upload className="w-4 h-4 text-emerald-600" />
               </div>
-              <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">Step 2 of 4</span>
+              <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">Custom Interview</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-              Upload Your Context
+              Upload Your Documents
             </h1>
             <p className="text-sm sm:text-base text-slate-600">
-              {roleKit ? (
-                <>Preparing for <span className="font-medium text-indigo-600">{roleKit.name}</span>. Upload your resume and optionally the job description for a personalized interview.</>
-              ) : (
-                <>Upload your resume and optionally the job description for a personalized interview experience.</>
-              )}
+              Upload your resume and job description for a personalized interview tailored to your background and target role.
             </p>
           </div>
         </div>

@@ -83,15 +83,42 @@ function AssessmentRoleplaySessionPage() {
 }
 
 export default AssessmentRoleplaySessionPage;
+interface InterviewSessionData {
+  id: number;
+  interviewConfigId: number;
+  interviewPlanId?: number;
+  status: string;
+  roleKit?: {
+    id: number;
+    name: string;
+    level: string;
+    domain: string;
+    coreCompetencies: string[];
+    typicalQuestions: string[];
+  };
+  config?: {
+    interviewType: string;
+    style: string;
+    seniority: string;
+  };
+  plan?: {
+    phases: { name: string; duration: number; objectives: string[]; questionPatterns: string[] }[];
+    focusAreas: string[];
+  };
+}
+
 const AvatarRoleplayPractice = () => {
   const { user } = useAuth();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [scenario, setScenario] = useState<ScenarioData | null>(null);
+  const [interviewSession, setInterviewSession] = useState<InterviewSessionData | null>(null);
   const [error, setError] = useState("");
   const [researchData, setResearchData] = useState<string>("");
   const avatarId = searchParams.get("avatarId");
+  const interviewSessionId = searchParams.get("interviewSessionId");
+  const isInterviewMode = !!interviewSessionId;
   const { data: avatarData, isLoading } = useAvatarById(avatarId);
   const realtimePrewarm = useRealtimePrewarm();
   // const { status, startRecording, stopRecording, mediaBlobUrl:audioUrl } =useReactMediaRecorder({ audio: true });
@@ -183,10 +210,120 @@ const AvatarRoleplayPractice = () => {
 
     if (scenarioId) {
       fetchScenario();
-    } else {
+    } else if (!isInterviewMode) {
       setIsInitializing(false);
     }
-  }, [scenarioId]);
+  }, [scenarioId, isInterviewMode]);
+  
+  useEffect(() => {
+    if (!isInterviewMode || interviewSession) return;
+    
+    const fetchInterviewSession = async () => {
+      try {
+        setIsInitializing(true);
+        const response = await fetch(`/api/interview/session/${interviewSessionId}`);
+        const data = await response.json();
+        if (data.success && data.session) {
+          setInterviewSession(data.session);
+          console.log("[Interview] Loaded session:", data.session);
+          
+          const interviewScenario: ScenarioData = {
+            name: data.session.roleKit?.name || "Interview Practice",
+            description: `${data.session.config?.interviewType || "interview"} interview for ${data.session.roleKit?.name || "role"}`,
+            context: buildInterviewContext(data.session),
+            instructions: buildInterviewInstructions(data.session),
+            avatarRole: getInterviewerRole(data.session.config?.interviewType),
+            difficulty: data.session.config?.style || "neutral",
+          };
+          setScenario(interviewScenario);
+        } else {
+          setError("Interview session not found. Please return and try again.");
+        }
+      } catch (err) {
+        console.error("Error fetching interview session:", err);
+        setError("Unable to load interview session. Please check your connection.");
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+    
+    fetchInterviewSession();
+  }, [isInterviewMode, interviewSessionId, interviewSession]);
+  
+  const getInterviewerRole = (type?: string): string => {
+    const roles: Record<string, string> = {
+      hr: "HR Recruiter",
+      hiring_manager: "Hiring Manager",
+      technical: "Technical Interviewer",
+      panel: "Interview Panel Lead",
+    };
+    return roles[type || "hr"] || "Interviewer";
+  };
+  
+  const buildInterviewContext = (session: InterviewSessionData): string => {
+    const roleKit = session.roleKit;
+    const config = session.config;
+    const plan = session.plan;
+    
+    let context = `You are conducting a ${config?.interviewType || "job"} interview for a ${roleKit?.name || "position"} role.\n\n`;
+    
+    if (roleKit) {
+      context += `Role Details:\n`;
+      context += `- Position: ${roleKit.name}\n`;
+      context += `- Level: ${roleKit.level}\n`;
+      context += `- Domain: ${roleKit.domain}\n`;
+      if (roleKit.coreCompetencies?.length) {
+        context += `- Key Competencies: ${roleKit.coreCompetencies.join(", ")}\n`;
+      }
+    }
+    
+    if (plan?.focusAreas?.length) {
+      context += `\nFocus Areas:\n${plan.focusAreas.map(a => `- ${a}`).join("\n")}\n`;
+    }
+    
+    return context;
+  };
+  
+  const buildInterviewInstructions = (session: InterviewSessionData): string => {
+    const config = session.config;
+    const plan = session.plan;
+    const roleKit = session.roleKit;
+    
+    let instructions = `Conduct a professional ${config?.interviewType || ""} interview.\n\n`;
+    
+    const styleGuide: Record<string, string> = {
+      friendly: "Be warm and encouraging. Put the candidate at ease while still evaluating their capabilities.",
+      neutral: "Be professional and balanced. Ask probing follow-up questions to assess depth of knowledge.",
+      stress: "Be challenging and push back on answers. Test how the candidate handles pressure.",
+    };
+    
+    instructions += `Interview Style: ${styleGuide[config?.style || "neutral"] || styleGuide.neutral}\n\n`;
+    
+    if (roleKit?.typicalQuestions?.length) {
+      instructions += `Sample Questions to Draw From:\n`;
+      roleKit.typicalQuestions.slice(0, 5).forEach((q, i) => {
+        instructions += `${i + 1}. ${q}\n`;
+      });
+      instructions += "\n";
+    }
+    
+    if (plan?.phases?.length) {
+      instructions += `Interview Structure:\n`;
+      plan.phases.forEach((phase, i) => {
+        instructions += `${i + 1}. ${phase.name} (${phase.duration} min): ${phase.objectives.join("; ")}\n`;
+      });
+    }
+    
+    instructions += `\nGuidelines:\n`;
+    instructions += `- Start with a warm greeting and brief introduction\n`;
+    instructions += `- Ask behavioral questions (STAR format)\n`;
+    instructions += `- Probe for specific examples and quantifiable results\n`;
+    instructions += `- Allow candidate to ask questions at the end\n`;
+    instructions += `- Stay in character as the interviewer throughout\n`;
+    
+    return instructions;
+  };
+
   // Attach SDK audio element once it exists (after first render in browser)
   useEffect(() => {
     if (sdkAudioElement && !audioElementRef.current) {

@@ -27,7 +27,8 @@ import DatabaseAdminPage from './pages/admin/database-admin';
 import AdminDashboard from './pages/admin/admin-dashboard';
 import UserDetailPage from './pages/admin/user-detail-page';
 import InterviewPracticePage from './pages/interview/page';
-import InterviewContextPage from './pages/interview/context/page';
+import InterviewConfigPage from './pages/interview/config/page';
+import InterviewCustomPage from './pages/interview/custom/page';
 import InterviewPreSessionPage from './pages/interview/pre-session/page';
 import InterviewResultsPage from './pages/interview/results/page';
 
@@ -60,7 +61,8 @@ export default function App() {
         <Route path="/admin/users/:userId" element={<UserDetailPage />} />
         <Route path="/admin/database" element={<DatabaseAdminPage />} />
         <Route path="/interview" element={<ProtectedRoute><InterviewPracticePage /></ProtectedRoute>} />
-        <Route path="/interview/context" element={<ProtectedRoute><InterviewContextPage /></ProtectedRoute>} />
+        <Route path="/interview/config" element={<ProtectedRoute><InterviewConfigPage /></ProtectedRoute>} />
+        <Route path="/interview/custom" element={<ProtectedRoute><InterviewCustomPage /></ProtectedRoute>} />
         <Route path="/interview/pre-session" element={<ProtectedRoute><InterviewPreSessionPage /></ProtectedRoute>} />
         <Route path="/interview/results" element={<ProtectedRoute><InterviewResultsPage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />

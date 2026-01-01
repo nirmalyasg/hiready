@@ -54,6 +54,10 @@ export default function AvatarSelectPage() {
   const accent = searchParams.get("accent");
   const personaOverlay = searchParams.get("personaOverlay");
   const personaOverlayData = searchParams.get("personaOverlayData");
+  const interviewSessionId = searchParams.get("interviewSessionId");
+  const configId = searchParams.get("configId");
+  
+  const isInterviewMode = !!interviewSessionId;
   
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
@@ -199,8 +203,16 @@ export default function AvatarSelectPage() {
       if (presentationId) {
         params.set("presentationId", presentationId);
       }
+      if (interviewSessionId) {
+        params.set("interviewSessionId", interviewSessionId);
+      }
+      if (configId) {
+        params.set("configId", configId);
+      }
       
-      if (presentationId) {
+      if (isInterviewMode) {
+        navigate(`/avatar/assessment-session/roleplay?${params.toString()}`);
+      } else if (presentationId) {
         navigate(`/avatar/practice/presentation/session?${params.toString()}`);
       } else if (isVoiceMode) {
         navigate(`/avatar/assessment-session/roleplay?${params.toString()}`);
@@ -212,6 +224,12 @@ export default function AvatarSelectPage() {
 
   // Build URL to go back to pre-session with all params
   const getBackToPreSessionUrl = () => {
+    if (isInterviewMode) {
+      const params = new URLSearchParams();
+      if (configId) params.set("configId", configId);
+      return `/interview/pre-session?${params.toString()}`;
+    }
+    
     const params = new URLSearchParams();
     if (scenarioId) params.set("scenarioId", scenarioId);
     if (blueprintParam) params.set("blueprint", blueprintParam);

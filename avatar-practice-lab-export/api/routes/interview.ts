@@ -341,10 +341,17 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
       interviewType,
       style,
       seniority,
+      mode,
     } = req.body;
     
-    if (!resumeDocId) {
-      return res.status(400).json({ success: false, error: "Resume document is required" });
+    const interviewMode = mode || (roleKitId && !resumeDocId ? "role_based" : "custom");
+    
+    if (interviewMode !== "role_based" && !resumeDocId) {
+      return res.status(400).json({ success: false, error: "Resume document is required for custom interviews" });
+    }
+    
+    if (interviewMode === "role_based" && !roleKitId) {
+      return res.status(400).json({ success: false, error: "Role kit is required for role-based interviews" });
     }
     
     const [config] = await db
@@ -352,10 +359,10 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
       .values({
         userId,
         roleKitId: roleKitId || null,
-        resumeDocId,
+        resumeDocId: resumeDocId || null,
         jdDocId: jdDocId || null,
         companyNotesDocId: companyNotesDocId || null,
-        interviewType: interviewType || "hr",
+        interviewType: interviewType || "behavioral",
         style: style || "neutral",
         seniority: seniority || "entry",
         createdAt: new Date(),
@@ -600,10 +607,16 @@ interviewRouter.get("/session/:id", requireAuth, async (req: Request, res: Respo
     let config: InterviewConfig | undefined;
     let plan: InterviewPlan | undefined;
     let analysis: InterviewAnalysisType | undefined;
+    let roleKit: RoleKit | undefined;
     
     if (session.interviewConfigId) {
       const [c] = await db.select().from(interviewConfigs).where(eq(interviewConfigs.id, session.interviewConfigId));
       config = c;
+      
+      if (c?.roleKitId) {
+        const [kit] = await db.select().from(roleKits).where(eq(roleKits.id, c.roleKitId));
+        roleKit = kit;
+      }
     }
     if (session.interviewPlanId) {
       const [p] = await db.select().from(interviewPlans).where(eq(interviewPlans.id, session.interviewPlanId));
@@ -613,7 +626,18 @@ interviewRouter.get("/session/:id", requireAuth, async (req: Request, res: Respo
     const [a] = await db.select().from(interviewAnalysis).where(eq(interviewAnalysis.interviewSessionId, sessionId));
     analysis = a;
     
-    res.json({ success: true, session, config, plan, analysis });
+    res.json({ 
+      success: true, 
+      session: {
+        ...session,
+        roleKit,
+        config,
+        plan: plan?.planJson,
+      },
+      config, 
+      plan, 
+      analysis 
+    });
   } catch (error: any) {
     console.error("Error fetching session:", error);
     res.status(500).json({ success: false, error: error.message });

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { MessageSquare, BookOpen, ArrowRight, Presentation, Briefcase, Globe, TrendingUp, Heart, Laptop, Trophy, Mic, Loader2 } from "lucide-react";
+import { MessageSquare, BookOpen, ArrowRight, Presentation, Briefcase, Globe, TrendingUp, Heart, Laptop, Trophy, Mic, Loader2, UserCheck, FileText } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { VoiceInputField } from "@/components/ui/voice-input";
@@ -119,10 +119,28 @@ const TOPIC_CATEGORIES: CategoryConfig[] = [
 
 const practiceOptions = [
   {
+    id: "interview",
+    icon: <UserCheck className="w-8 h-8" />,
+    title: "Interview Practice",
+    description: "Practice job interviews by role",
+    route: "/interview",
+    bgColor: "bg-gradient-to-br from-indigo-600 to-indigo-800",
+    iconBg: "bg-white/20",
+  },
+  {
+    id: "interview-custom",
+    icon: <FileText className="w-8 h-8" />,
+    title: "Custom Interview",
+    description: "Upload resume & job description",
+    route: "/interview/custom",
+    bgColor: "bg-gradient-to-br from-emerald-600 to-teal-700",
+    iconBg: "bg-white/20",
+  },
+  {
     id: "scenario",
     icon: <BookOpen className="w-8 h-8" />,
-    title: "Practice a scenario",
-    description: "Pre-built scenarios by skill",
+    title: "Workplace Scenarios",
+    description: "Practice difficult conversations",
     route: "/avatar/practice",
     bgColor: "bg-gradient-to-br from-brand-primary to-brand-dark",
     iconBg: "bg-white/20",
@@ -130,7 +148,7 @@ const practiceOptions = [
   {
     id: "situation",
     icon: <MessageSquare className="w-8 h-8" />,
-    title: "Practice my situation",
+    title: "Custom Situation",
     description: "Describe your own situation",
     route: "/avatar/practice/custom-scenario",
     bgColor: "bg-gradient-to-br from-brand-light to-brand-primary",
@@ -139,7 +157,7 @@ const practiceOptions = [
   {
     id: "presentation",
     icon: <Presentation className="w-8 h-8" />,
-    title: "Practice a presentation",
+    title: "Presentation Practice",
     description: "Upload slides and practice",
     route: "/avatar/practice/presentation",
     bgColor: "bg-gradient-to-br from-brand-accent to-brand-accent-light",
