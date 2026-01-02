@@ -1,15 +1,13 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { Briefcase, Clock, Mic, MicOff, Phone, MessageSquare, Volume2, User, PhoneOff, BarChart3, Brain, Play, ListChecks, Target } from "lucide-react";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import { Briefcase, Clock, Mic, MicOff, Brain, Play, Target, ListChecks, Volume2, BarChart3 } from "lucide-react";
 import { TranscriptProvider, useTranscript } from '@/contexts/TranscriptContext';
 import { EventProvider } from '@/contexts/EventContext';
 import { useRealtimeSession } from '@/hooks/useRealtimeSession';
 import { useHandleSessionHistory } from '@/hooks/useHandleSessionHistory';
 import { RealtimeAgent } from '@openai/agents/realtime';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface CaseTemplate {
   id: number;
@@ -33,24 +31,6 @@ interface ExerciseSession {
   status: string;
 }
 
-interface SelectedAvatar {
-  id: string;
-  name: string;
-  gender: string;
-  imageUrl: string;
-  personality: string;
-  role?: string;
-}
-
-const defaultInterviewer: SelectedAvatar = { 
-  id: "Wayne_20240711", 
-  name: "Alex", 
-  gender: "male",
-  imageUrl: "https://files.heygen.ai/avatar/v3/Wayne_20240711/full_body.webp",
-  personality: "Senior case interviewer - analytical, probing, focused on structured thinking and business acumen",
-  role: "interviewer"
-};
-
 const voiceMap: Record<string, string> = {
   male: 'ash',
   female: 'sage',
@@ -60,26 +40,24 @@ function CaseStudySessionContent() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get("templateId");
-  const { toast } = useToast();
 
   const [template, setTemplate] = useState<CaseTemplate | null>(null);
   const [session, setSession] = useState<ExerciseSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sessionPhase, setSessionPhase] = useState<"prep" | "thinking" | "lobby" | "active" | "complete">("prep");
+  const [sessionPhase, setSessionPhase] = useState<"prep" | "thinking" | "active" | "complete">("prep");
   const [thinkingTimeRemaining, setThinkingTimeRemaining] = useState(60);
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [interviewer] = useState<SelectedAvatar>(defaultInterviewer);
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasGreeted, setHasGreeted] = useState(false);
   const [sessionStatus, setSessionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
+  const [interviewerMessage, setInterviewerMessage] = useState<string>("Walk me through how you would approach this problem. What's your initial framework?");
 
   const { transcriptItems } = useTranscript();
-  const transcriptRef = useRef<HTMLDivElement>(null);
 
   const sdkAudioElement = useMemo(() => {
     const el = document.createElement('audio');
@@ -111,6 +89,7 @@ function CaseStudySessionContent() {
 
   const { connect, disconnect, sendUserText, mute, status } = useRealtimeSession({
     onConnectionChange: (s) => {
+      console.log('[CaseStudySession] Connection status:', s);
       if (s === 'CONNECTED') {
         setSessionStatus('connected');
       } else if (s === 'CONNECTING') {
@@ -120,6 +99,13 @@ function CaseStudySessionContent() {
       }
     },
   });
+
+  useEffect(() => {
+    const lastAssistantMessage = transcriptItems.filter(item => item.role === 'assistant').pop();
+    if (lastAssistantMessage?.title) {
+      setInterviewerMessage(lastAssistantMessage.title);
+    }
+  }, [transcriptItems]);
 
   useEffect(() => {
     const fetchTemplate = async () => {
@@ -155,7 +141,7 @@ function CaseStudySessionContent() {
       interval = setInterval(() => {
         setThinkingTimeRemaining(prev => {
           if (prev <= 1) {
-            setSessionPhase("lobby");
+            connectToRealtime();
             return 0;
           }
           return prev - 1;
@@ -172,12 +158,6 @@ function CaseStudySessionContent() {
     return () => clearInterval(interval);
   }, [sessionPhase, thinkingTimeRemaining, sessionStartTime]);
 
-  useEffect(() => {
-    if (transcriptRef.current) {
-      transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
-    }
-  }, [transcriptItems]);
-
   const fetchEphemeralKey = async () => {
     try {
       const response = await fetch('/api/realtime/token', {
@@ -185,11 +165,12 @@ function CaseStudySessionContent() {
         credentials: 'include',
       });
       const data = await response.json();
+      console.log('[CaseStudySession] Token response:', data);
       if (data.success && data.token) {
         return data.token;
       }
     } catch (err) {
-      console.error('Error fetching ephemeral key:', err);
+      console.error('[CaseStudySession] Error fetching ephemeral key:', err);
     }
     return null;
   };
@@ -216,10 +197,10 @@ ${template.probingMap.ifStrong.map(p => `- "${p}"`).join('\n')}
     return `
 CASE INTERVIEW SESSION - AI INTERVIEWER
 
-You are ${interviewer.name}, a senior case interviewer conducting a structured case interview. Your role is to evaluate the candidate's problem-solving approach, structured thinking, and business acumen.
+You are a senior case interviewer conducting a structured case interview. Your role is to evaluate the candidate's problem-solving approach, structured thinking, and business acumen.
 
 YOUR ROLE: Senior Case Interviewer
-YOUR PERSONALITY: ${interviewer.personality}
+YOUR PERSONALITY: Analytical, probing, focused on structured thinking and business acumen. Professional but conversational.
 
 CASE DETAILS:
 - Type: ${template.caseType}
@@ -234,7 +215,7 @@ ${evaluationContext}
 === CRITICAL BEHAVIOR RULES ===
 
 1. OPENING:
-   - Start by briefly introducing the case and asking the candidate to walk you through their approach
+   - Start by briefly asking the candidate to walk you through their approach
    - Be professional but conversational
 
 2. INTERVIEWER BEHAVIOR:
@@ -261,34 +242,33 @@ ${probingInstructions}
    - When the candidate seems to have covered the main points, wrap up naturally
    - Thank them for their analysis
 `.trim();
-  }, [template, interviewer]);
+  }, [template]);
 
   const connectToRealtime = async () => {
     if (sessionStatus !== 'disconnected') return;
     
     setSessionStatus('connecting');
+    console.log('[CaseStudySession] Starting connection...');
     
     try {
       const EPHEMERAL_KEY = await fetchEphemeralKey();
       if (!EPHEMERAL_KEY) {
-        toast({
-          title: "Connection Error",
-          description: "Failed to get session token. Please try again.",
-          variant: "destructive",
-        });
+        console.error('[CaseStudySession] No ephemeral key received');
         setSessionStatus('disconnected');
         return;
       }
 
-      const voice = voiceMap[interviewer.gender?.toLowerCase() || 'male'] || 'ash';
       const systemPrompt = buildInterviewerContext();
+      console.log('[CaseStudySession] System prompt built, length:', systemPrompt.length);
       
       const agent = new RealtimeAgent({
-        name: `case_interviewer_${interviewer.name}`,
-        voice: voice,
+        name: 'case_interviewer',
+        voice: 'ash',
         instructions: systemPrompt,
         tools: [],
       });
+
+      console.log('[CaseStudySession] Agent created, connecting...');
 
       await connect({
         getEphemeralKey: async () => EPHEMERAL_KEY,
@@ -296,12 +276,13 @@ ${probingInstructions}
         audioElement: sdkAudioElement,
       });
 
+      console.log('[CaseStudySession] Connected successfully');
       setSessionStartTime(Date.now());
       setSessionPhase("active");
       
       if (!hasGreeted) {
         setTimeout(() => {
-          sendUserText(`Greet the candidate and introduce the case. Say: "Welcome to your case interview. Today we'll be working through a ${template?.caseType || 'business'} case. Let me share the prompt with you: ${template?.promptStatement || 'the case scenario'}. Take a moment to think about it, then walk me through how you would approach this problem." Keep it professional and under 50 words.`);
+          sendUserText(`Greet the candidate and introduce the case. Say something like: "Welcome to your case interview. Today we'll be working on ${template?.name || 'this case'}. Let me share the context: ${template?.promptStatement || 'the scenario'}. Take a moment to think, then walk me through your approach." Keep it professional and under 50 words.`);
           setHasGreeted(true);
         }, 2000);
       }
@@ -309,11 +290,6 @@ ${probingInstructions}
     } catch (err) {
       console.error('[CaseStudySession] Error connecting:', err);
       setSessionStatus('disconnected');
-      toast({
-        title: "Connection Failed",
-        description: "Could not connect to the session. Please try again.",
-        variant: "destructive",
-      });
     }
   };
 
@@ -354,8 +330,8 @@ ${probingInstructions}
   };
 
   const skipThinkingTime = () => {
-    setSessionPhase("lobby");
     setThinkingTimeRemaining(0);
+    connectToRealtime();
   };
 
   const endSession = async () => {
@@ -379,10 +355,7 @@ ${probingInstructions}
         await fetch(`/api/exercise-mode/sessions/${session.id}/analyze`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            transcript,
-            sessionDuration 
-          })
+          body: JSON.stringify({ transcript, sessionDuration })
         });
       } catch (err) {
         console.error("Error saving session:", err);
@@ -433,10 +406,6 @@ ${probingInstructions}
           <p className="text-slate-400 mb-4">
             Our AI is evaluating your structured thinking, business acumen, and problem-solving approach...
           </p>
-          <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-            <span>Generating personalized feedback</span>
-          </div>
         </div>
       </div>
     );
@@ -451,13 +420,11 @@ ${probingInstructions}
           </div>
           <h1 className="text-2xl font-bold mb-3">Session Error</h1>
           <p className="text-slate-400 mb-6">{error || 'Unable to load case template'}</p>
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/exercise-mode/case-study')}
-            className="text-white border-white hover:bg-white/10"
-          >
-            Back to Case Study
-          </Button>
+          <Link to="/exercise-mode/case-study">
+            <Button variant="outline" className="text-white border-white hover:bg-white/10">
+              Back to Case Study
+            </Button>
+          </Link>
         </div>
       </div>
     );
@@ -513,8 +480,8 @@ ${probingInstructions}
             <ol className="text-sm text-blue-200 space-y-2">
               <li>1. Read the case prompt carefully</li>
               <li>2. You'll have 60 seconds of thinking time to structure your approach</li>
-              <li>3. Join the session with an AI interviewer avatar</li>
-              <li>4. Present your analysis verbally - the interviewer will ask follow-up questions</li>
+              <li>3. Present your analysis verbally - the AI interviewer will ask follow-ups</li>
+              <li>4. End the session when done to receive your feedback</li>
             </ol>
           </div>
 
@@ -538,7 +505,7 @@ ${probingInstructions}
           <Brain className="w-16 h-16 text-blue-400 mx-auto mb-6" />
           <h2 className="text-2xl font-bold mb-4">Thinking Time</h2>
           <p className="text-slate-300 mb-8">
-            Take this time to structure your approach. The interviewer will join when the timer ends.
+            Take this time to structure your approach. The interviewer will begin when the timer ends.
           </p>
           
           <div className="text-6xl font-mono font-bold text-blue-400 mb-8">
@@ -555,53 +522,7 @@ ${probingInstructions}
             onClick={skipThinkingTime}
             className="border-slate-600 text-slate-300 hover:bg-slate-800"
           >
-            Skip & Join Session
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (sessionPhase === "lobby") {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-white flex items-center justify-center">
-        <div className="text-center max-w-md px-6">
-          <div className="w-24 h-24 mx-auto mb-6 rounded-full overflow-hidden border-4 border-emerald-500">
-            <img 
-              src={interviewer.imageUrl} 
-              alt={interviewer.name}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <h2 className="text-2xl font-bold mb-2">Ready to Join</h2>
-          <p className="text-slate-400 mb-2">Your interviewer is waiting</p>
-          <p className="text-slate-500 text-sm mb-8">{interviewer.name} - Senior Case Interviewer</p>
-          
-          <Button 
-            onClick={connectToRealtime}
-            size="lg"
-            className="w-full bg-emerald-600 hover:bg-emerald-700 mb-4"
-            disabled={sessionStatus === 'connecting'}
-          >
-            {sessionStatus === 'connecting' ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Connecting...
-              </>
-            ) : (
-              <>
-                <Phone className="w-5 h-5 mr-2" />
-                Join Interview
-              </>
-            )}
-          </Button>
-
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/exercise-mode/case-study')}
-            className="w-full border-slate-600 text-slate-300 hover:bg-slate-800"
-          >
-            Cancel
+            Skip & Start Now
           </Button>
         </div>
       </div>
@@ -609,14 +530,13 @@ ${probingInstructions}
   }
 
   return (
-    <div className="h-screen bg-slate-900 flex flex-col overflow-hidden">
-      <div className="bg-slate-800/95 border-b border-slate-700 p-3 flex items-center justify-between flex-shrink-0">
+    <div className="min-h-screen bg-slate-900 text-white">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-slate-700 bg-slate-800/80">
         <div className="flex items-center gap-3">
           <Briefcase className="w-5 h-5 text-emerald-400" />
-          <span className="text-white font-medium truncate max-w-[200px] md:max-w-none">{template.name}</span>
-          <span className="text-xs px-2 py-0.5 bg-slate-700 text-slate-300 rounded capitalize">{template.caseType}</span>
+          <span className="font-medium">{template.name}</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-slate-400 text-sm">
             <Clock className="w-4 h-4" />
             <span className="font-mono">{formatTime(sessionDuration)}</span>
@@ -632,152 +552,104 @@ ${probingInstructions}
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 flex flex-col p-4 overflow-hidden">
-          <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-6 mb-4 flex-shrink-0">
-            <h3 className="font-medium text-emerald-400 mb-3 flex items-center gap-2">
-              <Target className="w-4 h-4" />
-              Case Prompt
-            </h3>
+      <div className="flex h-[calc(100vh-57px)]">
+        <div className="flex-1 p-6 overflow-y-auto">
+          <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-6 mb-6">
+            <h3 className="text-emerald-400 font-medium mb-3">Case Prompt</h3>
             <p className="text-slate-200 text-lg leading-relaxed">{template.promptStatement}</p>
           </div>
 
+          <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-slate-400 font-medium">Your Response</h3>
+              {sessionStatus === 'connected' && !isMuted && (
+                <span className="flex items-center gap-1 text-emerald-400 text-sm">
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                  Listening...
+                </span>
+              )}
+            </div>
+            
+            <div className="flex justify-center py-8">
+              <button
+                onClick={toggleMute}
+                disabled={sessionStatus !== 'connected'}
+                className={cn(
+                  "w-24 h-24 rounded-full flex items-center justify-center transition-all",
+                  sessionStatus !== 'connected' 
+                    ? "bg-slate-700 cursor-not-allowed"
+                    : isMuted 
+                      ? "bg-red-600 hover:bg-red-700" 
+                      : "bg-emerald-600 hover:bg-emerald-700"
+                )}
+              >
+                {isMuted ? (
+                  <MicOff className="w-10 h-10" />
+                ) : (
+                  <Mic className="w-10 h-10" />
+                )}
+              </button>
+            </div>
+            
+            <p className="text-center text-slate-400 text-sm">
+              {sessionStatus === 'connecting' 
+                ? "Connecting to interviewer..." 
+                : sessionStatus === 'connected'
+                  ? (isMuted ? "Click to unmute" : "Click to start speaking")
+                  : "Waiting for connection..."
+              }
+            </p>
+          </div>
+        </div>
+
+        <div className="w-80 lg:w-96 border-l border-slate-700 bg-slate-800/30 flex flex-col">
+          <div className="p-4 border-b border-slate-700">
+            <h3 className="font-medium text-slate-300 flex items-center gap-2 mb-3">
+              <Volume2 className="w-4 h-4 text-blue-400" />
+              AI Interviewer
+              {isSpeaking && (
+                <span className="ml-auto flex items-center gap-1">
+                  <div className="w-1 h-2 bg-blue-400 rounded-full animate-pulse" />
+                  <div className="w-1 h-3 bg-blue-400 rounded-full animate-pulse delay-75" />
+                  <div className="w-1 h-2 bg-blue-400 rounded-full animate-pulse delay-150" />
+                </span>
+              )}
+            </h3>
+            <div className="bg-slate-900/50 rounded-lg p-3">
+              <p className="text-slate-300 text-sm italic">"{interviewerMessage}"</p>
+            </div>
+          </div>
+
           {template.context && (
-            <div className="bg-slate-800/30 rounded-xl border border-slate-700 p-4 mb-4 flex-shrink-0 max-h-48 overflow-y-auto">
-              <h3 className="font-medium text-slate-400 mb-2 flex items-center gap-2 text-sm">
+            <div className="p-4 border-b border-slate-700">
+              <h3 className="font-medium text-slate-400 mb-2 text-sm flex items-center gap-2">
                 <ListChecks className="w-4 h-4" />
-                Context & Key Facts
+                Context
               </h3>
-              <p className="text-slate-300 text-sm whitespace-pre-line">{template.context}</p>
+              <div className="text-slate-400 text-xs space-y-1 max-h-32 overflow-y-auto">
+                <p className="font-medium text-slate-300 mb-1">Key facts:</p>
+                {template.context.split('\n').filter(line => line.trim()).slice(0, 6).map((line, i) => (
+                  <p key={i}>- {line.trim()}</p>
+                ))}
+              </div>
             </div>
           )}
 
           {template.evaluationFocus && (
-            <div className="bg-slate-800/30 rounded-xl border border-slate-700 p-4 flex-shrink-0">
-              <h3 className="font-medium text-slate-400 mb-2 text-sm">Focus Areas</h3>
-              <div className="flex flex-wrap gap-2">
+            <div className="p-4">
+              <h3 className="font-medium text-slate-400 mb-2 text-sm flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                Focus Areas
+              </h3>
+              <div className="flex flex-wrap gap-1">
                 {template.evaluationFocus.map((focus, i) => (
-                  <span key={i} className="px-3 py-1 bg-emerald-900/30 text-emerald-400 rounded-full text-sm">
+                  <span key={i} className="px-2 py-1 bg-slate-700 text-slate-300 rounded text-xs">
                     {focus}
                   </span>
                 ))}
               </div>
             </div>
           )}
-        </div>
-
-        <div className="w-80 lg:w-96 border-l border-slate-700 flex flex-col bg-slate-800/50 flex-shrink-0">
-          <div className="p-4 border-b border-slate-700 flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className={cn(
-                  "w-16 h-16 rounded-xl overflow-hidden border-2",
-                  isSpeaking ? "border-emerald-400 ring-2 ring-emerald-400/30" : "border-slate-600"
-                )}>
-                  <img 
-                    src={interviewer.imageUrl} 
-                    alt={interviewer.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                {isSpeaking && (
-                  <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1">
-                    <Volume2 className="w-3 h-3 text-white" />
-                  </div>
-                )}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-white font-medium">{interviewer.name}</span>
-                  {isSpeaking && (
-                    <span className="text-[10px] bg-emerald-500 text-white px-1.5 py-0.5 rounded">
-                      SPEAKING
-                    </span>
-                  )}
-                </div>
-                <p className="text-slate-400 text-sm">Case Interviewer</p>
-                {isSpeaking && (
-                  <div className="flex items-center gap-0.5 mt-1">
-                    <div className="w-1 h-3 bg-emerald-400 rounded-full animate-pulse" />
-                    <div className="w-1 h-4 bg-emerald-400 rounded-full animate-pulse delay-75" />
-                    <div className="w-1 h-2 bg-emerald-400 rounded-full animate-pulse delay-150" />
-                    <div className="w-1 h-3 bg-emerald-400 rounded-full animate-pulse delay-200" />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-hidden flex flex-col">
-            <div className="p-3 border-b border-slate-700/50 flex items-center justify-between flex-shrink-0">
-              <h3 className="text-white text-sm font-semibold flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-purple-400" />
-                Live Transcript
-              </h3>
-              <span className="text-xs text-slate-400">
-                {transcriptItems.length} message{transcriptItems.length !== 1 ? 's' : ''}
-              </span>
-            </div>
-            
-            <div 
-              ref={transcriptRef} 
-              className="flex-1 overflow-y-auto p-3"
-            >
-              {transcriptItems.length === 0 ? (
-                <div className="flex items-center justify-center h-full text-slate-500">
-                  <MessageSquare className="w-5 h-5 mr-2 opacity-50" />
-                  <span className="text-sm">Waiting for conversation...</span>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {transcriptItems.map((item, idx) => {
-                    const isUser = item.role === 'user';
-                    const speakerName = isUser ? 'You' : interviewer.name;
-                    
-                    return (
-                      <div key={idx} className={cn(
-                        "p-2 rounded-lg text-sm",
-                        isUser ? "bg-blue-900/30 text-blue-200" : "bg-slate-700/50 text-slate-200"
-                      )}>
-                        <span className="font-medium text-xs opacity-70">{speakerName}:</span>
-                        <p className="mt-0.5">{item.title || '...'}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="p-4 border-t border-slate-700 flex-shrink-0">
-            <div className="flex items-center justify-center gap-4">
-              <button
-                onClick={toggleMute}
-                className={cn(
-                  "w-12 h-12 rounded-full flex items-center justify-center transition-all",
-                  isMuted 
-                    ? "bg-red-600 hover:bg-red-700" 
-                    : "bg-slate-700 hover:bg-slate-600"
-                )}
-              >
-                {isMuted ? (
-                  <MicOff className="w-5 h-5 text-white" />
-                ) : (
-                  <Mic className="w-5 h-5 text-white" />
-                )}
-              </button>
-
-              <button
-                onClick={endSession}
-                className="w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center transition-all"
-              >
-                <PhoneOff className="w-5 h-5 text-white" />
-              </button>
-            </div>
-            <p className="text-center text-slate-500 text-xs mt-2">
-              {isMuted ? "Microphone muted" : "Microphone active"}
-            </p>
-          </div>
         </div>
       </div>
     </div>
