@@ -3,8 +3,9 @@ import { ChevronRight, Upload, FileText, X, Check, AlertCircle, Loader2, Briefca
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
+import { JobTargetSelector } from "@/components/job-target-selector";
 
 interface UploadedDoc {
   id: number;
@@ -16,6 +17,8 @@ interface UploadedDoc {
 
 export default function InterviewCustomPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const preSelectedJobId = searchParams.get("jobTargetId");
 
   const [resumeDoc, setResumeDoc] = useState<UploadedDoc | null>(null);
   const [jdDoc, setJdDoc] = useState<UploadedDoc | null>(null);
@@ -23,6 +26,7 @@ export default function InterviewCustomPage() {
   const [parsing, setParsing] = useState<{ resume: boolean; jd: boolean }>({ resume: false, jd: false });
   const [interviewType, setInterviewType] = useState<string>("hr");
   const [style, setStyle] = useState<string>("neutral");
+  const [selectedJobTargetId, setSelectedJobTargetId] = useState<string | null>(preSelectedJobId);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -110,6 +114,7 @@ export default function InterviewCustomPage() {
           style,
           seniority: "entry",
           mode: "custom",
+          jobTargetId: selectedJobTargetId,
         }),
       });
 
@@ -311,6 +316,11 @@ export default function InterviewCustomPage() {
                 )}
               </CardContent>
             </Card>
+
+            <JobTargetSelector
+              value={selectedJobTargetId}
+              onChange={(id) => setSelectedJobTargetId(id)}
+            />
 
             <Card className="border-slate-200 rounded-2xl overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-slate-100">

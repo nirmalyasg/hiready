@@ -80,6 +80,7 @@ function CaseStudySessionContent() {
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get("templateId");
   const avatarsParam = searchParams.get("avatars");
+  const jobTargetId = searchParams.get("jobTargetId");
 
   const [template, setTemplate] = useState<CaseTemplate | null>(null);
   const [session, setSession] = useState<ExerciseSession | null>(null);
@@ -354,7 +355,8 @@ ${probingContext}
         body: JSON.stringify({
           exerciseType: "case_study",
           caseTemplateId: template.id,
-          roleKitId: null
+          roleKitId: null,
+          jobTargetId: jobTargetId || null
         })
       });
       

@@ -6,6 +6,7 @@ import SidebarLayout from "@/components/layout/sidebar-layout";
 import { ChevronRight, Check, ArrowLeft, Code, Users } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useRealtimePrewarm } from "@/contexts/RealtimeSessionPrewarmContext";
+import { JobTargetSelector } from "@/components/job-target-selector";
 
 interface CodingExercise {
   id: number;
@@ -54,11 +55,13 @@ export default function CodingLabAvatarSelectPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const exerciseId = searchParams.get("exerciseId");
+  const preSelectedJobId = searchParams.get("jobTargetId");
   
   const [exercise, setExercise] = useState<CodingExercise | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
+  const [selectedJobTargetId, setSelectedJobTargetId] = useState<string | null>(preSelectedJobId);
   
   const realtimePrewarm = useRealtimePrewarm();
 
@@ -115,7 +118,11 @@ export default function CodingLabAvatarSelectPage() {
       personality: avatar.personality,
     }]));
     
-    navigate(`/exercise-mode/coding-lab/session?exerciseId=${exerciseId}&avatars=${avatarParam}`);
+    let url = `/exercise-mode/coding-lab/session?exerciseId=${exerciseId}&avatars=${avatarParam}`;
+    if (selectedJobTargetId) {
+      url += `&jobTargetId=${selectedJobTargetId}`;
+    }
+    navigate(url);
   };
 
   if (isLoading) {
@@ -210,6 +217,12 @@ export default function CodingLabAvatarSelectPage() {
               );
             })}
           </div>
+
+          <JobTargetSelector
+            value={selectedJobTargetId}
+            onChange={(id) => setSelectedJobTargetId(id)}
+            className="mb-8"
+          />
 
           <div className="flex items-center justify-between">
             <Button

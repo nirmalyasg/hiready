@@ -8,6 +8,7 @@ import {
   exerciseSessions,
   interviewAnalysis,
   exerciseAnalysis,
+  userSkillPatterns,
 } from "../../shared/schema.js";
 import { requireAuth } from "../middleware/auth.js";
 import { getOpenAI } from "../utils/openai-client.js";
@@ -487,6 +488,226 @@ jobsRouter.get("/job-targets/:id/practice-suggestions", requireAuth, async (req:
     res.json({ success: true, suggestions, job });
   } catch (error: any) {
     console.error("Error generating practice suggestions:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Compute and update readiness score for a job target
+jobsRouter.post("/job-targets/:id/compute-readiness", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const jobId = req.params.id;
+
+    const [job] = await db
+      .select()
+      .from(jobTargets)
+      .where(and(eq(jobTargets.id, jobId), eq(jobTargets.userId, userId)));
+
+    if (!job) {
+      return res.status(404).json({ success: false, error: "Job target not found" });
+    }
+
+    // Get all interview sessions for this job
+    const interviewSessionsForJob = await db
+      .select({
+        sessionId: interviewSessions.id,
+        dimensionScores: interviewAnalysis.dimensionScores,
+        createdAt: interviewSessions.createdAt,
+      })
+      .from(interviewConfigs)
+      .innerJoin(interviewSessions, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+      .leftJoin(interviewAnalysis, eq(interviewAnalysis.interviewSessionId, interviewSessions.id))
+      .where(eq(interviewConfigs.jobTargetId, jobId));
+
+    // Get all exercise sessions for this job
+    const exerciseSessionsForJob = await db
+      .select({
+        sessionId: exerciseSessions.id,
+        score: exerciseAnalysis.overallScore,
+        createdAt: exerciseSessions.createdAt,
+      })
+      .from(exerciseSessions)
+      .leftJoin(exerciseAnalysis, eq(exerciseAnalysis.exerciseSessionId, exerciseSessions.id))
+      .where(eq(exerciseSessions.jobTargetId, jobId));
+
+    const totalSessions = interviewSessionsForJob.length + exerciseSessionsForJob.length;
+    
+    // Calculate average score from all sessions
+    // For interview sessions, compute average from dimensionScores
+    const interviewScores = interviewSessionsForJob
+      .filter(s => s.dimensionScores && Array.isArray(s.dimensionScores))
+      .map(s => {
+        const scores = (s.dimensionScores as { score: number }[]).map(d => d.score);
+        return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null;
+      })
+      .filter((s): s is number => s !== null);
+    
+    const allScores = [
+      ...interviewScores,
+      ...exerciseSessionsForJob.filter(s => s.score !== null).map(s => s.score as number),
+    ];
+    
+    const avgScore = allScores.length > 0 
+      ? allScores.reduce((a, b) => a + b, 0) / allScores.length 
+      : null;
+
+    // Compute readiness score based on:
+    // 1. Practice volume (up to 30 points): 3 points per session, max 10 sessions
+    // 2. Average performance (up to 50 points): score directly maps
+    // 3. Skill coverage (up to 20 points): based on how many JD skills are practiced
+    
+    let readinessScore = 0;
+    
+    // Practice volume component (max 30 points)
+    const volumeScore = Math.min(totalSessions * 3, 30);
+    readinessScore += volumeScore;
+    
+    // Performance component (max 50 points)
+    if (avgScore !== null) {
+      const performanceScore = (avgScore / 100) * 50;
+      readinessScore += performanceScore;
+    }
+    
+    // Skill coverage component (max 20 points)
+    // Requires at least 3 sessions AND parsed JD with skills to award 20 points
+    const parsed = job.jdParsed as JDParsedType | null;
+    let coverageScore = 0;
+    if (parsed && parsed.requiredSkills && parsed.requiredSkills.length > 0 && totalSessions >= 3) {
+      coverageScore = 20;
+      readinessScore += coverageScore;
+    }
+    
+    readinessScore = Math.round(readinessScore);
+
+    // Find last practice date
+    const allDates = [
+      ...interviewSessionsForJob.map(s => s.createdAt),
+      ...exerciseSessionsForJob.map(s => s.createdAt),
+    ].filter(d => d !== null) as Date[];
+    
+    const lastPracticedAt = allDates.length > 0 
+      ? new Date(Math.max(...allDates.map(d => d.getTime())))
+      : null;
+
+    // Update the job target with computed readiness score
+    const [updated] = await db
+      .update(jobTargets)
+      .set({
+        readinessScore,
+        lastPracticedAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(jobTargets.id, jobId))
+      .returning();
+
+    res.json({
+      success: true,
+      job: updated,
+      breakdown: {
+        totalSessions,
+        avgScore: avgScore ? Math.round(avgScore) : null,
+        volumeScore,
+        performanceScore: avgScore ? Math.round((avgScore / 100) * 50) : 0,
+        coverageScore,
+        readinessScore,
+      },
+    });
+  } catch (error: any) {
+    console.error("Error computing readiness score:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get user skill patterns (career memory)
+jobsRouter.get("/skill-patterns", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+
+    const patterns = await db
+      .select()
+      .from(userSkillPatterns)
+      .where(eq(userSkillPatterns.userId, userId))
+      .orderBy(desc(userSkillPatterns.occurrences));
+
+    res.json({ success: true, patterns });
+  } catch (error: any) {
+    console.error("Error fetching skill patterns:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update skill patterns after a session analysis (called by analysis endpoints)
+jobsRouter.post("/skill-patterns/update", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { dimensions } = req.body;
+
+    if (!dimensions || !Array.isArray(dimensions)) {
+      return res.status(400).json({ success: false, error: "Dimensions array required" });
+    }
+
+    const updatedPatterns: (typeof userSkillPatterns.$inferSelect)[] = [];
+
+    for (const dim of dimensions) {
+      const { name, score } = dim;
+      if (!name || score === undefined) continue;
+
+      // Check if pattern exists
+      const [existing] = await db
+        .select()
+        .from(userSkillPatterns)
+        .where(and(
+          eq(userSkillPatterns.userId, userId),
+          eq(userSkillPatterns.dimension, name)
+        ));
+
+      if (existing) {
+        // Update existing pattern
+        const newOccurrences = (existing.occurrences || 1) + 1;
+        const prevAvg = existing.avgScore || score;
+        const newAvgScore = ((prevAvg * (newOccurrences - 1)) + score) / newOccurrences;
+        
+        // Determine trend
+        let trend: "improving" | "stagnant" | "declining" = "stagnant";
+        if (prevAvg && score > prevAvg + 5) trend = "improving";
+        else if (prevAvg && score < prevAvg - 5) trend = "declining";
+
+        const [updated] = await db
+          .update(userSkillPatterns)
+          .set({
+            occurrences: newOccurrences,
+            avgScore: newAvgScore,
+            trend,
+            lastSeenAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(eq(userSkillPatterns.id, existing.id))
+          .returning();
+
+        updatedPatterns.push(updated);
+      } else {
+        // Create new pattern
+        const [created] = await db
+          .insert(userSkillPatterns)
+          .values({
+            userId,
+            dimension: name,
+            occurrences: 1,
+            avgScore: score,
+            trend: "stagnant",
+            lastSeenAt: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .returning();
+
+        updatedPatterns.push(created);
+      }
+    }
+
+    res.json({ success: true, patterns: updatedPatterns });
+  } catch (error: any) {
+    console.error("Error updating skill patterns:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

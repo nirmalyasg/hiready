@@ -415,12 +415,25 @@ export default function JobsPage() {
                           </div>
                           
                           <div className="flex items-center gap-3">
-                            {job.readinessScore !== null && (
-                              <div className="text-right hidden sm:block">
-                                <div className="text-2xl font-bold text-brand-dark">
-                                  {job.readinessScore}%
+                            {job.readinessScore !== null && job.readinessScore > 0 && (
+                              <div className="hidden sm:flex items-center gap-3">
+                                <div className="w-24">
+                                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                                    <div 
+                                      className={`h-full rounded-full transition-all ${
+                                        job.readinessScore >= 70 ? 'bg-green-500' :
+                                        job.readinessScore >= 40 ? 'bg-amber-500' : 'bg-brand-accent'
+                                      }`}
+                                      style={{ width: `${job.readinessScore}%` }}
+                                    />
+                                  </div>
                                 </div>
-                                <div className="text-xs text-brand-muted">Ready</div>
+                                <div className="text-right">
+                                  <div className="text-lg font-bold text-brand-dark">
+                                    {job.readinessScore}%
+                                  </div>
+                                  <div className="text-xs text-brand-muted">Ready</div>
+                                </div>
                               </div>
                             )}
                             

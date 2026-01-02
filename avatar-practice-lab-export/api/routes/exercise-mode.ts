@@ -8,6 +8,7 @@ import {
   exerciseRubrics,
   exerciseAnalysis,
   roleKits,
+  jobTargets,
   CaseTemplate,
   CodingExercise,
   ExerciseSession,
@@ -195,6 +196,7 @@ exerciseModeRouter.post("/sessions", requireAuth, async (req: Request, res: Resp
       roleKitId,
       interviewType,
       style,
+      jobTargetId,
     } = req.body;
     
     if (!exerciseType || !["case_study", "coding_lab"].includes(exerciseType)) {
@@ -209,6 +211,18 @@ exerciseModeRouter.post("/sessions", requireAuth, async (req: Request, res: Resp
       return res.status(400).json({ success: false, error: "Coding exercise ID required for coding lab" });
     }
     
+    // If jobTargetId provided, verify it belongs to this user
+    if (jobTargetId) {
+      const [jobTarget] = await db
+        .select()
+        .from(jobTargets)
+        .where(and(eq(jobTargets.id, jobTargetId), eq(jobTargets.userId, userId)));
+      
+      if (!jobTarget) {
+        return res.status(404).json({ success: false, error: "Job target not found" });
+      }
+    }
+    
     const sessionUid = uuidv4();
     
     const [session] = await db
@@ -221,6 +235,7 @@ exerciseModeRouter.post("/sessions", requireAuth, async (req: Request, res: Resp
         roleKitId: roleKitId ? parseInt(roleKitId) : null,
         interviewType: interviewType || "hiring_manager",
         style: style || "neutral",
+        jobTargetId: jobTargetId || null,
         sessionUid,
         status: "created",
         createdAt: new Date(),

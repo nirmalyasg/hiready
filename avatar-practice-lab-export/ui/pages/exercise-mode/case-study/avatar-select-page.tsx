@@ -6,6 +6,7 @@ import SidebarLayout from "@/components/layout/sidebar-layout";
 import { ChevronRight, Check, ArrowLeft, Briefcase, Users } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useRealtimePrewarm } from "@/contexts/RealtimeSessionPrewarmContext";
+import { JobTargetSelector } from "@/components/job-target-selector";
 
 interface CaseTemplate {
   id: number;
@@ -62,11 +63,13 @@ export default function CaseStudyAvatarSelectPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get("templateId");
+  const preSelectedJobId = searchParams.get("jobTargetId");
   
   const [template, setTemplate] = useState<CaseTemplate | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
+  const [selectedJobTargetId, setSelectedJobTargetId] = useState<string | null>(preSelectedJobId);
   
   const realtimePrewarm = useRealtimePrewarm();
 
@@ -123,7 +126,11 @@ export default function CaseStudyAvatarSelectPage() {
       personality: avatar.personality,
     }]));
     
-    navigate(`/exercise-mode/case-study/session?templateId=${templateId}&avatars=${avatarParam}`);
+    let url = `/exercise-mode/case-study/session?templateId=${templateId}&avatars=${avatarParam}`;
+    if (selectedJobTargetId) {
+      url += `&jobTargetId=${selectedJobTargetId}`;
+    }
+    navigate(url);
   };
 
   if (isLoading) {
@@ -215,6 +222,12 @@ export default function CaseStudyAvatarSelectPage() {
               );
             })}
           </div>
+
+          <JobTargetSelector
+            value={selectedJobTargetId}
+            onChange={(id) => setSelectedJobTargetId(id)}
+            className="mb-8"
+          />
 
           <div className="flex items-center justify-between">
             <Button

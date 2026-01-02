@@ -109,6 +109,7 @@ function CodingLabSessionContent() {
   const [searchParams] = useSearchParams();
   const exerciseId = searchParams.get("exerciseId");
   const avatarsParam = searchParams.get("avatars");
+  const jobTargetId = searchParams.get("jobTargetId");
 
   const [exercise, setExercise] = useState<CodingExercise | null>(null);
   const [session, setSession] = useState<ExerciseSession | null>(null);
@@ -404,7 +405,8 @@ ${probingQuestionsContext}
         body: JSON.stringify({
           exerciseType: "coding_lab",
           codingExerciseId: exercise.id,
-          roleKitId: null
+          roleKitId: null,
+          jobTargetId: jobTargetId || null
         })
       });
       

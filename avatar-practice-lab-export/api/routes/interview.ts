@@ -15,6 +15,7 @@ import {
   interviewSessions,
   interviewAnalysis,
   interviewArtifacts,
+  jobTargets,
   RoleKit,
   UserDocument,
   InterviewConfig,
@@ -342,6 +343,7 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
       style,
       seniority,
       mode,
+      jobTargetId,
     } = req.body;
     
     const interviewMode = mode || (roleKitId && !resumeDocId ? "role_based" : "custom");
@@ -352,6 +354,18 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
     
     if (interviewMode === "role_based" && !roleKitId) {
       return res.status(400).json({ success: false, error: "Role kit is required for role-based interviews" });
+    }
+    
+    // If jobTargetId provided, verify it belongs to this user
+    if (jobTargetId) {
+      const [jobTarget] = await db
+        .select()
+        .from(jobTargets)
+        .where(and(eq(jobTargets.id, jobTargetId), eq(jobTargets.userId, userId)));
+      
+      if (!jobTarget) {
+        return res.status(404).json({ success: false, error: "Job target not found" });
+      }
     }
     
     const [config] = await db
@@ -365,6 +379,7 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
         interviewType: interviewType || "behavioral",
         style: style || "neutral",
         seniority: seniority || "entry",
+        jobTargetId: jobTargetId || null,
         createdAt: new Date(),
       })
       .returning();
