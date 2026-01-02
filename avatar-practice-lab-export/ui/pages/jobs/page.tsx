@@ -63,7 +63,7 @@ export default function JobsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [addMode, setAddMode] = useState<"url" | "paste" | "manual" | null>(null);
+  const [addMode, setAddMode] = useState<"url" | "manual" | null>(null);
   const [pastedJD, setPastedJD] = useState("");
   const [pastedUrl, setPastedUrl] = useState("");
   const [isParsing, setIsParsing] = useState(false);
@@ -113,12 +113,16 @@ export default function JobsPage() {
       const response = await fetch("/api/jobs/job-targets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newJob),
+        body: JSON.stringify({ 
+          ...newJob, 
+          jdText: pastedJD.trim() || null 
+        }),
       });
       const data = await response.json();
       if (data.success) {
         setJobs([data.job, ...jobs]);
         setNewJob({ roleTitle: "", companyName: "", location: "" });
+        setPastedJD("");
         setAddDialogOpen(false);
       }
     } catch (error) {
@@ -157,9 +161,10 @@ export default function JobsPage() {
     
     setUrlError("");
     
-    // Validate LinkedIn URL
-    if (!pastedUrl.includes("linkedin.com/jobs")) {
-      setUrlError("Please enter a valid LinkedIn job URL");
+    try {
+      new URL(pastedUrl);
+    } catch {
+      setUrlError("Please enter a valid URL starting with http:// or https://");
       return;
     }
     
@@ -252,12 +257,11 @@ export default function JobsPage() {
                   Add Job
                 </Button>
               </DialogTrigger>
-              <DialogContent className={addMode === "paste" ? "max-w-2xl" : ""}>
+              <DialogContent>
                 <DialogHeader>
                   <DialogTitle>
-                    {addMode === "url" ? "Import from LinkedIn" :
-                     addMode === "paste" ? "Paste Job Description" :
-                     addMode === "manual" ? "Add Job Manually" :
+                    {addMode === "url" ? "Import from URL" :
+                     addMode === "manual" ? "Enter Job Details" :
                      "Add New Job"}
                   </DialogTitle>
                 </DialogHeader>
@@ -277,28 +281,10 @@ export default function JobsPage() {
                         </div>
                         <div>
                           <div className="font-medium text-brand-dark group-hover:text-brand-accent">
-                            LinkedIn URL
+                            Import from URL
                           </div>
                           <div className="text-sm text-brand-muted">
-                            Paste a LinkedIn job link - we'll extract everything
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => setAddMode("paste")}
-                      className="w-full p-4 border rounded-xl text-left hover:border-brand-accent hover:bg-brand-accent/5 transition-all group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                          <ClipboardPaste className="w-5 h-5 text-purple-600" />
-                        </div>
-                        <div>
-                          <div className="font-medium text-brand-dark group-hover:text-brand-accent">
-                            Paste Job Description
-                          </div>
-                          <div className="text-sm text-brand-muted">
-                            Copy-paste a JD and we'll parse the details
+                            Paste any job link (LinkedIn, Indeed, Glassdoor, Naukri, etc.)
                           </div>
                         </div>
                       </div>
@@ -313,10 +299,10 @@ export default function JobsPage() {
                         </div>
                         <div>
                           <div className="font-medium text-brand-dark group-hover:text-brand-accent">
-                            Add Manually
+                            Enter Manually
                           </div>
                           <div className="text-sm text-brand-muted">
-                            Enter job title, company, and location yourself
+                            Type job title, company, location, and description
                           </div>
                         </div>
                       </div>
@@ -325,19 +311,19 @@ export default function JobsPage() {
                 ) : addMode === "url" ? (
                   <div className="space-y-4 pt-4">
                     <p className="text-sm text-brand-muted">
-                      Paste a LinkedIn job URL and we'll extract all the details automatically.
+                      Paste a job URL and we'll extract all the details automatically.
                     </p>
                     <Input
                       value={pastedUrl}
                       onChange={(e) => { setPastedUrl(e.target.value); setUrlError(""); }}
-                      placeholder="https://linkedin.com/jobs/view/..."
+                      placeholder="https://linkedin.com/jobs/... or https://indeed.com/..."
                       className={urlError ? "border-red-500" : ""}
                     />
                     {urlError && (
                       <p className="text-sm text-red-500">{urlError}</p>
                     )}
                     <div className="text-xs text-brand-muted bg-gray-50 p-3 rounded-lg">
-                      <strong>Supported:</strong> LinkedIn job URLs (linkedin.com/jobs/...)
+                      <strong>Supported:</strong> LinkedIn, Indeed, Glassdoor, Naukri, Monster, and more
                     </div>
                     <div className="flex justify-between gap-3">
                       <Button variant="ghost" onClick={() => setAddMode(null)}>
@@ -362,70 +348,49 @@ export default function JobsPage() {
                       </Button>
                     </div>
                   </div>
-                ) : addMode === "paste" ? (
-                  <div className="space-y-4 pt-4">
-                    <p className="text-sm text-brand-muted">
-                      Paste a job description and we'll extract the key details automatically.
-                    </p>
-                    <textarea
-                      value={pastedJD}
-                      onChange={(e) => setPastedJD(e.target.value)}
-                      placeholder="Paste the full job description here..."
-                      className="w-full h-64 p-4 border rounded-xl resize-none focus:ring-2 focus:ring-brand-accent focus:border-brand-accent"
-                    />
-                    <div className="flex justify-between gap-3">
-                      <Button variant="ghost" onClick={() => setAddMode(null)}>
-                        Back
-                      </Button>
-                      <Button 
-                        onClick={handlePasteJD}
-                        disabled={isParsing || pastedJD.length < 50}
-                        className="gap-2 bg-brand-accent hover:bg-brand-accent/90"
-                      >
-                        {isParsing ? (
-                          <>
-                            <LoadingSpinner className="w-4 h-4" />
-                            Analyzing...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="w-4 h-4" />
-                            Analyze & Save
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
                 ) : (
                   <div className="space-y-4 pt-4">
-                    <div>
-                      <label className="text-sm font-medium text-brand-dark mb-1.5 block">
-                        Role Title *
-                      </label>
-                      <Input
-                        value={newJob.roleTitle}
-                        onChange={(e) => setNewJob({ ...newJob, roleTitle: e.target.value })}
-                        placeholder="e.g. Senior Product Manager"
-                      />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="col-span-2">
+                        <label className="text-sm font-medium text-brand-dark mb-1.5 block">
+                          Role Title *
+                        </label>
+                        <Input
+                          value={newJob.roleTitle}
+                          onChange={(e) => setNewJob({ ...newJob, roleTitle: e.target.value })}
+                          placeholder="e.g. Senior Product Manager"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-brand-dark mb-1.5 block">
+                          Company
+                        </label>
+                        <Input
+                          value={newJob.companyName}
+                          onChange={(e) => setNewJob({ ...newJob, companyName: e.target.value })}
+                          placeholder="e.g. Google"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-brand-dark mb-1.5 block">
+                          Location
+                        </label>
+                        <Input
+                          value={newJob.location}
+                          onChange={(e) => setNewJob({ ...newJob, location: e.target.value })}
+                          placeholder="e.g. Remote, NYC"
+                        />
+                      </div>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-brand-dark mb-1.5 block">
-                        Company
+                        Job Description
                       </label>
-                      <Input
-                        value={newJob.companyName}
-                        onChange={(e) => setNewJob({ ...newJob, companyName: e.target.value })}
-                        placeholder="e.g. Google"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-brand-dark mb-1.5 block">
-                        Location
-                      </label>
-                      <Input
-                        value={newJob.location}
-                        onChange={(e) => setNewJob({ ...newJob, location: e.target.value })}
-                        placeholder="e.g. San Francisco, CA"
+                      <textarea
+                        value={pastedJD}
+                        onChange={(e) => setPastedJD(e.target.value)}
+                        placeholder="Paste the full job description here (optional, helps with practice focus)..."
+                        className="w-full h-32 p-3 border rounded-xl resize-none focus:ring-2 focus:ring-brand-accent focus:border-brand-accent text-sm"
                       />
                     </div>
                     <div className="flex justify-between gap-3 pt-2">

@@ -436,7 +436,153 @@ jobsRouter.delete("/job-targets/:id", requireAuth, async (req: Request, res: Res
   }
 });
 
-// Scrape LinkedIn job URL and auto-create job target with parsed data
+type JobPortal = "linkedin" | "indeed" | "glassdoor" | "naukri" | "monster" | "wellfound" | "generic";
+
+interface PortalConfig {
+  name: string;
+  titleSelectors: string[];
+  companySelectors: string[];
+  locationSelectors: string[];
+  descriptionSelectors: string[];
+  waitSelector?: string;
+}
+
+const PORTAL_CONFIGS: Record<JobPortal, PortalConfig> = {
+  linkedin: {
+    name: "LinkedIn",
+    titleSelectors: [
+      'h1.top-card-layout__title', 'h1.topcard__title',
+      'h1.job-details-jobs-unified-top-card__job-title',
+      '.jobs-unified-top-card__job-title', 'h1'
+    ],
+    companySelectors: [
+      '.topcard__org-name-link', '.job-details-jobs-unified-top-card__company-name',
+      '.jobs-unified-top-card__company-name', '.topcard__flavor--black-link'
+    ],
+    locationSelectors: [
+      '.topcard__flavor--bullet', '.jobs-unified-top-card__bullet',
+      '.job-details-jobs-unified-top-card__primary-description-container span'
+    ],
+    descriptionSelectors: [
+      '.show-more-less-html__markup', '.description__text',
+      '.jobs-description__content', '.jobs-box__html-content'
+    ],
+    waitSelector: 'h1, .job-details, .show-more-less-html'
+  },
+  indeed: {
+    name: "Indeed",
+    titleSelectors: [
+      'h1.jobsearch-JobInfoHeader-title', '.jobsearch-JobInfoHeader-title',
+      '[data-testid="jobsearch-JobInfoHeader-title"]', 'h1'
+    ],
+    companySelectors: [
+      '[data-testid="inlineHeader-companyName"]', '.jobsearch-InlineCompanyRating-companyHeader',
+      '.jobsearch-CompanyInfoContainer a', '.css-1saizt3'
+    ],
+    locationSelectors: [
+      '[data-testid="jobsearch-JobInfoHeader-companyLocation"]',
+      '[data-testid="inlineHeader-companyLocation"]', '.jobsearch-JobInfoHeader-subtitle > div'
+    ],
+    descriptionSelectors: [
+      '#jobDescriptionText', '.jobsearch-jobDescriptionText', '[data-testid="jobDescriptionText"]'
+    ],
+    waitSelector: '#jobDescriptionText, .jobsearch-JobInfoHeader-title'
+  },
+  glassdoor: {
+    name: "Glassdoor",
+    titleSelectors: [
+      '[data-test="job-title"]', '.job-title', '.css-1vg6q84', 'h1'
+    ],
+    companySelectors: [
+      '[data-test="employer-name"]', '.employer-name', '.css-87uc0g', '.job-details-employer-link'
+    ],
+    locationSelectors: [
+      '[data-test="location"]', '.job-location', '.css-1buaf54'
+    ],
+    descriptionSelectors: [
+      '[data-test="description"]', '.jobDescriptionContent', '.desc', '.job-description'
+    ],
+    waitSelector: '[data-test="job-title"], .job-title'
+  },
+  naukri: {
+    name: "Naukri",
+    titleSelectors: [
+      '.jd-header-title', 'h1.title', '.job-title', 'h1'
+    ],
+    companySelectors: [
+      '.jd-header-comp-name', '.company-title', '.companyName', 'a.company-name'
+    ],
+    locationSelectors: [
+      '.loc', '.location', '.ni-job-tuple-icon-location + span'
+    ],
+    descriptionSelectors: [
+      '.job-desc', '.dang-inner-html', '.job-description-inner', '#job-description'
+    ],
+    waitSelector: '.jd-header-title, .job-title'
+  },
+  monster: {
+    name: "Monster",
+    titleSelectors: [
+      '[data-testid="viewJobTitle"]', '.job-title', 'h1'
+    ],
+    companySelectors: [
+      '[data-testid="viewJobCompanyName"]', '.company-name', '.job-company'
+    ],
+    locationSelectors: [
+      '[data-testid="viewJobLocation"]', '.location', '.job-location'
+    ],
+    descriptionSelectors: [
+      '[data-testid="viewJobDescription"]', '.job-description', '#JobDescription'
+    ],
+    waitSelector: '[data-testid="viewJobTitle"], .job-title'
+  },
+  wellfound: {
+    name: "Wellfound",
+    titleSelectors: [
+      '.job-title', 'h1', '[data-test="JobTitle"]'
+    ],
+    companySelectors: [
+      '.company-link', '.startup-link', '[data-test="CompanyName"]'
+    ],
+    locationSelectors: [
+      '.location', '.job-location', '[data-test="JobLocation"]'
+    ],
+    descriptionSelectors: [
+      '.job-description', '.description-content', '[data-test="JobDescription"]'
+    ]
+  },
+  generic: {
+    name: "Job Portal",
+    titleSelectors: ['h1', '[class*="title"]', '[class*="job-title"]', '[class*="jobtitle"]'],
+    companySelectors: ['[class*="company"]', '[class*="employer"]', '[class*="org"]'],
+    locationSelectors: ['[class*="location"]', '[class*="city"]', 'address'],
+    descriptionSelectors: [
+      '[class*="description"]', '[class*="job-desc"]', 
+      'article', 'main', '[role="main"]'
+    ]
+  }
+};
+
+function detectPortal(url: string): JobPortal {
+  const hostname = new URL(url).hostname.toLowerCase();
+  if (hostname.includes('linkedin.com')) return 'linkedin';
+  if (hostname.includes('indeed.com') || hostname.includes('indeed.co')) return 'indeed';
+  if (hostname.includes('glassdoor.com') || hostname.includes('glassdoor.co')) return 'glassdoor';
+  if (hostname.includes('naukri.com')) return 'naukri';
+  if (hostname.includes('monster.com') || hostname.includes('monster.co')) return 'monster';
+  if (hostname.includes('wellfound.com') || hostname.includes('angel.co')) return 'wellfound';
+  return 'generic';
+}
+
+function isValidJobUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return ['http:', 'https:'].includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
 jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
@@ -446,166 +592,122 @@ jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res:
       return res.status(400).json({ success: false, error: "URL is required" });
     }
 
-    // Validate LinkedIn URL
-    const linkedinPattern = /linkedin\.com\/jobs\/(view|search)/i;
-    if (!linkedinPattern.test(url)) {
+    if (!isValidJobUrl(url)) {
       return res.status(400).json({ 
         success: false, 
-        error: "Please provide a valid LinkedIn job URL" 
+        error: "Please provide a valid URL starting with http:// or https://" 
       });
     }
 
-    console.log("Scraping LinkedIn job URL:", url);
+    const portal = detectPortal(url);
+    const config = PORTAL_CONFIGS[portal];
+    console.log(`Scraping job from ${config.name}: ${url}`);
 
-    // Launch Puppeteer to scrape the LinkedIn job page
     const browser = await puppeteer.launch({
       headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--single-process'
-      ]
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process']
     });
+
+    let jobData = { title: '', company: '', location: '', description: '' };
+    let pageText = '';
 
     try {
       const page = await browser.newPage();
-      
-      // Set a realistic user agent
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
       
-      await page.goto(url, { 
-        waitUntil: 'networkidle2',
-        timeout: 30000 
-      });
+      await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+      
+      if (config.waitSelector) {
+        await page.waitForSelector(config.waitSelector, { timeout: 10000 }).catch(() => {});
+      }
+      await new Promise(r => setTimeout(r, 2000));
 
-      // Wait for content to load
-      await page.waitForSelector('h1, .job-details, .show-more-less-html', { timeout: 10000 }).catch(() => {});
-
-      // Extract job details from the page
-      const jobData = await page.evaluate(() => {
-        // Try multiple selectors for job title
-        const titleSelectors = [
-          'h1.top-card-layout__title',
-          'h1.topcard__title',
-          'h1.job-details-jobs-unified-top-card__job-title',
-          '.jobs-unified-top-card__job-title',
-          'h1'
-        ];
-        let title = '';
-        for (const sel of titleSelectors) {
-          const el = document.querySelector(sel);
-          if (el && el.textContent?.trim()) {
-            title = el.textContent.trim();
-            break;
-          }
+      const extractWithSelectors = async (selectors: string[]): Promise<string> => {
+        for (const sel of selectors) {
+          const text = await page.$eval(sel, el => el.textContent?.trim() || '').catch(() => '');
+          if (text) return text;
         }
+        return '';
+      };
 
-        // Try multiple selectors for company name
-        const companySelectors = [
-          '.topcard__org-name-link',
-          '.top-card-layout__card a.topcard__org-name-link',
-          '.job-details-jobs-unified-top-card__company-name',
-          '.jobs-unified-top-card__company-name',
-          'a[data-tracking-control-name="public_jobs_topcard-org-name"]',
-          '.topcard__flavor--black-link'
-        ];
-        let company = '';
-        for (const sel of companySelectors) {
-          const el = document.querySelector(sel);
-          if (el && el.textContent?.trim()) {
-            company = el.textContent.trim();
-            break;
-          }
-        }
-
-        // Try multiple selectors for location
-        const locationSelectors = [
-          '.topcard__flavor--bullet',
-          '.top-card-layout__second-subline .topcard__flavor--bullet',
-          '.job-details-jobs-unified-top-card__primary-description-container span',
-          '.jobs-unified-top-card__bullet'
-        ];
-        let location = '';
-        for (const sel of locationSelectors) {
-          const el = document.querySelector(sel);
-          if (el && el.textContent?.trim()) {
-            location = el.textContent.trim();
-            break;
-          }
-        }
-
-        // Try to get the job description
-        const descriptionSelectors = [
-          '.show-more-less-html__markup',
-          '.description__text',
-          '.jobs-description__content',
-          '.job-details-module__content',
-          '.jobs-box__html-content'
-        ];
-        let description = '';
-        for (const sel of descriptionSelectors) {
-          const el = document.querySelector(sel);
-          if (el && el.textContent?.trim()) {
-            description = el.textContent.trim();
-            break;
-          }
-        }
-
-        return { title, company, location, description };
-      });
-
+      jobData.title = await extractWithSelectors(config.titleSelectors);
+      jobData.company = await extractWithSelectors(config.companySelectors);
+      jobData.location = await extractWithSelectors(config.locationSelectors);
+      jobData.description = await extractWithSelectors(config.descriptionSelectors);
+      
+      pageText = await page.evaluate(() => document.body.innerText || '').catch(() => '');
+      
       await browser.close();
 
       console.log("Scraped job data:", {
+        portal: config.name,
         title: jobData.title?.substring(0, 50),
         company: jobData.company,
         location: jobData.location,
         descLength: jobData.description?.length
       });
 
-      if (!jobData.title && !jobData.company) {
+      if (!jobData.title && !jobData.description && pageText.length > 200) {
+        console.log("Selector extraction failed, using AI fallback...");
+        try {
+          const openai = getOpenAI();
+          const aiExtract = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: `Extract job posting details from this webpage text. Return JSON with: title (job title), company (company name), location (job location), description (full job description text). If any field is unclear, leave it empty.` },
+              { role: "user", content: pageText.substring(0, 12000) }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.2,
+          });
+          const extracted = JSON.parse(aiExtract.choices[0].message.content || "{}");
+          jobData.title = extracted.title || jobData.title;
+          jobData.company = extracted.company || jobData.company;
+          jobData.location = extracted.location || jobData.location;
+          jobData.description = extracted.description || jobData.description;
+        } catch (e) {
+          console.error("AI extraction fallback failed:", e);
+        }
+      }
+
+      if (!jobData.title) {
         return res.status(400).json({
           success: false,
-          error: "Could not extract job details from the URL. The page might require login or have a different format."
+          error: "Could not extract job details. The page might require login or have a different format. Try entering manually instead."
         });
       }
 
-      // Parse the JD with OpenAI if we have a description
       let jdParsed: JDParsedType | null = null;
-      if (jobData.description && jobData.description.length > 100) {
+      const descToAnalyze = jobData.description || pageText;
+      if (descToAnalyze && descToAnalyze.length > 100) {
         try {
           const openai = getOpenAI();
           const completion = await openai.chat.completions.create({
-            model: "gpt-4o",
+            model: "gpt-4o-mini",
             messages: [
               { role: "system", content: JD_PARSE_PROMPT },
-              { role: "user", content: jobData.description }
+              { role: "user", content: descToAnalyze.substring(0, 8000) }
             ],
             response_format: { type: "json_object" },
             temperature: 0.3,
           });
-
-          const parsed = JSON.parse(completion.choices[0].message.content || "{}");
-          jdParsed = parsed as JDParsedType;
-        } catch (parseError) {
-          console.error("Error parsing JD with OpenAI:", parseError);
+          jdParsed = JSON.parse(completion.choices[0].message.content || "{}") as JDParsedType;
+        } catch (e) {
+          console.error("Error parsing JD:", e);
         }
       }
 
-      // Create the job target
       const [newJob] = await db
         .insert(jobTargets)
         .values({
           userId,
-          roleTitle: jobData.title || "Unknown Role",
+          roleTitle: jobData.title,
           companyName: jobData.company || null,
           location: jobData.location || null,
           jdText: jobData.description || null,
           jdParsed,
           jobUrl: url,
-          source: "linkedin",
+          source: portal,
           status: "saved",
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -615,6 +717,7 @@ jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res:
       res.status(201).json({ 
         success: true, 
         job: newJob,
+        portal: config.name,
         scraped: {
           title: jobData.title,
           company: jobData.company,
@@ -629,7 +732,7 @@ jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res:
       console.error("Scraping error:", scrapeError);
       return res.status(500).json({
         success: false,
-        error: "Failed to scrape the LinkedIn job page. Please try pasting the job description manually."
+        error: "Failed to load the job page. Please check the URL or try entering the job details manually."
       });
     }
 

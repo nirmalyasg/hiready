@@ -749,7 +749,7 @@ export const jobTargets = pgTable("job_targets", {
   userId: varchar("user_id")
     .notNull()
     .references(() => authUsers.id, { onDelete: "cascade" }),
-  source: text("source").$type<"linkedin" | "naukri" | "indeed" | "company" | "manual">().default("manual"),
+  source: text("source").$type<"linkedin" | "naukri" | "indeed" | "glassdoor" | "monster" | "wellfound" | "company" | "manual" | "generic">().default("manual"),
   jobUrl: text("job_url"),
   companyName: text("company_name"),
   roleTitle: text("role_title").notNull(),

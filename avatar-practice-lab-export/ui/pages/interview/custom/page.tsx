@@ -27,7 +27,7 @@ interface JobTarget {
   lastResumeDocId: number | null;
 }
 
-type AddJobMode = "url" | "paste" | "manual" | null;
+type AddJobMode = "url" | "manual" | null;
 
 export default function InterviewCustomPage() {
   const navigate = useNavigate();
@@ -125,7 +125,7 @@ export default function InterviewCustomPage() {
 
   const handleAddJobViaUrl = async () => {
     if (!linkedinUrl.trim()) {
-      setAddJobError("Please enter a LinkedIn job URL");
+      setAddJobError("Please enter a job URL");
       return;
     }
 
@@ -133,7 +133,7 @@ export default function InterviewCustomPage() {
     setAddJobError(null);
 
     try {
-      const response = await fetch("/api/jobs/import-linkedin", {
+      const response = await fetch("/api/jobs/job-targets/parse-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: linkedinUrl }),
@@ -146,7 +146,7 @@ export default function InterviewCustomPage() {
       handleSelectJob(data.job);
       setLinkedinUrl("");
     } catch (e: any) {
-      setAddJobError(e.message || "Failed to import job from LinkedIn");
+      setAddJobError(e.message || "Failed to import job from URL");
     } finally {
       setAddingJob(false);
     }
@@ -195,13 +195,14 @@ export default function InterviewCustomPage() {
     setAddJobError(null);
 
     try {
-      const response = await fetch("/api/jobs", {
+      const response = await fetch("/api/jobs/job-targets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           roleTitle: manualTitle,
           companyName: manualCompany || null,
           location: manualLocation || null,
+          jdText: jdPasteText.trim() || null,
           source: "manual",
         }),
       });
@@ -214,6 +215,7 @@ export default function InterviewCustomPage() {
       setManualTitle("");
       setManualCompany("");
       setManualLocation("");
+      setJdPasteText("");
     } catch (e: any) {
       setAddJobError(e.message || "Failed to create job");
     } finally {
@@ -445,7 +447,7 @@ export default function InterviewCustomPage() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
                         <button
                           onClick={() => setAddJobMode("url")}
                           className={`p-4 rounded-xl border-2 text-left transition-all ${
@@ -455,21 +457,8 @@ export default function InterviewCustomPage() {
                           }`}
                         >
                           <Link2 className={`w-5 h-5 mb-2 ${addJobMode === "url" ? "text-emerald-600" : "text-slate-400"}`} />
-                          <p className="font-medium text-sm text-slate-900">LinkedIn URL</p>
-                          <p className="text-xs text-slate-500 mt-1">Import from LinkedIn</p>
-                        </button>
-
-                        <button
-                          onClick={() => setAddJobMode("paste")}
-                          className={`p-4 rounded-xl border-2 text-left transition-all ${
-                            addJobMode === "paste"
-                              ? "border-emerald-500 bg-emerald-50"
-                              : "border-slate-200 hover:border-emerald-300"
-                          }`}
-                        >
-                          <ClipboardPaste className={`w-5 h-5 mb-2 ${addJobMode === "paste" ? "text-emerald-600" : "text-slate-400"}`} />
-                          <p className="font-medium text-sm text-slate-900">Paste JD</p>
-                          <p className="text-xs text-slate-500 mt-1">Paste job description</p>
+                          <p className="font-medium text-sm text-slate-900">Import from URL</p>
+                          <p className="text-xs text-slate-500 mt-1">LinkedIn, Indeed, Glassdoor, Naukri, etc.</p>
                         </button>
 
                         <button
@@ -481,17 +470,17 @@ export default function InterviewCustomPage() {
                           }`}
                         >
                           <FileText className={`w-5 h-5 mb-2 ${addJobMode === "manual" ? "text-emerald-600" : "text-slate-400"}`} />
-                          <p className="font-medium text-sm text-slate-900">Manual Entry</p>
-                          <p className="text-xs text-slate-500 mt-1">Enter details yourself</p>
+                          <p className="font-medium text-sm text-slate-900">Enter Manually</p>
+                          <p className="text-xs text-slate-500 mt-1">Type title, company, location & JD</p>
                         </button>
                       </div>
 
                       {addJobMode === "url" && (
                         <div className="space-y-4">
                           <div>
-                            <Label className="text-sm font-medium text-slate-700 mb-2 block">LinkedIn Job URL</Label>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Job URL</Label>
                             <Input
-                              placeholder="https://www.linkedin.com/jobs/view/..."
+                              placeholder="https://linkedin.com/jobs/... or https://indeed.com/..."
                               value={linkedinUrl}
                               onChange={(e) => setLinkedinUrl(e.target.value)}
                               className="rounded-xl"
@@ -512,37 +501,6 @@ export default function InterviewCustomPage() {
                               <>
                                 <Link2 className="w-4 h-4 mr-2" />
                                 Import Job
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      )}
-
-                      {addJobMode === "paste" && (
-                        <div className="space-y-4">
-                          <div>
-                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Job Description</Label>
-                            <Textarea
-                              placeholder="Paste the full job description here..."
-                              value={jdPasteText}
-                              onChange={(e) => setJdPasteText(e.target.value)}
-                              className="rounded-xl min-h-[200px]"
-                            />
-                          </div>
-                          <Button
-                            onClick={handleAddJobViaPaste}
-                            disabled={addingJob}
-                            className="rounded-xl"
-                          >
-                            {addingJob ? (
-                              <>
-                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                                Processing...
-                              </>
-                            ) : (
-                              <>
-                                <ClipboardPaste className="w-4 h-4 mr-2" />
-                                Add Job
                               </>
                             )}
                           </Button>
@@ -573,12 +531,21 @@ export default function InterviewCustomPage() {
                             <div>
                               <Label className="text-sm font-medium text-slate-700 mb-2 block">Location</Label>
                               <Input
-                                placeholder="e.g., San Francisco, CA"
+                                placeholder="e.g., Remote, NYC"
                                 value={manualLocation}
                                 onChange={(e) => setManualLocation(e.target.value)}
                                 className="rounded-xl"
                               />
                             </div>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Job Description</Label>
+                            <Textarea
+                              placeholder="Paste the full job description here (optional, helps with practice focus)..."
+                              value={jdPasteText}
+                              onChange={(e) => setJdPasteText(e.target.value)}
+                              className="rounded-xl min-h-[120px]"
+                            />
                           </div>
                           <Button
                             onClick={handleAddJobManual}
