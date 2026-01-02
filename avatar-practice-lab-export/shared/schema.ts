@@ -740,6 +740,56 @@ export const userProfileExtracted = pgTable("user_profile_extracted", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// =====================
+// Job Targets - Real jobs users are preparing for (NEW: Job-Centric Practice)
+// =====================
+
+export const jobTargets = pgTable("job_targets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => authUsers.id, { onDelete: "cascade" }),
+  source: text("source").$type<"linkedin" | "naukri" | "indeed" | "company" | "manual">().default("manual"),
+  jobUrl: text("job_url"),
+  companyName: text("company_name"),
+  roleTitle: text("role_title").notNull(),
+  location: text("location"),
+  jdText: text("jd_text"),
+  jdParsed: jsonb("jd_parsed").$type<{
+    requiredSkills?: string[];
+    preferredSkills?: string[];
+    experienceLevel?: string;
+    responsibilities?: string[];
+    companyContext?: string;
+    redFlags?: string[];
+    focusAreas?: string[];
+    salaryRange?: string;
+  }>(),
+  status: text("status")
+    .$type<"saved" | "applied" | "interview" | "offer" | "rejected" | "archived">()
+    .notNull()
+    .default("saved"),
+  readinessScore: integer("readiness_score"),
+  lastPracticedAt: timestamp("last_practiced_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// User Skill Patterns - Career memory tracking improvements (NEW: Learning Loop)
+export const userSkillPatterns = pgTable("user_skill_patterns", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => authUsers.id, { onDelete: "cascade" }),
+  dimension: text("dimension").notNull(),
+  occurrences: integer("occurrences").default(1),
+  avgScore: real("avg_score"),
+  trend: text("trend").$type<"improving" | "stagnant" | "declining">().default("stagnant"),
+  lastSeenAt: timestamp("last_seen_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Interview Configs - User's chosen interview settings for a session
 export const interviewConfigs = pgTable("interview_configs", {
   id: serial("id").primaryKey(),
@@ -748,6 +798,8 @@ export const interviewConfigs = pgTable("interview_configs", {
     .references(() => authUsers.id, { onDelete: "cascade" }),
   roleKitId: integer("role_kit_id")
     .references(() => roleKits.id, { onDelete: "set null" }),
+  jobTargetId: varchar("job_target_id")
+    .references(() => jobTargets.id, { onDelete: "set null" }),
   resumeDocId: integer("resume_doc_id")
     .references(() => userDocuments.id, { onDelete: "set null" }),
   jdDocId: integer("jd_doc_id")
@@ -1050,6 +1102,8 @@ export const exerciseSessions = pgTable("exercise_sessions", {
     .references(() => codingExercises.id, { onDelete: "set null" }),
   roleKitId: integer("role_kit_id")
     .references(() => roleKits.id, { onDelete: "set null" }),
+  jobTargetId: varchar("job_target_id")
+    .references(() => jobTargets.id, { onDelete: "set null" }),
   interviewType: text("interview_type")
     .$type<"hiring_manager" | "panel">()
     .default("hiring_manager"),
@@ -1153,7 +1207,29 @@ export const exerciseSessionsRelations = relations(exerciseSessions, ({ one, man
     fields: [exerciseSessions.roleKitId],
     references: [roleKits.id],
   }),
+  jobTarget: one(jobTargets, {
+    fields: [exerciseSessions.jobTargetId],
+    references: [jobTargets.id],
+  }),
   analysis: many(exerciseAnalysis),
+}));
+
+// Job Targets Relations
+export const jobTargetsRelations = relations(jobTargets, ({ one, many }) => ({
+  user: one(authUsers, {
+    fields: [jobTargets.userId],
+    references: [authUsers.id],
+  }),
+  interviewConfigs: many(interviewConfigs),
+  exerciseSessions: many(exerciseSessions),
+}));
+
+// User Skill Patterns Relations
+export const userSkillPatternsRelations = relations(userSkillPatterns, ({ one }) => ({
+  user: one(authUsers, {
+    fields: [userSkillPatterns.userId],
+    references: [authUsers.id],
+  }),
 }));
 
 export const exerciseAnalysisRelations = relations(exerciseAnalysis, ({ one }) => ({
@@ -1409,6 +1485,10 @@ export const insertPresentationScenarioSchema = createInsertSchema(presentationS
 export const insertPresentationSessionSchema = createInsertSchema(presentationSessions).omit({ id: true, createdAt: true });
 export const insertPresentationFeedbackSchema = createInsertSchema(presentationFeedback).omit({ id: true, createdAt: true });
 
+// Job Targets Insert Schemas
+export const insertJobTargetSchema = createInsertSchema(jobTargets).omit({ createdAt: true, updatedAt: true });
+export const insertUserSkillPatternSchema = createInsertSchema(userSkillPatterns).omit({ id: true, createdAt: true, updatedAt: true });
+
 // Interview Practice Lab Insert Schemas
 export const insertRoleKitSchema = createInsertSchema(roleKits).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertInterviewRubricSchema = createInsertSchema(interviewRubrics).omit({ id: true, createdAt: true, updatedAt: true });
@@ -1477,6 +1557,12 @@ export type PresentationScenario = typeof presentationScenarios.$inferSelect;
 export type InsertPresentationScenario = z.infer<typeof insertPresentationScenarioSchema>;
 export type PresentationFeedbackType = typeof presentationFeedback.$inferSelect;
 export type InsertPresentationFeedback = z.infer<typeof insertPresentationFeedbackSchema>;
+
+// Job Targets Types
+export type JobTarget = typeof jobTargets.$inferSelect;
+export type InsertJobTarget = z.infer<typeof insertJobTargetSchema>;
+export type UserSkillPattern = typeof userSkillPatterns.$inferSelect;
+export type InsertUserSkillPattern = z.infer<typeof insertUserSkillPatternSchema>;
 
 // Interview Practice Lab Types
 export type RoleKit = typeof roleKits.$inferSelect;

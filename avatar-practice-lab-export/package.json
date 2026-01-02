@@ -7,7 +7,7 @@
     "dev": "tsx watch api/index.ts",
     "build": "npx vite build && (tsc -p tsconfig.build.json || true)",
     "start": "NODE_ENV=production node dist/api/index.js",
-    "db:migrate": "drizzle-kit push",
+    "db:migrate": "drizzle-kit push:pg",
     "db:migrate:sql": "tsx scripts/run-migrations.ts",
     "db:seed": "tsx scripts/run-seeds.ts",
     "db:setup": "npm run db:migrate:sql && npm run db:seed",
