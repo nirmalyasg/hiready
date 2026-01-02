@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Plus, Briefcase, Building2, MapPin, Clock, ChevronRight, MoreVertical, Target, CheckCircle2, XCircle, Archive, Filter, ClipboardPaste, Sparkles } from "lucide-react";
+import { Search, Plus, Briefcase, Building2, MapPin, Clock, ChevronRight, MoreVertical, Target, CheckCircle2, XCircle, Archive, Filter, ClipboardPaste, Sparkles, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
@@ -64,8 +64,12 @@ export default function JobsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [pasteDialogOpen, setPasteDialogOpen] = useState(false);
+  const [urlDialogOpen, setUrlDialogOpen] = useState(false);
   const [pastedJD, setPastedJD] = useState("");
+  const [pastedUrl, setPastedUrl] = useState("");
   const [isParsing, setIsParsing] = useState(false);
+  const [isParsingUrl, setIsParsingUrl] = useState(false);
+  const [urlError, setUrlError] = useState("");
   const [newJob, setNewJob] = useState({ roleTitle: "", companyName: "", location: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -149,6 +153,41 @@ export default function JobsPage() {
     }
   };
 
+  const handleParseUrl = async () => {
+    if (!pastedUrl.trim()) return;
+    
+    setUrlError("");
+    
+    // Validate LinkedIn URL
+    if (!pastedUrl.includes("linkedin.com/jobs")) {
+      setUrlError("Please enter a valid LinkedIn job URL");
+      return;
+    }
+    
+    try {
+      setIsParsingUrl(true);
+      const response = await fetch("/api/jobs/job-targets/parse-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: pastedUrl }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setJobs([data.job, ...jobs]);
+        setPastedUrl("");
+        setUrlDialogOpen(false);
+        navigate(`/jobs/${data.job.id}`);
+      } else {
+        setUrlError(data.error || "Failed to parse the job URL");
+      }
+    } catch (error) {
+      console.error("Error parsing URL:", error);
+      setUrlError("Failed to connect. Please try again.");
+    } finally {
+      setIsParsingUrl(false);
+    }
+  };
+
   const handleUpdateStatus = async (jobId: string, status: string) => {
     try {
       const response = await fetch(`/api/jobs/job-targets/${jobId}/status`, {
@@ -199,6 +238,62 @@ export default function JobsPage() {
             </div>
 
             <div className="flex gap-3">
+              <Dialog open={urlDialogOpen} onOpenChange={(open) => { setUrlDialogOpen(open); if (!open) { setUrlError(""); setPastedUrl(""); } }}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="gap-2 border-brand-accent text-brand-accent hover:bg-brand-accent/10">
+                    <Link2 className="w-4 h-4" />
+                    <span className="hidden sm:inline">Paste URL</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <Link2 className="w-5 h-5 text-brand-accent" />
+                      Import from LinkedIn
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-4">
+                    <p className="text-sm text-brand-muted">
+                      Paste a LinkedIn job URL and we'll extract all the details automatically.
+                    </p>
+                    <Input
+                      value={pastedUrl}
+                      onChange={(e) => { setPastedUrl(e.target.value); setUrlError(""); }}
+                      placeholder="https://linkedin.com/jobs/view/..."
+                      className={urlError ? "border-red-500" : ""}
+                    />
+                    {urlError && (
+                      <p className="text-sm text-red-500">{urlError}</p>
+                    )}
+                    <div className="text-xs text-brand-muted bg-gray-50 p-3 rounded-lg">
+                      <strong>Supported:</strong> LinkedIn job URLs (linkedin.com/jobs/...)
+                    </div>
+                    <div className="flex justify-end gap-3">
+                      <Button variant="outline" onClick={() => setUrlDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button 
+                        onClick={handleParseUrl}
+                        disabled={isParsingUrl || !pastedUrl.trim()}
+                        className="gap-2 bg-brand-accent hover:bg-brand-accent/90"
+                      >
+                        {isParsingUrl ? (
+                          <>
+                            <LoadingSpinner className="w-4 h-4" />
+                            Importing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4" />
+                            Import Job
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
               <Dialog open={pasteDialogOpen} onOpenChange={setPasteDialogOpen}>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="gap-2">

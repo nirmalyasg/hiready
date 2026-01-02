@@ -41,7 +41,7 @@
     "openid-client": "^6.8.1",
     "passport": "^0.7.0",
     "pdf-parse": "^2.4.5",
-    "puppeteer": "^24.33.0",
+    "puppeteer": "^24.34.0",
     "react-markdown": "^10.1.0",
     "react-media-recorder": "^1.7.2",
     "react-pdf": "^10.2.0",

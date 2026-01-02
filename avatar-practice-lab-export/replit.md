@@ -35,6 +35,7 @@ Implemented comprehensive job targeting system with career memory and readiness 
    - Save target jobs with role title, company, location, and full job description
    - Track job status: Saved → Applied → Interviewing → Offer/Rejected
    - AI-powered JD parsing using GPT-4o extracts required skills, focus areas, experience level
+   - **LinkedIn URL Import**: Paste a LinkedIn job URL, Puppeteer scrapes the page and auto-extracts title, company, location, and description
    - Paste-and-parse feature: paste full JD text, AI extracts all fields automatically
 
 2. **Job-Aware Practice Sessions (Phase 2)**
@@ -71,6 +72,7 @@ Implemented comprehensive job targeting system with career memory and readiness 
 - `/api/jobs/job-targets` - CRUD for job targets
 - `/api/jobs/job-targets/:id/parse-jd` - AI parse job description
 - `/api/jobs/job-targets/parse-paste` - Paste JD, auto-extract and save
+- `/api/jobs/job-targets/parse-url` - Scrape LinkedIn job URL with Puppeteer, auto-extract and AI-parse
 - `/api/jobs/job-targets/:id/practice-suggestions` - Get practice recommendations
 - `/api/jobs/job-targets/:id/readiness-score` - Compute readiness score from linked sessions
 - `/api/jobs/skill-patterns` - Get user's career memory skill patterns

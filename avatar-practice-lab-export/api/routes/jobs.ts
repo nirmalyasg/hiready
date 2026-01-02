@@ -12,6 +12,7 @@ import {
 } from "../../shared/schema.js";
 import { requireAuth } from "../middleware/auth.js";
 import { getOpenAI } from "../utils/openai-client.js";
+import puppeteer from "puppeteer";
 
 export const jobsRouter = Router();
 
@@ -285,6 +286,209 @@ jobsRouter.delete("/job-targets/:id", requireAuth, async (req: Request, res: Res
     res.json({ success: true, message: "Job target deleted" });
   } catch (error: any) {
     console.error("Error deleting job target:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Scrape LinkedIn job URL and auto-create job target with parsed data
+jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { url } = req.body;
+
+    if (!url) {
+      return res.status(400).json({ success: false, error: "URL is required" });
+    }
+
+    // Validate LinkedIn URL
+    const linkedinPattern = /linkedin\.com\/jobs\/(view|search)/i;
+    if (!linkedinPattern.test(url)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Please provide a valid LinkedIn job URL" 
+      });
+    }
+
+    console.log("Scraping LinkedIn job URL:", url);
+
+    // Launch Puppeteer to scrape the LinkedIn job page
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--single-process'
+      ]
+    });
+
+    try {
+      const page = await browser.newPage();
+      
+      // Set a realistic user agent
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+      
+      await page.goto(url, { 
+        waitUntil: 'networkidle2',
+        timeout: 30000 
+      });
+
+      // Wait for content to load
+      await page.waitForSelector('h1, .job-details, .show-more-less-html', { timeout: 10000 }).catch(() => {});
+
+      // Extract job details from the page
+      const jobData = await page.evaluate(() => {
+        // Try multiple selectors for job title
+        const titleSelectors = [
+          'h1.top-card-layout__title',
+          'h1.topcard__title',
+          'h1.job-details-jobs-unified-top-card__job-title',
+          '.jobs-unified-top-card__job-title',
+          'h1'
+        ];
+        let title = '';
+        for (const sel of titleSelectors) {
+          const el = document.querySelector(sel);
+          if (el && el.textContent?.trim()) {
+            title = el.textContent.trim();
+            break;
+          }
+        }
+
+        // Try multiple selectors for company name
+        const companySelectors = [
+          '.topcard__org-name-link',
+          '.top-card-layout__card a.topcard__org-name-link',
+          '.job-details-jobs-unified-top-card__company-name',
+          '.jobs-unified-top-card__company-name',
+          'a[data-tracking-control-name="public_jobs_topcard-org-name"]',
+          '.topcard__flavor--black-link'
+        ];
+        let company = '';
+        for (const sel of companySelectors) {
+          const el = document.querySelector(sel);
+          if (el && el.textContent?.trim()) {
+            company = el.textContent.trim();
+            break;
+          }
+        }
+
+        // Try multiple selectors for location
+        const locationSelectors = [
+          '.topcard__flavor--bullet',
+          '.top-card-layout__second-subline .topcard__flavor--bullet',
+          '.job-details-jobs-unified-top-card__primary-description-container span',
+          '.jobs-unified-top-card__bullet'
+        ];
+        let location = '';
+        for (const sel of locationSelectors) {
+          const el = document.querySelector(sel);
+          if (el && el.textContent?.trim()) {
+            location = el.textContent.trim();
+            break;
+          }
+        }
+
+        // Try to get the job description
+        const descriptionSelectors = [
+          '.show-more-less-html__markup',
+          '.description__text',
+          '.jobs-description__content',
+          '.job-details-module__content',
+          '.jobs-box__html-content'
+        ];
+        let description = '';
+        for (const sel of descriptionSelectors) {
+          const el = document.querySelector(sel);
+          if (el && el.textContent?.trim()) {
+            description = el.textContent.trim();
+            break;
+          }
+        }
+
+        return { title, company, location, description };
+      });
+
+      await browser.close();
+
+      console.log("Scraped job data:", {
+        title: jobData.title?.substring(0, 50),
+        company: jobData.company,
+        location: jobData.location,
+        descLength: jobData.description?.length
+      });
+
+      if (!jobData.title && !jobData.company) {
+        return res.status(400).json({
+          success: false,
+          error: "Could not extract job details from the URL. The page might require login or have a different format."
+        });
+      }
+
+      // Parse the JD with OpenAI if we have a description
+      let jdParsed: JDParsedType | null = null;
+      if (jobData.description && jobData.description.length > 100) {
+        try {
+          const openai = getOpenAI();
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              { role: "system", content: JD_PARSE_PROMPT },
+              { role: "user", content: jobData.description }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.3,
+          });
+
+          const parsed = JSON.parse(completion.choices[0].message.content || "{}");
+          jdParsed = parsed as JDParsedType;
+        } catch (parseError) {
+          console.error("Error parsing JD with OpenAI:", parseError);
+        }
+      }
+
+      // Create the job target
+      const [newJob] = await db
+        .insert(jobTargets)
+        .values({
+          userId,
+          roleTitle: jobData.title || "Unknown Role",
+          companyName: jobData.company || null,
+          location: jobData.location || null,
+          jdText: jobData.description || null,
+          jdParsed,
+          jobUrl: url,
+          source: "linkedin",
+          status: "saved",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+
+      res.status(201).json({ 
+        success: true, 
+        job: newJob,
+        scraped: {
+          title: jobData.title,
+          company: jobData.company,
+          location: jobData.location,
+          descriptionLength: jobData.description?.length || 0,
+          parsed: jdParsed !== null
+        }
+      });
+
+    } catch (scrapeError: any) {
+      await browser.close();
+      console.error("Scraping error:", scrapeError);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to scrape the LinkedIn job page. Please try pasting the job description manually."
+      });
+    }
+
+  } catch (error: any) {
+    console.error("Error parsing job URL:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
