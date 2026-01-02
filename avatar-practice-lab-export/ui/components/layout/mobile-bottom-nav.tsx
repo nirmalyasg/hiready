@@ -1,5 +1,19 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, PlayCircle, BarChart3, LogOut } from "lucide-react";
+import { Home, Target, BarChart3, User } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface NavItem {
+  path: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+}
+
+const navItems: NavItem[] = [
+  { path: "/avatar/dashboard", icon: Home, label: "Home" },
+  { path: "/avatar/start", icon: Target, label: "Practice" },
+  { path: "/avatar/results", icon: BarChart3, label: "Results" },
+  { path: "/profile", icon: User, label: "Profile" },
+];
 
 export default function MobileBottomNav() {
   const location = useLocation();
@@ -9,49 +23,52 @@ export default function MobileBottomNav() {
       return location.pathname === "/avatar/dashboard";
     }
     if (path === "/avatar/start") {
-      return location.pathname.startsWith("/avatar/practice") || location.pathname === "/avatar/start";
+      return location.pathname === "/avatar/start" ||
+             location.pathname.startsWith("/avatar/practice") || 
+             location.pathname.startsWith("/interview") ||
+             location.pathname.startsWith("/exercise-mode");
     }
     if (path === "/avatar/results") {
-      return location.pathname === "/avatar/results" || location.pathname.includes("/session-analysis");
+      return location.pathname === "/avatar/results" || 
+             location.pathname.includes("/session-analysis");
+    }
+    if (path === "/profile") {
+      return location.pathname === "/profile";
     }
     return false;
   };
 
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    window.location.href = '/';
-  };
-
-  const navItems = [
-    { path: "/avatar/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { path: "/avatar/start", icon: PlayCircle, label: "Practice" },
-    { path: "/avatar/results", icon: BarChart3, label: "Results" },
-  ];
-
   return (
-    <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-2 py-3 z-40 shadow-lg">
-      <div className="flex justify-around items-center max-w-md mx-auto">
-        {navItems.map(({ path, icon: Icon, label }) => (
-          <Link
-            key={path}
-            to={path}
-            className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all duration-200 ${
-              isActive(path)
-                ? "text-white bg-brand-dark shadow-md"
-                : "text-brand-muted hover:text-brand-dark hover:bg-gray-50"
-            }`}
-          >
-            <Icon className="w-5 h-5" />
-            <span className="text-[10px] font-semibold tracking-wide">{label}</span>
-          </Link>
-        ))}
-        <button
-          onClick={handleLogout}
-          className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl text-brand-muted hover:text-brand-accent hover:bg-brand-accent/10 transition-all duration-200"
-        >
-          <LogOut className="w-5 h-5" />
-          <span className="text-[10px] font-semibold tracking-wide">Logout</span>
-        </button>
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-200/80 z-50 pb-safe">
+      <div className="flex items-stretch justify-around h-16">
+        {navItems.map(({ path, icon: Icon, label }) => {
+          const active = isActive(path);
+          return (
+            <Link
+              key={path}
+              to={path}
+              className={cn(
+                "flex flex-col items-center justify-center flex-1 gap-0.5 transition-all duration-200 active:scale-95",
+                active 
+                  ? "text-brand-accent" 
+                  : "text-gray-400"
+              )}
+            >
+              <div className={cn(
+                "p-1.5 rounded-xl transition-colors",
+                active && "bg-brand-accent/10"
+              )}>
+                <Icon className="w-5 h-5" />
+              </div>
+              <span className={cn(
+                "text-[10px] font-semibold",
+                active ? "text-brand-accent" : "text-gray-500"
+              )}>
+                {label}
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );

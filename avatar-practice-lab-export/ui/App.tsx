@@ -40,6 +40,7 @@ import CodingLabPage from './pages/exercise-mode/coding-lab/page';
 import CodingLabAvatarSelectPage from './pages/exercise-mode/coding-lab/avatar-select-page';
 import CodingLabSessionPage from './pages/exercise-mode/coding-lab/session-page';
 import CodingLabResultsPage from './pages/exercise-mode/coding-lab/results-page';
+import ProfilePage from './pages/profile/page';
 
 export default function App() {
   return (
@@ -83,6 +84,7 @@ export default function App() {
         <Route path="/exercise-mode/coding-lab/avatar-select" element={<ProtectedRoute><CodingLabAvatarSelectPage /></ProtectedRoute>} />
         <Route path="/exercise-mode/coding-lab/session" element={<ProtectedRoute><CodingLabSessionPage /></ProtectedRoute>} />
         <Route path="/exercise-mode/coding-lab/results" element={<ProtectedRoute><CodingLabResultsPage /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </RealtimeSessionPrewarmProvider>
