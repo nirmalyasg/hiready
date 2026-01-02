@@ -21,7 +21,7 @@ interface SidebarLayoutProps {
   children: React.ReactNode;
 }
 
-export default function SidebarLayout({ children }: SidebarLayoutProps) {
+export function SidebarLayout({ children }: SidebarLayoutProps) {
   const location = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -194,3 +194,5 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
     </div>
   );
 }
+
+export default SidebarLayout;

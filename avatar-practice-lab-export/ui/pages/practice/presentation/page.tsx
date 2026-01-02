@@ -5,8 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { VoiceInputField } from "@/components/ui/voice-input";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
-import MobileBottomNav from "@/components/layout/mobile-bottom-nav";
+import { SidebarLayout } from "@/components/layout/sidebar-layout";
 
 interface SlidePreview {
   slideNumber: number;
@@ -105,7 +104,7 @@ export default function PresentationPage() {
   };
 
   return (
-    <ModernDashboardLayout>
+    <SidebarLayout>
       <div className="min-h-screen pb-32 sm:pb-8">
         <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-3xl">
           <div className="flex items-center justify-between mb-4 sm:mb-8">
@@ -329,8 +328,7 @@ export default function PresentationPage() {
           )}
         </div>
 
-        <MobileBottomNav />
       </div>
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }

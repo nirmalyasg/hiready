@@ -22,8 +22,7 @@ const SUPPORTED_LANGUAGES = [
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
-import MobileBottomNav from "@/components/layout/mobile-bottom-nav";
+import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { useAvatars, type Avatar } from "@/hooks/use-avatars";
 import { useQuery } from "@tanstack/react-query";
 
@@ -182,7 +181,7 @@ export default function PresentationAvatarSelectPage() {
 
   if (!presentationId) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <Presentation className="w-12 h-12 text-slate-400 mx-auto mb-4" />
@@ -193,12 +192,12 @@ export default function PresentationAvatarSelectPage() {
             </Link>
           </div>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   return (
-    <ModernDashboardLayout>
+    <SidebarLayout>
       <div className="min-h-screen bg-gray-50/50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-7xl">
           <div className="mb-6">
@@ -497,7 +496,6 @@ export default function PresentationAvatarSelectPage() {
           <div className="h-20"></div>
         </div>
       </div>
-      <MobileBottomNav />
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }

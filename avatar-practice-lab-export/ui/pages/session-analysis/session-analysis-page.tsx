@@ -20,8 +20,7 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
-import MobileBottomNav from "@/components/layout/mobile-bottom-nav";
+import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { useState } from "react";
 import {
   ConversationBlueprint,
@@ -197,20 +196,20 @@ export default function SessionAnalysisPage() {
 
   if (isLoading) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-muted-foreground">Analyzing your session...</p>
           </div>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   if (error) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <p className="text-red-500 mb-4">Error loading your session analysis</p>
@@ -220,13 +219,13 @@ export default function SessionAnalysisPage() {
             </Button>
           </div>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   if (!data || !data.analysis) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <Card>
             <CardContent className="p-12 text-center">
@@ -240,7 +239,7 @@ export default function SessionAnalysisPage() {
             </CardContent>
           </Card>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
@@ -259,7 +258,7 @@ export default function SessionAnalysisPage() {
   const growthAreas = analysis.growthAreas || analysis.feedback?.growthAreas || [];
 
   return (
-    <ModernDashboardLayout>
+    <SidebarLayout>
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pb-20 sm:pb-6">
         {/* Header */}
         <div className="border-b bg-card sticky top-0 z-10">
@@ -619,7 +618,6 @@ export default function SessionAnalysisPage() {
           )}
         </div>
       </div>
-      <MobileBottomNav />
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }

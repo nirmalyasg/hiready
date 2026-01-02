@@ -8,8 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
-import MobileBottomNav from "@/components/layout/mobile-bottom-nav";
+import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { 
@@ -286,17 +285,17 @@ export default function PresentationResultsPage() {
 
   if (isLoading) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="flex items-center justify-center min-h-screen">
           <LoadingSpinner className="h-12 w-12" />
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   if (!feedback) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <Card className="text-center py-12">
             <CardContent>
@@ -311,14 +310,14 @@ export default function PresentationResultsPage() {
             </CardContent>
           </Card>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   const scorePercent = (score: number) => (score / 5) * 100;
 
   return (
-    <ModernDashboardLayout>
+    <SidebarLayout>
       <div className="min-h-screen bg-gray-50/50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-5xl">
           <div className="mb-6">
@@ -1108,7 +1107,6 @@ export default function PresentationResultsPage() {
           </div>
         </div>
       </div>
-      <MobileBottomNav />
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }
