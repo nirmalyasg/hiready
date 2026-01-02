@@ -4,7 +4,7 @@ import { AnalyticsDashboard } from "@/components/ai-session-analysis/analytics-d
 import { ArrowLeft, BarChart3 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
+import { SidebarLayout } from "@/components/layout/sidebar-layout";
 
 export default function MicroAssessmentSessionAnalysisPage() {
   const [searchParams] = useSearchParams();
@@ -54,20 +54,20 @@ export default function MicroAssessmentSessionAnalysisPage() {
 
   if (isLoading) {
     return (
-      <ModernDashboardLayout initialActiveSection="assessments" activeItem="micro-assessment">
+      <SidebarLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-muted-foreground">Loading your session analysis...</p>
           </div>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   if (error) {
     return (
-      <ModernDashboardLayout initialActiveSection="assessments" activeItem="micro-assessment">
+      <SidebarLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <p className="text-red-500 mb-4">Error loading your session analysis</p>
@@ -77,13 +77,13 @@ export default function MicroAssessmentSessionAnalysisPage() {
             </Button>
           </div>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   if (!data || !data.analysis) {
     return (
-      <ModernDashboardLayout initialActiveSection="assessments" activeItem="micro-assessment">
+      <SidebarLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <Card>
             <CardContent className="p-12 text-center">
@@ -101,12 +101,12 @@ export default function MicroAssessmentSessionAnalysisPage() {
             </CardContent>
           </Card>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   return (
-    <ModernDashboardLayout initialActiveSection="assessments" activeItem="micro-assessment">
+    <SidebarLayout>
       <div className="">
         {/* Header */}
         <div className="border-b bg-card">
@@ -139,6 +139,6 @@ export default function MicroAssessmentSessionAnalysisPage() {
           />
         </div>
       </div>
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }
