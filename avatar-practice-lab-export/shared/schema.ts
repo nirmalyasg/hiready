@@ -771,6 +771,7 @@ export const jobTargets = pgTable("job_targets", {
     .default("saved"),
   readinessScore: integer("readiness_score"),
   lastPracticedAt: timestamp("last_practiced_at"),
+  lastResumeDocId: integer("last_resume_doc_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
