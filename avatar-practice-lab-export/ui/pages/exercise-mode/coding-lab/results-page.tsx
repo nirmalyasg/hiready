@@ -252,14 +252,19 @@ class DistributedRateLimiter:
               <h3 className="font-semibold text-slate-900">Your Practice Plan</h3>
             </div>
             <ol className="space-y-2">
-              {results.practicePlan.map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-sm text-slate-700">
-                  <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-medium flex-shrink-0">
-                    {i + 1}
-                  </span>
-                  {item}
-                </li>
-              ))}
+              {results.practicePlan.map((item, i) => {
+                const text = typeof item === 'string' 
+                  ? item 
+                  : (item as any).task || JSON.stringify(item);
+                return (
+                  <li key={i} className="flex items-start gap-3 text-sm text-slate-700">
+                    <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-medium flex-shrink-0">
+                      {i + 1}
+                    </span>
+                    {text}
+                  </li>
+                );
+              })}
             </ol>
           </div>
 
