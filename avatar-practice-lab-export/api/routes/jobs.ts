@@ -75,6 +75,152 @@ Return a JSON object with the following fields:
 
 Be precise and extract only what is explicitly stated or strongly implied. If something is not mentioned, use an empty array or null.`;
 
+jobsRouter.get("/", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const jobs = await db
+      .select()
+      .from(jobTargets)
+      .where(and(eq(jobTargets.userId, userId), sql`${jobTargets.status} != 'archived'`))
+      .orderBy(desc(jobTargets.updatedAt))
+      .limit(50);
+    res.json({ success: true, jobs });
+  } catch (error: any) {
+    console.error("Error fetching jobs:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+jobsRouter.post("/", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { roleTitle, companyName, location, jdText, source = "manual" } = req.body;
+
+    if (!roleTitle) {
+      return res.status(400).json({ success: false, error: "Role title is required" });
+    }
+
+    let parsedJd: JDParsedType | null = null;
+    if (jdText && jdText.length > 50) {
+      try {
+        const openai = getOpenAI();
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: JD_PARSE_PROMPT },
+            { role: "user", content: jdText.substring(0, 8000) },
+          ],
+          response_format: { type: "json_object" },
+        });
+        parsedJd = JSON.parse(response.choices[0].message.content || "{}") as JDParsedType;
+      } catch (e) {
+        console.error("Failed to parse JD:", e);
+      }
+    }
+
+    const [newJob] = await db
+      .insert(jobTargets)
+      .values({
+        userId,
+        roleTitle: parsedJd?.focusAreas?.[0] ? roleTitle.replace("Job from Paste", parsedJd.focusAreas[0]) : roleTitle,
+        companyName: companyName || null,
+        location: location || null,
+        jdText: jdText || null,
+        jdParsed: parsedJd,
+        source,
+        status: "saved",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    res.status(201).json({ success: true, job: newJob });
+  } catch (error: any) {
+    console.error("Error creating job:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+jobsRouter.post("/import-linkedin", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { url } = req.body;
+
+    if (!url || !url.includes("linkedin.com/jobs")) {
+      return res.status(400).json({ success: false, error: "Valid LinkedIn job URL required" });
+    }
+
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+    });
+
+    const page = await browser.newPage();
+    await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+    await new Promise((r) => setTimeout(r, 2000));
+
+    const scraped = await page.evaluate(() => {
+      const getText = (selectors: string[]): string => {
+        for (const s of selectors) {
+          const el = document.querySelector(s);
+          if (el?.textContent?.trim()) return el.textContent.trim();
+        }
+        return "";
+      };
+      return {
+        title: getText(["h1.top-card-layout__title", "h1.jobs-unified-top-card__job-title", ".job-details-jobs-unified-top-card__job-title", "h1"]),
+        company: getText([".topcard__org-name-link", ".jobs-unified-top-card__company-name a", ".job-details-jobs-unified-top-card__company-name"]),
+        location: getText([".topcard__flavor--bullet", ".jobs-unified-top-card__bullet", ".job-details-jobs-unified-top-card__bullet"]),
+        description: getText([".description__text", ".jobs-description-content__text", ".jobs-box__html-content"]),
+      };
+    });
+
+    await browser.close();
+
+    let parsedJd: JDParsedType | null = null;
+    if (scraped.description && scraped.description.length > 50) {
+      try {
+        const openai = getOpenAI();
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: JD_PARSE_PROMPT },
+            { role: "user", content: scraped.description.substring(0, 8000) },
+          ],
+          response_format: { type: "json_object" },
+        });
+        parsedJd = JSON.parse(response.choices[0].message.content || "{}") as JDParsedType;
+      } catch (e) {
+        console.error("Failed to parse JD:", e);
+      }
+    }
+
+    const [newJob] = await db
+      .insert(jobTargets)
+      .values({
+        userId,
+        roleTitle: scraped.title || "Untitled Role",
+        companyName: scraped.company || null,
+        location: scraped.location || null,
+        jobUrl: url,
+        jdText: scraped.description || null,
+        jdParsed: parsedJd,
+        source: "linkedin",
+        status: "saved",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    res.status(201).json({ success: true, job: newJob });
+  } catch (error: any) {
+    console.error("Error importing LinkedIn job:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 jobsRouter.get("/job-targets", requireAuth, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;

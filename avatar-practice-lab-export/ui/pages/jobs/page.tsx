@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Plus, Briefcase, Building2, MapPin, Clock, ChevronRight, MoreVertical, Target, CheckCircle2, XCircle, Archive, Filter, ClipboardPaste, Sparkles, Link2 } from "lucide-react";
+import { Search, Plus, Briefcase, Building2, MapPin, Clock, ChevronRight, MoreVertical, Target, CheckCircle2, XCircle, Archive, Filter, ClipboardPaste, Sparkles, Link2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
@@ -532,6 +532,18 @@ export default function JobsPage() {
                               </div>
                             )}
                             
+                            <Button
+                              size="sm"
+                              onClick={(e: React.MouseEvent) => {
+                                e.stopPropagation();
+                                navigate(`/interview/custom?jobTargetId=${job.id}`);
+                              }}
+                              className="gap-1.5 bg-brand-accent hover:bg-brand-accent/90 text-white rounded-lg hidden sm:flex"
+                            >
+                              <Play className="w-3.5 h-3.5" />
+                              Practice
+                            </Button>
+                            
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -539,6 +551,13 @@ export default function JobsPage() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                                <DropdownMenuItem 
+                                  onClick={() => navigate(`/interview/custom?jobTargetId=${job.id}`)}
+                                  className="sm:hidden"
+                                >
+                                  <Play className="w-4 h-4 mr-2" />
+                                  Practice Interview
+                                </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleUpdateStatus(job.id, "applied")}>
                                   Mark as Applied
                                 </DropdownMenuItem>
