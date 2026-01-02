@@ -1,0 +1,328 @@
+1. What stays the same (important to align the dev)
+
+From the existing documentation, the following do NOT change :
+
+Reused as-is
+
+Voice-first avatar sessions (OpenAI Realtime + HeyGen)
+
+Session lifecycle:
+start → live → transcript → analysis → results
+
+Interview Practice Lab core:
+
+role_kits
+
+interview_configs
+
+interview_plans
+
+interview_sessions
+
+interview_analysis
+
+Exercise Mode base routing:
+
+/exercise-mode
+
+case_templates
+
+coding_exercises
+
+Dashboard, Results, Admin, Cost tracking, Auth, Mobile nav
+
+This is critical:
+👉 We are extending the system, not replacing it.
+
+2. Core Product Shift (conceptual, but crucial)
+Before
+
+Practice is session-centric
+
+Scenarios / exercises are standalone
+
+After
+
+Practice becomes job-centric
+
+Sessions accumulate into a career memory
+
+This single shift creates your moat.
+
+3. New Core Concept to Introduce
+🔑 Job Target (First-class entity)
+
+A Job Target represents:
+
+“A real job the user is preparing for.”
+
+This object becomes the anchor for:
+
+Interview configs
+
+Case exercises
+
+Coding exercises
+
+Progress tracking
+
+Readiness scoring
+
+4. New Tables to Add (Clean, additive)
+
+These fit naturally alongside existing Interview + Exercise tables .
+
+4.1 job_targets (NEW)
+job_targets (
+  id UUID PK,
+  user_id UUID NOT NULL,
+  source TEXT,              -- linkedin | naukri | indeed | company | manual
+  job_url TEXT,
+  company_name TEXT,
+  role_title TEXT,
+  location TEXT,
+  jd_text TEXT,
+  jd_parsed JSONB,
+  status TEXT,              -- saved | applied | interview | offer | rejected
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+)
+
+
+Why devs need this clearly
+
+This is NOT a job board
+
+This is a personal job tracker
+
+4.2 Link interviews & exercises to jobs
+Extend existing tables:
+ALTER TABLE interview_configs
+ADD COLUMN job_target_id UUID;
+
+ALTER TABLE exercise_sessions
+ADD COLUMN job_target_id UUID;
+
+
+Now:
+
+Every interview / case / coding session can be tied to a job
+
+Or remain generic if job_target_id is NULL
+
+5. Job Ingestion (How jobs enter the system)
+MVP-recommended approach (simple + powerful)
+Option A — Chrome Extension (preferred)
+
+User saves job from LinkedIn / Naukri / company site
+
+Extension extracts:
+
+title
+
+company
+
+JD text (best effort)
+
+URL
+
+POST → /api/jobs/save
+
+Option B — Paste Job Link / JD
+
+User pastes job URL or JD text into app
+
+Backend fetches or stores raw text
+
+Important for dev:
+No scraping engine required for MVP.
+Just store what the user provides.
+
+6. Enhancing Interview Practice Lab (existing module)
+Where this fits
+
+/interview/* routes already exist
+
+Enhancements
+6.1 Job-aware Interview Config
+
+Extend interview setup:
+
+Before
+
+Select role kit
+
+Upload resume/JD
+
+After
+
+Select Job Target (optional)
+
+JD auto-prefilled from job_target
+
+Interview plan emphasizes:
+
+JD risks
+
+Company expectations
+
+Repeated weaknesses from past sessions
+
+6.2 Interview Plan Generation (enhanced logic)
+
+Use existing /api/interview/plans/generate but add inputs:
+
+inputs = {
+  role_kit,
+  interview_type,
+  resume_profile,
+  jd_parsed,
+  job_target_history,
+  user_weakness_patterns
+}
+
+
+The interviewer:
+
+Probes what matters for THIS job
+
+Pushes harder on historical weak areas
+
+7. Exercise Mode Enhancement (this is big)
+
+Your doc already has:
+
+Case Study Mode
+
+Coding Lab Mode
+
+We now sharpen them.
+
+7.1 Case Study Mode → Job-Aware Case Mode
+Enhancements
+
+Case can be:
+
+Generic (role-based)
+
+Job-derived (from JD)
+
+New table fields (extend case_templates)
+ADD COLUMN job_fit_tags JSONB;
+ADD COLUMN role_level TEXT;
+
+Runtime behavior
+
+If job_target_id exists:
+
+Prefer case templates tagged to that role/company type
+
+Use JD language in probing
+
+7.2 Coding Lab Mode → Explain / Debug / Modify (tightened)
+
+Already present in doc, but clarify MVP behavior:
+
+Coding modes (explicit)
+
+explain
+
+debug
+
+modify
+
+MVP constraint (important for dev)
+
+No code execution
+
+Evaluation is:
+
+reasoning
+
+correctness explanation
+
+edge case handling
+
+debugging method
+
+Later → sandbox.
+
+8. Career Memory & Learning Loop (moat layer)
+
+This is what makes the app hard to leave.
+
+8.1 New derived table: user_skill_patterns
+user_skill_patterns (
+  user_id UUID,
+  dimension TEXT,        -- e.g. edge_cases, clarity, structuring
+  occurrences INT,
+  last_seen TIMESTAMP,
+  trend TEXT             -- improving | stagnant | declining
+)
+
+
+Updated after every:
+
+interview_analysis
+
+exercise_analysis
+
+8.2 Interview Readiness Score (derived, not stored)
+
+Computed per:
+
+role
+
+job_target
+
+Inputs:
+
+Last N sessions
+
+Rubric weights
+
+Trend direction
+
+Displayed:
+
+On Job Target page
+
+On Dashboard
+
+9. UX Changes (minimal, clear)
+New screens
+
+Jobs
+
+Saved jobs
+
+Status tracking
+
+“Practice for this job” CTA
+
+Job Detail
+
+JD summary
+
+Practice history
+
+Readiness score
+
+Suggested next practice
+
+Existing screens enhanced
+
+Interview setup → auto-prefill from job
+
+Results → “Impact on readiness for this job”
+
+10. API Additions (concrete)
+POST /api/jobs/save
+GET  /api/jobs
+GET  /api/jobs/:id
+PATCH /api/jobs/:id/status
+
+GET  /api/jobs/:id/practice-suggestions
+
+
+No breaking changes to existing APIs.
