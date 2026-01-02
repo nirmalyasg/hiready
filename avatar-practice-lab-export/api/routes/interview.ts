@@ -26,11 +26,8 @@ import {
 } from "../../shared/schema.js";
 import { requireAuth } from "../middleware/auth.js";
 import { getOpenAI } from "../utils/openai-client.js";
-import { createRequire } from "module";
-
-const require = createRequire(import.meta.url);
-const pdfParse = require("pdf-parse");
-const mammoth = require("mammoth");
+import { PDFParse } from "pdf-parse";
+import mammoth from "mammoth";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -152,8 +149,10 @@ interviewRouter.post("/documents/upload", requireAuth, upload.single("file"), as
     
     if (mimeType === "application/pdf") {
       const dataBuffer = fs.readFileSync(filePath);
-      const pdfData = await pdfParse(dataBuffer);
+      const parser = new PDFParse({ data: dataBuffer });
+      const pdfData = await parser.getText();
       rawText = pdfData.text;
+      await parser.destroy();
     } else if (mimeType.includes("wordprocessingml") || mimeType === "application/msword") {
       const result = await mammoth.extractRawText({ path: filePath });
       rawText = result.value;
