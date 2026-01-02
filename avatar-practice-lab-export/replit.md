@@ -28,6 +28,21 @@ avatar-practice-lab-export/
 
 ## Recent Changes (January 2, 2026)
 
+### Interview Custom 2-Step Wizard Flow (Latest)
+Redesigned the Interview Custom page into a streamlined 2-step wizard:
+- **Step 1: Select Target Job**
+  - Choose from saved jobs or add a new one via:
+    - LinkedIn URL import (auto-scrapes with Puppeteer)
+    - Paste full JD text (AI parses details)
+    - Manual entry (title, company, location)
+  - Selected job displayed with company/location context
+- **Step 2: Configure Interview**
+  - Upload resume (drag-drop, parsed via AI)
+  - Choose interview type (HR, Hiring Manager, Technical, Panel)
+  - Select interviewer style (Friendly, Neutral, Challenging)
+  - Resume cached per job via `lastResumeDocId` for repeat sessions
+- **Jobs Page Practice Buttons**: Direct "Practice" button on each job card routes to Interview Custom with job pre-selected
+
 ### Job-Centric Career Preparation Feature (Complete)
 Implemented comprehensive job targeting system with career memory and readiness tracking:
 
@@ -69,7 +84,9 @@ Implemented comprehensive job targeting system with career memory and readiness 
 - Added `job_target_id` foreign key to `interview_configs` and `exercise_sessions`
 
 ### New API Endpoints
-- `/api/jobs/job-targets` - CRUD for job targets
+- `/api/jobs` - GET list jobs, POST create job (simplified)
+- `/api/jobs/import-linkedin` - Scrape LinkedIn URL and create job (simplified)
+- `/api/jobs/job-targets` - CRUD for job targets (full version)
 - `/api/jobs/job-targets/:id/parse-jd` - AI parse job description
 - `/api/jobs/job-targets/parse-paste` - Paste JD, auto-extract and save
 - `/api/jobs/job-targets/parse-url` - Scrape LinkedIn job URL with Puppeteer, auto-extract and AI-parse
