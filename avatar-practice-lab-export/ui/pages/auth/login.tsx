@@ -43,26 +43,26 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-brand-light/5 to-white flex flex-col">
-      <header className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+    <div className="min-h-screen bg-brand-background flex flex-col">
+      <header className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <nav className="flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-2 sm:gap-4">
-            <img src={a3cendLogo} alt="A3CEND" className="h-7 sm:h-9" />
-            <div className="h-5 sm:h-6 w-px bg-brand-light/40" />
-            <span className="text-sm sm:text-lg font-medium text-brand-dark tracking-wide">AI Practice Lab</span>
+          <Link to="/" className="flex items-center gap-3">
+            <img src={a3cendLogo} alt="A3CEND" className="h-8" />
+            <div className="h-6 w-px bg-gray-200" />
+            <span className="text-sm font-semibold text-brand-dark tracking-tight">AI Practice Lab</span>
           </Link>
         </nav>
       </header>
 
       <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-sm border border-brand-light/20">
-            <h1 className="text-xl sm:text-2xl font-bold text-brand-dark mb-2 text-center">Welcome back</h1>
-            <p className="text-sm sm:text-base text-brand-dark/60 text-center mb-6 sm:mb-8">Sign in to continue practicing</p>
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+            <h1 className="text-2xl font-bold text-brand-dark mb-2 text-center">Welcome back</h1>
+            <p className="text-brand-muted text-center mb-8">Sign in to continue practicing</p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm">
+                <div className="bg-brand-accent/10 text-brand-accent px-4 py-3 rounded-xl text-sm font-medium">
                   {error}
                 </div>
               )}
@@ -76,7 +76,7 @@ export default function LoginPage() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-4 py-3 border border-brand-light/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-light focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-brand-dark placeholder:text-brand-muted/60 focus:outline-none focus:ring-2 focus:ring-brand-dark/20 focus:border-brand-dark transition-all duration-200"
                   placeholder="Enter your username"
                   required
                 />
@@ -91,7 +91,7 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-brand-light/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-light focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-brand-dark placeholder:text-brand-muted/60 focus:outline-none focus:ring-2 focus:ring-brand-dark/20 focus:border-brand-dark transition-all duration-200"
                   placeholder="Enter your password"
                   required
                 />
@@ -100,7 +100,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-brand-primary text-white py-3 rounded-lg font-medium hover:bg-brand-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-brand-dark text-white py-3.5 rounded-xl font-semibold hover:bg-brand-dark/90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
               >
                 {isLoading ? (
                   <>
@@ -113,10 +113,10 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-brand-dark/60">
+            <div className="mt-8 text-center">
+              <p className="text-brand-muted">
                 Don't have an account?{' '}
-                <Link to="/register" className="text-brand-accent hover:text-brand-accent/80 font-medium">
+                <Link to="/register" className="text-brand-accent hover:text-brand-accent/80 font-semibold transition-colors">
                   Create one
                 </Link>
               </p>
