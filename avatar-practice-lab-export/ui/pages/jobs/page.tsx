@@ -63,8 +63,7 @@ export default function JobsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [pasteDialogOpen, setPasteDialogOpen] = useState(false);
-  const [urlDialogOpen, setUrlDialogOpen] = useState(false);
+  const [addMode, setAddMode] = useState<"url" | "paste" | "manual" | null>(null);
   const [pastedJD, setPastedJD] = useState("");
   const [pastedUrl, setPastedUrl] = useState("");
   const [isParsing, setIsParsing] = useState(false);
@@ -143,7 +142,7 @@ export default function JobsPage() {
       if (data.success) {
         setJobs([data.job, ...jobs]);
         setPastedJD("");
-        setPasteDialogOpen(false);
+        setAddDialogOpen(false);
         navigate(`/jobs/${data.job.id}`);
       }
     } catch (error) {
@@ -175,7 +174,7 @@ export default function JobsPage() {
       if (data.success) {
         setJobs([data.job, ...jobs]);
         setPastedUrl("");
-        setUrlDialogOpen(false);
+        setAddDialogOpen(false);
         navigate(`/jobs/${data.job.id}`);
       } else {
         setUrlError(data.error || "Failed to parse the job URL");
@@ -237,21 +236,93 @@ export default function JobsPage() {
               </p>
             </div>
 
-            <div className="flex gap-3">
-              <Dialog open={urlDialogOpen} onOpenChange={(open) => { setUrlDialogOpen(open); if (!open) { setUrlError(""); setPastedUrl(""); } }}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="gap-2 border-brand-accent text-brand-accent hover:bg-brand-accent/10">
-                    <Link2 className="w-4 h-4" />
-                    <span className="hidden sm:inline">Paste URL</span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <Link2 className="w-5 h-5 text-brand-accent" />
-                      Import from LinkedIn
-                    </DialogTitle>
-                  </DialogHeader>
+            <Dialog open={addDialogOpen} onOpenChange={(open) => { 
+              setAddDialogOpen(open); 
+              if (!open) { 
+                setAddMode(null); 
+                setUrlError(""); 
+                setPastedUrl(""); 
+                setPastedJD("");
+                setNewJob({ roleTitle: "", companyName: "", location: "" });
+              } 
+            }}>
+              <DialogTrigger asChild>
+                <Button className="gap-2 bg-brand-dark hover:bg-brand-dark/90">
+                  <Plus className="w-4 h-4" />
+                  Add Job
+                </Button>
+              </DialogTrigger>
+              <DialogContent className={addMode === "paste" ? "max-w-2xl" : ""}>
+                <DialogHeader>
+                  <DialogTitle>
+                    {addMode === "url" ? "Import from LinkedIn" :
+                     addMode === "paste" ? "Paste Job Description" :
+                     addMode === "manual" ? "Add Job Manually" :
+                     "Add New Job"}
+                  </DialogTitle>
+                </DialogHeader>
+                
+                {!addMode ? (
+                  <div className="space-y-3 pt-4">
+                    <p className="text-sm text-brand-muted mb-4">
+                      Choose how you'd like to add a job:
+                    </p>
+                    <button
+                      onClick={() => setAddMode("url")}
+                      className="w-full p-4 border rounded-xl text-left hover:border-brand-accent hover:bg-brand-accent/5 transition-all group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <Link2 className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-brand-dark group-hover:text-brand-accent">
+                            LinkedIn URL
+                          </div>
+                          <div className="text-sm text-brand-muted">
+                            Paste a LinkedIn job link - we'll extract everything
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setAddMode("paste")}
+                      className="w-full p-4 border rounded-xl text-left hover:border-brand-accent hover:bg-brand-accent/5 transition-all group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <ClipboardPaste className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-brand-dark group-hover:text-brand-accent">
+                            Paste Job Description
+                          </div>
+                          <div className="text-sm text-brand-muted">
+                            Copy-paste a JD and we'll parse the details
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setAddMode("manual")}
+                      className="w-full p-4 border rounded-xl text-left hover:border-brand-accent hover:bg-brand-accent/5 transition-all group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <Plus className="w-5 h-5 text-gray-600" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-brand-dark group-hover:text-brand-accent">
+                            Add Manually
+                          </div>
+                          <div className="text-sm text-brand-muted">
+                            Enter job title, company, and location yourself
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                ) : addMode === "url" ? (
                   <div className="space-y-4 pt-4">
                     <p className="text-sm text-brand-muted">
                       Paste a LinkedIn job URL and we'll extract all the details automatically.
@@ -268,9 +339,9 @@ export default function JobsPage() {
                     <div className="text-xs text-brand-muted bg-gray-50 p-3 rounded-lg">
                       <strong>Supported:</strong> LinkedIn job URLs (linkedin.com/jobs/...)
                     </div>
-                    <div className="flex justify-end gap-3">
-                      <Button variant="outline" onClick={() => setUrlDialogOpen(false)}>
-                        Cancel
+                    <div className="flex justify-between gap-3">
+                      <Button variant="ghost" onClick={() => setAddMode(null)}>
+                        Back
                       </Button>
                       <Button 
                         onClick={handleParseUrl}
@@ -291,23 +362,7 @@ export default function JobsPage() {
                       </Button>
                     </div>
                   </div>
-                </DialogContent>
-              </Dialog>
-
-              <Dialog open={pasteDialogOpen} onOpenChange={setPasteDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="gap-2">
-                    <ClipboardPaste className="w-4 h-4" />
-                    <span className="hidden sm:inline">Paste JD</span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <Sparkles className="w-5 h-5 text-brand-accent" />
-                      Paste Job Description
-                    </DialogTitle>
-                  </DialogHeader>
+                ) : addMode === "paste" ? (
                   <div className="space-y-4 pt-4">
                     <p className="text-sm text-brand-muted">
                       Paste a job description and we'll extract the key details automatically.
@@ -318,9 +373,9 @@ export default function JobsPage() {
                       placeholder="Paste the full job description here..."
                       className="w-full h-64 p-4 border rounded-xl resize-none focus:ring-2 focus:ring-brand-accent focus:border-brand-accent"
                     />
-                    <div className="flex justify-end gap-3">
-                      <Button variant="outline" onClick={() => setPasteDialogOpen(false)}>
-                        Cancel
+                    <div className="flex justify-between gap-3">
+                      <Button variant="ghost" onClick={() => setAddMode(null)}>
+                        Back
                       </Button>
                       <Button 
                         onClick={handlePasteJD}
@@ -341,20 +396,7 @@ export default function JobsPage() {
                       </Button>
                     </div>
                   </div>
-                </DialogContent>
-              </Dialog>
-
-              <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="gap-2 bg-brand-dark hover:bg-brand-dark/90">
-                    <Plus className="w-4 h-4" />
-                    Add Job
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add New Job Target</DialogTitle>
-                  </DialogHeader>
+                ) : (
                   <div className="space-y-4 pt-4">
                     <div>
                       <label className="text-sm font-medium text-brand-dark mb-1.5 block">
@@ -386,9 +428,9 @@ export default function JobsPage() {
                         placeholder="e.g. San Francisco, CA"
                       />
                     </div>
-                    <div className="flex justify-end gap-3 pt-2">
-                      <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
-                        Cancel
+                    <div className="flex justify-between gap-3 pt-2">
+                      <Button variant="ghost" onClick={() => setAddMode(null)}>
+                        Back
                       </Button>
                       <Button 
                         onClick={handleAddJob}
@@ -399,9 +441,9 @@ export default function JobsPage() {
                       </Button>
                     </div>
                   </div>
-                </DialogContent>
-              </Dialog>
-            </div>
+                )}
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -447,23 +489,13 @@ export default function JobsPage() {
                   : "Add jobs you're preparing for to track your progress and get personalized practice recommendations."}
               </p>
               {!searchQuery && statusFilter === "all" && (
-                <div className="flex gap-3 justify-center">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setPasteDialogOpen(true)}
-                    className="gap-2"
-                  >
-                    <ClipboardPaste className="w-4 h-4" />
-                    Paste JD
-                  </Button>
-                  <Button 
-                    onClick={() => setAddDialogOpen(true)}
-                    className="gap-2 bg-brand-dark hover:bg-brand-dark/90"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add Job
-                  </Button>
-                </div>
+                <Button 
+                  onClick={() => setAddDialogOpen(true)}
+                  className="gap-2 bg-brand-dark hover:bg-brand-dark/90"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Job
+                </Button>
               )}
             </div>
           ) : (
