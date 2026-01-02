@@ -12,13 +12,19 @@ interface ScoreDimension {
   feedback: string;
 }
 
+interface PracticePlanItem {
+  day?: number;
+  task?: string;
+  timeMinutes?: number;
+}
+
 interface MockResults {
   overallScore: number;
   dimensions: ScoreDimension[];
   strengths: string[];
   improvements: string[];
   rewrittenAnswer: string;
-  practicePlan: string[];
+  practicePlan: (string | PracticePlanItem)[];
 }
 
 export default function CaseStudyResultsPage() {
@@ -237,14 +243,36 @@ export default function CaseStudyResultsPage() {
               <h3 className="font-semibold text-slate-900">Your Practice Plan</h3>
             </div>
             <ol className="space-y-2">
-              {results.practicePlan.map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-sm text-slate-700">
-                  <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-medium flex-shrink-0">
-                    {i + 1}
-                  </span>
-                  {item}
-                </li>
-              ))}
+              {results.practicePlan.map((item, i) => {
+                let displayText: string;
+                let timeDisplay: string | null = null;
+                
+                if (typeof item === 'string') {
+                  displayText = item;
+                } else if (typeof item === 'object' && item !== null) {
+                  const planItem = item as PracticePlanItem;
+                  displayText = planItem.task || `Day ${planItem.day}`;
+                  if (planItem.timeMinutes) {
+                    timeDisplay = `${planItem.timeMinutes} min`;
+                  }
+                } else {
+                  displayText = String(item);
+                }
+                
+                return (
+                  <li key={i} className="flex items-start gap-3 text-sm text-slate-700">
+                    <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-medium flex-shrink-0">
+                      {i + 1}
+                    </span>
+                    <div className="flex-1">
+                      {displayText}
+                      {timeDisplay && (
+                        <span className="ml-2 text-xs text-slate-500">({timeDisplay})</span>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ol>
           </div>
 
