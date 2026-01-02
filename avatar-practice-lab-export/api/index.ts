@@ -6,6 +6,7 @@ import { adminRouter } from "./routes/admin.js";
 import { interviewRouter } from "./routes/interview.js";
 import { exerciseModeRouter } from "./routes/exercise-mode.js";
 import { realtimeRouter } from "./routes/realtime.js";
+import { jobsRouter } from "./routes/jobs.js";
 import { setupAuth } from "./replitAuth.js";
 import dotenv from "dotenv";
 
@@ -81,6 +82,18 @@ async function startServer() {
 
   // Mount realtime token routes
   app.use("/api/realtime", realtimeRouter);
+
+  // Middleware to populate req.user from session for jobs routes
+  app.use("/api/jobs", (req, res, next) => {
+    const sessionUser = (req.session as any)?.user;
+    if (sessionUser) {
+      req.user = sessionUser;
+    }
+    next();
+  });
+
+  // Mount jobs/career target routes
+  app.use("/api/jobs", jobsRouter);
 
   // Health check
   app.get("/health", (req, res) => {

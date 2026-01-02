@@ -28,7 +28,43 @@ avatar-practice-lab-export/
 
 ## Recent Changes (January 2, 2026)
 
-### Interview Exercise Mode Feature
+### Job-Centric Career Preparation Feature (Phase 1)
+Implemented job targeting system that allows users to save real job opportunities and tie practice sessions to specific job preparation:
+
+1. **Job Targets Management**
+   - Save target jobs with role title, company, location, and full job description
+   - Track job status: Saved → Applied → Interviewing → Offer/Rejected
+   - AI-powered JD parsing using GPT-4o extracts required skills, focus areas, experience level
+   - Paste-and-parse feature: paste full JD text, AI extracts all fields automatically
+
+2. **Practice Suggestions Engine**
+   - Personalized practice recommendations based on parsed JD focus areas
+   - Technical skill detection for coding practice suggestions
+   - Quick actions to start Interview Practice, Case Study, or Coding Lab for any job
+
+3. **Navigation Updates**
+   - "My Jobs" added to sidebar navigation (desktop)
+   - "Jobs" added to mobile bottom navigation
+   - Job detail page with AI-analyzed requirements display
+
+### New Database Tables
+- `job_targets` - User's saved target jobs with JD parsing
+- `user_skill_patterns` - Career memory for tracking practice patterns
+- Added `job_target_id` foreign key to `interview_configs` and `exercise_sessions`
+
+### New API Endpoints
+- `/api/jobs/job-targets` - CRUD for job targets
+- `/api/jobs/job-targets/:id/parse-jd` - AI parse job description
+- `/api/jobs/job-targets/parse-paste` - Paste JD, auto-extract and save
+- `/api/jobs/job-targets/:id/practice-suggestions` - Get practice recommendations
+
+### New Frontend Routes
+- `/jobs` - List of saved job targets with status filtering
+- `/jobs/:jobId` - Job detail with AI analysis and practice history
+
+---
+
+### Interview Exercise Mode Feature (Previous)
 Added two new flagship interview practice tracks with full avatar integration:
 
 1. **Case Study Mode**

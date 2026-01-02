@@ -11,7 +11,8 @@ import {
   ChevronDown,
   UserCheck,
   FileText,
-  BookOpen
+  BookOpen,
+  Briefcase
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -42,6 +43,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 
   const navItems: NavItem[] = [
     { href: '/avatar/dashboard', label: 'Dashboard', icon: Home },
+    { href: '/jobs', label: 'My Jobs', icon: Briefcase },
     { 
       href: '/avatar/start', 
       label: 'Practice', 

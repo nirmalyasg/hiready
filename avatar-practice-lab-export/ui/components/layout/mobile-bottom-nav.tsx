@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Target, BarChart3, User } from "lucide-react";
+import { Home, Target, BarChart3, User, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -10,9 +10,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { path: "/avatar/dashboard", icon: Home, label: "Home" },
+  { path: "/jobs", icon: Briefcase, label: "Jobs" },
   { path: "/avatar/start", icon: Target, label: "Practice" },
   { path: "/avatar/results", icon: BarChart3, label: "Results" },
-  { path: "/profile", icon: User, label: "Profile" },
 ];
 
 export default function MobileBottomNav() {
@@ -21,6 +21,9 @@ export default function MobileBottomNav() {
   const isActive = (path: string) => {
     if (path === "/avatar/dashboard") {
       return location.pathname === "/avatar/dashboard";
+    }
+    if (path === "/jobs") {
+      return location.pathname.startsWith("/jobs");
     }
     if (path === "/avatar/start") {
       return location.pathname === "/avatar/start" ||

@@ -41,6 +41,8 @@ import CodingLabAvatarSelectPage from './pages/exercise-mode/coding-lab/avatar-s
 import CodingLabSessionPage from './pages/exercise-mode/coding-lab/session-page';
 import CodingLabResultsPage from './pages/exercise-mode/coding-lab/results-page';
 import ProfilePage from './pages/profile/page';
+import JobsPage from './pages/jobs/page';
+import JobDetailPage from './pages/jobs/detail-page';
 
 export default function App() {
   return (
@@ -85,6 +87,8 @@ export default function App() {
         <Route path="/exercise-mode/coding-lab/session" element={<ProtectedRoute><CodingLabSessionPage /></ProtectedRoute>} />
         <Route path="/exercise-mode/coding-lab/results" element={<ProtectedRoute><CodingLabResultsPage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/jobs" element={<ProtectedRoute><JobsPage /></ProtectedRoute>} />
+        <Route path="/jobs/:jobId" element={<ProtectedRoute><JobDetailPage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </RealtimeSessionPrewarmProvider>
