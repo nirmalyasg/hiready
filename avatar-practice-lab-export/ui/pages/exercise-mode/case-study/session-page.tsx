@@ -306,12 +306,18 @@ ${probingInstructions}
   };
 
   const startSession = async () => {
-    if (!template) return;
+    console.log('[CaseStudySession] startSession called, template:', template?.id);
+    if (!template) {
+      console.log('[CaseStudySession] No template, returning');
+      return;
+    }
     
     try {
+      console.log('[CaseStudySession] Creating session...');
       const response = await fetch("/api/exercise-mode/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify({
           exerciseType: "case_study",
           caseTemplateId: template.id,
@@ -320,12 +326,15 @@ ${probingInstructions}
       });
       
       const data = await response.json();
+      console.log('[CaseStudySession] Session response:', data);
       if (data.success) {
         setSession(data.session);
         setSessionPhase("thinking");
+      } else {
+        console.error('[CaseStudySession] Session creation failed:', data.error);
       }
     } catch (err) {
-      console.error("Error creating session:", err);
+      console.error("[CaseStudySession] Error creating session:", err);
     }
   };
 
