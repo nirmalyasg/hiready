@@ -1,13 +1,15 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
-import { Code, Clock, Mic, MicOff, Play, Volume2, BarChart3, Eye, Bug, Wrench, Copy, Check, AlertCircle, Target } from "lucide-react";
+import { Code, Clock, Mic, MicOff, Users, PhoneOff, BarChart3, Volume2, User, Eye, Bug, Wrench, Copy, Check, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
+import MeetingLobby from '@/components/MeetingLobby';
 import { TranscriptProvider, useTranscript } from '@/contexts/TranscriptContext';
 import { EventProvider } from '@/contexts/EventContext';
 import { useRealtimeSession } from '@/hooks/useRealtimeSession';
 import { useHandleSessionHistory } from '@/hooks/useHandleSessionHistory';
 import { RealtimeAgent } from '@openai/agents/realtime';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface CodingExercise {
   id: number;
@@ -21,7 +23,15 @@ interface CodingExercise {
   modificationRequirement: string | null;
   probingQuestions: string[] | null;
   expectedSignals: string[] | null;
-  failureModes: string[] | null;
+}
+
+interface SelectedAvatar {
+  id: string;
+  name: string;
+  gender: string;
+  imageUrl: string;
+  personality: string;
+  role?: string;
 }
 
 interface ExerciseSession {
@@ -37,7 +47,7 @@ const activityConfig = {
     color: "text-blue-400",
     bgColor: "bg-blue-900/30",
     borderColor: "border-blue-800",
-    instruction: "Walk through this code and explain how it works, including design decisions and trade-offs."
+    instruction: "Walk through this code and explain how it works."
   },
   debug: { 
     label: "Debug Code", 
@@ -45,7 +55,7 @@ const activityConfig = {
     color: "text-red-400",
     bgColor: "bg-red-900/30",
     borderColor: "border-red-800",
-    instruction: "Find the bug(s) in this code and explain how you would fix them."
+    instruction: "Find the bug(s) in this code and explain how to fix them."
   },
   modify: { 
     label: "Modify Code", 
@@ -57,30 +67,71 @@ const activityConfig = {
   }
 };
 
+const defaultAvatars: SelectedAvatar[] = [
+  { 
+    id: "Wayne_20240711", 
+    name: "Wayne", 
+    gender: "male",
+    imageUrl: "https://files.heygen.ai/avatar/v3/Wayne_20240711/full_body.webp",
+    personality: "thorough technical interviewer who probes for deep code understanding",
+    role: "interviewer"
+  },
+];
+
+function parseAvatarsFromUrl(avatarsParam: string | null): SelectedAvatar[] {
+  if (!avatarsParam) return defaultAvatars;
+  
+  try {
+    const parsed = JSON.parse(decodeURIComponent(avatarsParam));
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed.map((a: any) => ({
+        id: a.id || 'Wayne_20240711',
+        name: a.name || 'Interviewer',
+        gender: a.gender || 'male',
+        imageUrl: a.imageUrl || `https://files.heygen.ai/avatar/v3/${a.id}/full_body.webp`,
+        personality: a.personality || 'professional technical interviewer',
+        role: a.role || 'interviewer'
+      }));
+    }
+  } catch (e) {
+    console.error('Failed to parse avatars:', e);
+  }
+  return defaultAvatars;
+}
+
+const voiceMap: Record<string, string> = {
+  male: 'ash',
+  female: 'sage',
+};
+
 function CodingLabSessionContent() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const exerciseId = searchParams.get("exerciseId");
+  const avatarsParam = searchParams.get("avatars");
 
   const [exercise, setExercise] = useState<CodingExercise | null>(null);
   const [session, setSession] = useState<ExerciseSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sessionPhase, setSessionPhase] = useState<"prep" | "active" | "complete">("prep");
+  const [showLobby, setShowLobby] = useState(true);
+  const [sessionStatus, setSessionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [hasGreeted, setHasGreeted] = useState(false);
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
-  const [copied, setCopied] = useState(false);
-
   const [isMuted, setIsMuted] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [hasGreeted, setHasGreeted] = useState(false);
-  const [sessionStatus, setSessionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
-  const [interviewerMessage, setInterviewerMessage] = useState<string>("Take a look at this code and walk me through what it does. Start wherever you'd like.");
+  const [copied, setCopied] = useState(false);
+  const [showFullCode, setShowFullCode] = useState(true);
 
+  const { toast } = useToast();
   const { transcriptItems } = useTranscript();
 
+  const [selectedAvatars] = useState<SelectedAvatar[]>(() => parseAvatarsFromUrl(avatarsParam));
+
   const sdkAudioElement = useMemo(() => {
+    if (typeof window === 'undefined') return undefined;
     const el = document.createElement('audio');
     el.autoplay = true;
     el.style.display = 'none';
@@ -122,13 +173,6 @@ function CodingLabSessionContent() {
   });
 
   useEffect(() => {
-    const lastAssistantMessage = transcriptItems.filter(item => item.role === 'assistant').pop();
-    if (lastAssistantMessage?.title) {
-      setInterviewerMessage(lastAssistantMessage.title);
-    }
-  }, [transcriptItems]);
-
-  useEffect(() => {
     const fetchExercise = async () => {
       if (!exerciseId) {
         setError("No exercise selected");
@@ -158,14 +202,14 @@ function CodingLabSessionContent() {
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
-    if (sessionPhase === "active" && sessionStartTime) {
+    if (sessionStatus === 'connected' && sessionStartTime) {
       interval = setInterval(() => {
         setSessionDuration(Math.floor((Date.now() - sessionStartTime) / 1000));
       }, 1000);
     }
     
     return () => clearInterval(interval);
-  }, [sessionPhase, sessionStartTime]);
+  }, [sessionStatus, sessionStartTime]);
 
   const fetchEphemeralKey = async () => {
     try {
@@ -196,6 +240,7 @@ function CodingLabSessionContent() {
     if (!exercise) return '';
 
     const config = activityConfig[exercise.activityType];
+    const currentAvatar = selectedAvatars[0];
     
     const activitySpecificContext = exercise.activityType === 'debug' && exercise.bugDescription
       ? `\nBUG CONTEXT: The candidate has been told there's a bug. The bug is: ${exercise.bugDescription}\nDo NOT reveal the bug - let them find it.`
@@ -214,10 +259,10 @@ function CodingLabSessionContent() {
     return `
 CODING INTERVIEW SESSION - AI TECHNICAL INTERVIEWER
 
-You are a senior technical interviewer conducting a ${config.label.toLowerCase()} exercise. Your role is to evaluate the candidate's code comprehension, debugging skills, and technical communication.
+You are ${currentAvatar?.name || 'the interviewer'}, a senior technical interviewer evaluating a candidate's code comprehension, debugging skills, and technical communication.
 
-YOUR ROLE: Senior Technical Interviewer  
-YOUR PERSONALITY: Thorough, encouraging, focused on understanding thought process and technical depth. Professional but conversational.
+YOUR ROLE: Senior Technical Interviewer
+YOUR PERSONALITY: ${currentAvatar?.personality || 'thorough and systematic, focused on understanding code and technical reasoning'}
 
 EXERCISE DETAILS:
 - Type: ${config.label}
@@ -239,8 +284,9 @@ ${expectedSignalsContext}
 === CRITICAL BEHAVIOR RULES ===
 
 1. OPENING:
-   - Start by asking them to take a look at the code and walk you through their analysis
-   - Be friendly but professional
+   - Introduce yourself briefly
+   - Present the exercise: "I'm going to show you some ${exercise.language} code. ${config.instruction}"
+   - Ask them to walk you through their analysis
 
 2. INTERVIEWER BEHAVIOR:
    - Listen to their explanation carefully
@@ -264,11 +310,16 @@ ${probingQuestionsContext}
    - Be encouraging but don't give away answers
    - Push for specificity when answers are vague
 
-5. END OF SESSION:
-   - When they've covered the main points, wrap up naturally
+5. INFORMATION ACCURACY:
+   - ONLY reference the code shown above
+   - Don't invent additional requirements or context
+   - If they ask about something not specified, ask them to make reasonable assumptions
+
+6. SESSION WRAP-UP:
+   - When they've covered the main points, summarize their approach
    - Thank them for their analysis
 `.trim();
-  }, [exercise]);
+  }, [exercise, selectedAvatars]);
 
   const connectToRealtime = async () => {
     if (sessionStatus !== 'disconnected') return;
@@ -281,15 +332,23 @@ ${probingQuestionsContext}
       if (!EPHEMERAL_KEY) {
         console.error('[CodingLabSession] No ephemeral key received');
         setSessionStatus('disconnected');
+        toast({
+          title: "Connection Failed",
+          description: "Could not connect to the AI interviewer. Please try again.",
+          variant: "destructive",
+        });
         return;
       }
 
+      const currentAvatar = selectedAvatars[0];
+      const voice = voiceMap[currentAvatar?.gender?.toLowerCase() || 'male'] || 'ash';
       const systemPrompt = buildInterviewerContext();
+      
       console.log('[CodingLabSession] System prompt built, length:', systemPrompt.length);
       
       const agent = new RealtimeAgent({
-        name: 'coding_interviewer',
-        voice: 'sage',
+        name: `coding_interviewer_${currentAvatar?.name || 'interviewer'}`,
+        voice: voice,
         instructions: systemPrompt,
         tools: [],
       });
@@ -304,13 +363,12 @@ ${probingQuestionsContext}
 
       console.log('[CodingLabSession] Connected successfully');
       setSessionStartTime(Date.now());
-      setSessionPhase("active");
       
       const config = activityConfig[exercise?.activityType || 'explain'];
       
       if (!hasGreeted) {
         setTimeout(() => {
-          sendUserText(`Greet the candidate and introduce the exercise. Say something like: "Hi! Thanks for joining. Today we're doing a ${config.label.toLowerCase()} exercise in ${exercise?.language || 'code'}. Take a look at the code on screen, and when you're ready, walk me through what you see." Keep it professional and under 40 words.`);
+          sendUserText(`Greet the candidate and introduce the exercise. Say: "Hi! I'm ${currentAvatar?.name || 'your interviewer'} and I'll be conducting your technical interview today. I've got a ${exercise?.language || 'code'} ${config.label.toLowerCase()} exercise for you. Take a look at the code on your screen, and when you're ready, walk me through it." Keep it under 50 words.`);
           setHasGreeted(true);
         }, 2000);
       }
@@ -318,6 +376,11 @@ ${probingQuestionsContext}
     } catch (err) {
       console.error('[CodingLabSession] Error connecting:', err);
       setSessionStatus('disconnected');
+      toast({
+        title: "Connection Error",
+        description: "Failed to connect. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -327,42 +390,48 @@ ${probingQuestionsContext}
     setIsSpeaking(false);
   };
 
-  const toggleMute = () => {
-    const newMutedState = !isMuted;
-    setIsMuted(newMutedState);
-    mute(newMutedState);
-  };
-
-  const startSession = async () => {
+  const handleLobbyComplete = useCallback(async () => {
+    setShowLobby(false);
+    
     if (!exercise) return;
     
     try {
       const response = await fetch("/api/exercise-mode/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify({
-          exerciseType: "coding",
+          exerciseType: "coding_lab",
           codingExerciseId: exercise.id,
           roleKitId: null
         })
       });
       
       const data = await response.json();
+      console.log('[CodingLabSession] Session created:', data);
       if (data.success) {
         setSession(data.session);
-        connectToRealtime();
       }
     } catch (err) {
-      console.error("Error creating session:", err);
+      console.error("[CodingLabSession] Error creating session:", err);
     }
-  };
+    
+    setTimeout(() => {
+      connectToRealtime();
+    }, 500);
+  }, [exercise]);
 
-  const endSession = async () => {
-    disconnectFromRealtime();
+  const handleEndCall = async () => {
+    if (isSaving) return;
+    
+    const confirmEnd = window.confirm('End this coding interview session?');
+    if (!confirmEnd) return;
+    
     setIsSaving(true);
+    disconnectFromRealtime();
 
-    if (session?.id) {
-      try {
+    try {
+      if (session?.id) {
         await fetch(`/api/exercise-mode/sessions/${session.id}/status`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -375,18 +444,23 @@ ${probingQuestionsContext}
           timestamp: Date.now()
         }));
 
+        toast({
+          title: "Analyzing your performance...",
+          description: "Generating feedback based on your coding interview",
+        });
+
         await fetch(`/api/exercise-mode/sessions/${session.id}/analyze`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ transcript, sessionDuration })
         });
-      } catch (err) {
-        console.error("Error saving session:", err);
       }
-    }
 
-    setSessionPhase("complete");
-    navigate(`/exercise-mode/coding-lab/results?exerciseId=${exercise?.id}&sessionId=${session?.id}`);
+      navigate(`/exercise-mode/coding-lab/results?sessionId=${session?.id}`);
+    } catch (err) {
+      console.error("[CodingLabSession] Error saving session:", err);
+      navigate(`/exercise-mode/coding-lab/results?sessionId=${session?.id}`);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -404,13 +478,20 @@ ${probingQuestionsContext}
     };
   }, []);
 
+  const lobbyParticipants = selectedAvatars.map(a => ({
+    id: a.id,
+    name: a.name,
+    imageUrl: a.imageUrl,
+    status: 'connecting' as const
+  }));
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center text-white">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
           <h3 className="text-lg font-semibold mb-2">Loading Exercise</h3>
-          <p className="text-slate-400">Preparing your coding challenge...</p>
+          <p className="text-slate-400">Preparing your interview...</p>
         </div>
       </div>
     );
@@ -429,6 +510,10 @@ ${probingQuestionsContext}
           <p className="text-slate-400 mb-4">
             Our AI is evaluating your code analysis, technical communication, and problem-solving approach...
           </p>
+          <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <span>Generating personalized feedback</span>
+          </div>
         </div>
       </div>
     );
@@ -455,229 +540,225 @@ ${probingQuestionsContext}
 
   const config = activityConfig[exercise.activityType];
   const ActivityIcon = config.icon;
-
-  if (sessionPhase === "prep") {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-white">
-        <div className="max-w-4xl mx-auto px-6 py-12">
-          <div className="flex items-center gap-3 mb-8">
-            <Code className="w-8 h-8 text-blue-400" />
-            <h1 className="text-2xl font-bold">Coding Lab Session</h1>
-          </div>
-
-          <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-6 mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <ActivityIcon className={`w-5 h-5 ${config.color}`} />
-              <span className={`font-medium ${config.color}`}>{config.label}</span>
-              <span className="px-2 py-0.5 bg-slate-700 rounded text-xs text-slate-300 ml-2">
-                {exercise.language}
-              </span>
-              <span className="px-2 py-0.5 bg-slate-700 rounded text-xs text-slate-300 capitalize">
-                {exercise.difficulty}
-              </span>
-            </div>
-            <h2 className="text-xl font-semibold mb-2">{exercise.name}</h2>
-            <p className="text-slate-300 mb-4">{config.instruction}</p>
-            
-            {exercise.activityType === "debug" && exercise.bugDescription && (
-              <div className={`${config.bgColor} border ${config.borderColor} rounded-lg p-3 mb-4`}>
-                <div className="flex items-center gap-2 mb-1">
-                  <AlertCircle className="w-4 h-4 text-red-400" />
-                  <span className="text-sm font-medium text-red-400">Bug Report</span>
-                </div>
-                <p className="text-red-300 text-sm">{exercise.bugDescription}</p>
-              </div>
-            )}
-            
-            {exercise.activityType === "modify" && exercise.modificationRequirement && (
-              <div className={`${config.bgColor} border ${config.borderColor} rounded-lg p-3 mb-4`}>
-                <div className="flex items-center gap-2 mb-1">
-                  <Wrench className="w-4 h-4 text-emerald-400" />
-                  <span className="text-sm font-medium text-emerald-400">Modification Requirement</span>
-                </div>
-                <p className="text-emerald-300 text-sm">{exercise.modificationRequirement}</p>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden mb-8">
-            <div className="flex items-center justify-between px-4 py-2 bg-slate-900/50 border-b border-slate-700">
-              <span className="text-sm text-slate-400">Code to review</span>
-              <button 
-                onClick={copyCode}
-                className="text-slate-400 hover:text-slate-200 flex items-center gap-1 text-sm"
-              >
-                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                {copied ? "Copied" : "Copy"}
-              </button>
-            </div>
-            <pre className="p-4 overflow-x-auto text-sm max-h-80">
-              <code className="text-slate-300">{exercise.codeSnippet}</code>
-            </pre>
-          </div>
-
-          <div className="bg-blue-900/30 border border-blue-800 rounded-lg p-4 mb-8">
-            <h3 className="font-medium text-blue-400 mb-2">How it works:</h3>
-            <ol className="text-sm text-blue-200 space-y-2">
-              <li>1. Review the code carefully before starting</li>
-              <li>2. Speak your analysis out loud as you would in an interview</li>
-              <li>3. The AI interviewer will ask follow-up questions</li>
-              <li>4. End the session when done to receive your feedback</li>
-            </ol>
-          </div>
-
-          <Button 
-            onClick={startSession}
-            size="lg"
-            className="w-full bg-blue-600 hover:bg-blue-700"
-          >
-            <Play className="w-5 h-5 mr-2" />
-            Start Session
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const currentAvatar = selectedAvatars[0];
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
-      <div className="flex items-center justify-between px-6 py-3 border-b border-slate-700 bg-slate-800/80">
+    <div className="h-screen bg-slate-900 flex flex-col overflow-hidden relative">
+      <MeetingLobby
+        participants={lobbyParticipants}
+        presentationTopic={exercise.name}
+        onAllReady={handleLobbyComplete}
+        isVisible={showLobby}
+      />
+
+      <div className="bg-slate-800 border-b border-slate-700 px-4 py-2 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
-          <ActivityIcon className={`w-5 h-5 ${config.color}`} />
-          <span className="font-medium">{exercise.name}</span>
+          <div className={cn(
+            "w-2.5 h-2.5 rounded-full",
+            sessionStatus === 'connected' ? 'bg-green-500 animate-pulse' : 
+            sessionStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' : 'bg-red-500'
+          )} />
+          <span className={cn(
+            "text-xs font-medium",
+            sessionStatus === 'connected' ? 'text-green-400' : 
+            sessionStatus === 'connecting' ? 'text-yellow-400' : 'text-red-400'
+          )}>
+            {sessionStatus === 'connected' ? 'LIVE' : sessionStatus === 'connecting' ? 'CONNECTING...' : 'DISCONNECTED'}
+          </span>
+          <span className="text-slate-600">|</span>
+          <ActivityIcon className={`w-4 h-4 ${config.color}`} />
+          <span className="text-white text-sm font-medium truncate max-w-sm">{exercise.name}</span>
           <span className="text-xs px-2 py-0.5 bg-slate-700 text-slate-300 rounded">{exercise.language}</span>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-slate-400 text-sm">
-            <Clock className="w-4 h-4" />
-            <span className="font-mono">{formatTime(sessionDuration)}</span>
-          </div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={endSession}
-            className="border-red-600 text-red-400 hover:bg-red-900/30"
-          >
-            End Session
-          </Button>
+        <div className="flex items-center gap-3">
+          <span className="text-slate-400 text-xs flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5" />
+            {formatTime(sessionDuration)}
+          </span>
+          <span className="text-slate-400 text-xs flex items-center gap-1.5">
+            <Users className="w-3.5 h-3.5" />
+            2 in meeting
+          </span>
         </div>
       </div>
 
-      <div className="flex h-[calc(100vh-57px)]">
-        <div className="flex-1 flex flex-col border-r border-slate-700 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-2 bg-slate-900/50 border-b border-slate-700 flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-400">{exercise.language}</span>
-              <span className={`text-xs ${config.color}`}>({config.label})</span>
-            </div>
-            <button 
-              onClick={copyCode}
-              className="text-slate-400 hover:text-slate-200 flex items-center gap-1 text-sm"
-            >
-              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            </button>
-          </div>
-          <pre className="flex-1 p-4 overflow-auto text-sm">
-            <code className="text-slate-300">{exercise.codeSnippet}</code>
-          </pre>
-
-          {(exercise.activityType === "debug" && exercise.bugDescription) || 
-           (exercise.activityType === "modify" && exercise.modificationRequirement) ? (
-            <div className={`${config.bgColor} border-t ${config.borderColor} p-3 flex-shrink-0`}>
-              <div className="flex items-center gap-2 mb-1">
-                {exercise.activityType === "debug" ? (
-                  <>
-                    <Bug className="w-4 h-4 text-red-400" />
-                    <span className="text-xs font-medium text-red-400">Bug Report</span>
-                  </>
-                ) : (
-                  <>
-                    <Wrench className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs font-medium text-emerald-400">Requirement</span>
-                  </>
-                )}
-              </div>
-              <p className={`text-xs ${exercise.activityType === "debug" ? "text-red-300" : "text-emerald-300"}`}>
-                {exercise.activityType === "debug" ? exercise.bugDescription : exercise.modificationRequirement}
-              </p>
-            </div>
-          ) : null}
-        </div>
-
-        <div className="w-80 lg:w-96 flex flex-col bg-slate-800/30">
-          <div className="p-4 border-b border-slate-700">
-            <h3 className="font-medium text-slate-300 flex items-center gap-2 mb-3">
-              <Volume2 className="w-4 h-4 text-blue-400" />
-              AI Interviewer
-              {isSpeaking && (
-                <span className="ml-auto flex items-center gap-1">
-                  <div className="w-1 h-2 bg-blue-400 rounded-full animate-pulse" />
-                  <div className="w-1 h-3 bg-blue-400 rounded-full animate-pulse delay-75" />
-                  <div className="w-1 h-2 bg-blue-400 rounded-full animate-pulse delay-150" />
-                </span>
-              )}
-            </h3>
-            <div className="bg-slate-900/50 rounded-lg p-3">
-              <p className="text-slate-300 text-sm italic">"{interviewerMessage}"</p>
-            </div>
-          </div>
-
-          <div className="flex-1 flex flex-col justify-center p-6">
-            <div className="text-center">
-              <div className="mb-4">
-                {sessionStatus === 'connected' && !isMuted && (
-                  <span className="flex items-center justify-center gap-1 text-blue-400 text-sm mb-2">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                    Listening...
-                  </span>
-                )}
+      <div className="flex-1 flex min-h-0">
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 flex flex-col p-4 bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
+            <div className="bg-slate-950 rounded-xl border border-slate-700 flex-1 flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2 bg-slate-900/80 border-b border-slate-700 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <Code className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm text-slate-400">{exercise.language}</span>
+                  <span className={`text-xs ${config.color}`}>({config.label})</span>
+                </div>
+                <button 
+                  onClick={copyCode}
+                  className="text-slate-400 hover:text-slate-200 flex items-center gap-1 text-sm"
+                >
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copied ? "Copied" : "Copy"}
+                </button>
               </div>
               
+              <pre className="flex-1 p-4 overflow-auto text-sm font-mono">
+                <code className="text-slate-300 whitespace-pre">{exercise.codeSnippet}</code>
+              </pre>
+
+              {(exercise.activityType === "debug" && exercise.bugDescription) || 
+               (exercise.activityType === "modify" && exercise.modificationRequirement) ? (
+                <div className={`${config.bgColor} border-t ${config.borderColor} p-3 flex-shrink-0`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    {exercise.activityType === "debug" ? (
+                      <>
+                        <Bug className="w-4 h-4 text-red-400" />
+                        <span className="text-xs font-medium text-red-400">Bug Report</span>
+                      </>
+                    ) : (
+                      <>
+                        <Wrench className="w-4 h-4 text-emerald-400" />
+                        <span className="text-xs font-medium text-emerald-400">Requirement</span>
+                      </>
+                    )}
+                  </div>
+                  <p className={`text-sm ${exercise.activityType === "debug" ? "text-red-300" : "text-emerald-300"}`}>
+                    {exercise.activityType === "debug" ? exercise.bugDescription : exercise.modificationRequirement}
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="bg-slate-850 border-t border-slate-700 flex-shrink-0 px-4 py-3" style={{ backgroundColor: '#1a2332' }}>
+            <div className="flex items-center justify-center gap-4">
               <button
-                onClick={toggleMute}
-                disabled={sessionStatus !== 'connected'}
+                onClick={() => {
+                  setIsMuted(!isMuted);
+                  mute(!isMuted);
+                }}
                 className={cn(
-                  "w-24 h-24 rounded-full flex items-center justify-center transition-all mx-auto",
-                  sessionStatus !== 'connected' 
-                    ? "bg-slate-700 cursor-not-allowed"
-                    : isMuted 
-                      ? "bg-red-600 hover:bg-red-700" 
-                      : "bg-blue-600 hover:bg-blue-700"
+                  "w-12 h-12 rounded-full flex items-center justify-center transition-all",
+                  isMuted 
+                    ? 'bg-red-500 hover:bg-red-600 ring-2 ring-red-400/50' 
+                    : 'bg-slate-600 hover:bg-slate-500'
                 )}
+                title={isMuted ? 'Unmute microphone' : 'Mute microphone'}
               >
-                {isMuted ? (
-                  <MicOff className="w-10 h-10" />
-                ) : (
-                  <Mic className="w-10 h-10" />
-                )}
+                {isMuted ? <MicOff className="w-5 h-5 text-white" /> : <Mic className="w-5 h-5 text-white" />}
               </button>
               
-              <p className="text-slate-400 text-sm mt-4">
-                {sessionStatus === 'connecting' 
-                  ? "Connecting to interviewer..." 
-                  : sessionStatus === 'connected'
-                    ? (isMuted ? "Click to unmute" : "Click to start speaking")
-                    : "Waiting for connection..."
-                }
-              </p>
+              <button
+                onClick={handleEndCall}
+                className="h-12 px-6 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center gap-2 transition-colors"
+                title="End interview"
+              >
+                <PhoneOff className="w-5 h-5 text-white" />
+                <span className="text-white font-medium">End Interview</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="w-80 bg-slate-800/95 border-l border-slate-700 flex flex-col min-h-0">
+          <div className="p-3 border-b border-slate-700 flex-shrink-0">
+            <h3 className="text-white text-sm font-semibold flex items-center gap-2">
+              <Users className="w-4 h-4 text-blue-400" />
+              Participants
+            </h3>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
+            <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/30 rounded-xl p-3">
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <User className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-white font-medium">You</span>
+                    <span className="text-[10px] bg-blue-500 text-white px-1.5 py-0.5 rounded font-medium">
+                      CANDIDATE
+                    </span>
+                  </div>
+                  <p className="text-slate-400 text-xs mt-0.5">Technical Interview</p>
+                </div>
+              </div>
+            </div>
+
+            <div className={cn(
+              "rounded-xl p-3 transition-all",
+              isSpeaking 
+                ? 'bg-slate-700/80 ring-2 ring-green-400 shadow-lg shadow-green-500/20' 
+                : 'bg-slate-700/40'
+            )}>
+              <div className="flex items-start gap-3">
+                <div className="relative flex-shrink-0">
+                  <div className={cn(
+                    "w-14 h-14 rounded-xl overflow-hidden",
+                    isSpeaking && "ring-2 ring-green-500"
+                  )}>
+                    <img
+                      src={currentAvatar.imageUrl}
+                      alt={currentAvatar.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${currentAvatar.name}&background=4a5568&color=fff`;
+                      }}
+                    />
+                  </div>
+                  
+                  {isSpeaking && (
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
+                      <Volume2 className="w-3 h-3 text-white" />
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-white font-medium text-sm">{currentAvatar.name}</span>
+                    <span className="text-[10px] bg-purple-500 text-white px-1.5 py-0.5 rounded font-medium">
+                      INTERVIEWER
+                    </span>
+                  </div>
+                  <p className="text-slate-400 text-xs mt-0.5 line-clamp-2">
+                    {currentAvatar.personality}
+                  </p>
+                  {isSpeaking && (
+                    <div className="flex items-center gap-1 mt-2">
+                      <div className="w-1 h-2 bg-green-400 rounded-full animate-pulse" />
+                      <div className="w-1 h-3 bg-green-400 rounded-full animate-pulse delay-75" />
+                      <div className="w-1 h-2 bg-green-400 rounded-full animate-pulse delay-150" />
+                      <span className="text-green-400 text-xs ml-1">Speaking</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
-          {exercise.expectedSignals && (
-            <div className="p-4 border-t border-slate-700">
-              <h3 className="font-medium text-slate-400 mb-2 text-sm flex items-center gap-2">
-                <Target className="w-4 h-4" />
-                Key Points
-              </h3>
-              <div className="flex flex-wrap gap-1">
-                {exercise.expectedSignals.slice(0, 4).map((signal, i) => (
-                  <span key={i} className="px-2 py-1 bg-slate-700 text-slate-300 rounded text-xs">
-                    {signal.length > 30 ? signal.substring(0, 30) + '...' : signal}
-                  </span>
+          <div className="p-3 border-t border-slate-700">
+            <div className="bg-slate-900/50 rounded-lg p-3">
+              <h4 className="text-slate-400 text-xs font-medium mb-2 flex items-center gap-1">
+                <Volume2 className="w-3 h-3" />
+                Recent
+              </h4>
+              <div className="space-y-2 max-h-32 overflow-y-auto">
+                {transcriptItems.slice(-3).map((item, i) => (
+                  <p key={i} className={cn(
+                    "text-xs leading-relaxed",
+                    item.role === 'user' ? 'text-blue-300' : 'text-slate-300'
+                  )}>
+                    <span className="font-medium">{item.role === 'user' ? 'You: ' : `${currentAvatar.name}: `}</span>
+                    {(item.title || '').slice(0, 80)}{(item.title || '').length > 80 ? '...' : ''}
+                  </p>
                 ))}
+                {transcriptItems.length === 0 && (
+                  <p className="text-slate-500 text-xs italic">Waiting for conversation to start...</p>
+                )}
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

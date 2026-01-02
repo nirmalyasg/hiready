@@ -127,7 +127,7 @@ export default function CodingLabPage() {
   const languages = [...new Set(exercises.map(e => e.language))];
 
   const handleSelectExercise = (exercise: CodingExercise) => {
-    navigate(`/exercise-mode/coding-lab/session?exerciseId=${exercise.id}`);
+    navigate(`/exercise-mode/coding-lab/avatar-select?exerciseId=${exercise.id}`);
   };
 
   const clearFilters = () => {

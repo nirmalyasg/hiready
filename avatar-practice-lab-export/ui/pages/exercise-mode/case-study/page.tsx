@@ -114,7 +114,7 @@ export default function CaseStudyPage() {
   });
 
   const handleSelectTemplate = (template: CaseTemplate) => {
-    navigate(`/exercise-mode/case-study/session?templateId=${template.id}`);
+    navigate(`/exercise-mode/case-study/avatar-select?templateId=${template.id}`);
   };
 
   const clearFilters = () => {
