@@ -3,8 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
-import MobileBottomNav from "@/components/layout/mobile-bottom-nav";
+import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import {
   Select,
   SelectContent,
@@ -541,20 +540,20 @@ Please be conversational, helpful, and stay in character based on the provided c
 
   if (loading) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="min-h-screen bg-gray-50/50 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-lg text-gray-600">Loading scenario details...</p>
           </div>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   if (!scenario && !currentBlueprint) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="min-h-screen bg-gray-50/50 flex items-center justify-center">
           <div className="text-center max-w-md">
             <div className="w-16 h-16 mx-auto mb-6 bg-red-100 rounded-full flex items-center justify-center">
@@ -575,7 +574,7 @@ Please be conversational, helpful, and stay in character based on the provided c
             </Link>
           </div>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
@@ -587,7 +586,7 @@ Please be conversational, helpful, and stay in character based on the provided c
     : null;
 
   return (
-    <ModernDashboardLayout>
+    <SidebarLayout>
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pb-24 sm:pb-8">
         <div className="container mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-6 max-w-6xl">
           <div className="mb-4 sm:mb-8">
@@ -1292,7 +1291,6 @@ Please be conversational, helpful, and stay in character based on the provided c
           </div>
         </div>
       </div>
-      <MobileBottomNav />
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }

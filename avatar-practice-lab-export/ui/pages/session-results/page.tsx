@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AnalyticsDashboard } from "@/components/ai-session-analysis/analytics-dashboard";
 import { ArrowLeft, Plus, BarChart3 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
+import { SidebarLayout } from "@/components/layout/sidebar-layout";
 
 export default function SessionResultsPage() {
   const [analysis, setAnalysis] = useState<any>(null);
@@ -89,7 +89,7 @@ export default function SessionResultsPage() {
 
   if (isLoading) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -98,13 +98,13 @@ export default function SessionResultsPage() {
             </p>
           </div>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   if (error) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <p className="text-red-500 mb-4">{error}</p>
@@ -114,13 +114,13 @@ export default function SessionResultsPage() {
             </Button>
           </div>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   if (!analysis) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">
           <Card>
             <CardContent className="p-12 text-center">
@@ -138,12 +138,12 @@ export default function SessionResultsPage() {
             </CardContent>
           </Card>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   return (
-    <ModernDashboardLayout>
+    <SidebarLayout>
       <div className="">
         {/* Header */}
         <div className="border-b bg-card">
@@ -178,6 +178,6 @@ export default function SessionResultsPage() {
           />
         </div>
       </div>
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }

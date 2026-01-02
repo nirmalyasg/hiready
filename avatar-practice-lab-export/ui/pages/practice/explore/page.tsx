@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Lightbulb, Brain, Compass, Briefcase, Globe, Heart, Mic } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
-import MobileBottomNav from "@/components/layout/mobile-bottom-nav";
+import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { useAvatars } from "@/hooks/use-avatars";
 import {
   type ConversationBlueprint,
@@ -114,7 +113,7 @@ export default function ExplorePage() {
   const canStart = selectedTopic || customTopic.trim().length > 0;
 
   return (
-    <ModernDashboardLayout>
+    <SidebarLayout>
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
         <div className="container mx-auto px-6 py-8 max-w-3xl">
           <button
@@ -201,7 +200,6 @@ export default function ExplorePage() {
           </div>
         </div>
       </div>
-      <MobileBottomNav />
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }

@@ -6,8 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link, useSearchParams } from "react-router-dom";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
-import MobileBottomNav from "@/components/layout/mobile-bottom-nav";
+import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface DimensionScore {
@@ -103,17 +102,17 @@ export default function InterviewResultsPage() {
 
   if (isLoading) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="flex justify-center items-center h-screen">
           <LoadingSpinner />
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   if (!analysis) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="min-h-screen bg-gradient-to-b from-slate-50/80 to-white flex items-center justify-center">
           <Card className="max-w-md mx-4">
             <CardContent className="p-8 text-center">
@@ -126,7 +125,7 @@ export default function InterviewResultsPage() {
             </CardContent>
           </Card>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
@@ -134,7 +133,7 @@ export default function InterviewResultsPage() {
   const RecIcon = recConfig?.icon || CheckCircle;
 
   return (
-    <ModernDashboardLayout>
+    <SidebarLayout>
       <div className="min-h-screen bg-gradient-to-b from-slate-50/80 to-white pb-24 sm:pb-8">
         <div className="bg-gradient-to-br from-indigo-500/5 via-white to-purple-50/30 border-b border-slate-100">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-5xl">
@@ -390,7 +389,6 @@ export default function InterviewResultsPage() {
           </div>
         </div>
       </div>
-      <MobileBottomNav />
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }

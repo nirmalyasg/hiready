@@ -3,8 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
-import MobileBottomNav from "@/components/layout/mobile-bottom-nav";
+import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { ChevronRight, ChevronLeft, Target, Clock, Users, BookOpen, Sparkles, AlertCircle } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Separator } from "@/components/ui/separator";
@@ -104,20 +103,20 @@ export default function ScenarioDetailsPage() {
 
   if (isLoading) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="flex justify-center items-center h-screen">
           <div className="text-center">
             <LoadingSpinner />
             <p className="text-gray-500 mt-4">Loading scenario details...</p>
           </div>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   if (error || !scenario) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="min-h-screen bg-gray-50/50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-4xl">
             <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
@@ -139,12 +138,12 @@ export default function ScenarioDetailsPage() {
             </div>
           </div>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   return (
-    <ModernDashboardLayout>
+    <SidebarLayout>
       <div className="min-h-screen bg-gray-50/50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-4xl">
           <Link
@@ -261,7 +260,6 @@ export default function ScenarioDetailsPage() {
           </p>
         </div>
       </div>
-      <MobileBottomNav />
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }

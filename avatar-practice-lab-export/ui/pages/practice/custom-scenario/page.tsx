@@ -4,8 +4,7 @@ import { ArrowLeft, ArrowRight, MessageSquare, Users, Target, Zap, Check, Sparkl
 import { VoiceInputField } from "@/components/ui/voice-input";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
-import MobileBottomNav from "@/components/layout/mobile-bottom-nav";
+import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { useAuth } from "@/hooks/useAuth";
 import {
   USER_OBJECTIVES,
@@ -213,7 +212,7 @@ export default function CustomScenarioPage() {
   };
 
   return (
-    <ModernDashboardLayout>
+    <SidebarLayout>
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pb-32 sm:pb-8">
         <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-3xl">
           <div className="flex items-center justify-between mb-4 sm:mb-8">
@@ -596,8 +595,7 @@ export default function CustomScenarioPage() {
           )}
         </div>
 
-        <MobileBottomNav />
       </div>
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }
