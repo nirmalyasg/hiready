@@ -34,7 +34,11 @@ import {
   Layers,
   Code,
   Briefcase,
-  UserCheck
+  UserCheck,
+  Building2,
+  CheckCircle2,
+  AlertTriangle,
+  Play
 } from "lucide-react";
 import { format, isToday, isYesterday, isThisWeek, isThisMonth } from "date-fns";
 
@@ -223,6 +227,17 @@ export default function ResultsPage() {
     return data.sessions;
   };
 
+  const fetchJobTargets = async () => {
+    try {
+      const res = await fetch("/api/jobs/job-targets", { credentials: 'include' });
+      const data = await res.json();
+      if (!data.success) return [];
+      return data.jobs || [];
+    } catch {
+      return [];
+    }
+  };
+
   const { isLoading: loadingTranscripts, data: transcripts } = useQuery({
     queryKey: ["/avatar/get-transcripts"],
     queryFn: fetchTranscripts,
@@ -257,6 +272,15 @@ export default function ResultsPage() {
     refetchOnMount: 'always',
     staleTime: 0,
   });
+
+  const { data: jobTargets } = useQuery({
+    queryKey: ["/jobs/job-targets"],
+    queryFn: fetchJobTargets,
+    refetchOnMount: 'always',
+    staleTime: 0,
+  });
+
+  const activeJobs = (jobTargets || []).filter((j: { status: string }) => j.status !== 'archived' && j.status !== 'rejected');
 
   const loading = loadingTranscripts || loadingSkills || loadingPresentations || loadingInterviews || loadingExercises;
 
@@ -378,37 +402,41 @@ export default function ResultsPage() {
       <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-brand-dark">Results</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-brand-dark">Performance Review</h1>
             <p className="text-sm sm:text-base text-brand-dark/60 mt-1">
               {totalSessions} sessions, {Math.round(totalDuration / 60)} minutes practiced
+              {activeJobs.length > 0 && ` across ${activeJobs.length} job target${activeJobs.length !== 1 ? 's' : ''}`}
             </p>
           </div>
-          <Link to="/avatar/start" className="w-full sm:w-auto">
-            <Button className="bg-brand-primary hover:bg-brand-dark text-white px-6 w-full sm:w-auto">
-              New Session
-            </Button>
-          </Link>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Link to="/interview/custom" className="flex-1 sm:flex-none">
+              <Button className="gap-2 w-full">
+                <Play className="w-4 h-4" />
+                Practice Interview
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
           <Card className="p-3 sm:p-4 border border-brand-light/30 bg-white">
-            <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Total</p>
+            <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Total Sessions</p>
             <p className="text-xl sm:text-2xl font-bold text-brand-dark mt-1">{totalSessions}</p>
           </Card>
-          <Card className="p-3 sm:p-4 border border-brand-light/30 bg-white">
-            <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Practice</p>
-            <p className="text-xl sm:text-2xl font-bold text-brand-dark mt-1">{totalConversationSessions}</p>
-          </Card>
-          <Card className="p-3 sm:p-4 border border-brand-light/30 bg-white">
-            <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Interviews</p>
-            <p className="text-xl sm:text-2xl font-bold text-brand-dark mt-1">{totalInterviewSessions}</p>
+          <Card className="p-3 sm:p-4 border border-purple-100 bg-purple-50">
+            <p className="text-[10px] sm:text-xs text-purple-600 font-medium uppercase tracking-wide">Interviews</p>
+            <p className="text-xl sm:text-2xl font-bold text-purple-700 mt-1">{totalInterviewSessions}</p>
           </Card>
           <Card className="p-3 sm:p-4 border border-brand-light/30 bg-white">
             <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Exercises</p>
             <p className="text-xl sm:text-2xl font-bold text-brand-dark mt-1">{totalExerciseSessions}</p>
           </Card>
           <Card className="p-3 sm:p-4 border border-brand-light/30 bg-white">
-            <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Time</p>
+            <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Practice</p>
+            <p className="text-xl sm:text-2xl font-bold text-brand-dark mt-1">{totalConversationSessions}</p>
+          </Card>
+          <Card className="p-3 sm:p-4 border border-brand-light/30 bg-white">
+            <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Total Time</p>
             <p className="text-xl sm:text-2xl font-bold text-brand-dark mt-1">{Math.round(totalDuration / 60)}m</p>
           </Card>
         </div>
@@ -740,6 +768,27 @@ export default function ResultsPage() {
                 <p className="text-gray-500">Try adjusting your search or filter criteria</p>
               </Card>
             )}
+          </div>
+        )}
+
+        {/* Next Recommended Exercise CTA */}
+        {activeJobs.length > 0 && (
+          <div className="mt-8 bg-gradient-to-r from-brand-dark to-brand-dark/90 rounded-2xl p-6 text-white">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold mb-1">Ready to continue practicing?</h3>
+                <p className="text-white/70 text-sm">
+                  Keep preparing for {(activeJobs[0] as { roleTitle: string }).roleTitle}
+                  {(activeJobs[0] as { companyName: string | null }).companyName && ` at ${(activeJobs[0] as { companyName: string | null }).companyName}`}
+                </p>
+              </div>
+              <Link to={`/interview/custom?jobId=${(activeJobs[0] as { id: string }).id}`}>
+                <Button className="bg-white text-brand-dark hover:bg-white/90 gap-2 w-full sm:w-auto">
+                  <Play className="w-4 h-4" />
+                  Practice Now
+                </Button>
+              </Link>
+            </div>
           </div>
         )}
       </div>
