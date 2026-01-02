@@ -76,11 +76,23 @@ Implemented comprehensive job targeting system with career memory and readiness 
 
 4. **Career Memory System**
    - Skill patterns tracking with rolling averages and trend detection
-   - Trends: improving (score > avg+5), declining (score < avg-5), stagnant
+   - Trends: improving (score > avg+0.3), declining (score < avg-0.3), stagnant
    - Occurrence counting to track which dimensions are practiced most
    - Auto-increments when same dimension is practiced across sessions
+   - **AI Insights Dashboard Section**: Displays personalized career observations including:
+     - Persistent weaknesses (dimensions with avgScore < 3 across 2+ sessions)
+     - Consistent strengths (dimensions with avgScore >= 4 across 2+ sessions)
+     - Improving/declining trend alerts
+     - Summary stats: skills tracked, improving count, declining count
 
-5. **Navigation Updates**
+5. **Interview Results Enhancements**
+   - **Job Readiness Card**: Shows readiness score, delta from previous session, trend badge
+   - **Strongest/Weakest Dimensions**: Color-coded display with edge-case handling
+   - **7-Day Practice Plans**: Day-by-day tasks with time estimates in "Plan" tab
+   - **Better Answer Examples**: Question/answer pairs showing improved responses in "Answers" tab
+   - **Practice Again CTA**: Purple gradient banner linking back to practice with job context
+
+6. **Navigation Updates**
    - "My Jobs" added to sidebar navigation (desktop)
    - "Jobs" added to mobile bottom navigation
    - Job detail page with AI-analyzed requirements display
