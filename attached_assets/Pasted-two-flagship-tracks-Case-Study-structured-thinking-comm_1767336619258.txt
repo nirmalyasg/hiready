@@ -1,0 +1,197 @@
+two flagship tracks:
+
+Case Study (structured thinking + communication)
+
+Coding Lab (explain → debug → modify)
+
+And we’ll add only what’s necessary to make these feel real, repeatable, and monetizable.
+
+Below is a deep, detailed feature plan your engineer can build from.
+
+Product MVP: Interview Exercise Mode (2-track)
+The promise (what users get)
+
+“I upload my resume + JD, pick a role, and practice real interview rounds—a case round + a coding round—with an AI interviewer that probes like a human and gives evidence-based feedback.”
+
+Track A — Case Study Mode (flagship)
+A1. What the user does
+
+Select: Role → Level → Interview Type (Hiring Manager / Panel) → Style (friendly/neutral/stress)
+
+Choose Case Template (role-specific) OR Custom case generated from JD
+
+Get 1–2 mins “thinking time” (optional timer)
+
+Speak their response
+
+Interviewer interrupts + probes
+
+Finish + get feedback
+
+A2. What makes it “real”
+
+Realism comes from structure + probing rules, not from storing thousands of cases.
+
+Case structure (always consistent)
+
+A case is a “prompt package” with:
+
+Prompt statement
+
+Clarifying questions allowed (candidate can ask 2–3)
+
+Data that can be revealed if candidate asks right questions
+
+Evaluation focus (what interviewer listens for)
+
+Probing map (if vague → drill; if wrong → redirect; if strong → push deeper)
+
+Example: Case prompt package
+
+“E-commerce repeat rate dropped 10% in 2 months. How would you diagnose and fix?”
+
+Revealable data: “repeat rate by cohort”, “top categories”, “NPS dip”, etc.
+
+A3. MVP Case types (keep it tight)
+
+You do NOT need 20 cases per role. You need 3 per role kit.
+
+For MVP:
+
+Business diagnosis case (metrics + hypotheses)
+
+Execution planning case (priorities + tradeoffs)
+
+Stakeholder case (pushback + negotiation)
+
+A4. Case scoring rubric (must be concrete)
+
+Dimensions (1–5) with anchors:
+
+Structure (clear steps, MECE-ish but not “consulting words”)
+
+Hypotheses quality (not random, linked to metrics)
+
+Clarifying questions (asks the right questions early)
+
+Trade-offs (time/cost/risk)
+
+Communication clarity (concise, not rambling)
+
+Handling interruptions (stays calm, re-centers)
+
+A5. Output (what user receives)
+
+6-dimension scorecard + evidence snippets
+
+“Your answer in a stronger structure” (rewrite)
+
+“3 better clarifying questions you should have asked”
+
+10-minute practice plan for next 7 days
+
+Track B — Coding Lab Mode (flagship)
+
+This is where you win vs generic “mock interview” tools.
+
+B1. The 3 coding activity types (MVP)
+
+You said: debugging, modification, explanation — perfect.
+
+1) Explain Code
+
+User sees a snippet (read-only) and must:
+
+Explain what it does
+
+Complexity
+
+Edge cases
+
+Improvements
+
+2) Debug Code
+
+User sees buggy code + failing test case / symptom.
+They must:
+
+Identify likely bug
+
+Explain how they’d debug (repro steps, logs, isolate)
+
+Propose fix
+Optionally: edit the code.
+
+3) Modify Code
+
+User sees working code + new requirement:
+
+“Make it handle X”
+
+“Optimize memory”
+
+“Return indices not values”
+They must:
+
+Explain changes
+
+Update code (optional)
+
+Validate edge cases
+
+B2. What makes Coding Lab “real”
+Real interviewer behaviors (must be encoded)
+
+Interrupt if candidate rambles
+
+Ask “why” on complexity
+
+Force edge cases
+
+Challenge assumptions
+
+Ask for a quick test plan
+
+Ask “what if constraints change?”
+
+B3. MVP approach: Don’t run code first
+
+Phase 1 (MVP): reasoning-first
+
+Candidate can edit code
+
+AI evaluates correctness by reasoning + expected behavior
+
+You store “expected signals” and “common failure modes”
+
+Phase 2 (later): run code
+
+Add sandbox execution + unit tests
+
+This keeps engineering safe and fast while still highly valuable.
+
+B4. Coding scoring rubric (tight + evidence-based)
+
+Dimensions:
+
+Understanding / correctness
+
+Step-by-step reasoning
+
+Edge case thinking
+
+Debugging method
+
+Code quality judgment (naming, modularity, clarity)
+
+Communication clarity
+
+B5. Feedback outputs
+
+Scorecard + evidence quotes
+
+“What you missed” list (edge cases, complexity)
+
+“Better explanation” rewrite (spoken-answer rewrite)
+
+For debug/modify: “Suggested patch” (optional)
