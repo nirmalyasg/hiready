@@ -497,6 +497,7 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
     let resumeParsed: any = null;
     let jdParsed: any = null;
     let roleKitData: RoleKit | null = null;
+    let jobTargetData: any = null;
     
     if (config.resumeDocId) {
       const [doc] = await db.select().from(userDocuments).where(eq(userDocuments.id, config.resumeDocId));
@@ -510,6 +511,23 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
       const [kit] = await db.select().from(roleKits).where(eq(roleKits.id, config.roleKitId));
       roleKitData = kit;
     }
+    // Load job target for custom interviews
+    if (config.jobTargetId) {
+      const [job] = await db.select().from(jobTargets).where(eq(jobTargets.id, config.jobTargetId));
+      if (job) {
+        jobTargetData = {
+          roleTitle: job.roleTitle,
+          company: job.companyName,
+          location: job.location,
+          description: job.jdText,
+          parsedJd: job.jdParsed,
+        };
+        // Use job target's parsed JD if no separate JD document
+        if (!jdParsed && job.jdParsed) {
+          jdParsed = job.jdParsed;
+        }
+      }
+    }
     
     const planContext = {
       interviewType: config.interviewType,
@@ -518,6 +536,7 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
       roleKit: roleKitData ? { name: roleKitData.name, domain: roleKitData.domain, skillsFocus: roleKitData.skillsFocus } : null,
       candidateProfile: resumeParsed,
       jobDescription: jdParsed,
+      jobTarget: jobTargetData,
     };
     
     const openaiClient = getOpenAI();
@@ -1184,61 +1203,65 @@ const GENERAL_DOC_EXTRACTOR_PROMPT = `Extract and structure the key information 
 
 Return a JSON object with relevant fields based on the content type.`;
 
-const INTERVIEW_PLAN_GENERATOR_PROMPT = `You are an interview planning expert. Create a structured interview plan based on the provided context.
+const INTERVIEW_PLAN_GENERATOR_PROMPT = `You are an interview planning expert. Create a CUSTOMIZED interview plan based on the provided context.
 
 INPUTS:
-- interviewType: HR/hiring_manager/technical/panel
-- style: friendly/neutral/stress
-- seniority: entry/mid/senior
-- roleKit: role information and skills focus
-- candidateProfile: parsed resume data
-- jobDescription: parsed JD data
+- interviewType: "hr" | "hiring_manager" | "technical" | "panel"
+- style: "friendly" | "neutral" | "stress"
+- seniority: "entry" | "mid" | "senior"
+- roleKit: role information and skills focus (may be null)
+- candidateProfile: parsed resume data (may be null)
+- jobDescription: parsed JD data (may be null)
+- jobTarget: target job details including company, role title, description
+
+CRITICAL CUSTOMIZATION RULES:
+
+1. INTERVIEW TYPE determines the focus:
+   - "hr": Focus on culture fit, motivation, career goals, behavioral questions, soft skills
+   - "hiring_manager": Focus on role fit, team dynamics, problem-solving, situational questions
+   - "technical": Focus on technical skills, coding concepts, system design, hands-on scenarios
+   - "panel": Mix of all above with multiple perspectives
+
+2. STYLE determines the tone and pressure:
+   - "friendly": Supportive, encouraging follow-ups, hints when stuck, conversational
+   - "neutral": Professional, balanced, standard interview pacing
+   - "stress": Challenging, probing deeply, time pressure, pushback on answers
+
+3. JOB TARGET context:
+   - If jobTarget is provided, tailor ALL questions to that specific role and company
+   - Reference the company name and role in warmup questions
+   - Use job description requirements to create relevant scenario questions
+   - Focus skills assessment on what the JD emphasizes
+
+4. CANDIDATE PROFILE:
+   - If candidateProfile (resume) is provided, create specific questions about their experience
+   - Identify potential gaps between resume and job requirements
+   - Probe claimed achievements and skills
 
 Generate a JSON interview plan with this structure:
 {
   "phases": [
     {
-      "name": "Warmup",
+      "name": "Phase name (e.g., Warmup, Technical Deep-Dive, Behavioral, Case Study, Wrap-up)",
       "duration": 60,
-      "objectives": ["Build rapport", "Set expectations"],
-      "questionPatterns": ["Tell me about yourself", "Why this role?"]
-    },
-    {
-      "name": "Resume Deep-Dive",
-      "duration": 120,
-      "objectives": ["Validate claims", "Assess depth"],
-      "questionPatterns": ["Walk me through [specific project]", "What was your role in [achievement]?"]
-    },
-    {
-      "name": "Role Skills",
-      "duration": 120,
-      "objectives": ["Test job-specific competencies"],
-      "questionPatterns": ["Based on skills focus from role kit"]
-    },
-    {
-      "name": "Scenario/Case",
-      "duration": 90,
-      "objectives": ["Assess problem-solving"],
-      "questionPatterns": ["Situational questions relevant to role"]
-    },
-    {
-      "name": "Wrap-up",
-      "duration": 30,
-      "objectives": ["Answer candidate questions", "Close positively"],
-      "questionPatterns": ["Questions for me?", "Timeline communication"]
+      "objectives": ["What to assess in this phase"],
+      "questionPatterns": ["Specific question templates tailored to the context"]
     }
   ],
   "triggers": [
     {
       "type": "skill_gap|risk_flag|claim_to_validate",
-      "source": "resume|jd|role_kit",
-      "probeRules": ["Specific follow-up approaches"]
+      "source": "resume|jd|job_target",
+      "probeRules": ["How to follow up based on this trigger"]
     }
   ],
-  "focusAreas": ["Top 3-5 things to assess based on resume vs JD fit"]
+  "focusAreas": ["Top 3-5 specific things to assess based on ALL inputs"],
+  "interviewerTone": "Description of how the interviewer should behave based on style",
+  "keyQuestions": ["5-7 most important questions to ask, fully customized to this specific interview"]
 }
 
-Customize phases and questions based on the interview type and candidate profile. For technical interviews, include more technical depth. For HR, focus on culture fit and soft skills.`;
+IMPORTANT: Do NOT use generic placeholder questions. Every question should be specific to the job target, candidate profile, and interview type provided. If company/role info is available, mention them by name.`;
+
 
 const EVALUATOR_PROMPT = `You are an interview evaluator.
 
