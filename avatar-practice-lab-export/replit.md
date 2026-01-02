@@ -29,19 +29,31 @@ avatar-practice-lab-export/
 ## Recent Changes (January 2, 2026)
 
 ### Interview Exercise Mode Feature
-Added two new flagship interview practice tracks:
+Added two new flagship interview practice tracks with full avatar integration:
 
 1. **Case Study Mode**
    - Practice structured case interviews (business diagnosis, execution planning, stakeholder)
+   - **Avatar-based interface** - Same experience as presentation mode with virtual AI interviewer
    - AI interviewer with probing behavior (ifVague, ifWrong, ifStrong responses)
-   - 60-second thinking time before session
-   - 6-dimension scorecard with evidence snippets
+   - 60-second thinking time before session + lobby screen before joining
+   - Real-time voice interaction with transcript display
+   - 6-dimension scorecard with evidence snippets in results
 
 2. **Coding Lab Mode**
    - Three activity types: Explain Code, Debug Code, Modify Code
-   - Code viewer with syntax highlighting
-   - Signal tracking (expected signals, failure modes)
+   - **Avatar-based interface** - Virtual technical interviewer with voice interaction
+   - Code display panel on left, avatar/transcript on right
+   - Signal tracking (expected signals, failure modes) in interviewer prompts
+   - Bug description or modification requirement shown in context panel
    - Suggested fix display in results
+
+### Technical Implementation
+Both session pages now use:
+- `TranscriptProvider` and `EventProvider` contexts (same as presentation mode)
+- `useRealtimeSession` hook for OpenAI Realtime voice connection
+- `RealtimeAgent` with mode-specific interviewer prompts
+- Audio element for TTS playback with speaking state detection
+- Same layout pattern as presentation mode (content left, avatar+transcript right)
 
 ### New Database Tables
 - `case_templates` - Case study exercise templates
