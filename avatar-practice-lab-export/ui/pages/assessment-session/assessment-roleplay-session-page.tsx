@@ -1136,6 +1136,8 @@ function Transcript({
   const [searchParams] = useSearchParams();
   const avatarIdParam = searchParams.get("avatarId");
   const assignmentId = searchParams.get("assignmentId");
+  const interviewSessionId = searchParams.get("interviewSessionId");
+  const isInterviewMode = !!interviewSessionId;
   const transcriptRef = useRef<HTMLDivElement | null>(null);
   const [saving, setSaving] = useState(false);
   const [prevLogs, setPrevLogs] = useState<TranscriptItem[]>([]);
@@ -1345,6 +1347,39 @@ function Transcript({
 
       if (response.ok) {
         console.log("Transcript saved successfully");
+        
+        // Handle Interview Custom sessions differently
+        if (isInterviewMode && interviewSessionId) {
+          try {
+            console.log("[Interview] Calling interview analyze endpoint...");
+            const analyzeResponse = await fetch(`/api/interview/session/${interviewSessionId}/analyze`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ 
+                transcript,
+                transcriptId 
+              }),
+            });
+            
+            if (analyzeResponse.ok) {
+              console.log("[Interview] Analysis created successfully");
+              navigate(`/interview/results?sessionId=${interviewSessionId}`);
+            } else {
+              console.error("[Interview] Failed to create analysis");
+              toast({
+                title: "Analysis failed",
+                description: "Could not analyze the interview. Please try again.",
+              });
+              // Still navigate to results page - it will show the error state
+              navigate(`/interview/results?sessionId=${interviewSessionId}`);
+            }
+          } catch (error) {
+            console.error("[Interview] Error calling analyze:", error);
+            navigate(`/interview/results?sessionId=${interviewSessionId}`);
+          }
+          return;
+        }
+        
         try {
           // /recommended-scenario
           fetch("/api/avatar/recommended-scenario", {

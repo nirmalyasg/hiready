@@ -95,19 +95,21 @@ const SkillDimensionAssessmentSchema = {
         },
       },
     },
-    personaFit: {
-      type: "object",
-      additionalProperties: false,
-      required: ["persona", "mistakesObserved", "authorityUsage", "tailoredAdvice", "successCriteriaMet", "overallPersonaFit"],
-      properties: {
-        persona: { type: "string" },
-        mistakesObserved: { type: "array", items: { type: "string" } },
-        authorityUsage: { type: "string" },
-        tailoredAdvice: { type: "string" },
-        successCriteriaMet: { type: "array", items: { type: "string" } },
-        overallPersonaFit: { type: "number" },
-      },
-    },
+  },
+};
+
+// PersonaFit schema - only used when personaOverlay is provided
+const PersonaFitSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["persona", "mistakesObserved", "authorityUsage", "tailoredAdvice", "successCriteriaMet", "overallPersonaFit"],
+  properties: {
+    persona: { type: "string" },
+    mistakesObserved: { type: "array", items: { type: "string" } },
+    authorityUsage: { type: "string" },
+    tailoredAdvice: { type: "string" },
+    successCriteriaMet: { type: "array", items: { type: "string" } },
+    overallPersonaFit: { type: "number" },
   },
 };
 
@@ -117,7 +119,7 @@ const SkillDimensionAssessmentSchemaWithPersona = {
   required: ["skillAssessments", "personaFit"],
   properties: {
     skillAssessments: SkillDimensionAssessmentSchema.properties.skillAssessments,
-    personaFit: SkillDimensionAssessmentSchema.properties.personaFit,
+    personaFit: PersonaFitSchema,
   },
 };
 
