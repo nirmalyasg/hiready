@@ -29,8 +29,9 @@ export default function MobileBottomNav() {
              location.pathname.startsWith("/exercise-mode");
     }
     if (path === "/avatar/results") {
-      return location.pathname === "/avatar/results" || 
-             location.pathname.includes("/session-analysis");
+      return location.pathname.startsWith("/avatar/results") || 
+             location.pathname.includes("/session-analysis") ||
+             location.pathname.includes("/results");
     }
     if (path === "/profile") {
       return location.pathname === "/profile";
