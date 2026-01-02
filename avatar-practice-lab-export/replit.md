@@ -28,7 +28,14 @@ avatar-practice-lab-export/
 
 ## Recent Changes (January 2, 2026)
 
-### Interview Custom 2-Step Wizard Flow (Latest)
+### Resume Persistence & Profile Management (Latest)
+Users can now save their resume once and reuse it across all interview practice sessions:
+- **Profile Page Resume Section**: Shows saved resume with upload date, replace/delete options
+- **Interview Custom Integration**: Auto-detects saved resume and offers "Use This Resume" or "Upload New"
+- **Smart Resume Deletion**: When deleting the current resume, system auto-promotes the next most recent resume
+- **API Endpoints**: Added DELETE /api/interview/documents/:id for resume management
+
+### Interview Custom 2-Step Wizard Flow
 Redesigned the Interview Custom page into a streamlined 2-step wizard:
 - **Step 1: Select Target Job**
   - Choose from saved jobs or add a new one via:
