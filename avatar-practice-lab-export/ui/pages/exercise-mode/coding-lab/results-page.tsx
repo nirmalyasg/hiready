@@ -42,7 +42,9 @@ export default function CodingLabResultsPage() {
       
       if (sessionId) {
         try {
-          const response = await fetch(`/api/exercise-mode/sessions/${sessionId}/analysis`);
+          const response = await fetch(`/api/exercise-mode/sessions/${sessionId}/analysis`, {
+              credentials: 'include'
+            });
           const data = await response.json();
           
           if (data.success && data.analysis) {
