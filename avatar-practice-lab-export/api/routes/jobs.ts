@@ -1071,6 +1071,140 @@ jobsRouter.post("/job-targets/:id/compute-readiness", requireAuth, async (req: R
   }
 });
 
+// GET readiness data for a specific job target with dimension analysis
+jobsRouter.get("/job-targets/:id/readiness", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const jobId = req.params.id;
+
+    // Verify job belongs to user
+    const [job] = await db
+      .select()
+      .from(jobTargets)
+      .where(and(eq(jobTargets.id, jobId), eq(jobTargets.userId, userId)));
+
+    if (!job) {
+      return res.status(404).json({ success: false, error: "Job not found" });
+    }
+
+    // Get all interview sessions for this job via interview configs
+    const configs = await db
+      .select({ id: interviewConfigs.id })
+      .from(interviewConfigs)
+      .where(eq(interviewConfigs.jobTargetId, jobId));
+
+    const configIds = configs.map(c => c.id);
+
+    // Get interview sessions and their analysis
+    let interviewSessionsWithAnalysis: {
+      sessionId: number;
+      createdAt: Date;
+      analysisId: number | null;
+      dimensionScores: { dimension: string; score: number; evidence: string[]; rationale: string; improvement: string }[] | null;
+      overallRecommendation: string | null;
+    }[] = [];
+
+    if (configIds.length > 0) {
+      for (const configId of configIds) {
+        const sessions = await db
+          .select({
+            sessionId: interviewSessions.id,
+            createdAt: interviewSessions.createdAt,
+            analysisId: interviewAnalysis.id,
+            dimensionScores: interviewAnalysis.dimensionScores,
+            overallRecommendation: interviewAnalysis.overallRecommendation,
+          })
+          .from(interviewSessions)
+          .leftJoin(interviewAnalysis, eq(interviewAnalysis.interviewSessionId, interviewSessions.id))
+          .where(eq(interviewSessions.interviewConfigId, configId));
+        
+        interviewSessionsWithAnalysis.push(...sessions);
+      }
+    }
+
+    // Aggregate dimension scores across all sessions
+    const dimensionAggregates: Record<string, { scores: number[]; evidence: string[]; improvements: string[] }> = {};
+
+    for (const session of interviewSessionsWithAnalysis) {
+      if (session.dimensionScores && Array.isArray(session.dimensionScores)) {
+        for (const dim of session.dimensionScores) {
+          if (!dimensionAggregates[dim.dimension]) {
+            dimensionAggregates[dim.dimension] = { scores: [], evidence: [], improvements: [] };
+          }
+          dimensionAggregates[dim.dimension].scores.push(dim.score);
+          if (dim.evidence) dimensionAggregates[dim.dimension].evidence.push(...dim.evidence);
+          if (dim.improvement) dimensionAggregates[dim.dimension].improvements.push(dim.improvement);
+        }
+      }
+    }
+
+    // Calculate average and trend for each dimension
+    const dimensionSummary = Object.entries(dimensionAggregates).map(([dimension, data]) => {
+      const avgScore = data.scores.length > 0 
+        ? Math.round(data.scores.reduce((a, b) => a + b, 0) / data.scores.length)
+        : 0;
+      
+      // Calculate trend from first half vs second half of scores
+      let trend: "improving" | "stable" | "declining" = "stable";
+      if (data.scores.length >= 2) {
+        const mid = Math.floor(data.scores.length / 2);
+        const firstHalfAvg = data.scores.slice(0, mid).reduce((a, b) => a + b, 0) / mid;
+        const secondHalfAvg = data.scores.slice(mid).reduce((a, b) => a + b, 0) / (data.scores.length - mid);
+        if (secondHalfAvg > firstHalfAvg + 5) trend = "improving";
+        else if (secondHalfAvg < firstHalfAvg - 5) trend = "declining";
+      }
+
+      return {
+        dimension,
+        avgScore,
+        trend,
+        sessionCount: data.scores.length,
+        latestScore: data.scores.length > 0 ? data.scores[data.scores.length - 1] : null,
+        topEvidence: data.evidence.slice(0, 3),
+        topImprovement: data.improvements[data.improvements.length - 1] || null,
+      };
+    });
+
+    // Sort by average score to find strongest and weakest
+    const sortedDimensions = [...dimensionSummary].sort((a, b) => b.avgScore - a.avgScore);
+    const strongestDimensions = sortedDimensions.slice(0, 3);
+    const weakestDimensions = sortedDimensions.slice(-3).reverse();
+
+    // Calculate overall averages
+    const overallAvg = dimensionSummary.length > 0
+      ? Math.round(dimensionSummary.reduce((sum, d) => sum + d.avgScore, 0) / dimensionSummary.length)
+      : 0;
+
+    // Get exercise sessions count
+    const exerciseSessionsForJob = await db
+      .select({ id: exerciseSessions.id })
+      .from(exerciseSessions)
+      .where(eq(exerciseSessions.jobTargetId, jobId));
+
+    res.json({
+      success: true,
+      jobId,
+      roleTitle: job.roleTitle,
+      companyName: job.companyName,
+      readinessScore: job.readinessScore || 0,
+      lastPracticedAt: job.lastPracticedAt,
+      stats: {
+        interviewSessionCount: interviewSessionsWithAnalysis.length,
+        exerciseSessionCount: exerciseSessionsForJob.length,
+        totalSessionCount: interviewSessionsWithAnalysis.length + exerciseSessionsForJob.length,
+        overallAvgScore: overallAvg,
+      },
+      dimensions: dimensionSummary,
+      strongestDimensions,
+      weakestDimensions,
+      focusAreas: (job.jdParsed as JDParsedType)?.focusAreas || [],
+    });
+  } catch (error: any) {
+    console.error("Error fetching readiness data:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Get user skill patterns (career memory)
 jobsRouter.get("/skill-patterns", requireAuth, async (req: Request, res: Response) => {
   try {
