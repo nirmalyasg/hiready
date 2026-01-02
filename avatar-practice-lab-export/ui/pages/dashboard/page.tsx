@@ -153,6 +153,26 @@ export default function AvatarSimulatorDashboard() {
     staleTime: 0,
   });
 
+  const fetchAIInsights = async () => {
+    try {
+      const res = await fetch("/api/jobs/ai-insights", { credentials: 'include' });
+      const data = await res.json();
+      if (!data.success) return null;
+      return data;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const aiInsightsQuery = useQuery({
+    queryKey: ["/jobs/ai-insights"],
+    queryFn: fetchAIInsights,
+    refetchOnMount: 'always',
+    staleTime: 0,
+  });
+
+  const aiInsights = aiInsightsQuery.data;
+
   const jobTargets: JobTarget[] = jobTargetsQuery.data || [];
   const activeJobs = jobTargets.filter(j => j.status !== 'archived' && j.status !== 'rejected');
 
@@ -549,6 +569,78 @@ export default function AvatarSimulatorDashboard() {
                     </Link>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* AI Insights - Career Memory */}
+            {aiInsights?.hasData && (
+              <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-100 shadow-sm">
+                <h3 className="text-lg font-bold text-brand-dark mb-2 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-purple-600" />
+                  AI Career Insights
+                </h3>
+                <p className="text-sm text-brand-muted mb-4">{aiInsights.summary}</p>
+                {aiInsights.insights?.length === 0 && (
+                  <div className="p-4 rounded-xl bg-white border border-purple-100">
+                    <p className="text-sm text-brand-muted text-center">
+                      Keep practicing to unlock personalized insights about your strengths and areas for improvement.
+                    </p>
+                  </div>
+                )}
+                <div className="space-y-3">
+                  {aiInsights.insights?.slice(0, 4).map((insight: any, idx: number) => (
+                    <div 
+                      key={idx}
+                      className={`p-4 rounded-xl ${
+                        insight.type === "strength" ? "bg-green-50 border border-green-100" :
+                        insight.type === "weakness" ? "bg-amber-50 border border-amber-100" :
+                        "bg-blue-50 border border-blue-100"
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                          insight.type === "strength" ? "bg-green-500" :
+                          insight.type === "weakness" ? "bg-amber-500" :
+                          "bg-blue-500"
+                        }`}>
+                          {insight.type === "strength" ? (
+                            <CheckCircle2 className="w-4 h-4 text-white" />
+                          ) : insight.type === "weakness" ? (
+                            <AlertTriangle className="w-4 h-4 text-white" />
+                          ) : (
+                            <TrendingUp className="w-4 h-4 text-white" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className={`text-sm font-medium ${
+                            insight.type === "strength" ? "text-green-800" :
+                            insight.type === "weakness" ? "text-amber-800" :
+                            "text-blue-800"
+                          }`}>
+                            {insight.title}
+                          </p>
+                          <p className="text-xs text-brand-muted mt-1">{insight.description}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {aiInsights.stats && (
+                  <div className="flex gap-4 mt-4 pt-4 border-t border-purple-100">
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-purple-700">{aiInsights.stats.dimensionsTracked}</p>
+                      <p className="text-xs text-brand-muted">Skills Tracked</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-green-600">{aiInsights.stats.improvingCount}</p>
+                      <p className="text-xs text-brand-muted">Improving</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-amber-600">{aiInsights.stats.decliningCount}</p>
+                      <p className="text-xs text-brand-muted">Need Focus</p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

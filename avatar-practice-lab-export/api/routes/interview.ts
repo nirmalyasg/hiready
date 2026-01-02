@@ -16,6 +16,7 @@ import {
   interviewAnalysis,
   interviewArtifacts,
   jobTargets,
+  userSkillPatterns,
   RoleKit,
   UserDocument,
   InterviewConfig,
@@ -808,6 +809,56 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
       .update(interviewSessions)
       .set({ status: "analyzed", updatedAt: new Date() })
       .where(eq(interviewSessions.id, sessionId));
+    
+    // Update skill patterns for career memory (failure pattern detection)
+    const userId = req.user!.id;
+    const dimensionScores = evaluatorResult.dimension_scores || [];
+    
+    for (const dimScore of dimensionScores) {
+      if (!dimScore.dimension || typeof dimScore.score !== "number") continue;
+      
+      const [existingPattern] = await db
+        .select()
+        .from(userSkillPatterns)
+        .where(and(
+          eq(userSkillPatterns.userId, userId),
+          eq(userSkillPatterns.dimension, dimScore.dimension)
+        ));
+      
+      if (existingPattern) {
+        const newOccurrences = (existingPattern.occurrences || 0) + 1;
+        const oldAvg = existingPattern.avgScore || dimScore.score;
+        const newAvg = ((oldAvg * (newOccurrences - 1)) + dimScore.score) / newOccurrences;
+        
+        let trend: "improving" | "stagnant" | "declining" = "stagnant";
+        if (dimScore.score > oldAvg + 0.3) trend = "improving";
+        else if (dimScore.score < oldAvg - 0.3) trend = "declining";
+        
+        await db
+          .update(userSkillPatterns)
+          .set({
+            occurrences: newOccurrences,
+            avgScore: newAvg,
+            trend,
+            lastSeenAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(eq(userSkillPatterns.id, existingPattern.id));
+      } else {
+        await db
+          .insert(userSkillPatterns)
+          .values({
+            userId,
+            dimension: dimScore.dimension,
+            occurrences: 1,
+            avgScore: dimScore.score,
+            trend: "stagnant",
+            lastSeenAt: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+      }
+    }
     
     res.json({
       success: true,

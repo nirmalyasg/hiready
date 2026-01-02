@@ -1268,6 +1268,110 @@ jobsRouter.get("/skill-patterns", requireAuth, async (req: Request, res: Respons
   }
 });
 
+// Get AI insights from career memory patterns
+jobsRouter.get("/ai-insights", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+
+    const patterns = await db
+      .select()
+      .from(userSkillPatterns)
+      .where(eq(userSkillPatterns.userId, userId))
+      .orderBy(desc(userSkillPatterns.occurrences));
+
+    if (patterns.length === 0) {
+      return res.json({
+        success: true,
+        insights: [],
+        summary: "Complete a few interview practice sessions to unlock personalized insights about your performance patterns.",
+        hasData: false,
+      });
+    }
+
+    // Generate insights from patterns
+    const insights: { type: "strength" | "weakness" | "trend" | "tip"; title: string; description: string; dimension?: string }[] = [];
+
+    // Find persistent weaknesses (low avg score, multiple occurrences)
+    const weakPatterns = patterns
+      .filter(p => p.avgScore !== null && p.avgScore < 3 && (p.occurrences || 0) >= 2)
+      .sort((a, b) => (a.avgScore || 0) - (b.avgScore || 0));
+
+    for (const weak of weakPatterns.slice(0, 2)) {
+      insights.push({
+        type: "weakness",
+        title: `Recurring Challenge: ${weak.dimension}`,
+        description: `You've scored below average on ${weak.dimension} across ${weak.occurrences} sessions (avg: ${(weak.avgScore || 0).toFixed(1)}/5). Focus your next practice on improving this area.`,
+        dimension: weak.dimension,
+      });
+    }
+
+    // Find strengths (high avg score, multiple occurrences)
+    const strongPatterns = patterns
+      .filter(p => p.avgScore !== null && p.avgScore >= 4 && (p.occurrences || 0) >= 2)
+      .sort((a, b) => (b.avgScore || 0) - (a.avgScore || 0));
+
+    for (const strong of strongPatterns.slice(0, 2)) {
+      insights.push({
+        type: "strength",
+        title: `Consistent Strength: ${strong.dimension}`,
+        description: `You consistently perform well on ${strong.dimension} (avg: ${(strong.avgScore || 0).toFixed(1)}/5 across ${strong.occurrences} sessions). This is a reliable asset in interviews.`,
+        dimension: strong.dimension,
+      });
+    }
+
+    // Find improving trends
+    const improvingPatterns = patterns.filter(p => p.trend === "improving" && (p.occurrences || 0) >= 2);
+    for (const improving of improvingPatterns.slice(0, 1)) {
+      insights.push({
+        type: "trend",
+        title: `Improving: ${improving.dimension}`,
+        description: `Your ${improving.dimension} scores are trending upward. Keep practicing to solidify these gains.`,
+        dimension: improving.dimension,
+      });
+    }
+
+    // Find declining trends
+    const decliningPatterns = patterns.filter(p => p.trend === "declining" && (p.occurrences || 0) >= 2);
+    for (const declining of decliningPatterns.slice(0, 1)) {
+      insights.push({
+        type: "trend",
+        title: `Attention Needed: ${declining.dimension}`,
+        description: `Your ${declining.dimension} scores have declined recently. Consider focused practice or review of fundamentals.`,
+        dimension: declining.dimension,
+      });
+    }
+
+    // Generate summary
+    const totalSessions = patterns.reduce((sum, p) => Math.max(sum, p.occurrences || 0), 0);
+    const avgOverall = patterns.reduce((sum, p) => sum + (p.avgScore || 0), 0) / patterns.length;
+    
+    let summary = `Based on ${patterns.length} skill dimensions tracked across your practice sessions, `;
+    if (avgOverall >= 4) {
+      summary += "you're performing strongly overall. Focus on maintaining consistency.";
+    } else if (avgOverall >= 3) {
+      summary += "you're showing solid progress with room for improvement in specific areas.";
+    } else {
+      summary += "there's significant opportunity for growth. Regular practice will help build confidence.";
+    }
+
+    res.json({
+      success: true,
+      insights,
+      summary,
+      hasData: true,
+      stats: {
+        dimensionsTracked: patterns.length,
+        avgScore: avgOverall,
+        improvingCount: improvingPatterns.length,
+        decliningCount: decliningPatterns.length,
+      },
+    });
+  } catch (error: any) {
+    console.error("Error generating AI insights:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Update skill patterns after a session analysis (called by analysis endpoints)
 jobsRouter.post("/skill-patterns/update", requireAuth, async (req: Request, res: Response) => {
   try {
