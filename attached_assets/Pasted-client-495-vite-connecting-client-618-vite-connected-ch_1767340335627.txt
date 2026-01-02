@@ -1,0 +1,77 @@
+client:495 [vite] connecting...
+client:618 [vite] connected.
+chunk-RPCDYKBN.js?v=22eb2af8:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+react-router-dom.js?v=22eb2af8:4413 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+warnOnce @ react-router-dom.js?v=22eb2af8:4413
+react-router-dom.js?v=22eb2af8:4413 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+warnOnce @ react-router-dom.js?v=22eb2af8:4413
+session-page.tsx:92 [CaseStudySession] Connection status: DISCONNECTED
+EventContext.tsx:13 [Client Event] DISCONNECTED: Object
+session-page.tsx:309 [CaseStudySession] startSession called, template: 4
+session-page.tsx:316 [CaseStudySession] Creating session...
+session-page.tsx:329 [CaseStudySession] Session response: Object
+session-page.tsx:251 [CaseStudySession] Starting connection...
+/api/realtime/token:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+session-page.tsx:173 [CaseStudySession] Error fetching ephemeral key: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+fetchEphemeralKey @ session-page.tsx:173
+session-page.tsx:256 [CaseStudySession] No ephemeral key received
+connectToRealtime @ session-page.tsx:256
+session-page.tsx:251 [CaseStudySession] Starting connection...
+session-page.tsx:163  POST https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/api/realtime/token 404 (Not Found)
+fetchEphemeralKey @ session-page.tsx:163
+connectToRealtime @ session-page.tsx:254
+skipThinkingTime @ session-page.tsx:343
+callCallback2 @ chunk-RPCDYKBN.js?v=22eb2af8:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=22eb2af8:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=22eb2af8:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=22eb2af8:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=22eb2af8:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=22eb2af8:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=22eb2af8:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=22eb2af8:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=22eb2af8:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=22eb2af8:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=22eb2af8:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=22eb2af8:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=22eb2af8:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=22eb2af8:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=22eb2af8:5449
+session-page.tsx:173 [CaseStudySession] Error fetching ephemeral key: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+fetchEphemeralKey @ session-page.tsx:173
+await in fetchEphemeralKey
+connectToRealtime @ session-page.tsx:254
+skipThinkingTime @ session-page.tsx:343
+callCallback2 @ chunk-RPCDYKBN.js?v=22eb2af8:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=22eb2af8:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=22eb2af8:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=22eb2af8:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=22eb2af8:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=22eb2af8:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=22eb2af8:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=22eb2af8:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=22eb2af8:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=22eb2af8:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=22eb2af8:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=22eb2af8:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=22eb2af8:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=22eb2af8:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=22eb2af8:5449
+session-page.tsx:256 [CaseStudySession] No ephemeral key received
+connectToRealtime @ session-page.tsx:256
+await in connectToRealtime
+skipThinkingTime @ session-page.tsx:343
+callCallback2 @ chunk-RPCDYKBN.js?v=22eb2af8:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=22eb2af8:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=22eb2af8:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=22eb2af8:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=22eb2af8:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=22eb2af8:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=22eb2af8:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=22eb2af8:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=22eb2af8:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=22eb2af8:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=22eb2af8:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=22eb2af8:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=22eb2af8:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=22eb2af8:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=22eb2af8:5449
