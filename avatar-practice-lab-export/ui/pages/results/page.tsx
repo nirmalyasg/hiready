@@ -11,8 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate, Link } from "react-router-dom";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
-import MobileBottomNav from "@/components/layout/mobile-bottom-nav";
+import SidebarLayout from "@/components/layout/sidebar-layout";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -181,12 +180,12 @@ export default function ResultsPage() {
 
   if (loading) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="flex justify-center items-center min-h-[60vh]">
           <LoadingSpinner className="mr-3" />
           <span className="text-gray-600">Loading your results...</span>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
@@ -251,7 +250,7 @@ export default function ResultsPage() {
 
   if (sessions.length === 0 && presentations.length === 0) {
     return (
-      <ModernDashboardLayout>
+      <SidebarLayout>
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-16">
             <h2 className="text-2xl font-bold text-brand-dark mb-3">No Practice Sessions Yet</h2>
@@ -265,12 +264,12 @@ export default function ResultsPage() {
             </Link>
           </div>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
   return (
-    <ModernDashboardLayout>
+    <SidebarLayout>
       <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div>
@@ -530,7 +529,6 @@ export default function ResultsPage() {
           </div>
         )}
       </div>
-      <MobileBottomNav />
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }

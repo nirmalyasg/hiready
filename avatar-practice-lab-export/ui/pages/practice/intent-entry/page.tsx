@@ -5,8 +5,7 @@ import { MessageSquare, BookOpen, ArrowRight, Presentation, Briefcase, Globe, Tr
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { VoiceInputField } from "@/components/ui/voice-input";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
-import MobileBottomNav from "@/components/layout/mobile-bottom-nav";
+import SidebarLayout from "@/components/layout/sidebar-layout";
 import { useAvatars } from "@/hooks/use-avatars";
 import {
   type ConversationBlueprint,
@@ -335,7 +334,7 @@ ${discussionStyle}
   };
 
   return (
-    <ModernDashboardLayout>
+    <SidebarLayout>
       <div className="min-h-screen pb-16 sm:pb-0">
         <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-10 max-w-3xl">
           
@@ -526,7 +525,6 @@ ${discussionStyle}
           </div>
         </div>
       </div>
-      <MobileBottomNav />
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }

@@ -1,12 +1,9 @@
 import { useState, useEffect } from "react";
-import { Search, ChevronRight, Briefcase, GraduationCap, Code, LineChart, Users, Megaphone, Clock, ArrowRight, Building2, Upload, FileText } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Search, ChevronRight, Briefcase, GraduationCap, Code, LineChart, Users, Megaphone, Clock, ArrowRight, Building2, Filter, Check, ChevronDown, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
-import MobileBottomNav from "@/components/layout/mobile-bottom-nav";
+import SidebarLayout from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface RoleKit {
@@ -37,32 +34,32 @@ const domainIcons: Record<string, any> = {
   engineering_management: Code,
 };
 
-const domainColors: Record<string, { bg: string; color: string; ring: string }> = {
-  software: { bg: "bg-gradient-to-br from-blue-50 to-blue-100", color: "text-blue-600", ring: "ring-blue-200" },
-  data: { bg: "bg-gradient-to-br from-purple-50 to-purple-100", color: "text-purple-600", ring: "ring-purple-200" },
-  product: { bg: "bg-gradient-to-br from-emerald-50 to-emerald-100", color: "text-emerald-600", ring: "ring-emerald-200" },
-  design: { bg: "bg-gradient-to-br from-pink-50 to-pink-100", color: "text-pink-600", ring: "ring-pink-200" },
-  sales: { bg: "bg-gradient-to-br from-amber-50 to-amber-100", color: "text-amber-600", ring: "ring-amber-200" },
-  marketing: { bg: "bg-gradient-to-br from-rose-50 to-rose-100", color: "text-rose-600", ring: "ring-rose-200" },
-  customer_success: { bg: "bg-gradient-to-br from-teal-50 to-teal-100", color: "text-teal-600", ring: "ring-teal-200" },
-  operations: { bg: "bg-gradient-to-br from-slate-50 to-slate-100", color: "text-slate-600", ring: "ring-slate-200" },
-  consulting: { bg: "bg-gradient-to-br from-indigo-50 to-indigo-100", color: "text-indigo-600", ring: "ring-indigo-200" },
-  finance: { bg: "bg-gradient-to-br from-green-50 to-green-100", color: "text-green-600", ring: "ring-green-200" },
-  hr: { bg: "bg-gradient-to-br from-orange-50 to-orange-100", color: "text-orange-600", ring: "ring-orange-200" },
-  recruiting: { bg: "bg-gradient-to-br from-cyan-50 to-cyan-100", color: "text-cyan-600", ring: "ring-cyan-200" },
-  engineering_management: { bg: "bg-gradient-to-br from-violet-50 to-violet-100", color: "text-violet-600", ring: "ring-violet-200" },
+const domainColors: Record<string, string> = {
+  software: "bg-blue-500",
+  data: "bg-purple-500",
+  product: "bg-emerald-500",
+  design: "bg-pink-500",
+  sales: "bg-amber-500",
+  marketing: "bg-rose-500",
+  customer_success: "bg-teal-500",
+  operations: "bg-slate-500",
+  consulting: "bg-indigo-500",
+  finance: "bg-green-500",
+  hr: "bg-orange-500",
+  recruiting: "bg-cyan-500",
+  engineering_management: "bg-violet-500",
 };
 
 const getLevelConfig = (level: string) => {
   switch (level) {
     case "entry":
-      return { label: "Entry Level", color: "bg-emerald-50 text-emerald-700 border-emerald-200" };
+      return { label: "Entry", color: "bg-green-100 text-green-700" };
     case "mid":
-      return { label: "Mid Level", color: "bg-amber-50 text-amber-700 border-amber-200" };
+      return { label: "Mid-Level", color: "bg-amber-100 text-amber-700" };
     case "senior":
-      return { label: "Senior", color: "bg-rose-50 text-rose-700 border-rose-200" };
+      return { label: "Senior", color: "bg-red-100 text-red-700" };
     default:
-      return { label: level, color: "bg-slate-50 text-slate-600 border-slate-200" };
+      return { label: level, color: "bg-gray-100 text-gray-600" };
   }
 };
 
@@ -72,7 +69,7 @@ export default function InterviewPracticePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
-  const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -96,7 +93,7 @@ export default function InterviewPracticePage() {
 
   useEffect(() => {
     let filtered = roleKits;
-    
+
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -106,17 +103,13 @@ export default function InterviewPracticePage() {
           kit.domain.toLowerCase().includes(query)
       );
     }
-    
+
     if (selectedDomain) {
       filtered = filtered.filter((kit) => kit.domain === selectedDomain);
     }
-    
-    if (selectedLevel) {
-      filtered = filtered.filter((kit) => kit.level === selectedLevel);
-    }
-    
+
     setFilteredKits(filtered);
-  }, [searchQuery, selectedDomain, selectedLevel, roleKits]);
+  }, [searchQuery, selectedDomain, roleKits]);
 
   const domains = [...new Set(roleKits.map((kit) => kit.domain))];
 
@@ -124,223 +117,176 @@ export default function InterviewPracticePage() {
     navigate(`/interview/config?roleKitId=${kit.id}`);
   };
 
+  const formatDomain = (domain: string) => {
+    return domain.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
   return (
-    <ModernDashboardLayout>
+    <SidebarLayout>
       {isLoading ? (
-        <div className="flex justify-center items-center h-screen">
+        <div className="flex justify-center items-center h-[60vh]">
           <LoadingSpinner />
         </div>
       ) : (
-        <div className="min-h-screen bg-gradient-to-b from-slate-50/80 to-white pb-24 sm:pb-8">
-          <div className="bg-gradient-to-br from-indigo-500/5 via-white to-purple-50/30 border-b border-slate-100">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-6xl">
-              <Link
-                to="/avatar/start"
-                className="inline-flex items-center text-slate-500 hover:text-indigo-600 mb-4 text-sm font-medium transition-colors group"
-              >
-                <ChevronRight className="w-4 h-4 rotate-180 mr-1 group-hover:-translate-x-0.5 transition-transform" />
-                Back to Dashboard
-              </Link>
-              
-              <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 sm:gap-6">
-                <div className="max-w-xl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-                      <Briefcase className="w-4 h-4 text-indigo-600" />
-                    </div>
-                    <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">Interview Practice</span>
-                  </div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-                    Choose Your Target Role
-                  </h1>
-                  <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                    Select a role to practice standard interview questions. Pick a role and start practicing right away!
-                  </p>
-                </div>
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-100 rounded-full text-purple-700 text-sm font-medium mb-3">
+                <Briefcase className="w-4 h-4" />
+                Interview Prep
+              </div>
+              <h1 className="text-3xl font-bold text-brand-dark">
+                Practice Interviews
+              </h1>
+              <p className="text-brand-muted mt-2 max-w-xl">
+                Choose your role and get ready for your next interview with AI-powered practice sessions.
+              </p>
+            </div>
 
-                <div className="w-full lg:w-80">
-                  <div className="relative">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input
-                      type="text"
-                      placeholder="Search roles..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 h-11 bg-white border-slate-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500/20 text-sm rounded-xl"
-                    />
-                  </div>
-                </div>
+            {/* Search */}
+            <div className="w-full lg:w-80">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
+                <Input
+                  type="text"
+                  placeholder="Search roles..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-11 h-12 bg-white"
+                />
               </div>
             </div>
           </div>
 
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-6xl">
-            <Link
-              to="/interview/custom"
-              className="block mb-6 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl hover:border-emerald-300 hover:shadow-md transition-all group"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center">
-                    <FileText className="w-6 h-6 text-emerald-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">
-                      Have a specific job in mind?
-                    </h3>
-                    <p className="text-sm text-slate-600">
-                      Upload your resume and job description for a personalized interview experience
-                    </p>
-                  </div>
-                </div>
-                <div className="hidden sm:flex items-center gap-2 text-emerald-600 font-medium">
-                  <Upload className="w-4 h-4" />
-                  <span>Custom Interview</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </Link>
-
-            <div className="mb-5 flex flex-wrap gap-2">
-              <Button
-                variant={selectedDomain === null ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedDomain(null)}
-                className="rounded-full"
+          {/* Filters */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative">
+              <button
+                onClick={() => setFilterOpen(!filterOpen)}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 bg-white border rounded-xl text-sm font-medium shadow-sm transition-all ${
+                  selectedDomain 
+                    ? "border-purple-400 text-purple-700" 
+                    : "border-gray-200 text-brand-dark hover:border-gray-300"
+                }`}
               >
-                All Domains
-              </Button>
-              {domains.map((domain) => (
-                <Button
-                  key={domain}
-                  variant={selectedDomain === domain ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedDomain(domain)}
-                  className="rounded-full capitalize"
-                >
-                  {domain.replace(/_/g, " ")}
-                </Button>
-              ))}
-            </div>
+                <Filter className="w-4 h-4" />
+                <span className="max-w-[150px] truncate">
+                  {selectedDomain ? formatDomain(selectedDomain) : "All Domains"}
+                </span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${filterOpen ? "rotate-180" : ""}`} />
+              </button>
 
-            <div className="mb-5 flex gap-2">
-              <Button
-                variant={selectedLevel === null ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setSelectedLevel(null)}
-              >
-                All Levels
-              </Button>
-              {["entry", "mid", "senior"].map((level) => (
-                <Button
-                  key={level}
-                  variant={selectedLevel === level ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setSelectedLevel(level)}
-                  className="capitalize"
-                >
-                  {level === "entry" ? "Entry Level" : level === "mid" ? "Mid Level" : "Senior"}
-                </Button>
-              ))}
-            </div>
-
-            <p className="text-sm text-slate-500 mb-4">
-              <span className="font-semibold text-slate-700">{filteredKits.length}</span> role{filteredKits.length !== 1 ? "s" : ""} available
-            </p>
-
-            {filteredKits.length === 0 ? (
-              <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm">
-                <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-2xl flex items-center justify-center">
-                  <Briefcase className="w-8 h-8 text-slate-400" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">No roles found</h3>
-                <p className="text-slate-500 mb-6 max-w-md mx-auto text-sm">
-                  Try adjusting your search or filters.
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSelectedDomain(null);
-                    setSelectedLevel(null);
-                    setSearchQuery("");
-                  }}
-                  className="rounded-xl"
-                >
-                  Clear Filters
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {filteredKits.map((kit) => {
-                  const IconComponent = domainIcons[kit.domain] || Briefcase;
-                  const colors = domainColors[kit.domain] || domainColors.consulting;
-                  const levelConfig = getLevelConfig(kit.level);
-
-                  return (
-                    <Card
-                      key={kit.id}
-                      className="h-full bg-white border border-slate-200 hover:border-indigo-400/40 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 overflow-hidden rounded-2xl cursor-pointer group"
-                      onClick={() => handleSelectRole(kit)}
+              {filterOpen && (
+                <div className="absolute left-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden z-50 max-h-80 overflow-y-auto">
+                  <button
+                    onClick={() => { setSelectedDomain(null); setFilterOpen(false); }}
+                    className={`w-full flex items-center justify-between px-4 py-3 text-sm text-left hover:bg-gray-50 ${
+                      !selectedDomain ? "bg-purple-50 text-purple-700 font-medium" : "text-brand-dark"
+                    }`}
+                  >
+                    All Domains
+                    {!selectedDomain && <Check className="w-4 h-4 text-purple-600" />}
+                  </button>
+                  {domains.map((domain) => (
+                    <button
+                      key={domain}
+                      onClick={() => { setSelectedDomain(domain); setFilterOpen(false); }}
+                      className={`w-full flex items-center justify-between px-4 py-3 text-sm text-left hover:bg-gray-50 border-t border-gray-100 ${
+                        selectedDomain === domain ? "bg-purple-50 text-purple-700 font-medium" : "text-brand-dark"
+                      }`}
                     >
-                      <CardContent className="p-0 h-full flex flex-col">
-                        <div className={`${colors.bg} p-4 sm:p-5 relative overflow-hidden`}>
-                          <div className="absolute top-0 right-0 w-24 h-24 bg-white/20 rounded-full -translate-y-1/2 translate-x-1/2" />
-                          
-                          <div className="relative flex items-start justify-between">
-                            <div className={`w-12 h-12 rounded-xl bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm ring-1 ${colors.ring}`}>
-                              <IconComponent className={`w-6 h-6 ${colors.color}`} />
-                            </div>
-                            <Badge variant="outline" className={`${levelConfig.color} border text-xs font-medium px-2.5 py-0.5`}>
-                              {levelConfig.label}
-                            </Badge>
-                          </div>
-                        </div>
+                      <span className="truncate pr-2">{formatDomain(domain)}</span>
+                      {selectedDomain === domain && <Check className="w-4 h-4 text-purple-600 flex-shrink-0" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-                        <div className="p-4 sm:p-5 flex-1 flex flex-col">
-                          <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
-                            {kit.name}
-                          </h3>
-
-                          <p className="text-sm text-slate-500 line-clamp-2 mb-3 flex-1">
-                            {kit.description || "Practice interview for this role"}
-                          </p>
-
-                          {kit.skillsFocus && kit.skillsFocus.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mb-3">
-                              {kit.skillsFocus.slice(0, 3).map((skill, idx) => (
-                                <span key={idx} className="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full">
-                                  {skill}
-                                </span>
-                              ))}
-                              {kit.skillsFocus.length > 3 && (
-                                <span className="text-xs px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full">
-                                  +{kit.skillsFocus.length - 3}
-                                </span>
-                              )}
-                            </div>
-                          )}
-
-                          <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                            <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                              <Clock className="w-3.5 h-3.5" />
-                              <span>{Math.round((kit.estimatedDuration || 360) / 60)} min</span>
-                            </div>
-                            <span className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 group-hover:gap-2 transition-all">
-                              Start Practice
-                              <ArrowRight className="w-4 h-4" />
-                            </span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
+            {selectedDomain && (
+              <button
+                onClick={() => setSelectedDomain(null)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 text-purple-700 text-sm font-medium rounded-full hover:bg-purple-200 transition-colors"
+              >
+                <X className="w-3 h-3" />
+                Clear
+              </button>
             )}
+
+            <span className="text-sm text-brand-muted ml-auto">
+              <span className="font-semibold text-brand-dark">{filteredKits.length}</span> roles
+            </span>
           </div>
+
+          {/* Role Kits Grid */}
+          {filteredKits.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-2xl flex items-center justify-center">
+                <Briefcase className="w-8 h-8 text-brand-muted" />
+              </div>
+              <h3 className="text-xl font-bold text-brand-dark mb-2">No roles found</h3>
+              <p className="text-brand-muted mb-6 max-w-md mx-auto">
+                Try adjusting your search or filters.
+              </p>
+              <Button variant="outline" onClick={() => { setSelectedDomain(null); setSearchQuery(""); }}>
+                Clear Filters
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {filteredKits.map((kit) => {
+                const IconComponent = domainIcons[kit.domain] || Briefcase;
+                const bgColor = domainColors[kit.domain] || "bg-gray-500";
+                const levelConfig = getLevelConfig(kit.level);
+
+                return (
+                  <button
+                    key={kit.id}
+                    onClick={() => handleSelectRole(kit)}
+                    className="group text-left"
+                  >
+                    <div className="h-full bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:border-purple-200 transition-all duration-300">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className={`w-12 h-12 ${bgColor} rounded-xl flex items-center justify-center`}>
+                          <IconComponent className="w-6 h-6 text-white" />
+                        </div>
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${levelConfig.color}`}>
+                          {levelConfig.label}
+                        </span>
+                      </div>
+
+                      <h3 className="text-lg font-bold text-brand-dark mb-1 group-hover:text-purple-700 transition-colors">
+                        {kit.name}
+                      </h3>
+                      <p className="text-sm text-brand-muted mb-4">
+                        {formatDomain(kit.domain)}
+                      </p>
+
+                      {kit.description && (
+                        <p className="text-sm text-brand-muted line-clamp-2 mb-5">
+                          {kit.description}
+                        </p>
+                      )}
+
+                      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div className="flex items-center gap-1.5 text-xs text-brand-muted">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>{kit.estimatedDuration || 30} min</span>
+                        </div>
+                        <span className="inline-flex items-center gap-1 text-sm font-semibold text-purple-600 group-hover:gap-2 transition-all">
+                          Start
+                          <ArrowRight className="w-4 h-4" />
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
-      <MobileBottomNav />
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }

@@ -4,12 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAvatars } from "@/hooks/use-avatars";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
-import { ChevronRight, ChevronLeft, Check, Filter, User } from "lucide-react";
+import SidebarLayout from "@/components/layout/sidebar-layout";
+import { ChevronRight, ChevronLeft, Check, Filter, User, ArrowLeft } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAvatarSession } from "@/contexts/AvatarSessionContext";
 import { useRealtimePrewarm } from "@/contexts/RealtimeSessionPrewarmContext";
-import MobileBottomNav from "@/components/layout/mobile-bottom-nav";
 
 export const avatarData = [
   {
@@ -240,71 +239,68 @@ export default function AvatarSelectPage() {
   };
 
   return (
-    <ModernDashboardLayout>
-      <div className="min-h-screen bg-gray-50/50 pb-32 sm:pb-8">
-        <div className="container mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl">
-          {/* Header */}
-          <div className="mb-4 sm:mb-6">
-            <Link
-              to={getBackToPreSessionUrl()}
-              className="inline-flex items-center text-gray-500 hover:text-primary mb-3 sm:mb-4 text-sm font-medium transition-colors"
-              data-testid="link-back-presession"
-            >
-              <ChevronRight className="w-4 h-4 rotate-180 mr-1" />
-              <span className="hidden sm:inline">Back to Settings</span>
-              <span className="sm:hidden">Back</span>
-            </Link>
-            
-            <div className="flex items-center justify-between gap-2 sm:gap-4">
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900" data-testid="text-page-title">
-                  Choose Your Avatar
-                </h1>
-                <p className="text-xs sm:text-base text-gray-500 mt-0.5 sm:mt-1 hidden sm:block" data-testid="text-page-subtitle">
-                  Select an AI avatar to practice with
-                </p>
-              </div>
+    <SidebarLayout>
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <Link
+            to={getBackToPreSessionUrl()}
+            className="inline-flex items-center text-brand-muted hover:text-brand-dark mb-4 text-sm font-medium transition-colors gap-1"
+            data-testid="link-back-presession"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Settings
+          </Link>
+          
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-brand-dark" data-testid="text-page-title">
+                Choose Your Avatar
+              </h1>
+              <p className="text-brand-muted mt-1" data-testid="text-page-subtitle">
+                Select an AI avatar to practice with
+              </p>
+            </div>
 
-              {/* Selected Avatar Indicator */}
-              {selectedAvatar && (
-                <div className="flex items-center gap-1.5 sm:gap-2 bg-primary/10 text-primary px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg">
-                  <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  <span className="text-xs sm:text-sm font-medium">Selected</span>
-                </div>
-              )}
+            {selectedAvatar && (
+              <div className="flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-xl">
+                <Check className="w-4 h-4" />
+                <span className="text-sm font-medium">Selected</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Applied Filters Banner */}
+        {activeFilterCount > 0 && (
+          <div className="mb-4 p-3 bg-brand-accent/10 border border-brand-accent/20 rounded-xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Filter className="w-4 h-4 text-brand-accent" />
+                <span className="text-sm text-brand-muted">Showing avatars matching:</span>
+                {filters.gender && (
+                  <span className="px-2 py-0.5 bg-brand-accent/10 text-brand-accent text-xs font-medium rounded-full">
+                    {filters.gender}
+                  </span>
+                )}
+                {filters.ethnicity && (
+                  <span className="px-2 py-0.5 bg-brand-accent/10 text-brand-accent text-xs font-medium rounded-full">
+                    {filters.ethnicity}
+                  </span>
+                )}
+              </div>
+              <Link 
+                to={getBackToPreSessionUrl()}
+                className="text-xs text-brand-accent hover:underline"
+              >
+                Change preferences
+              </Link>
             </div>
           </div>
+        )}
 
-          {/* Applied Filters Banner */}
-          {activeFilterCount > 0 && (
-            <div className="mb-4 p-3 bg-brand-primary/5 border border-brand-primary/20 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Filter className="w-4 h-4 text-brand-primary" />
-                  <span className="text-sm text-gray-600">Showing avatars matching:</span>
-                  {filters.gender && (
-                    <Badge variant="secondary" className="bg-brand-primary/10 text-brand-primary border-0">
-                      {filters.gender}
-                    </Badge>
-                  )}
-                  {filters.ethnicity && (
-                    <Badge variant="secondary" className="bg-brand-primary/10 text-brand-primary border-0">
-                      {filters.ethnicity}
-                    </Badge>
-                  )}
-                </div>
-                <Link 
-                  to={getBackToPreSessionUrl()}
-                  className="text-xs text-brand-primary hover:underline"
-                >
-                  Change preferences
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {/* Two-column layout for desktop */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Two-column layout for desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* LEFT COLUMN - Avatar Grid */}
             <div className="lg:col-span-9 order-2 lg:order-1">
               {/* Avatar Grid */}
@@ -515,45 +511,42 @@ export default function AvatarSelectPage() {
                     </ul>
                   </CardContent>
                 </Card>
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile: Fixed bottom CTA bar */}
-          <div className="lg:hidden fixed bottom-14 left-0 right-0 p-3 bg-white border-t border-gray-200 z-50 shadow-lg">
-            <div className="flex items-center gap-3">
-              {selectedAvatar && (() => {
-                const selected = shuffledAvatars?.find(a => a.id === selectedAvatar);
-                return selected ? (
-                  <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-brand-primary/20 flex-shrink-0">
-                    <img 
-                      src={failedImages[selected.id] ? getFallbackUrl(selected.name) : selected.imageUrl}
-                      alt={selected.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ) : null;
-              })()}
-              <Button
-                size="lg"
-                onClick={startSession}
-                disabled={!selectedAvatar}
-                className={`flex-1 py-3 text-sm font-semibold transition-all ${
-                  selectedAvatar
-                    ? "bg-gradient-to-r from-brand-primary to-brand-light text-white shadow-md"
-                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                }`}
-                data-testid="button-start-practice-mobile"
-              >
-                {selectedAvatar ? "Start Practice" : "Select an Avatar"}
-                <ChevronRight className="w-4 h-4 ml-1.5" />
-              </Button>
             </div>
           </div>
         </div>
 
-        <MobileBottomNav />
+        {/* Mobile: Fixed bottom CTA bar */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 z-50 shadow-lg">
+          <div className="flex items-center gap-3">
+            {selectedAvatar && (() => {
+              const selected = shuffledAvatars?.find(a => a.id === selectedAvatar);
+              return selected ? (
+                <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-brand-accent/30 flex-shrink-0">
+                  <img 
+                    src={failedImages[selected.id] ? getFallbackUrl(selected.name) : selected.imageUrl}
+                    alt={selected.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : null;
+            })()}
+            <Button
+              size="lg"
+              onClick={startSession}
+              disabled={!selectedAvatar}
+              className={`flex-1 py-3 font-semibold transition-all ${
+                selectedAvatar
+                  ? "bg-brand-dark text-white shadow-lg"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              }`}
+              data-testid="button-start-practice-mobile"
+            >
+              {selectedAvatar ? "Start Practice" : "Select an Avatar"}
+              <ChevronRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        </div>
       </div>
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }

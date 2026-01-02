@@ -1,30 +1,25 @@
 import { useState, useEffect } from "react";
 import {
   Clock,
-  Users,
   Trophy,
-  ArrowRight,
   Briefcase,
-  Users2,
+  Users,
   MessageSquare,
   UserPlus,
   Video,
-  Award,
   BarChart3,
   Target,
-  Brain,
   TrendingUp,
-  Zap,
-  Sparkles,
   ChevronRight,
+  Sparkles,
+  Play,
+  Zap,
+  ArrowUpRight
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
-import MobileBottomNav from "@/components/layout/mobile-bottom-nav";
+import SidebarLayout from "@/components/layout/sidebar-layout";
 import { useQuery } from "@tanstack/react-query";
 
 interface Skill {
@@ -32,15 +27,6 @@ interface Skill {
   name: string;
   description: string;
   scenario_count: number;
-}
-
-interface Transcript {
-  id: string;
-  skill_id: string;
-  knowledge_id: string;
-  streaming_sessions: any[];
-  messages: any[];
-  created_at: string;
 }
 
 interface DashboardStats {
@@ -80,6 +66,7 @@ export default function AvatarSimulatorDashboard() {
     skillBreakdown: {},
   });
   const [isLoading, setIsLoading] = useState(true);
+
   const fetchSkills = async () => {
     const res = await fetch("/api/avatar/get-skills");
     const data = await res.json();
@@ -97,6 +84,7 @@ export default function AvatarSimulatorDashboard() {
       return [];
     }
   };
+
   const skillsQuery = useQuery({
     queryKey: ["/avatar/get-skills"],
     queryFn: fetchSkills,
@@ -156,24 +144,21 @@ export default function AvatarSimulatorDashboard() {
         if (transcript.knowledge_id) {
           uniqueScenarios.add(transcript.knowledge_id);
         }
-        
         if (transcript.custom_scenario_id) {
           uniqueScenarios.add(`custom_${transcript.custom_scenario_id}`);
         }
-
         if (transcript.skill_id) {
           skillMap.set(transcript.skill_id, true);
           skillOccurrences[transcript.skill_id] =
             (skillOccurrences[transcript.skill_id] || 0) + 1;
         }
-
         const duration = parseInt(transcript.duration);
         if (!isNaN(duration) && duration > 0) {
           totalDuration += duration;
           completedSessionsCount++;
         }
       });
-      
+
       const skillsWithAssessments = progressData.filter((sp: SkillProgressData) => sp.sessionCount > 0);
       skillsWithAssessments.forEach((sp: SkillProgressData) => {
         skillMap.set(sp.skillId, true);
@@ -185,7 +170,6 @@ export default function AvatarSimulatorDashboard() {
         ? Math.round(totalDuration / transcripts.length)
         : 0;
       const avgDurationMinutes = Math.round(avgDurationSeconds / 60);
-
       const lastSession = transcripts[0]?.created_at
         ? new Date(transcripts[0].created_at).toLocaleDateString()
         : "-";
@@ -195,10 +179,7 @@ export default function AvatarSimulatorDashboard() {
         completedScenarios: uniqueScenarios.size,
         skillProgress:
           skillsQuery.data.length > 0
-            ? Math.min(
-                Math.round((skillMap.size / skillsQuery.data.length) * 100),
-                100,
-              )
+            ? Math.min(Math.round((skillMap.size / skillsQuery.data.length) * 100), 100)
             : 0,
         averageSessionDuration: `${avgDurationMinutes}m`,
         uniqueSkillsPracticed: skillMap.size,
@@ -211,25 +192,13 @@ export default function AvatarSimulatorDashboard() {
     }
   }, [skillsQuery.data, transcriptsQuery.data, skillProgressQuery.data]);
 
-  const getSkillIcon = (skillName: string) => {
-    const icons: Record<string, any> = {
-      "Business Communication": Briefcase,
-      "Team Collaboration": Users,
-      "Public Speaking": MessageSquare,
-      Negotiation: Users2,
-      "Conflict Resolution": UserPlus,
-      "Job Interviews": Video,
-    };
-    return icons[skillName] || Trophy;
-  };
-
   if (isLoading) {
     return (
-      <ModernDashboardLayout>
-        <div className="flex justify-center items-center h-screen">
+      <SidebarLayout>
+        <div className="flex justify-center items-center h-[60vh]">
           <Spinner size="lg" />
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
 
@@ -243,11 +212,11 @@ export default function AvatarSimulatorDashboard() {
   const lowestSkill = practicedSkills.length > 1
     ? practicedSkills.reduce((worst, sp) => (sp.avgScore || 5) < (worst.avgScore || 5) ? sp : worst)
     : null;
-  
+
   const getRecommendedSkills = () => {
     const unpracticed = skillProgress.filter(sp => sp.sessionCount === 0);
     if (lowestSkill && lowestSkill.frameworkMapping) {
-      const relatedSkills = unpracticed.filter(sp => 
+      const relatedSkills = unpracticed.filter(sp =>
         sp.frameworkMapping === lowestSkill.frameworkMapping
       ).slice(0, 3);
       if (relatedSkills.length > 0) return relatedSkills;
@@ -256,179 +225,223 @@ export default function AvatarSimulatorDashboard() {
   };
 
   return (
-    <ModernDashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-6 pb-20 sm:pb-0">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <SidebarLayout>
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-brand-dark">Dashboard</h1>
-            <p className="text-sm sm:text-base text-brand-muted mt-1">
-              {practicedSkills.length > 0 
-                ? `${stats.totalSessions} sessions across ${practicedSkills.length} skills`
-                : 'Start practicing to track your progress'}
+            <h1 className="text-3xl font-bold text-brand-dark">Welcome back</h1>
+            <p className="text-brand-muted mt-1">
+              {practicedSkills.length > 0
+                ? `You've completed ${stats.totalSessions} practice sessions`
+                : 'Ready to start practicing?'}
             </p>
           </div>
-          <Link to="/avatar/start" className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto" data-testid="button-start-voice-practice">
-              Start Practice
+          <Link to="/avatar/start">
+            <Button className="w-full lg:w-auto gap-2" data-testid="button-start-voice-practice">
+              <Play className="w-4 h-4" />
+              New Session
             </Button>
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          <Card className="p-5">
-            <p className="text-xs text-brand-muted font-medium uppercase tracking-wider">Practice Time</p>
-            <p className="text-2xl sm:text-3xl font-bold text-brand-dark mt-2">{stats.totalTime}</p>
-          </Card>
-          <Card className="p-5">
-            <p className="text-xs text-brand-muted font-medium uppercase tracking-wider">Scenarios</p>
-            <p className="text-2xl sm:text-3xl font-bold text-brand-dark mt-2">{stats.completedScenarios}</p>
-          </Card>
-          <Card className="p-5">
-            <p className="text-xs text-brand-muted font-medium uppercase tracking-wider">Skills</p>
-            <p className="text-2xl sm:text-3xl font-bold text-brand-dark mt-2">{stats.uniqueSkillsPracticed}</p>
-          </Card>
-          <Card className="p-5">
-            <p className="text-xs text-brand-muted font-medium uppercase tracking-wider">Avg Score</p>
-            <p className="text-2xl sm:text-3xl font-bold text-brand-dark mt-2">{avgOverallScore > 0 ? `${avgOverallScore.toFixed(1)}/5` : '-'}</p>
-          </Card>
+        {/* Bento Grid Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-brand-dark/10 rounded-xl flex items-center justify-center">
+                <Clock className="w-5 h-5 text-brand-dark" />
+              </div>
+              <TrendingUp className="w-4 h-4 text-green-500" />
+            </div>
+            <p className="text-2xl font-bold text-brand-dark">{stats.totalTime}</p>
+            <p className="text-sm text-brand-muted">Total practice</p>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-brand-accent/10 rounded-xl flex items-center justify-center">
+                <Target className="w-5 h-5 text-brand-accent" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-brand-dark">{stats.completedScenarios}</p>
+            <p className="text-sm text-brand-muted">Scenarios done</p>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                <Zap className="w-5 h-5 text-green-600" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-brand-dark">{stats.uniqueSkillsPracticed}</p>
+            <p className="text-sm text-brand-muted">Skills practiced</p>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-purple-600" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-brand-dark">{avgOverallScore > 0 ? avgOverallScore.toFixed(1) : '-'}</p>
+            <p className="text-sm text-brand-muted">Avg score</p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content Grid */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Main Column */}
           <div className="lg:col-span-2 space-y-6">
-            <Card className="p-6">
-              <h2 className="text-lg font-semibold text-brand-dark mb-4">What to Practice Next</h2>
-              
-              {lowestSkill && lowestSkill.avgScore !== null ? (
-                <div className="space-y-5">
-                  <div className="p-5 rounded-xl bg-brand-accent/10 border border-brand-accent/20">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-sm text-brand-accent font-semibold">Recommended Focus</p>
-                        <h3 className="text-xl font-bold text-brand-dark mt-1">{lowestSkill.skillName}</h3>
-                        <p className="text-sm text-brand-muted mt-2">
-                          Current score: {lowestSkill.avgScore.toFixed(1)}/5
-                        </p>
-                      </div>
-                      <Link to="/avatar/start">
-                        <Button size="sm" variant="destructive">
-                          Practice
-                        </Button>
-                      </Link>
+            {/* Featured Action Card */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-brand-dark to-brand-dark/90 rounded-3xl p-8 text-white">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-brand-accent/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              <div className="relative">
+                {lowestSkill && lowestSkill.avgScore !== null ? (
+                  <>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-accent/20 rounded-full text-brand-accent text-sm font-medium mb-4">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Recommended focus
                     </div>
-                  </div>
-
-                  {getRecommendedSkills().length > 0 && (
-                    <div>
-                      <p className="text-sm text-brand-muted mb-3">Other skills to try:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {getRecommendedSkills().slice(0, 4).map((sp) => (
-                          <Link key={sp.skillId} to="/avatar/start" className="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-sm font-medium text-brand-dark transition-colors duration-200">
-                            {sp.skillName}
-                          </Link>
-                        ))}
-                      </div>
+                    <h2 className="text-2xl font-bold mb-2">{lowestSkill.skillName}</h2>
+                    <p className="text-white/60 mb-6">
+                      Current score: {lowestSkill.avgScore.toFixed(1)}/5. Let's work on improving this.
+                    </p>
+                    <Link to="/avatar/start">
+                      <Button className="bg-white text-brand-dark hover:bg-white/90">
+                        Start Practice
+                        <ArrowUpRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-white/80 text-sm font-medium mb-4">
+                      <Play className="w-3.5 h-3.5" />
+                      Get started
                     </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Target className="w-8 h-8 text-brand-muted" />
-                  </div>
-                  <p className="text-brand-muted mb-4">
-                    Start practicing to get personalized recommendations
-                  </p>
-                  <Link to="/avatar/start">
-                    <Button>
-                      Start Your First Session
-                    </Button>
-                  </Link>
-                </div>
-              )}
-            </Card>
+                    <h2 className="text-2xl font-bold mb-2">Begin Your Journey</h2>
+                    <p className="text-white/60 mb-6">
+                      Start your first practice session to unlock personalized recommendations.
+                    </p>
+                    <Link to="/avatar/start">
+                      <Button className="bg-white text-brand-dark hover:bg-white/90">
+                        Start First Session
+                        <ArrowUpRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
 
+            {/* Skills Progress */}
             {practicedSkills.length > 0 && (
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-lg font-semibold text-brand-dark">Skills at a Glance</h2>
-                  <Link to="/avatar/results" className="text-sm text-brand-accent font-medium hover:underline">
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-bold text-brand-dark">Your Progress</h3>
+                  <Link to="/avatar/results" className="text-sm text-brand-accent font-medium hover:underline flex items-center gap-1">
                     View all
+                    <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
-                
                 <div className="space-y-4">
-                  {practicedSkills.slice(0, 5).map((sp) => {
-                    const scoreColor = sp.avgScore !== null 
-                      ? sp.avgScore >= 4 ? 'text-green-600' 
-                      : sp.avgScore >= 2.5 ? 'text-amber-600' 
-                      : 'text-brand-accent'
-                      : 'text-brand-muted';
-                    
+                  {practicedSkills.slice(0, 4).map((sp) => {
+                    const percentage = ((sp.avgScore || 0) / 5) * 100;
                     return (
-                      <div key={sp.skillId} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                        <span className="text-sm font-medium text-brand-dark">{sp.skillName}</span>
-                        <div className="flex items-center gap-4">
-                          <span className="text-xs text-brand-muted">{sp.sessionCount} sessions</span>
-                          <span className={`text-sm font-bold ${scoreColor}`}>
-                            {sp.avgScore?.toFixed(1) || '-'}
-                          </span>
+                      <div key={sp.skillId}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-brand-dark">{sp.skillName}</span>
+                          <span className="text-sm font-bold text-brand-dark">{sp.avgScore?.toFixed(1) || '-'}</span>
+                        </div>
+                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-brand-accent to-brand-accent/70 rounded-full transition-all duration-500"
+                            style={{ width: `${percentage}%` }}
+                          />
                         </div>
                       </div>
                     );
                   })}
                 </div>
-              </Card>
+              </div>
             )}
           </div>
 
+          {/* Sidebar Column */}
           <div className="space-y-6">
+            {/* Top Skill */}
             {topSkill && topSkill.avgScore !== null && (
-              <Card className="p-5 border-green-200 bg-green-50/50">
-                <p className="text-xs text-green-700 font-semibold uppercase tracking-wider">Your Strongest</p>
-                <p className="text-xl font-bold text-brand-dark mt-2">{topSkill.skillName}</p>
-                <p className="text-sm text-green-700 font-medium mt-1">{topSkill.avgScore.toFixed(1)}/5</p>
-              </Card>
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+                <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center mb-4">
+                  <Trophy className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-sm text-green-700 font-medium mb-1">Your strongest skill</p>
+                <p className="text-xl font-bold text-brand-dark">{topSkill.skillName}</p>
+                <p className="text-sm text-green-600 font-medium mt-1">{topSkill.avgScore.toFixed(1)}/5</p>
+              </div>
             )}
 
-            <Card className="p-5">
-              <h3 className="font-semibold text-brand-dark mb-4">Activity</h3>
-              <div className="space-y-4 text-sm">
-                <div className="flex justify-between items-center">
-                  <span className="text-brand-muted">Last session</span>
-                  <span className="font-medium text-brand-dark">{stats.lastSessionDate}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-brand-muted">Avg duration</span>
-                  <span className="font-medium text-brand-dark">{stats.averageSessionDuration}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-brand-muted">Skills explored</span>
-                  <span className="font-medium text-brand-dark">{stats.skillProgress}%</span>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-5">
-              <h3 className="font-semibold text-brand-dark mb-4">Quick Actions</h3>
+            {/* Quick Actions */}
+            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+              <h3 className="text-lg font-bold text-brand-dark mb-4">Quick Actions</h3>
               <div className="space-y-2">
-                <Link to="/avatar/start" className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors text-sm font-medium text-brand-dark group">
-                  <span>Think something through</span>
-                  <ChevronRight className="w-4 h-4 text-brand-muted group-hover:text-brand-dark transition-colors" />
+                <Link to="/avatar/start" className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                  <div className="w-10 h-10 bg-brand-dark/5 rounded-xl flex items-center justify-center group-hover:bg-brand-dark/10 transition-colors">
+                    <MessageSquare className="w-5 h-5 text-brand-dark" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-brand-dark">Quick practice</p>
+                    <p className="text-xs text-brand-muted">Think something through</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-brand-muted" />
                 </Link>
-                <Link to="/avatar/practice" className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors text-sm font-medium text-brand-dark group">
-                  <span>Practice a scenario</span>
-                  <ChevronRight className="w-4 h-4 text-brand-muted group-hover:text-brand-dark transition-colors" />
+
+                <Link to="/avatar/practice" className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                  <div className="w-10 h-10 bg-brand-accent/10 rounded-xl flex items-center justify-center group-hover:bg-brand-accent/20 transition-colors">
+                    <Target className="w-5 h-5 text-brand-accent" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-brand-dark">Browse scenarios</p>
+                    <p className="text-xs text-brand-muted">Explore practice options</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-brand-muted" />
                 </Link>
-                <Link to="/avatar/practice/custom-scenario" className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors text-sm font-medium text-brand-dark group">
-                  <span>Create custom situation</span>
-                  <ChevronRight className="w-4 h-4 text-brand-muted group-hover:text-brand-dark transition-colors" />
+
+                <Link to="/interview" className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                  <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                    <Briefcase className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-brand-dark">Interview prep</p>
+                    <p className="text-xs text-brand-muted">Practice for job interviews</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-brand-muted" />
                 </Link>
               </div>
-            </Card>
+            </div>
+
+            {/* Activity */}
+            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+              <h3 className="text-lg font-bold text-brand-dark mb-4">Recent Activity</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-brand-muted">Last session</span>
+                  <span className="text-sm font-medium text-brand-dark">{stats.lastSessionDate}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-brand-muted">Avg duration</span>
+                  <span className="text-sm font-medium text-brand-dark">{stats.averageSessionDuration}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-brand-muted">Skills explored</span>
+                  <span className="text-sm font-medium text-brand-dark">{stats.skillProgress}%</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <MobileBottomNav />
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 }

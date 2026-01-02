@@ -10,12 +10,22 @@ Preferred communication style: Simple, everyday language.
 
 ### UI/UX Decisions
 - **Brand Color Palette** (January 2026): Modern, professional color scheme applied across the entire application:
-  - Primary/Dark: #042c4c (deep navy blue) - Headers, buttons, text
+  - Primary/Dark: #042c4c (deep navy blue) - Headers, sidebar, text
   - Accent: #ee7e65 (coral/salmon) - CTAs, highlights, active states
   - Light: #768c9c (slate blue) - Secondary elements
   - Muted: #6c8194 (gray-blue) - Subtle text, borders
-  - Background: #fbfbfc (off-white) - Page backgrounds
-- **Modern Design System**: Consistent rounded-xl corners, subtle shadows, smooth transitions (200ms), hover/focus states across all components. Clean, minimal aesthetic prioritizing readability and usability.
+  - Background: #f8f9fb (light gray) - App page backgrounds
+- **Sidebar Navigation Layout** (January 2026): Modern app-like experience with collapsible dark sidebar:
+  - Dark navy sidebar with navigation links (Dashboard, Practice, Interviews, Results)
+  - User profile and sign-out in sidebar footer
+  - Collapsible sidebar toggle for desktop
+  - Mobile: Hamburger menu with slide-out sidebar overlay
+  - Located in `ui/components/layout/sidebar-layout.tsx`
+- **Home Page Hero Design**: Bold dark hero section with gradient backgrounds, floating visual elements, coral accent text, and dual CTA buttons.
+- **Bento-Grid Dashboard**: Stat cards in grid layout, featured action cards with gradients, progress bars, quick actions panel, and activity summary.
+- **Split-Screen Auth Pages**: Login and register pages use 50/50 split layout with branding panel (dark navy) on left and form panel (light) on right.
+- **Card-Based Browsing**: Practice and interview pages use card grids with colored icons, difficulty/level badges, and hover effects.
+- **Modern Design System**: Consistent rounded-2xl corners, subtle shadows, smooth transitions (200ms), hover/focus states across all components. Clean, minimal aesthetic prioritizing readability and usability.
 - **Mobile Responsiveness**: Comprehensive mobile responsiveness across all pages, including a mobile hamburger menu, adaptive layouts, and app-like UX patterns such as fixed bottom action bars and progressive content disclosure.
 - **Admin Console**: A 6-page SaaS-style dashboard for analytics, user management, session tracking, content performance, avatar usage, and cost monitoring.
 - **Voice Input**: Redesigned voice input with flag-based language selection and auto-detection, supporting 22 languages including 8 Indian languages with code-mixing capabilities.
