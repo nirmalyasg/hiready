@@ -58,7 +58,7 @@ interface ScenarioData {
 // import { avatarData } from "../practice/avatar-select/page";
 import { useHandleSessionHistory } from "@/hooks/useHandleSessionHistory";
 import { SCENARIOS } from "./roleplay-scenarios-page";
-import ModernDashboardLayout from "@/components/layout/modern-dashboard-layout";
+import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import ReactMarkdown from "react-markdown";
 import { Clipboard, Download, Phone, PhoneOff, Mic, MicOff, ChevronUp, ChevronDown, MessageSquare, User, Volume2, VolumeX, Plus } from "lucide-react";
 import { TranscriptItem } from "@/types/avatar-roleplay-types";
@@ -1074,28 +1074,22 @@ ${scenario?.instructions ? `## How to Play Your Character\n${scenario.instructio
   }, [location.pathname]);
   if (isInitializing || isLoading) {
     return (
-      <ModernDashboardLayout
-        initialActiveSection="assessments"
-        activeItem="micro-assessments"
-      >
-        <div className="min-h-screen bg-white flex items-center justify-center">
+      <SidebarLayout>
+        <div className="min-h-[80vh] flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-accent mx-auto mb-4"></div>
+            <h3 className="text-lg font-semibold text-brand-dark mb-2">
               Preparing Your Session...
             </h3>
           </div>
         </div>
-      </ModernDashboardLayout>
+      </SidebarLayout>
     );
   }
   console.log(scenario);
   return (
-    <ModernDashboardLayout
-      initialActiveSection="assessments"
-      activeItem="micro-assessments"
-    >
-      <div className="h-[calc(100vh-80px)] flex flex-col bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 -m-6 p-6">
+    <SidebarLayout>
+      <div className="h-[calc(100vh-100px)] flex flex-col bg-gradient-to-b from-brand-dark via-[#0a3a5c] to-brand-dark rounded-2xl overflow-hidden">
         <Transcript
           avatar={avatarData}
           sessionStatus={sessionStatus}
@@ -1107,7 +1101,7 @@ ${scenario?.instructions ? `## How to Play Your Character\n${scenario.instructio
           onToggleAudioMute={() => setIsAudioPlaybackEnabled(prev => !prev)}
         />
       </div>
-    </ModernDashboardLayout>
+    </SidebarLayout>
   );
 };
 
@@ -1424,7 +1418,7 @@ function Transcript({
 
   const getTimerColor = () => {
     if (timeRemaining <= 60) return "text-red-400";
-    if (timeRemaining <= 180) return "text-orange-400";
+    if (timeRemaining <= 180) return "text-brand-accent";
     return "text-white/80";
   };
 
@@ -1453,19 +1447,19 @@ function Transcript({
           {/* Outer pulse rings when connected */}
           {isConnected && (
             <>
-              <div className="absolute inset-0 rounded-full bg-green-500/20 animate-ping" style={{ animationDuration: '2s' }} />
-              <div className="absolute -inset-4 rounded-full bg-green-500/10 animate-pulse" style={{ animationDuration: '1.5s' }} />
+              <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" style={{ animationDuration: '2s' }} />
+              <div className="absolute -inset-4 rounded-full bg-emerald-500/10 animate-pulse" style={{ animationDuration: '1.5s' }} />
             </>
           )}
           {isConnecting && (
-            <div className="absolute -inset-4 rounded-full bg-blue-500/20 animate-pulse" />
+            <div className="absolute -inset-4 rounded-full bg-brand-accent/20 animate-pulse" />
           )}
           
           {/* Avatar Circle */}
           <div className={cn(
             "relative w-32 h-32 rounded-full overflow-hidden ring-4 transition-all duration-300",
-            isConnected ? "ring-green-500 shadow-lg shadow-green-500/30" :
-            isConnecting ? "ring-blue-500 shadow-lg shadow-blue-500/30" :
+            isConnected ? "ring-emerald-500 shadow-lg shadow-emerald-500/30" :
+            isConnecting ? "ring-brand-accent shadow-lg shadow-brand-accent/30" :
             "ring-white/20"
           )}>
             {avatar?.imageUrl ? (
@@ -1491,14 +1485,14 @@ function Transcript({
         <div className="flex items-center gap-2 mb-4">
           {isConnecting && (
             <>
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-              <span className="text-blue-400 text-sm">Connecting...</span>
+              <div className="w-2 h-2 bg-brand-accent rounded-full animate-pulse" />
+              <span className="text-brand-accent text-sm">Connecting...</span>
             </>
           )}
           {isConnected && (
             <>
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-green-400 text-sm">Connected</span>
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-emerald-400 text-sm">Connected</span>
             </>
           )}
           {!isConnected && !isConnecting && !hasConnectedOnce && (
@@ -1547,7 +1541,7 @@ function Transcript({
 
       {/* Collapsible Transcript Panel */}
       <div className={cn(
-        "bg-slate-800/90 backdrop-blur-sm rounded-t-2xl transition-all duration-300 ease-in-out",
+        "bg-brand-dark/90 backdrop-blur-sm rounded-t-2xl transition-all duration-300 ease-in-out",
         isTranscriptExpanded ? "h-[40vh]" : "h-16"
       )}>
         {/* Transcript Header - Always Visible */}
