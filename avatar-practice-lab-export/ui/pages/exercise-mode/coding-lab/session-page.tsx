@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
-import { Code, Clock, Mic, MicOff, Users, PhoneOff, BarChart3, Volume2, User, Eye, Bug, Wrench, Copy, Check, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { Code, Clock, Mic, MicOff, Users, PhoneOff, BarChart3, Volume2, User, Eye, Bug, Wrench, Copy, Check, AlertCircle, ChevronDown, ChevronUp, Play, ArrowLeft } from "lucide-react";
 import MeetingLobby from '@/components/MeetingLobby';
 import { TranscriptProvider, useTranscript } from '@/contexts/TranscriptContext';
 import { EventProvider } from '@/contexts/EventContext';
@@ -114,7 +114,8 @@ function CodingLabSessionContent() {
   const [session, setSession] = useState<ExerciseSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showLobby, setShowLobby] = useState(true);
+  const [showPreSession, setShowPreSession] = useState(true);
+  const [showLobby, setShowLobby] = useState(false);
   const [sessionStatus, setSessionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasGreeted, setHasGreeted] = useState(false);
@@ -469,6 +470,11 @@ ${probingQuestionsContext}
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const handleStartSession = () => {
+    setShowPreSession(false);
+    setShowLobby(true);
+  };
+
   useEffect(() => {
     return () => {
       disconnectFromRealtime();
@@ -541,6 +547,107 @@ ${probingQuestionsContext}
   const config = activityConfig[exercise.activityType];
   const ActivityIcon = config.icon;
   const currentAvatar = selectedAvatars[0];
+
+  if (showPreSession) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+        <div className="p-4 border-b border-slate-700/50">
+          <button
+            onClick={() => navigate('/exercise-mode/coding-lab')}
+            className="text-slate-400 hover:text-white text-sm flex items-center gap-2 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Coding Lab
+          </button>
+        </div>
+
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
+          <div className="w-full max-w-3xl">
+            <div className="text-center mb-8">
+              <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl ${config.bgColor} flex items-center justify-center`}>
+                <ActivityIcon className={`w-8 h-8 ${config.color}`} />
+              </div>
+              <h1 className="text-2xl font-bold text-white mb-2">{exercise.name}</h1>
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-xs px-3 py-1 rounded-full bg-slate-700 text-slate-300">{exercise.language}</span>
+                <span className={`text-xs px-3 py-1 rounded-full ${config.bgColor} ${config.color}`}>{config.label}</span>
+                <span className="text-xs px-3 py-1 rounded-full bg-slate-700 text-slate-300 capitalize">{exercise.difficulty}</span>
+              </div>
+            </div>
+
+            <div className="bg-slate-800/80 rounded-2xl border border-slate-700 overflow-hidden mb-6">
+              <div className="flex items-center justify-between px-4 py-3 bg-slate-900/50 border-b border-slate-700">
+                <div className="flex items-center gap-2">
+                  <Code className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm text-slate-300">Code to review</span>
+                </div>
+                <button
+                  onClick={copyCode}
+                  className="text-slate-400 hover:text-white flex items-center gap-1.5 text-sm transition-colors"
+                >
+                  {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                  {copied ? "Copied" : "Copy"}
+                </button>
+              </div>
+              <pre className="p-4 overflow-auto max-h-64 text-sm font-mono">
+                <code className="text-slate-300 whitespace-pre">{exercise.codeSnippet}</code>
+              </pre>
+            </div>
+
+            <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-5 mb-8">
+              <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-blue-400" />
+                How it works:
+              </h3>
+              <ol className="space-y-2 text-sm text-slate-300">
+                <li className="flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center text-xs flex-shrink-0">1</span>
+                  <span>Review the code carefully before starting</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center text-xs flex-shrink-0">2</span>
+                  <span>Speak your analysis out loud as you would in an interview</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center text-xs flex-shrink-0">3</span>
+                  <span>The AI interviewer will ask follow-up questions</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center text-xs flex-shrink-0">4</span>
+                  <span>End the session when done to receive your feedback</span>
+                </li>
+              </ol>
+            </div>
+
+            <div className="flex items-center justify-center gap-4">
+              <div className="flex items-center gap-3 mr-4">
+                <img
+                  src={currentAvatar.imageUrl}
+                  alt={currentAvatar.name}
+                  className="w-10 h-10 rounded-full border-2 border-slate-600 object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${currentAvatar.name}&background=4a5568&color=fff`;
+                  }}
+                />
+                <div className="text-sm">
+                  <p className="text-white font-medium">{currentAvatar.name}</p>
+                  <p className="text-slate-400 text-xs">Your interviewer</p>
+                </div>
+              </div>
+              <Button
+                onClick={handleStartSession}
+                size="lg"
+                className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-6 text-lg rounded-xl"
+              >
+                <Play className="w-5 h-5 mr-2" />
+                Start Session
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen bg-slate-900 flex flex-col overflow-hidden relative">
