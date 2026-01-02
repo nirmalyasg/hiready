@@ -833,8 +833,39 @@ interviewRouter.get("/analysis/:sessionId", requireAuth, async (req: Request, re
     if (!analysis) {
       return res.status(404).json({ success: false, error: "Analysis not found" });
     }
+
+    // Get session and config to find job context
+    const [session] = await db
+      .select()
+      .from(interviewSessions)
+      .where(eq(interviewSessions.id, sessionId));
+
+    let jobContext: { id: string; roleTitle: string; companyName: string | null; readinessScore: number | null } | null = null;
+
+    if (session) {
+      const [config] = await db
+        .select()
+        .from(interviewConfigs)
+        .where(eq(interviewConfigs.id, session.interviewConfigId));
+
+      if (config?.jobTargetId) {
+        const [job] = await db
+          .select({
+            id: jobTargets.id,
+            roleTitle: jobTargets.roleTitle,
+            companyName: jobTargets.companyName,
+            readinessScore: jobTargets.readinessScore,
+          })
+          .from(jobTargets)
+          .where(eq(jobTargets.id, config.jobTargetId));
+        
+        if (job) {
+          jobContext = job;
+        }
+      }
+    }
     
-    res.json({ success: true, analysis });
+    res.json({ success: true, analysis, jobContext });
   } catch (error: any) {
     console.error("Error fetching analysis:", error);
     res.status(500).json({ success: false, error: error.message });

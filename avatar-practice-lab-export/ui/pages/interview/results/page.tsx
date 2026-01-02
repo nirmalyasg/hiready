@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronRight, TrendingUp, Target, CheckCircle, AlertTriangle, Calendar, ArrowRight, Award, MessageSquare, Lightbulb, Star, BarChart3 } from "lucide-react";
+import { ChevronRight, TrendingUp, Target, CheckCircle, AlertTriangle, Calendar, ArrowRight, Award, MessageSquare, Lightbulb, Star, BarChart3, Briefcase, Play, ArrowUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +43,22 @@ interface InterviewAnalysis {
   improvements: string[] | null;
 }
 
+interface JobContext {
+  id: string;
+  roleTitle: string;
+  companyName: string | null;
+  readinessScore: number | null;
+}
+
+interface ReadinessData {
+  readinessScore: number;
+  previousScore: number;
+  readinessDelta: number;
+  overallTrend: "improving" | "stable" | "declining";
+  strongestDimensions: { dimension: string; avgScore: number; trend: string }[];
+  weakestDimensions: { dimension: string; avgScore: number; trend: string }[];
+}
+
 const getRecommendationConfig = (rec: string) => {
   const configs: Record<string, { label: string; color: string; bgColor: string; icon: any }> = {
     strong_yes: { label: "Strong Yes", color: "text-emerald-700", bgColor: "bg-emerald-50 border-emerald-200", icon: Award },
@@ -73,6 +89,8 @@ export default function InterviewResultsPage() {
   const sessionId = searchParams.get("sessionId");
 
   const [analysis, setAnalysis] = useState<InterviewAnalysis | null>(null);
+  const [jobContext, setJobContext] = useState<JobContext | null>(null);
+  const [readinessData, setReadinessData] = useState<ReadinessData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -86,6 +104,28 @@ export default function InterviewResultsPage() {
         const data = await response.json();
         if (data.success) {
           setAnalysis(data.analysis);
+          if (data.jobContext) {
+            setJobContext(data.jobContext);
+            // Fetch readiness data for the job
+            try {
+              const readinessRes = await fetch(`/api/jobs/job-targets/${data.jobContext.id}/readiness`, {
+                credentials: 'include'
+              });
+              const readinessJson = await readinessRes.json();
+              if (readinessJson.success) {
+                setReadinessData({
+                  readinessScore: readinessJson.readinessScore,
+                  previousScore: readinessJson.previousScore,
+                  readinessDelta: readinessJson.readinessDelta,
+                  overallTrend: readinessJson.overallTrend,
+                  strongestDimensions: readinessJson.strongestDimensions,
+                  weakestDimensions: readinessJson.weakestDimensions,
+                });
+              }
+            } catch (e) {
+              console.error("Error fetching readiness:", e);
+            }
+          }
         }
       } catch (error) {
         console.error("Error fetching analysis:", error);
@@ -146,17 +186,39 @@ export default function InterviewResultsPage() {
             </Link>
             
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-                <BarChart3 className="w-4 h-4 text-indigo-600" />
+              <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <BarChart3 className="w-4 h-4 text-purple-600" />
               </div>
-              <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">Interview Analysis</span>
+              <span className="text-xs font-semibold text-purple-600 uppercase tracking-wide">Interview Analysis</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
               Your Interview Results
             </h1>
-            <p className="text-sm sm:text-base text-slate-600">
-              Detailed feedback and actionable recommendations to help you improve.
-            </p>
+            {jobContext ? (
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="outline" className="bg-white/50 gap-1">
+                  <Briefcase className="w-3 h-3" />
+                  {jobContext.roleTitle}
+                </Badge>
+                {jobContext.companyName && (
+                  <Badge variant="outline" className="bg-white/50">
+                    {jobContext.companyName}
+                  </Badge>
+                )}
+                {(readinessData?.readinessScore ?? jobContext.readinessScore) !== null && (
+                  <Badge className="bg-purple-100 text-purple-700 border-purple-200 gap-1">
+                    {readinessData?.readinessScore ?? jobContext.readinessScore}% Ready
+                    {readinessData?.readinessDelta !== undefined && readinessData.readinessDelta > 0 && (
+                      <ArrowUp className="w-3 h-3" />
+                    )}
+                  </Badge>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm sm:text-base text-slate-600">
+                Detailed feedback and actionable recommendations to help you improve.
+              </p>
+            )}
           </div>
         </div>
 
@@ -213,6 +275,74 @@ export default function InterviewResultsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-slate-700 leading-relaxed">{analysis.summary}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Readiness Impact Section */}
+          {readinessData && (
+            <Card className="border-purple-200 bg-purple-50/30 rounded-2xl mb-6">
+              <CardContent className="p-6">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center">
+                      <span className="text-2xl font-bold text-purple-700">{readinessData.readinessScore}%</span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900">Job Readiness</h3>
+                      <div className="flex items-center gap-2 text-sm">
+                        {readinessData.readinessDelta !== 0 && (
+                          <span className={`flex items-center gap-1 ${readinessData.readinessDelta > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                            {readinessData.readinessDelta > 0 ? <ArrowUp className="w-3 h-3" /> : <TrendingUp className="w-3 h-3 rotate-180" />}
+                            {readinessData.readinessDelta > 0 ? '+' : ''}{readinessData.readinessDelta}% from last
+                          </span>
+                        )}
+                        <Badge variant="outline" className={`capitalize ${
+                          readinessData.overallTrend === 'improving' ? 'bg-emerald-50 text-emerald-700' :
+                          readinessData.overallTrend === 'declining' ? 'bg-red-50 text-red-700' :
+                          'bg-slate-50 text-slate-700'
+                        }`}>
+                          {readinessData.overallTrend}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {(readinessData.strongestDimensions?.length > 0 || readinessData.weakestDimensions?.length > 0) && (
+                    <div className="grid grid-cols-2 gap-4 lg:gap-8">
+                      <div>
+                        <h4 className="text-xs uppercase text-slate-500 font-medium mb-2">Strongest Areas</h4>
+                        {readinessData.strongestDimensions?.length > 0 ? (
+                          <ul className="space-y-1">
+                            {readinessData.strongestDimensions.slice(0, 2).map((dim, i) => (
+                              <li key={i} className="text-sm text-emerald-700 flex items-center gap-1">
+                                <CheckCircle className="w-3 h-3" />
+                                {dim.dimension}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-xs text-slate-400">Complete more sessions</p>
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="text-xs uppercase text-slate-500 font-medium mb-2">Focus Areas</h4>
+                        {readinessData.weakestDimensions?.length > 0 ? (
+                          <ul className="space-y-1">
+                            {readinessData.weakestDimensions.slice(0, 2).map((dim, i) => (
+                              <li key={i} className="text-sm text-amber-700 flex items-center gap-1">
+                                <Target className="w-3 h-3" />
+                                {dim.dimension}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-xs text-slate-400">Complete more sessions</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )}
@@ -374,13 +504,34 @@ export default function InterviewResultsPage() {
             </TabsContent>
           </Tabs>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+          {/* Next Steps CTA */}
+          {jobContext && (
+            <div className="mt-8 bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-6 text-white">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-bold mb-1">Keep Building Your Readiness</h3>
+                  <p className="text-white/80 text-sm">
+                    Continue practicing for {jobContext.roleTitle}
+                    {jobContext.companyName && ` at ${jobContext.companyName}`}
+                  </p>
+                </div>
+                <Link to={`/interview/custom?jobId=${jobContext.id}`}>
+                  <Button className="bg-white text-purple-700 hover:bg-white/90 gap-2 w-full sm:w-auto">
+                    <Play className="w-4 h-4" />
+                    Practice Again
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/interview">
               <Button variant="outline" size="lg" className="rounded-xl w-full sm:w-auto">
                 Practice Another Role
               </Button>
             </Link>
-            <Link to="/avatar/start">
+            <Link to="/dashboard">
               <Button size="lg" className="rounded-xl w-full sm:w-auto">
                 Return to Dashboard
                 <ArrowRight className="w-4 h-4 ml-2" />

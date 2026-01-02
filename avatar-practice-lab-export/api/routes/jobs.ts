@@ -1181,23 +1181,68 @@ jobsRouter.get("/job-targets/:id/readiness", requireAuth, async (req: Request, r
       .from(exerciseSessions)
       .where(eq(exerciseSessions.jobTargetId, jobId));
 
+    // Calculate new readiness score based on volume + performance + coverage
+    const totalSessions = interviewSessionsWithAnalysis.length + exerciseSessionsForJob.length;
+    let volumeScore = Math.min(totalSessions * 10, 30); // 0-30 points
+
+    // Performance score based on overall avg (0-50 points, scaled from 0-100)
+    const performanceScore = overallAvg > 0 ? Math.round((overallAvg / 5) * 50) : 0;
+
+    // Coverage score based on focus areas practiced (0-20 points)
+    const focusAreas = (job.jdParsed as JDParsedType)?.focusAreas || [];
+    const coveredDimensions = dimensionSummary.map(d => d.dimension.toLowerCase());
+    const coverageRatio = focusAreas.length > 0
+      ? focusAreas.filter(f => coveredDimensions.some(d => d.includes(f.toLowerCase()) || f.toLowerCase().includes(d))).length / focusAreas.length
+      : (dimensionSummary.length > 0 ? 0.5 : 0);
+    const coverageScore = Math.round(coverageRatio * 20);
+
+    const computedReadinessScore = Math.min(volumeScore + performanceScore + coverageScore, 100);
+    const previousScore = job.readinessScore || 0;
+    const readinessDelta = computedReadinessScore - previousScore;
+
+    // Determine overall trend
+    const improvingDimensions = dimensionSummary.filter(d => d.trend === "improving").length;
+    const decliningDimensions = dimensionSummary.filter(d => d.trend === "declining").length;
+    let overallTrend: "improving" | "stable" | "declining" = "stable";
+    if (improvingDimensions > decliningDimensions + 1) overallTrend = "improving";
+    else if (decliningDimensions > improvingDimensions + 1) overallTrend = "declining";
+
+    // Persist computed readiness score if changed
+    if (computedReadinessScore !== previousScore) {
+      await db
+        .update(jobTargets)
+        .set({
+          readinessScore: computedReadinessScore,
+          updatedAt: new Date(),
+        })
+        .where(eq(jobTargets.id, jobId));
+    }
+
     res.json({
       success: true,
       jobId,
       roleTitle: job.roleTitle,
       companyName: job.companyName,
-      readinessScore: job.readinessScore || 0,
+      readinessScore: computedReadinessScore,
+      previousScore,
+      readinessDelta,
+      overallTrend,
       lastPracticedAt: job.lastPracticedAt,
       stats: {
         interviewSessionCount: interviewSessionsWithAnalysis.length,
         exerciseSessionCount: exerciseSessionsForJob.length,
-        totalSessionCount: interviewSessionsWithAnalysis.length + exerciseSessionsForJob.length,
+        totalSessionCount: totalSessions,
         overallAvgScore: overallAvg,
+      },
+      breakdown: {
+        volumeScore,
+        performanceScore,
+        coverageScore,
       },
       dimensions: dimensionSummary,
       strongestDimensions,
       weakestDimensions,
-      focusAreas: (job.jdParsed as JDParsedType)?.focusAreas || [],
+      focusAreas,
     });
   } catch (error: any) {
     console.error("Error fetching readiness data:", error);
