@@ -157,7 +157,6 @@ export default function AvatarSimulatorDashboard() {
           uniqueScenarios.add(transcript.knowledge_id);
         }
         
-        // Also count custom scenarios
         if (transcript.custom_scenario_id) {
           uniqueScenarios.add(`custom_${transcript.custom_scenario_id}`);
         }
@@ -168,7 +167,6 @@ export default function AvatarSimulatorDashboard() {
             (skillOccurrences[transcript.skill_id] || 0) + 1;
         }
 
-        // Use transcript.duration directly (in seconds)
         const duration = parseInt(transcript.duration);
         if (!isNaN(duration) && duration > 0) {
           totalDuration += duration;
@@ -176,13 +174,11 @@ export default function AvatarSimulatorDashboard() {
         }
       });
       
-      // Count skills from skill assessments (more accurate)
       const skillsWithAssessments = progressData.filter((sp: SkillProgressData) => sp.sessionCount > 0);
       skillsWithAssessments.forEach((sp: SkillProgressData) => {
         skillMap.set(sp.skillId, true);
       });
 
-      // totalDuration is in seconds, convert properly
       const hours = Math.floor(totalDuration / 3600);
       const minutes = Math.floor((totalDuration % 3600) / 60);
       const avgDurationSeconds = transcripts.length
@@ -261,60 +257,60 @@ export default function AvatarSimulatorDashboard() {
 
   return (
     <ModernDashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 md:space-y-8 pb-16 sm:pb-0 px-3 sm:px-4 md:px-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+      <div className="max-w-5xl mx-auto space-y-6 pb-20 sm:pb-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-lg sm:text-2xl font-bold text-brand-dark">Dashboard</h1>
-            <p className="text-xs sm:text-base text-brand-dark/60">
+            <h1 className="text-2xl sm:text-3xl font-bold text-brand-dark">Dashboard</h1>
+            <p className="text-sm sm:text-base text-brand-muted mt-1">
               {practicedSkills.length > 0 
                 ? `${stats.totalSessions} sessions across ${practicedSkills.length} skills`
                 : 'Start practicing to track your progress'}
             </p>
           </div>
           <Link to="/avatar/start" className="w-full sm:w-auto">
-            <Button className="bg-brand-primary hover:bg-brand-dark text-white px-6 w-full sm:w-auto" data-testid="button-start-voice-practice">
+            <Button className="w-full sm:w-auto" data-testid="button-start-voice-practice">
               Start Practice
             </Button>
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-3 md:gap-4 md:grid-cols-4">
-          <Card className="p-3 sm:p-4 border border-brand-light/30 bg-white">
-            <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Practice Time</p>
-            <p className="text-xl sm:text-2xl font-bold text-brand-dark mt-1">{stats.totalTime}</p>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <Card className="p-5">
+            <p className="text-xs text-brand-muted font-medium uppercase tracking-wider">Practice Time</p>
+            <p className="text-2xl sm:text-3xl font-bold text-brand-dark mt-2">{stats.totalTime}</p>
           </Card>
-          <Card className="p-3 sm:p-4 border border-brand-light/30 bg-white">
-            <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Scenarios</p>
-            <p className="text-xl sm:text-2xl font-bold text-brand-dark mt-1">{stats.completedScenarios}</p>
+          <Card className="p-5">
+            <p className="text-xs text-brand-muted font-medium uppercase tracking-wider">Scenarios</p>
+            <p className="text-2xl sm:text-3xl font-bold text-brand-dark mt-2">{stats.completedScenarios}</p>
           </Card>
-          <Card className="p-3 sm:p-4 border border-brand-light/30 bg-white">
-            <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Skills</p>
-            <p className="text-xl sm:text-2xl font-bold text-brand-dark mt-1">{stats.uniqueSkillsPracticed}</p>
+          <Card className="p-5">
+            <p className="text-xs text-brand-muted font-medium uppercase tracking-wider">Skills</p>
+            <p className="text-2xl sm:text-3xl font-bold text-brand-dark mt-2">{stats.uniqueSkillsPracticed}</p>
           </Card>
-          <Card className="p-3 sm:p-4 border border-brand-light/30 bg-white">
-            <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Avg Score</p>
-            <p className="text-xl sm:text-2xl font-bold text-brand-dark mt-1">{avgOverallScore > 0 ? `${avgOverallScore.toFixed(1)}/5` : '-'}</p>
+          <Card className="p-5">
+            <p className="text-xs text-brand-muted font-medium uppercase tracking-wider">Avg Score</p>
+            <p className="text-2xl sm:text-3xl font-bold text-brand-dark mt-2">{avgOverallScore > 0 ? `${avgOverallScore.toFixed(1)}/5` : '-'}</p>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 lg:gap-6">
-          <div className="md:col-span-2 space-y-4 sm:space-y-6">
-            <Card className="p-4 sm:p-6 border border-brand-light/30 bg-white">
-              <h2 className="text-base sm:text-lg font-semibold text-brand-dark mb-3 sm:mb-4">What to Practice Next</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="p-6">
+              <h2 className="text-lg font-semibold text-brand-dark mb-4">What to Practice Next</h2>
               
               {lowestSkill && lowestSkill.avgScore !== null ? (
-                <div className="space-y-4">
-                  <div className="p-4 rounded-lg bg-brand-accent/10 border border-brand-accent/30">
+                <div className="space-y-5">
+                  <div className="p-5 rounded-xl bg-brand-accent/10 border border-brand-accent/20">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-sm text-brand-accent font-medium">Recommended Focus</p>
-                        <h3 className="text-lg font-semibold text-brand-dark mt-1">{lowestSkill.skillName}</h3>
-                        <p className="text-sm text-brand-dark/60 mt-1">
+                        <p className="text-sm text-brand-accent font-semibold">Recommended Focus</p>
+                        <h3 className="text-xl font-bold text-brand-dark mt-1">{lowestSkill.skillName}</h3>
+                        <p className="text-sm text-brand-muted mt-2">
                           Current score: {lowestSkill.avgScore.toFixed(1)}/5
                         </p>
                       </div>
                       <Link to="/avatar/start">
-                        <Button size="sm" className="bg-brand-accent hover:bg-brand-accent/90 text-white">
+                        <Button size="sm" variant="destructive">
                           Practice
                         </Button>
                       </Link>
@@ -323,10 +319,10 @@ export default function AvatarSimulatorDashboard() {
 
                   {getRecommendedSkills().length > 0 && (
                     <div>
-                      <p className="text-sm text-slate-500 mb-2">Other skills to try:</p>
+                      <p className="text-sm text-brand-muted mb-3">Other skills to try:</p>
                       <div className="flex flex-wrap gap-2">
                         {getRecommendedSkills().slice(0, 4).map((sp) => (
-                          <Link key={sp.skillId} to="/avatar/start" className="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-sm text-slate-700 transition-colors">
+                          <Link key={sp.skillId} to="/avatar/start" className="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-sm font-medium text-brand-dark transition-colors duration-200">
                             {sp.skillName}
                           </Link>
                         ))}
@@ -335,12 +331,15 @@ export default function AvatarSimulatorDashboard() {
                   )}
                 </div>
               ) : (
-                <div className="text-center py-6">
-                  <p className="text-slate-600 mb-4">
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Target className="w-8 h-8 text-brand-muted" />
+                  </div>
+                  <p className="text-brand-muted mb-4">
                     Start practicing to get personalized recommendations
                   </p>
                   <Link to="/avatar/start">
-                    <Button className="bg-brand-primary hover:bg-brand-dark text-white">
+                    <Button>
                       Start Your First Session
                     </Button>
                   </Link>
@@ -349,28 +348,28 @@ export default function AvatarSimulatorDashboard() {
             </Card>
 
             {practicedSkills.length > 0 && (
-              <Card className="p-6 border border-slate-200">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-slate-900">Skills at a Glance</h2>
-                  <Link to="/avatar/results" className="text-sm text-brand-primary hover:underline">
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-lg font-semibold text-brand-dark">Skills at a Glance</h2>
+                  <Link to="/avatar/results" className="text-sm text-brand-accent font-medium hover:underline">
                     View all
                   </Link>
                 </div>
                 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {practicedSkills.slice(0, 5).map((sp) => {
                     const scoreColor = sp.avgScore !== null 
                       ? sp.avgScore >= 4 ? 'text-green-600' 
                       : sp.avgScore >= 2.5 ? 'text-amber-600' 
-                      : 'text-red-600'
-                      : 'text-slate-400';
+                      : 'text-brand-accent'
+                      : 'text-brand-muted';
                     
                     return (
-                      <div key={sp.skillId} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
-                        <span className="text-sm text-slate-700">{sp.skillName}</span>
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs text-slate-500">{sp.sessionCount} sessions</span>
-                          <span className={`text-sm font-semibold ${scoreColor}`}>
+                      <div key={sp.skillId} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                        <span className="text-sm font-medium text-brand-dark">{sp.skillName}</span>
+                        <div className="flex items-center gap-4">
+                          <span className="text-xs text-brand-muted">{sp.sessionCount} sessions</span>
+                          <span className={`text-sm font-bold ${scoreColor}`}>
                             {sp.avgScore?.toFixed(1) || '-'}
                           </span>
                         </div>
@@ -384,42 +383,45 @@ export default function AvatarSimulatorDashboard() {
 
           <div className="space-y-6">
             {topSkill && topSkill.avgScore !== null && (
-              <Card className="p-5 border border-green-200 bg-green-50">
-                <p className="text-xs text-green-700 font-medium uppercase tracking-wide">Your Strongest</p>
-                <p className="text-lg font-semibold text-slate-900 mt-1">{topSkill.skillName}</p>
-                <p className="text-sm text-green-700 mt-1">{topSkill.avgScore.toFixed(1)}/5</p>
+              <Card className="p-5 border-green-200 bg-green-50/50">
+                <p className="text-xs text-green-700 font-semibold uppercase tracking-wider">Your Strongest</p>
+                <p className="text-xl font-bold text-brand-dark mt-2">{topSkill.skillName}</p>
+                <p className="text-sm text-green-700 font-medium mt-1">{topSkill.avgScore.toFixed(1)}/5</p>
               </Card>
             )}
 
-            <Card className="p-5 border border-slate-200">
-              <h3 className="font-semibold text-slate-900 mb-4">Activity</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Last session</span>
-                  <span className="text-slate-900">{stats.lastSessionDate}</span>
+            <Card className="p-5">
+              <h3 className="font-semibold text-brand-dark mb-4">Activity</h3>
+              <div className="space-y-4 text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-brand-muted">Last session</span>
+                  <span className="font-medium text-brand-dark">{stats.lastSessionDate}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Avg duration</span>
-                  <span className="text-slate-900">{stats.averageSessionDuration}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-brand-muted">Avg duration</span>
+                  <span className="font-medium text-brand-dark">{stats.averageSessionDuration}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Skills explored</span>
-                  <span className="text-slate-900">{stats.skillProgress}%</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-brand-muted">Skills explored</span>
+                  <span className="font-medium text-brand-dark">{stats.skillProgress}%</span>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-5 border border-slate-200">
-              <h3 className="font-semibold text-slate-900 mb-3">Quick Actions</h3>
+            <Card className="p-5">
+              <h3 className="font-semibold text-brand-dark mb-4">Quick Actions</h3>
               <div className="space-y-2">
-                <Link to="/avatar/start" className="block p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors text-sm text-slate-700">
-                  Think something through
+                <Link to="/avatar/start" className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors text-sm font-medium text-brand-dark group">
+                  <span>Think something through</span>
+                  <ChevronRight className="w-4 h-4 text-brand-muted group-hover:text-brand-dark transition-colors" />
                 </Link>
-                <Link to="/avatar/practice" className="block p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors text-sm text-slate-700">
-                  Practice a scenario
+                <Link to="/avatar/practice" className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors text-sm font-medium text-brand-dark group">
+                  <span>Practice a scenario</span>
+                  <ChevronRight className="w-4 h-4 text-brand-muted group-hover:text-brand-dark transition-colors" />
                 </Link>
-                <Link to="/avatar/practice/custom-scenario" className="block p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors text-sm text-slate-700">
-                  Create custom situation
+                <Link to="/avatar/practice/custom-scenario" className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors text-sm font-medium text-brand-dark group">
+                  <span>Create custom situation</span>
+                  <ChevronRight className="w-4 h-4 text-brand-muted group-hover:text-brand-dark transition-colors" />
                 </Link>
               </div>
             </Card>

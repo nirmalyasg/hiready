@@ -9,28 +9,28 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'default', size = 'default', color, ...props }, ref) => {
-    const baseStyles = "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
+    const baseStyles = "inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-dark focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
     
     const variants = {
-      default: "bg-brand-primary text-white hover:bg-brand-dark",
-      destructive: "bg-brand-accent text-white hover:bg-red-700",
-      outline: "border border-brand-light bg-white hover:bg-brand-light/10 text-brand-dark",
+      default: "bg-brand-dark text-white hover:bg-brand-dark/90 shadow-md hover:shadow-lg",
+      destructive: "bg-brand-accent text-white hover:bg-brand-accent/90 shadow-md hover:shadow-lg",
+      outline: "border-2 border-brand-dark/20 bg-white hover:bg-gray-50 text-brand-dark hover:border-brand-dark/40",
       secondary: "bg-brand-light/20 text-brand-dark hover:bg-brand-light/30",
-      ghost: "hover:bg-brand-light/10 text-brand-dark",
-      link: "text-brand-primary underline-offset-4 hover:underline",
+      ghost: "hover:bg-gray-100 text-brand-dark",
+      link: "text-brand-dark underline-offset-4 hover:underline",
     };
 
     const sizes = {
-      default: "h-10 px-4 py-2",
-      sm: "h-9 rounded-md px-3",
-      lg: "h-11 rounded-md px-8",
+      default: "h-11 px-6 py-2.5",
+      sm: "h-9 rounded-lg px-4 text-sm",
+      lg: "h-12 rounded-xl px-8 text-base",
       icon: "h-10 w-10",
     };
 
     const colors = {
-      primary: "bg-brand-primary text-white hover:bg-brand-dark",
-      secondary: "bg-brand-light text-white hover:bg-brand-primary",
-      danger: "bg-brand-accent text-white hover:bg-red-700",
+      primary: "bg-brand-dark text-white hover:bg-brand-dark/90 shadow-md hover:shadow-lg",
+      secondary: "bg-brand-light text-white hover:bg-brand-muted shadow-md hover:shadow-lg",
+      danger: "bg-brand-accent text-white hover:bg-brand-accent/90 shadow-md hover:shadow-lg",
     };
 
     return (

@@ -29,28 +29,28 @@ export default function MobileBottomNav() {
   ];
 
   return (
-    <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-2 py-2 z-40">
-      <div className="flex justify-around items-center">
+    <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-2 py-3 z-40 shadow-lg">
+      <div className="flex justify-around items-center max-w-md mx-auto">
         {navItems.map(({ path, icon: Icon, label }) => (
           <Link
             key={path}
             to={path}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
+            className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all duration-200 ${
               isActive(path)
-                ? "text-brand-primary"
-                : "text-slate-500 hover:text-brand-primary"
+                ? "text-white bg-brand-dark shadow-md"
+                : "text-brand-muted hover:text-brand-dark hover:bg-gray-50"
             }`}
           >
             <Icon className="w-5 h-5" />
-            <span className="text-[10px] font-medium">{label}</span>
+            <span className="text-[10px] font-semibold tracking-wide">{label}</span>
           </Link>
         ))}
         <button
           onClick={handleLogout}
-          className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-slate-500 hover:text-red-500 transition-colors"
+          className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl text-brand-muted hover:text-brand-accent hover:bg-brand-accent/10 transition-all duration-200"
         >
           <LogOut className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Logout</span>
+          <span className="text-[10px] font-semibold tracking-wide">Logout</span>
         </button>
       </div>
     </nav>

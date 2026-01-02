@@ -12,20 +12,20 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
     const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
     
     const colors = {
-      primary: 'bg-blue-600',
-      success: 'bg-green-600',
-      warning: 'bg-yellow-500',
-      danger: 'bg-red-600',
+      primary: 'bg-brand-dark',
+      success: 'bg-green-500',
+      warning: 'bg-amber-500',
+      danger: 'bg-brand-accent',
     };
 
     return (
       <div
         ref={ref}
-        className={cn("relative h-2 w-full overflow-hidden rounded-full bg-slate-200", className)}
+        className={cn("relative h-2.5 w-full overflow-hidden rounded-full bg-gray-100", className)}
         {...props}
       >
         <div
-          className={cn("h-full transition-all", colors[color])}
+          className={cn("h-full rounded-full transition-all duration-300 ease-out", colors[color])}
           style={{ width: `${percentage}%` }}
         />
       </div>

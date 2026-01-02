@@ -22,14 +22,14 @@ export default function ModernDashboardLayout({ children }: ModernDashboardLayou
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-brand-light/5 to-white">
-      <header className="bg-white border-b border-brand-light/30 sticky top-0 z-50">
-        <div className="container mx-auto px-4 sm:px-6 py-3">
-          <div className="flex justify-between items-center">
+    <div className="min-h-screen bg-brand-background">
+      <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center gap-3">
-              <img src={a3cendLogo} alt="A3CEND" className="h-7" />
-              <div className="h-5 w-px bg-brand-light/40" />
-              <span className="text-sm font-medium text-brand-dark tracking-wide">AI Practice Lab</span>
+              <img src={a3cendLogo} alt="A3CEND" className="h-8" />
+              <div className="h-6 w-px bg-gray-200" />
+              <span className="text-sm font-semibold text-brand-dark tracking-tight">AI Practice Lab</span>
             </Link>
             
             <nav className="hidden md:flex items-center gap-1">
@@ -41,10 +41,10 @@ export default function ModernDashboardLayout({ children }: ModernDashboardLayou
                     key={item.href}
                     to={item.href}
                     className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                      "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
                       isActive 
-                        ? "bg-brand-light/20 text-brand-dark" 
-                        : "text-brand-dark/70 hover:bg-brand-light/10"
+                        ? "bg-brand-dark text-white shadow-md" 
+                        : "text-brand-muted hover:text-brand-dark hover:bg-gray-50"
                     )}
                   >
                     <Icon className="w-4 h-4" />
@@ -54,24 +54,24 @@ export default function ModernDashboardLayout({ children }: ModernDashboardLayou
               })}
             </nav>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {isLoading ? (
-                <div className="w-8 h-8 rounded-full bg-slate-200 animate-pulse" />
+                <div className="w-9 h-9 rounded-full bg-gray-100 animate-pulse" />
               ) : isAuthenticated && user ? (
-                <div className="hidden sm:flex items-center gap-2">
-                  <div className="flex items-center gap-2">
+                <div className="hidden sm:flex items-center gap-3">
+                  <div className="flex items-center gap-2.5 px-3 py-1.5 bg-gray-50 rounded-full">
                     {user.profileImageUrl ? (
                       <img
                         src={user.profileImageUrl}
                         alt={user.firstName || 'User'}
-                        className="w-8 h-8 rounded-full object-cover"
+                        className="w-7 h-7 rounded-full object-cover ring-2 ring-white"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
-                        <User className="w-4 h-4 text-slate-600" />
+                      <div className="w-7 h-7 rounded-full bg-brand-dark/10 flex items-center justify-center">
+                        <User className="w-3.5 h-3.5 text-brand-dark" />
                       </div>
                     )}
-                    <span className="text-sm font-medium text-slate-700 hidden lg:block">
+                    <span className="text-sm font-medium text-brand-dark hidden lg:block">
                       {user.firstName || user.username || 'User'}
                     </span>
                   </div>
@@ -80,7 +80,8 @@ export default function ModernDashboardLayout({ children }: ModernDashboardLayou
                       await fetch('/api/auth/logout', { method: 'POST' });
                       window.location.href = '/';
                     }}
-                    className="flex items-center gap-1 px-3 py-1.5 text-sm text-brand-dark/60 hover:text-brand-dark hover:bg-brand-light/10 rounded-lg transition-colors"
+                    className="flex items-center justify-center w-9 h-9 text-brand-muted hover:text-brand-accent hover:bg-brand-accent/10 rounded-full transition-all duration-200"
+                    title="Sign out"
                   >
                     <LogOut className="w-4 h-4" />
                   </button>
@@ -88,7 +89,7 @@ export default function ModernDashboardLayout({ children }: ModernDashboardLayou
               ) : (
                 <Link
                   to="/login"
-                  className="hidden sm:flex items-center gap-2 px-4 py-2 bg-brand-accent text-white rounded-lg text-sm font-medium hover:bg-brand-accent/90 transition-colors"
+                  className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-brand-accent text-white rounded-xl text-sm font-semibold hover:bg-brand-accent/90 transition-all duration-200 shadow-md hover:shadow-lg"
                 >
                   <LogIn className="w-4 h-4" />
                   Sign in
@@ -97,7 +98,7 @@ export default function ModernDashboardLayout({ children }: ModernDashboardLayou
               
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+                className="md:hidden flex items-center justify-center w-10 h-10 text-brand-dark hover:bg-gray-50 rounded-xl transition-colors"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -106,8 +107,8 @@ export default function ModernDashboardLayout({ children }: ModernDashboardLayou
         </div>
         
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-slate-200 bg-white">
-            <nav className="container mx-auto px-4 py-3 space-y-1">
+          <div className="md:hidden border-t border-gray-100 bg-white animate-in slide-in-from-top-2 duration-200">
+            <nav className="max-w-7xl mx-auto px-4 py-4 space-y-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
@@ -117,10 +118,10 @@ export default function ModernDashboardLayout({ children }: ModernDashboardLayou
                     to={item.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                      "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
                       isActive 
-                        ? "bg-brand-light/20 text-brand-dark" 
-                        : "text-brand-dark/70 hover:bg-brand-light/10"
+                        ? "bg-brand-dark text-white shadow-md" 
+                        : "text-brand-muted hover:text-brand-dark hover:bg-gray-50"
                     )}
                   >
                     <Icon className="w-5 h-5" />
@@ -129,35 +130,37 @@ export default function ModernDashboardLayout({ children }: ModernDashboardLayou
                 );
               })}
               
-              {isAuthenticated && user && (
-                <button
-                  onClick={async () => {
-                    await fetch('/api/auth/logout', { method: 'POST' });
-                    window.location.href = '/';
-                  }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-brand-dark/70 hover:bg-brand-light/10 transition-colors"
-                >
-                  <LogOut className="w-5 h-5" />
-                  Sign out
-                </button>
-              )}
-              
-              {!isAuthenticated && (
-                <Link
-                  to="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-brand-primary"
-                >
-                  <LogIn className="w-5 h-5" />
-                  Sign in
-                </Link>
-              )}
+              <div className="pt-3 mt-3 border-t border-gray-100">
+                {isAuthenticated && user && (
+                  <button
+                    onClick={async () => {
+                      await fetch('/api/auth/logout', { method: 'POST' });
+                      window.location.href = '/';
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-brand-accent hover:bg-brand-accent/10 transition-all duration-200"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    Sign out
+                  </button>
+                )}
+                
+                {!isAuthenticated && (
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-brand-accent text-white rounded-xl text-sm font-semibold hover:bg-brand-accent/90 transition-all duration-200"
+                  >
+                    <LogIn className="w-5 h-5" />
+                    Sign in
+                  </Link>
+                )}
+              </div>
             </nav>
           </div>
         )}
       </header>
 
-      <main className="container mx-auto px-4 sm:px-6 py-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
     </div>
