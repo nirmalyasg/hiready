@@ -551,6 +551,72 @@ exerciseModeRouter.get("/sessions/:id/analysis", requireAuth, async (req: Reques
 });
 
 // ===================================================================
+// Session History - Get user's exercise sessions
+// ===================================================================
+
+exerciseModeRouter.get("/session-history", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { exerciseType, limit: limitParam } = req.query;
+    const limitNum = limitParam ? parseInt(limitParam as string) : 50;
+    
+    const sessions = await db
+      .select()
+      .from(exerciseSessions)
+      .where(eq(exerciseSessions.userId, userId))
+      .orderBy(desc(exerciseSessions.createdAt))
+      .limit(limitNum);
+    
+    const filteredSessions = exerciseType 
+      ? sessions.filter(s => s.exerciseType === exerciseType)
+      : sessions;
+    
+    const enrichedSessions = await Promise.all(
+      filteredSessions.map(async (session) => {
+        let exerciseName = "";
+        let exerciseData: any = null;
+        
+        if (session.exerciseType === "case_study" && session.caseTemplateId) {
+          const [ct] = await db.select().from(caseTemplates).where(eq(caseTemplates.id, session.caseTemplateId));
+          exerciseName = ct?.name || "Case Study";
+          exerciseData = ct ? { name: ct.name, caseType: ct.caseType, difficulty: ct.difficulty } : null;
+        } else if (session.exerciseType === "coding_lab" && session.codingExerciseId) {
+          const [ce] = await db.select().from(codingExercises).where(eq(codingExercises.id, session.codingExerciseId));
+          exerciseName = ce?.name || "Coding Exercise";
+          exerciseData = ce ? { name: ce.name, activityType: ce.activityType, language: ce.language, difficulty: ce.difficulty } : null;
+        }
+        
+        const [analysis] = await db
+          .select()
+          .from(exerciseAnalysis)
+          .where(eq(exerciseAnalysis.exerciseSessionId, session.id));
+        
+        return {
+          id: session.id,
+          sessionUid: session.sessionUid,
+          exerciseType: session.exerciseType,
+          exerciseName,
+          exerciseData,
+          status: session.status,
+          duration: session.duration,
+          createdAt: session.createdAt,
+          analysis: analysis ? {
+            id: analysis.id,
+            overallScore: analysis.overallScore,
+            summary: analysis.summary,
+          } : null,
+        };
+      })
+    );
+    
+    res.json({ success: true, sessions: enrichedSessions });
+  } catch (error: any) {
+    console.error("Error fetching exercise session history:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ===================================================================
 // AI Interviewer Prompts - Generate system prompts for sessions
 // ===================================================================
 
