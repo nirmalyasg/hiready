@@ -175,7 +175,21 @@ export default function CodingLabResultsPage() {
   const dimensions = analysis.dimensionScores || [];
   const strengths = analysis.strengthsIdentified || [];
   const improvements = analysis.areasForImprovement || [];
-  const transcript = session?.transcript || [];
+  
+  const parseTranscript = (raw: any): TranscriptMessage[] => {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    if (typeof raw === 'string') {
+      try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
+  const transcript = parseTranscript(session?.transcript);
 
   return (
     <SidebarLayout>
