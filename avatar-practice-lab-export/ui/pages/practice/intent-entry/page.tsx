@@ -129,39 +129,21 @@ const practiceOptions = [
   {
     id: "interview-custom",
     icon: <FileText className="w-8 h-8" />,
-    title: "Custom Interview",
+    title: "Create Your Own Interview",
     description: "Upload resume & job description",
     route: "/interview/custom",
     bgColor: "bg-gradient-to-br from-emerald-600 to-teal-700",
     iconBg: "bg-white/20",
   },
   {
-    id: "scenario",
+    id: "exercise",
     icon: <BookOpen className="w-8 h-8" />,
-    title: "Workplace Scenarios",
-    description: "Practice difficult conversations",
-    route: "/avatar/practice",
+    title: "Case Study & Coding",
+    description: "Technical exercises and case studies",
+    route: "/exercise-mode",
     bgColor: "bg-gradient-to-br from-brand-primary to-brand-dark",
     iconBg: "bg-white/20",
   },
-  {
-    id: "situation",
-    icon: <MessageSquare className="w-8 h-8" />,
-    title: "Custom Situation",
-    description: "Describe your own situation",
-    route: "/avatar/practice/custom-scenario",
-    bgColor: "bg-gradient-to-br from-brand-light to-brand-primary",
-    iconBg: "bg-white/20",
-  },
-  {
-    id: "presentation",
-    icon: <Presentation className="w-8 h-8" />,
-    title: "Presentation Practice",
-    description: "Upload slides and practice",
-    route: "/avatar/practice/presentation",
-    bgColor: "bg-gradient-to-br from-brand-accent to-brand-accent-light",
-    iconBg: "bg-white/20",
-  }
 ];
 
 export default function IntentEntryPage() {
