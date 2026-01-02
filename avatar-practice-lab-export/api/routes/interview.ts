@@ -326,6 +326,53 @@ interviewRouter.post("/documents/:id/parse", requireAuth, async (req: Request, r
   }
 });
 
+interviewRouter.delete("/documents/:id", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const id = parseInt(req.params.id);
+    
+    const [doc] = await db
+      .select()
+      .from(userDocuments)
+      .where(and(eq(userDocuments.id, id), eq(userDocuments.userId, userId)));
+    
+    if (!doc) {
+      return res.status(404).json({ success: false, error: "Document not found" });
+    }
+    
+    await db.delete(userDocuments).where(eq(userDocuments.id, id));
+    
+    if (doc.docType === "resume") {
+      const [profile] = await db
+        .select()
+        .from(userProfileExtracted)
+        .where(eq(userProfileExtracted.userId, userId));
+      
+      if (profile && profile.latestResumeDocId === id) {
+        const [nextResume] = await db
+          .select()
+          .from(userDocuments)
+          .where(and(eq(userDocuments.userId, userId), eq(userDocuments.docType, "resume")))
+          .orderBy(desc(userDocuments.createdAt))
+          .limit(1);
+        
+        await db
+          .update(userProfileExtracted)
+          .set({ 
+            latestResumeDocId: nextResume?.id || null, 
+            updatedAt: new Date() 
+          })
+          .where(eq(userProfileExtracted.userId, userId));
+      }
+    }
+    
+    res.json({ success: true, message: "Document deleted" });
+  } catch (error: any) {
+    console.error("Error deleting document:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ===================================================================
 // Interview Config Endpoints
 // ===================================================================

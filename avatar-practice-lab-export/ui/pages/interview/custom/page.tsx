@@ -50,6 +50,8 @@ export default function InterviewCustomPage() {
   const [addJobError, setAddJobError] = useState<string | null>(null);
 
   const [resumeDoc, setResumeDoc] = useState<UploadedDoc | null>(null);
+  const [savedResume, setSavedResume] = useState<UploadedDoc | null>(null);
+  const [resumeChoice, setResumeChoice] = useState<"saved" | "new" | null>(null);
   const [uploading, setUploading] = useState(false);
   const [parsing, setParsing] = useState(false);
   const [interviewType, setInterviewType] = useState<string>("hr");
@@ -61,7 +63,35 @@ export default function InterviewCustomPage() {
 
   useEffect(() => {
     fetchSavedJobs();
+    fetchSavedResume();
   }, []);
+
+  const fetchSavedResume = async () => {
+    try {
+      const response = await fetch("/api/interview/documents?docType=resume");
+      const data = await response.json();
+      if (data.success && data.documents?.length > 0) {
+        const latest = data.documents[0];
+        setSavedResume({
+          id: latest.id,
+          fileName: latest.fileName,
+          docType: latest.docType,
+          textLength: 0,
+          parsed: true,
+        });
+        setResumeDoc({
+          id: latest.id,
+          fileName: latest.fileName,
+          docType: latest.docType,
+          textLength: 0,
+          parsed: true,
+        });
+        setResumeChoice("saved");
+      }
+    } catch (e) {
+      console.error("Failed to fetch saved resume:", e);
+    }
+  };
 
   useEffect(() => {
     if (preSelectedJobId && savedJobs.length > 0) {
@@ -633,6 +663,45 @@ export default function InterviewCustomPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">
+                    {savedResume && !resumeDoc && (
+                      <div className="mb-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-slate-900">{savedResume.fileName}</p>
+                            <p className="text-xs text-blue-600">Saved in your profile</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              setResumeDoc(savedResume);
+                              setResumeChoice("saved");
+                            }}
+                            className="flex-1 rounded-lg"
+                          >
+                            <Check className="w-4 h-4 mr-1" />
+                            Use This Resume
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setResumeChoice("new");
+                              resumeInputRef.current?.click();
+                            }}
+                            className="flex-1 rounded-lg"
+                          >
+                            <Upload className="w-4 h-4 mr-1" />
+                            Upload New
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
                     {resumeDoc ? (
                       <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-xl border border-emerald-200">
                         <div className="flex items-center gap-3">
@@ -644,7 +713,7 @@ export default function InterviewCustomPage() {
                             <p className="text-xs text-slate-500">
                               {resumeDoc.parsed ? (
                                 <span className="flex items-center gap-1 text-emerald-600">
-                                  <Check className="w-3 h-3" /> Parsed successfully
+                                  <Check className="w-3 h-3" /> {resumeChoice === "saved" ? "Using saved resume" : "Parsed successfully"}
                                 </span>
                               ) : parsing ? (
                                 <span className="flex items-center gap-1 text-amber-600">
@@ -659,29 +728,22 @@ export default function InterviewCustomPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setResumeDoc(null)}
+                          onClick={() => {
+                            setResumeDoc(null);
+                            setResumeChoice(null);
+                          }}
                           className="text-slate-400 hover:text-red-500"
                         >
                           <X className="w-4 h-4" />
                         </Button>
                       </div>
-                    ) : (
+                    ) : !savedResume && (
                       <div
                         className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-emerald-400 hover:bg-emerald-50/30 transition-colors cursor-pointer"
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={handleDrop}
                         onClick={() => resumeInputRef.current?.click()}
                       >
-                        <input
-                          ref={resumeInputRef}
-                          type="file"
-                          accept=".pdf,.docx,.doc,.txt"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleFileUpload(file);
-                          }}
-                        />
                         {uploading ? (
                           <Loader2 className="w-8 h-8 text-emerald-500 animate-spin mx-auto mb-3" />
                         ) : (
@@ -693,6 +755,20 @@ export default function InterviewCustomPage() {
                         <p className="text-xs text-slate-500">PDF, DOCX, or TXT (max 10MB)</p>
                       </div>
                     )}
+
+                    <input
+                      ref={resumeInputRef}
+                      type="file"
+                      accept=".pdf,.docx,.doc,.txt"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setResumeChoice("new");
+                          handleFileUpload(file);
+                        }
+                      }}
+                    />
                   </CardContent>
                 </Card>
 
