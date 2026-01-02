@@ -9,6 +9,13 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### UI/UX Decisions
+- **Brand Color Palette** (January 2026): Modern, professional color scheme applied across the entire application:
+  - Primary/Dark: #042c4c (deep navy blue) - Headers, buttons, text
+  - Accent: #ee7e65 (coral/salmon) - CTAs, highlights, active states
+  - Light: #768c9c (slate blue) - Secondary elements
+  - Muted: #6c8194 (gray-blue) - Subtle text, borders
+  - Background: #fbfbfc (off-white) - Page backgrounds
+- **Modern Design System**: Consistent rounded-xl corners, subtle shadows, smooth transitions (200ms), hover/focus states across all components. Clean, minimal aesthetic prioritizing readability and usability.
 - **Mobile Responsiveness**: Comprehensive mobile responsiveness across all pages, including a mobile hamburger menu, adaptive layouts, and app-like UX patterns such as fixed bottom action bars and progressive content disclosure.
 - **Admin Console**: A 6-page SaaS-style dashboard for analytics, user management, session tracking, content performance, avatar usage, and cost monitoring.
 - **Voice Input**: Redesigned voice input with flag-based language selection and auto-detection, supporting 22 languages including 8 Indian languages with code-mixing capabilities.
