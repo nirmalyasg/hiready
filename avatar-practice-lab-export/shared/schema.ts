@@ -961,6 +961,213 @@ export const interviewArtifactsRelations = relations(interviewArtifacts, ({ one 
 }));
 
 // =====================
+// Interview Exercise Mode Tables (Case Study + Coding Lab)
+// =====================
+
+// Case Templates - "Prompt packages" for case study interviews
+export const caseTemplates = pgTable("case_templates", {
+  id: serial("id").primaryKey(),
+  roleKitId: integer("role_kit_id")
+    .references(() => roleKits.id, { onDelete: "set null" }),
+  name: varchar("name").notNull(),
+  caseType: text("case_type")
+    .$type<"business_diagnosis" | "execution_planning" | "stakeholder">()
+    .notNull(),
+  difficulty: text("difficulty")
+    .$type<"easy" | "medium" | "hard">()
+    .notNull()
+    .default("medium"),
+  promptStatement: text("prompt_statement").notNull(),
+  context: text("context"),
+  clarifyingQuestionsAllowed: integer("clarifying_questions_allowed").default(3),
+  revealableData: jsonb("revealable_data").$type<{
+    dataPoint: string;
+    triggerQuestion: string;
+    value: string;
+  }[]>(),
+  evaluationFocus: jsonb("evaluation_focus").$type<string[]>(),
+  probingMap: jsonb("probing_map").$type<{
+    ifVague: string[];
+    ifWrong: string[];
+    ifStrong: string[];
+  }>(),
+  expectedDurationMinutes: integer("expected_duration_minutes").default(15),
+  tags: jsonb("tags").$type<string[]>(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Coding Exercises - Code snippets for Explain/Debug/Modify activities
+export const codingExercises = pgTable("coding_exercises", {
+  id: serial("id").primaryKey(),
+  roleKitId: integer("role_kit_id")
+    .references(() => roleKits.id, { onDelete: "set null" }),
+  name: varchar("name").notNull(),
+  activityType: text("activity_type")
+    .$type<"explain" | "debug" | "modify">()
+    .notNull(),
+  language: varchar("language").notNull().default("javascript"),
+  difficulty: text("difficulty")
+    .$type<"easy" | "medium" | "hard">()
+    .notNull()
+    .default("medium"),
+  codeSnippet: text("code_snippet").notNull(),
+  bugDescription: text("bug_description"),
+  failingTestCase: text("failing_test_case"),
+  modificationRequirement: text("modification_requirement"),
+  expectedBehavior: text("expected_behavior"),
+  expectedSignals: jsonb("expected_signals").$type<{
+    signal: string;
+    importance: "critical" | "important" | "nice_to_have";
+  }[]>(),
+  commonFailureModes: jsonb("common_failure_modes").$type<{
+    mistake: string;
+    feedback: string;
+  }[]>(),
+  suggestedFix: text("suggested_fix"),
+  edgeCases: jsonb("edge_cases").$type<string[]>(),
+  complexityExpected: text("complexity_expected"),
+  probingQuestions: jsonb("probing_questions").$type<string[]>(),
+  tags: jsonb("tags").$type<string[]>(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Exercise Sessions - Track case study and coding lab sessions
+export const exerciseSessions = pgTable("exercise_sessions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => authUsers.id, { onDelete: "cascade" }),
+  exerciseType: text("exercise_type")
+    .$type<"case_study" | "coding_lab">()
+    .notNull(),
+  caseTemplateId: integer("case_template_id")
+    .references(() => caseTemplates.id, { onDelete: "set null" }),
+  codingExerciseId: integer("coding_exercise_id")
+    .references(() => codingExercises.id, { onDelete: "set null" }),
+  roleKitId: integer("role_kit_id")
+    .references(() => roleKits.id, { onDelete: "set null" }),
+  interviewType: text("interview_type")
+    .$type<"hiring_manager" | "panel">()
+    .default("hiring_manager"),
+  style: text("style")
+    .$type<"friendly" | "neutral" | "stress">()
+    .default("neutral"),
+  thinkingTimeUsed: integer("thinking_time_used").default(0),
+  sessionUid: text("session_uid").notNull().unique(),
+  transcript: text("transcript"),
+  userCodeSubmission: text("user_code_submission"),
+  duration: integer("duration").default(0),
+  status: text("status")
+    .$type<"created" | "thinking" | "active" | "ended" | "analyzed">()
+    .notNull()
+    .default("created"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Exercise Rubrics - Scoring dimensions for case study and coding exercises
+export const exerciseRubrics = pgTable("exercise_rubrics", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  exerciseType: text("exercise_type")
+    .$type<"case_study" | "coding_lab">()
+    .notNull(),
+  dimensions: jsonb("dimensions").$type<{
+    name: string;
+    description: string;
+    weight: number;
+    anchors: {
+      score: number;
+      description: string;
+    }[];
+  }[]>().notNull(),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Exercise Analysis - Detailed feedback for exercise sessions
+export const exerciseAnalysis = pgTable("exercise_analysis", {
+  id: serial("id").primaryKey(),
+  exerciseSessionId: integer("exercise_session_id")
+    .notNull()
+    .references(() => exerciseSessions.id, { onDelete: "cascade" }),
+  rubricId: integer("rubric_id")
+    .references(() => exerciseRubrics.id, { onDelete: "set null" }),
+  overallScore: real("overall_score").notNull(),
+  dimensionScores: jsonb("dimension_scores").$type<{
+    dimension: string;
+    score: number;
+    maxScore: number;
+    evidence: string[];
+    feedback: string;
+  }[]>().notNull(),
+  strengthsIdentified: jsonb("strengths_identified").$type<string[]>(),
+  areasForImprovement: jsonb("areas_for_improvement").$type<string[]>(),
+  rewrittenAnswer: text("rewritten_answer"),
+  betterClarifyingQuestions: jsonb("better_clarifying_questions").$type<string[]>(),
+  missedEdgeCases: jsonb("missed_edge_cases").$type<string[]>(),
+  suggestedPatch: text("suggested_patch"),
+  practicePlan: jsonb("practice_plan").$type<{
+    day: number;
+    task: string;
+    timeMinutes: number;
+  }[]>(),
+  summary: text("summary"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Exercise Sessions Relations
+export const caseTemplatesRelations = relations(caseTemplates, ({ one }) => ({
+  roleKit: one(roleKits, {
+    fields: [caseTemplates.roleKitId],
+    references: [roleKits.id],
+  }),
+}));
+
+export const codingExercisesRelations = relations(codingExercises, ({ one }) => ({
+  roleKit: one(roleKits, {
+    fields: [codingExercises.roleKitId],
+    references: [roleKits.id],
+  }),
+}));
+
+export const exerciseSessionsRelations = relations(exerciseSessions, ({ one, many }) => ({
+  user: one(authUsers, {
+    fields: [exerciseSessions.userId],
+    references: [authUsers.id],
+  }),
+  caseTemplate: one(caseTemplates, {
+    fields: [exerciseSessions.caseTemplateId],
+    references: [caseTemplates.id],
+  }),
+  codingExercise: one(codingExercises, {
+    fields: [exerciseSessions.codingExerciseId],
+    references: [codingExercises.id],
+  }),
+  roleKit: one(roleKits, {
+    fields: [exerciseSessions.roleKitId],
+    references: [roleKits.id],
+  }),
+  analysis: many(exerciseAnalysis),
+}));
+
+export const exerciseAnalysisRelations = relations(exerciseAnalysis, ({ one }) => ({
+  session: one(exerciseSessions, {
+    fields: [exerciseAnalysis.exerciseSessionId],
+    references: [exerciseSessions.id],
+  }),
+  rubric: one(exerciseRubrics, {
+    fields: [exerciseAnalysis.rubricId],
+    references: [exerciseRubrics.id],
+  }),
+}));
+
+// =====================
 // Admin Tables
 // =====================
 
@@ -1213,6 +1420,13 @@ export const insertInterviewSessionSchema = createInsertSchema(interviewSessions
 export const insertInterviewAnalysisSchema = createInsertSchema(interviewAnalysis).omit({ id: true, createdAt: true });
 export const insertInterviewArtifactSchema = createInsertSchema(interviewArtifacts).omit({ id: true, createdAt: true });
 
+// Interview Exercise Mode Insert Schemas
+export const insertCaseTemplateSchema = createInsertSchema(caseTemplates).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCodingExerciseSchema = createInsertSchema(codingExercises).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertExerciseSessionSchema = createInsertSchema(exerciseSessions).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertExerciseRubricSchema = createInsertSchema(exerciseRubrics).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertExerciseAnalysisSchema = createInsertSchema(exerciseAnalysis).omit({ id: true, createdAt: true });
+
 // Admin Insert Schemas
 export const insertUserRoleSchema = createInsertSchema(userRoles).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertUserLoginEventSchema = createInsertSchema(userLoginEvents).omit({ id: true });
@@ -1283,6 +1497,18 @@ export type InterviewAnalysisType = typeof interviewAnalysis.$inferSelect;
 export type InsertInterviewAnalysis = z.infer<typeof insertInterviewAnalysisSchema>;
 export type InterviewArtifact = typeof interviewArtifacts.$inferSelect;
 export type InsertInterviewArtifact = z.infer<typeof insertInterviewArtifactSchema>;
+
+// Interview Exercise Mode Types
+export type CaseTemplate = typeof caseTemplates.$inferSelect;
+export type InsertCaseTemplate = z.infer<typeof insertCaseTemplateSchema>;
+export type CodingExercise = typeof codingExercises.$inferSelect;
+export type InsertCodingExercise = z.infer<typeof insertCodingExerciseSchema>;
+export type ExerciseSession = typeof exerciseSessions.$inferSelect;
+export type InsertExerciseSession = z.infer<typeof insertExerciseSessionSchema>;
+export type ExerciseRubric = typeof exerciseRubrics.$inferSelect;
+export type InsertExerciseRubric = z.infer<typeof insertExerciseRubricSchema>;
+export type ExerciseAnalysisType = typeof exerciseAnalysis.$inferSelect;
+export type InsertExerciseAnalysis = z.infer<typeof insertExerciseAnalysisSchema>;
 
 // Admin Types
 export type UserRole = typeof userRoles.$inferSelect;

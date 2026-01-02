@@ -31,6 +31,13 @@ import InterviewConfigPage from './pages/interview/config/page';
 import InterviewCustomPage from './pages/interview/custom/page';
 import InterviewPreSessionPage from './pages/interview/pre-session/page';
 import InterviewResultsPage from './pages/interview/results/page';
+import ExerciseModePage from './pages/exercise-mode/page';
+import CaseStudyPage from './pages/exercise-mode/case-study/page';
+import CaseStudySessionPage from './pages/exercise-mode/case-study/session-page';
+import CaseStudyResultsPage from './pages/exercise-mode/case-study/results-page';
+import CodingLabPage from './pages/exercise-mode/coding-lab/page';
+import CodingLabSessionPage from './pages/exercise-mode/coding-lab/session-page';
+import CodingLabResultsPage from './pages/exercise-mode/coding-lab/results-page';
 
 export default function App() {
   return (
@@ -65,6 +72,13 @@ export default function App() {
         <Route path="/interview/custom" element={<ProtectedRoute><InterviewCustomPage /></ProtectedRoute>} />
         <Route path="/interview/pre-session" element={<ProtectedRoute><InterviewPreSessionPage /></ProtectedRoute>} />
         <Route path="/interview/results" element={<ProtectedRoute><InterviewResultsPage /></ProtectedRoute>} />
+        <Route path="/exercise-mode" element={<ProtectedRoute><ExerciseModePage /></ProtectedRoute>} />
+        <Route path="/exercise-mode/case-study" element={<ProtectedRoute><CaseStudyPage /></ProtectedRoute>} />
+        <Route path="/exercise-mode/case-study/session" element={<ProtectedRoute><CaseStudySessionPage /></ProtectedRoute>} />
+        <Route path="/exercise-mode/case-study/results" element={<ProtectedRoute><CaseStudyResultsPage /></ProtectedRoute>} />
+        <Route path="/exercise-mode/coding-lab" element={<ProtectedRoute><CodingLabPage /></ProtectedRoute>} />
+        <Route path="/exercise-mode/coding-lab/session" element={<ProtectedRoute><CodingLabSessionPage /></ProtectedRoute>} />
+        <Route path="/exercise-mode/coding-lab/results" element={<ProtectedRoute><CodingLabResultsPage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </RealtimeSessionPrewarmProvider>

@@ -11,7 +11,8 @@ import {
   X, 
   ChevronLeft,
   Sparkles,
-  Settings
+  Settings,
+  Code
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -31,6 +32,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
     { href: '/avatar/dashboard', label: 'Dashboard', icon: Home },
     { href: '/avatar/start', label: 'Practice', icon: Target },
     { href: '/interview', label: 'Interviews', icon: Briefcase },
+    { href: '/exercise-mode', label: 'Exercise Mode', icon: Code },
     { href: '/avatar/results', label: 'Results', icon: BarChart3 },
   ];
 

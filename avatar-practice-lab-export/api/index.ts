@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { avatarSimulator } from "./routes/avatar-simulator.js";
 import { adminRouter } from "./routes/admin.js";
 import { interviewRouter } from "./routes/interview.js";
+import { exerciseModeRouter } from "./routes/exercise-mode.js";
 import { setupAuth } from "./replitAuth.js";
 import dotenv from "dotenv";
 
@@ -55,6 +56,18 @@ async function startServer() {
 
   // Mount interview practice routes
   app.use("/api/interview", interviewRouter);
+
+  // Middleware to populate req.user from session for exercise mode routes
+  app.use("/api/exercise-mode", (req, res, next) => {
+    const sessionUser = (req.session as any)?.user;
+    if (sessionUser) {
+      req.user = sessionUser;
+    }
+    next();
+  });
+
+  // Mount interview exercise mode routes (Case Study + Coding Lab)
+  app.use("/api/exercise-mode", exerciseModeRouter);
 
   // Health check
   app.get("/health", (req, res) => {
