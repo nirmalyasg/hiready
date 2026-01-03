@@ -65,6 +65,12 @@ Implemented comprehensive job targeting system with career memory and readiness 
    - Users can optionally link practice sessions to specific job targets
    - Session creation APIs accept and validate jobTargetId with proper user authorization
    - Backward compatible: generic practice without job linkage still works
+   - **Automatic Smart Job Linking**: When selecting a case study or coding exercise:
+     - System automatically suggests the most relevant saved job based on skill overlap, role type match, and recent activity
+     - Confidence-based scoring (high ≥35pts, medium ≥15pts) using weighted factors: role type (30%), skill overlap (35%), domain (15%), recency (15%)
+     - "Smart Match" badge displays suggestion with rationale on avatar-select page
+     - Users can override or dismiss the suggestion
+     - Auto-link metadata (confidence, signals) persisted with session for analytics
 
 3. **Readiness Score System (Phase 3)**
    - 3-component scoring algorithm (100 points max):
@@ -113,6 +119,7 @@ Implemented comprehensive job targeting system with career memory and readiness 
 - `/api/jobs/job-targets/:id/readiness-score` - Compute readiness score from linked sessions
 - `/api/jobs/skill-patterns` - Get user's career memory skill patterns
 - `/api/jobs/skill-patterns/update` - Update patterns after session analysis
+- `/api/exercise-mode/auto-link` - Get automatic job suggestions for case study/coding exercises
 
 ### New Frontend Components
 - `JobTargetSelector` - Reusable dropdown for linking practice to jobs
