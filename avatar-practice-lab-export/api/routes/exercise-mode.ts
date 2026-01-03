@@ -18,6 +18,7 @@ import {
 import { requireAuth } from "../middleware/auth.js";
 import { getOpenAI } from "../utils/openai-client.js";
 import { v4 as uuidv4 } from "uuid";
+import { getAutoLinkSuggestion, getRankedJobSuggestions } from "../lib/exercise-job-matcher.js";
 
 export const exerciseModeRouter = Router();
 
@@ -183,6 +184,68 @@ exerciseModeRouter.get("/rubrics/default/:exerciseType", async (req: Request, re
 });
 
 // ===================================================================
+// Auto-Link Job Target Suggestion Endpoints
+// ===================================================================
+
+exerciseModeRouter.post("/auto-link", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { exerciseType, templateId, codingExerciseId, roleKitId } = req.body;
+    
+    if (!exerciseType || !["case_study", "coding_lab"].includes(exerciseType)) {
+      return res.status(400).json({ success: false, error: "Invalid exercise type" });
+    }
+    
+    const suggestion = await getAutoLinkSuggestion(userId, {
+      exerciseType,
+      templateId: templateId ? parseInt(templateId) : undefined,
+      codingExerciseId: codingExerciseId ? parseInt(codingExerciseId) : undefined,
+      roleKitId: roleKitId ? parseInt(roleKitId) : undefined,
+    });
+    
+    res.json({
+      success: true,
+      suggestion,
+      hasSuggestion: suggestion !== null,
+    });
+  } catch (error: any) {
+    console.error("Error getting auto-link suggestion:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+exerciseModeRouter.post("/auto-link/ranked", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { exerciseType, templateId, codingExerciseId, roleKitId, limit = 3 } = req.body;
+    
+    if (!exerciseType || !["case_study", "coding_lab"].includes(exerciseType)) {
+      return res.status(400).json({ success: false, error: "Invalid exercise type" });
+    }
+    
+    const suggestions = await getRankedJobSuggestions(
+      userId,
+      {
+        exerciseType,
+        templateId: templateId ? parseInt(templateId) : undefined,
+        codingExerciseId: codingExerciseId ? parseInt(codingExerciseId) : undefined,
+        roleKitId: roleKitId ? parseInt(roleKitId) : undefined,
+      },
+      limit
+    );
+    
+    res.json({
+      success: true,
+      suggestions,
+      count: suggestions.length,
+    });
+  } catch (error: any) {
+    console.error("Error getting ranked job suggestions:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ===================================================================
 // Exercise Sessions Endpoints
 // ===================================================================
 
@@ -197,6 +260,9 @@ exerciseModeRouter.post("/sessions", requireAuth, async (req: Request, res: Resp
       interviewType,
       style,
       jobTargetId,
+      autoLinked,
+      autoLinkConfidence,
+      autoLinkSignals,
     } = req.body;
     
     if (!exerciseType || !["case_study", "coding_lab"].includes(exerciseType)) {
@@ -236,6 +302,9 @@ exerciseModeRouter.post("/sessions", requireAuth, async (req: Request, res: Resp
         interviewType: interviewType || "hiring_manager",
         style: style || "neutral",
         jobTargetId: jobTargetId || null,
+        autoLinked: autoLinked || false,
+        autoLinkConfidence: autoLinkConfidence || null,
+        autoLinkSignals: autoLinkSignals || null,
         sessionUid,
         status: "created",
         createdAt: new Date(),

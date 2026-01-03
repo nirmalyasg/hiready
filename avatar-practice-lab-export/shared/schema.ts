@@ -1120,6 +1120,14 @@ export const exerciseSessions = pgTable("exercise_sessions", {
     .$type<"created" | "thinking" | "active" | "ended" | "analyzed">()
     .notNull()
     .default("created"),
+  autoLinked: boolean("auto_linked").default(false),
+  autoLinkConfidence: text("auto_link_confidence").$type<"high" | "medium" | "low">(),
+  autoLinkSignals: jsonb("auto_link_signals").$type<{
+    skillOverlap: number;
+    roleTypeMatch: boolean;
+    recentActivity: boolean;
+    domainMatch: boolean;
+  }>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

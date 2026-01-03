@@ -81,6 +81,9 @@ function CaseStudySessionContent() {
   const templateId = searchParams.get("templateId");
   const avatarsParam = searchParams.get("avatars");
   const jobTargetId = searchParams.get("jobTargetId");
+  const autoLinkedParam = searchParams.get("autoLinked") === "true";
+  const autoLinkConfidenceParam = searchParams.get("autoLinkConfidence") as "high" | "medium" | "low" | null;
+  const autoLinkSignalsParam = searchParams.get("autoLinkSignals");
 
   const [template, setTemplate] = useState<CaseTemplate | null>(null);
   const [session, setSession] = useState<ExerciseSession | null>(null);
@@ -348,6 +351,15 @@ ${probingContext}
     if (!template) return;
     
     try {
+      let parsedAutoLinkSignals = null;
+      if (autoLinkSignalsParam) {
+        try {
+          parsedAutoLinkSignals = JSON.parse(decodeURIComponent(autoLinkSignalsParam));
+        } catch (e) {
+          console.error("Failed to parse auto-link signals:", e);
+        }
+      }
+      
       const response = await fetch("/api/exercise-mode/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -356,7 +368,10 @@ ${probingContext}
           exerciseType: "case_study",
           caseTemplateId: template.id,
           roleKitId: null,
-          jobTargetId: jobTargetId || null
+          jobTargetId: jobTargetId || null,
+          autoLinked: autoLinkedParam,
+          autoLinkConfidence: autoLinkConfidenceParam,
+          autoLinkSignals: parsedAutoLinkSignals
         })
       });
       
