@@ -571,3 +571,95 @@ export const QUESTION_PATTERNS = {
 export function getSampleQuestionsForPattern(pattern: string): string[] {
   return QUESTION_PATTERNS[pattern as keyof typeof QUESTION_PATTERNS] || [];
 }
+
+// ============================================================
+// WORKSPACE CONTEXT (Code/Case Study Integration)
+// ============================================================
+
+export interface WorkspaceContext {
+  mode: "coding" | "case_study" | "normal";
+  code?: {
+    content: string;
+    language: string;
+  };
+  caseStudy?: {
+    notes: string;
+    calculation: string;
+  };
+  problemStatement?: string;
+  casePrompt?: string;
+}
+
+export function buildWorkspaceContextPrompt(workspace: WorkspaceContext): string {
+  if (workspace.mode === "normal") {
+    return "";
+  }
+
+  if (workspace.mode === "coding") {
+    const parts: string[] = [];
+    parts.push("=== CODING WORKSPACE ===");
+    
+    if (workspace.problemStatement) {
+      parts.push(`PROBLEM STATEMENT:\n${workspace.problemStatement}`);
+    }
+    
+    if (workspace.code?.content) {
+      parts.push(`CANDIDATE'S CURRENT CODE (${workspace.code.language}):\n\`\`\`${workspace.code.language}\n${workspace.code.content}\n\`\`\``);
+    } else {
+      parts.push("CANDIDATE'S CODE: [No code written yet]");
+    }
+    
+    parts.push(`
+CODING INTERVIEW GUIDELINES:
+- You can see the candidate's code in real-time as they type.
+- Ask them to explain their approach, time complexity, and space complexity.
+- If you notice bugs or issues, prompt them to trace through with an example.
+- Encourage them to think aloud and vocalize their reasoning.
+- Ask clarifying questions about edge cases.
+- Do NOT provide the solution or fix bugs for them.`);
+    
+    return parts.join("\n\n");
+  }
+
+  if (workspace.mode === "case_study") {
+    const parts: string[] = [];
+    parts.push("=== CASE STUDY WORKSPACE ===");
+    
+    if (workspace.casePrompt) {
+      parts.push(`CASE PROMPT:\n${workspace.casePrompt}`);
+    }
+    
+    if (workspace.caseStudy?.notes) {
+      parts.push(`CANDIDATE'S NOTES:\n${workspace.caseStudy.notes}`);
+    }
+    
+    if (workspace.caseStudy?.calculation) {
+      parts.push(`CANDIDATE'S CALCULATIONS:\n${workspace.caseStudy.calculation}`);
+    }
+    
+    parts.push(`
+CASE STUDY INTERVIEW GUIDELINES:
+- The candidate has access to case materials and a scratch pad for notes/calculations.
+- Walk them through the case step by step.
+- Ask for their framework/approach before diving into specifics.
+- Probe their assumptions and reasoning.
+- Ask them to quantify their estimates with calculations.
+- Provide additional data points when they ask good clarifying questions.
+- Do NOT give away the answer; guide them through the problem-solving process.`);
+    
+    return parts.join("\n\n");
+  }
+
+  return "";
+}
+
+export function enhancePromptWithWorkspace(
+  basePrompt: string,
+  workspace: WorkspaceContext
+): string {
+  const workspaceContext = buildWorkspaceContextPrompt(workspace);
+  if (!workspaceContext) {
+    return basePrompt;
+  }
+  return `${basePrompt}\n\n${workspaceContext}`;
+}
