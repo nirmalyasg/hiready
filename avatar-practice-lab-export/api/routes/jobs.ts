@@ -1081,6 +1081,8 @@ jobsRouter.get("/job-targets/:id/practice-options", requireAuth, async (req: Req
     const leadershipPrinciples = blueprintData?.blueprint?.skillFocus?.filter(s => 
       s.includes("ownership") || s.includes("leadership") || s.includes("customer")
     ) || null;
+    
+    const blueprintFocusAreas = blueprintData?.blueprint?.interviewRounds?.flatMap(r => r.focus || []) || null;
 
     const options = generateTaxonomyPracticeOptions(
       jobId,
@@ -1092,7 +1094,8 @@ jobsRouter.get("/job-targets/:id/practice-options", requireAuth, async (req: Req
       blueprintRounds,
       blueprintData?.blueprint?.notes || null,
       parsed?.focusAreas || [],
-      leadershipPrinciples
+      leadershipPrinciples,
+      blueprintFocusAreas
     );
 
     res.json({

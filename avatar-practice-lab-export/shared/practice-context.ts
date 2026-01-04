@@ -169,7 +169,8 @@ export function generatePracticeOptions(
   blueprintRounds: string[] | null,
   blueprintNotes: string | null,
   focusAreas: string[] = [],
-  leadershipPrinciples: string[] | null = null
+  leadershipPrinciples: string[] | null = null,
+  blueprintFocusAreas: string[] | null = null
 ): PracticeOption[] {
   const context: CompanyPracticeContext = {
     jobTargetId,
@@ -186,19 +187,55 @@ export function generatePracticeOptions(
   };
 
   let roundCategories: RoundCategory[] = [];
+  let hasBlueprintCoding = false;
+  let hasBlueprintCaseStudy = false;
+
+  if (blueprintFocusAreas && blueprintFocusAreas.length > 0) {
+    const focusLower = blueprintFocusAreas.map(f => f.toLowerCase());
+    if (focusLower.some(f => ["coding", "dsa", "algorithms", "machine-coding", "leetcode"].includes(f))) {
+      hasBlueprintCoding = true;
+    }
+    if (focusLower.some(f => ["case", "case-study", "estimation", "market-sizing", "business-case"].includes(f))) {
+      hasBlueprintCaseStudy = true;
+    }
+  }
 
   if (blueprintRounds && blueprintRounds.length > 0) {
     for (const round of blueprintRounds) {
       const mapped = BLUEPRINT_ROUND_MAPPING[round.toLowerCase()];
       if (mapped) {
-        roundCategories.push(...mapped);
+        for (const cat of mapped) {
+          if (cat === "coding_assessment") {
+            hasBlueprintCoding = true;
+          } else if (cat === "case_study") {
+            hasBlueprintCaseStudy = true;
+          }
+          roundCategories.push(cat);
+        }
       }
     }
     roundCategories = [...new Set(roundCategories)];
-  } else if (archetype && ARCHETYPE_ROUND_DEFAULTS[archetype]) {
-    roundCategories = ARCHETYPE_ROUND_DEFAULTS[archetype];
-  } else {
-    roundCategories = ARCHETYPE_ROUND_DEFAULTS.default;
+  }
+
+  if (roundCategories.length === 0) {
+    if (archetype && ARCHETYPE_ROUND_DEFAULTS[archetype]) {
+      roundCategories = [...ARCHETYPE_ROUND_DEFAULTS[archetype]];
+    } else {
+      roundCategories = [...ARCHETYPE_ROUND_DEFAULTS.default];
+    }
+  }
+
+  roundCategories = roundCategories.filter(cat => {
+    if (cat === "coding_assessment" && !hasBlueprintCoding) return false;
+    if (cat === "case_study" && !hasBlueprintCaseStudy) return false;
+    return true;
+  });
+  
+  if (hasBlueprintCoding && !roundCategories.includes("coding_assessment")) {
+    roundCategories.push("coding_assessment");
+  }
+  if (hasBlueprintCaseStudy && !roundCategories.includes("case_study")) {
+    roundCategories.push("case_study");
   }
 
   const options: PracticeOption[] = roundCategories.map((category, index) => {
