@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Building2, MapPin, Clock, ExternalLink, Target, Sparkles, Play, FileText, Code, BookOpen, CheckCircle2, AlertCircle, MoreVertical, Trash2 } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, Clock, ExternalLink, Target, Sparkles, Play, FileText, Code, BookOpen, CheckCircle2, AlertCircle, MoreVertical, Trash2, X, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SidebarLayout from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,11 +44,36 @@ interface JobTarget {
 }
 
 interface PracticeSuggestion {
+  id: string;
   type: string;
   priority: "high" | "medium" | "low";
   title: string;
   description: string;
-  action: Record<string, unknown>;
+  focusAreas: string[];
+  companySpecific: boolean;
+  roundType?: string;
+  duration?: number;
+  action: {
+    type: string;
+    jobId?: string;
+    interviewType?: string;
+    focusAreas?: string[];
+    roundType?: string;
+    companyContext?: {
+      companyName: string;
+      archetype: string;
+      blueprintNotes?: string;
+    };
+  };
+}
+
+interface CompanyData {
+  companyName: string | null;
+  archetype: string | null;
+  tier: string | null;
+  hasBlueprint: boolean;
+  blueprintNotes: string | null;
+  hasContext: boolean;
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
@@ -59,10 +90,12 @@ export default function JobDetailPage() {
   const navigate = useNavigate();
   const [job, setJob] = useState<JobTarget | null>(null);
   const [suggestions, setSuggestions] = useState<PracticeSuggestion[]>([]);
+  const [companyData, setCompanyData] = useState<CompanyData | null>(null);
   const [practiceHistory, setPracticeHistory] = useState<{ interviews: any[]; exercises: any[] }>({ interviews: [], exercises: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [isParsing, setIsParsing] = useState(false);
   const [jdExpanded, setJdExpanded] = useState(false);
+  const [showGuideModal, setShowGuideModal] = useState(false);
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -85,6 +118,9 @@ export default function JobDetailPage() {
         
         if (suggestionsData.success) {
           setSuggestions(suggestionsData.suggestions);
+          if (suggestionsData.companyData) {
+            setCompanyData(suggestionsData.companyData);
+          }
         }
       } catch (error) {
         console.error("Error fetching job:", error);
@@ -111,6 +147,9 @@ export default function JobDetailPage() {
         const suggestionsData = await suggestionsRes.json();
         if (suggestionsData.success) {
           setSuggestions(suggestionsData.suggestions);
+          if (suggestionsData.companyData) {
+            setCompanyData(suggestionsData.companyData);
+          }
         }
       }
     } catch (error) {
@@ -138,12 +177,40 @@ export default function JobDetailPage() {
   const handleStartPractice = (suggestion: PracticeSuggestion) => {
     if (suggestion.action.type === "parse_jd") {
       handleParseJD();
-    } else if (suggestion.action.type === "start_interview") {
-      navigate(`/interview/config?jobTargetId=${job?.id}`);
+      return;
+    }
+    
+    if (suggestion.action.type === "view_guide") {
+      setShowGuideModal(true);
+      return;
+    }
+    
+    const params = new URLSearchParams();
+    params.set("jobTargetId", job?.id || "");
+    
+    if (suggestion.action.interviewType) {
+      params.set("interviewType", suggestion.action.interviewType);
+    }
+    if (suggestion.action.roundType) {
+      params.set("roundType", suggestion.action.roundType);
+    }
+    if (suggestion.action.focusAreas && suggestion.action.focusAreas.length > 0) {
+      params.set("focusAreas", suggestion.action.focusAreas.join(","));
+    }
+    if (suggestion.action.companyContext) {
+      params.set("companyName", suggestion.action.companyContext.companyName);
+      params.set("archetype", suggestion.action.companyContext.archetype);
+      if (suggestion.action.companyContext.blueprintNotes) {
+        params.set("blueprintNotes", suggestion.action.companyContext.blueprintNotes.substring(0, 200));
+      }
+    }
+    
+    if (suggestion.action.type === "start_interview") {
+      navigate(`/interview/config?${params.toString()}`);
     } else if (suggestion.action.type === "start_coding") {
-      navigate(`/exercise-mode/coding-lab?jobTargetId=${job?.id}`);
+      navigate(`/exercise-mode/coding-lab?${params.toString()}`);
     } else if (suggestion.action.type === "start_case") {
-      navigate(`/exercise-mode/case-study?jobTargetId=${job?.id}`);
+      navigate(`/exercise-mode/case-study?${params.toString()}`);
     }
   };
 
@@ -238,48 +305,84 @@ export default function JobDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {suggestions.length > 0 && (
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                <h2 className="text-lg font-semibold text-brand-dark mb-4 flex items-center gap-2">
-                  <Target className="w-5 h-5 text-brand-accent" />
-                  Recommended Practice
-                </h2>
-                <div className="space-y-3">
-                  {suggestions.map((suggestion, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          suggestion.priority === "high" ? "bg-brand-accent/10" : "bg-gray-100"
-                        }`}>
-                          {suggestion.type === "interview_practice" && <FileText className="w-5 h-5 text-brand-accent" />}
-                          {suggestion.type === "coding_practice" && <Code className="w-5 h-5 text-blue-500" />}
-                          {suggestion.type === "case_study" && <BookOpen className="w-5 h-5 text-purple-500" />}
-                          {suggestion.type === "parse_jd" && <Sparkles className="w-5 h-5 text-brand-accent" />}
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-brand-dark">{suggestion.title}</h4>
-                          <p className="text-sm text-brand-muted">{suggestion.description}</p>
-                        </div>
-                      </div>
-                      <Button
-                        onClick={() => handleStartPractice(suggestion)}
-                        size="sm"
-                        className={suggestion.type === "parse_jd" ? "bg-brand-accent hover:bg-brand-accent/90" : ""}
-                        disabled={suggestion.type === "parse_jd" && isParsing}
-                      >
-                        {suggestion.type === "parse_jd" ? (
-                          isParsing ? "Analyzing..." : "Analyze"
-                        ) : (
-                          <>
-                            <Play className="w-4 h-4 mr-1" />
-                            Start
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  ))}
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-brand-dark flex items-center gap-2">
+                    <Target className="w-5 h-5 text-brand-accent" />
+                    {companyData?.hasBlueprint && companyData.companyName ? `${companyData.companyName} Interview Rounds` : "Recommended Practice"}
+                  </h2>
+                  {companyData?.hasBlueprint && companyData.hasContext && (
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                      {companyData.tier === "tier1" ? "Top Company" : "Known Blueprint"}
+                    </span>
+                  )}
                 </div>
+                <div className="space-y-3">
+                  {suggestions.map((suggestion) => {
+                    const getIcon = () => {
+                      switch (suggestion.type) {
+                        case "coding_practice":
+                          return <Code className="w-5 h-5 text-blue-500" />;
+                        case "case_study":
+                          return <BookOpen className="w-5 h-5 text-purple-500" />;
+                        case "behavioral":
+                          return <Target className="w-5 h-5 text-orange-500" />;
+                        case "parse_jd":
+                          return <Sparkles className="w-5 h-5 text-brand-accent" />;
+                        case "interview_round":
+                        case "generic_interview":
+                        default:
+                          return <FileText className="w-5 h-5 text-brand-accent" />;
+                      }
+                    };
+                    
+                    return (
+                      <div
+                        key={suggestion.id}
+                        className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                            suggestion.priority === "high" ? "bg-brand-accent/10" : "bg-gray-100"
+                          }`}>
+                            {getIcon()}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium text-brand-dark">{suggestion.title}</h4>
+                              {suggestion.companySpecific && (
+                                <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
+                                  Company-Specific
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-brand-muted">{suggestion.description}</p>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => handleStartPractice(suggestion)}
+                          size="sm"
+                          className={suggestion.type === "parse_jd" ? "bg-brand-accent hover:bg-brand-accent/90" : ""}
+                          disabled={suggestion.type === "parse_jd" && isParsing}
+                        >
+                          {suggestion.type === "parse_jd" ? (
+                            isParsing ? "Analyzing..." : "Analyze"
+                          ) : (
+                            <>
+                              <Play className="w-4 h-4 mr-1" />
+                              Start
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+                {companyData?.blueprintNotes && (
+                  <div className="mt-4 p-3 bg-amber-50 border border-amber-100 rounded-lg">
+                    <p className="text-xs text-amber-800 font-medium mb-1">Interview Insight</p>
+                    <p className="text-sm text-amber-700">{companyData.blueprintNotes}</p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -434,31 +537,65 @@ export default function JobDetailPage() {
             )}
 
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h3 className="text-sm font-medium text-brand-muted mb-4">Quick Actions</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-medium text-brand-muted">
+                  {companyData?.hasBlueprint && companyData.companyName ? `${companyData.companyName} Interview Prep` : "Quick Actions"}
+                </h3>
+                {companyData?.hasBlueprint && companyData.hasContext && (
+                  <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                    Company-Specific
+                  </span>
+                )}
+              </div>
               <div className="space-y-2">
-                <Button
-                  onClick={() => navigate(`/interview/config?jobTargetId=${job.id}`)}
-                  className="w-full justify-start gap-2 bg-brand-dark hover:bg-brand-dark/90"
-                >
-                  <FileText className="w-4 h-4" />
-                  Practice Interview
-                </Button>
-                <Button
-                  onClick={() => navigate(`/exercise-mode/case-study?jobTargetId=${job.id}`)}
-                  variant="outline"
-                  className="w-full justify-start gap-2"
-                >
-                  <BookOpen className="w-4 h-4" />
-                  Case Study
-                </Button>
-                <Button
-                  onClick={() => navigate(`/exercise-mode/coding-lab?jobTargetId=${job.id}`)}
-                  variant="outline"
-                  className="w-full justify-start gap-2"
-                >
-                  <Code className="w-4 h-4" />
-                  Coding Lab
-                </Button>
+                {suggestions.filter(s => s.type !== "parse_jd").slice(0, 4).map((suggestion, idx) => {
+                  const getIcon = () => {
+                    switch (suggestion.type) {
+                      case "coding_practice":
+                        return <Code className="w-4 h-4" />;
+                      case "case_study":
+                        return <BookOpen className="w-4 h-4" />;
+                      case "behavioral":
+                        return <Target className="w-4 h-4" />;
+                      default:
+                        return <FileText className="w-4 h-4" />;
+                    }
+                  };
+                  
+                  return (
+                    <Button
+                      key={suggestion.id}
+                      onClick={() => handleStartPractice(suggestion)}
+                      variant={idx === 0 ? "default" : "outline"}
+                      className={`w-full justify-start gap-2 ${idx === 0 ? "bg-brand-dark hover:bg-brand-dark/90" : ""}`}
+                    >
+                      {getIcon()}
+                      <span className="truncate text-left flex-1">{suggestion.title}</span>
+                      {suggestion.companySpecific && (
+                        <span className="text-xs opacity-60">{suggestion.duration}m</span>
+                      )}
+                    </Button>
+                  );
+                })}
+                {suggestions.filter(s => s.type !== "parse_jd").length === 0 && (
+                  <>
+                    <Button
+                      onClick={() => navigate(`/interview/config?jobTargetId=${job.id}`)}
+                      className="w-full justify-start gap-2 bg-brand-dark hover:bg-brand-dark/90"
+                    >
+                      <FileText className="w-4 h-4" />
+                      Practice Interview
+                    </Button>
+                    <Button
+                      onClick={() => navigate(`/exercise-mode/coding-lab?jobTargetId=${job.id}`)}
+                      variant="outline"
+                      className="w-full justify-start gap-2"
+                    >
+                      <Code className="w-4 h-4" />
+                      Coding Lab
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
 
@@ -494,6 +631,79 @@ export default function JobDetailPage() {
           </div>
         </div>
       </div>
+
+      <Dialog open={showGuideModal} onOpenChange={setShowGuideModal}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lightbulb className="w-5 h-5 text-amber-500" />
+              {companyData?.companyName || job?.companyName || "Company"} Interview Guide
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {companyData?.blueprintNotes ? (
+              <div className="p-4 bg-amber-50 rounded-xl">
+                <h4 className="font-medium text-amber-900 mb-2">What to Expect</h4>
+                <p className="text-sm text-amber-800">{companyData.blueprintNotes}</p>
+              </div>
+            ) : (
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <h4 className="font-medium text-brand-dark mb-2">
+                  {companyData?.hasContext ? "General Guidance" : "No Company-Specific Insights Available"}
+                </h4>
+                <p className="text-sm text-brand-muted">
+                  {companyData?.hasContext 
+                    ? "We have general information about this company but no specific interview insights yet. Practice with our general interview preparation to build core skills."
+                    : "We don't have information about this company in our database yet. Practice with our general interview preparation to build core skills that apply to any company."
+                  }
+                </p>
+              </div>
+            )}
+            {companyData?.hasContext && (
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <h4 className="font-medium text-brand-dark mb-2">Company Profile</h4>
+                <div className="space-y-2 text-sm">
+                  {companyData?.archetype && (
+                    <div className="flex justify-between">
+                      <span className="text-brand-muted">Company Type</span>
+                      <span className="font-medium capitalize">{companyData.archetype}</span>
+                    </div>
+                  )}
+                  {companyData?.tier && (
+                    <div className="flex justify-between">
+                      <span className="text-brand-muted">Tier</span>
+                      <span className="font-medium capitalize">{companyData.tier.replace("tier", "Tier ")}</span>
+                    </div>
+                  )}
+                  {companyData?.hasBlueprint && (
+                    <div className="flex justify-between">
+                      <span className="text-brand-muted">Interview Blueprint</span>
+                      <span className="text-green-600 font-medium">Available</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowGuideModal(false)}>
+                Close
+              </Button>
+              <Button 
+                onClick={() => {
+                  setShowGuideModal(false);
+                  if (suggestions.length > 0) {
+                    const firstPractice = suggestions.find(s => s.type !== "parse_jd");
+                    if (firstPractice) handleStartPractice(firstPractice);
+                  }
+                }}
+                className="bg-brand-accent hover:bg-brand-accent/90"
+              >
+                Start Practice
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </SidebarLayout>
   );
 }

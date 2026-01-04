@@ -13,6 +13,7 @@ import {
 import { requireAuth } from "../middleware/auth.js";
 import { getOpenAI } from "../utils/openai-client.js";
 import puppeteer from "puppeteer";
+import { getCompanyAwarePracticeOptions } from "../lib/practice-suggestions-generator.js";
 import { execSync } from "child_process";
 
 let cachedChromiumPath: string | null = null;
@@ -963,66 +964,84 @@ jobsRouter.get("/job-targets/:id/practice-suggestions", requireAuth, async (req:
       return res.status(404).json({ success: false, error: "Job target not found" });
     }
 
-    type PracticeSuggestion = {
-      type: string;
-      priority: "high" | "medium" | "low";
-      title: string;
-      description: string;
-      action: Record<string, unknown>;
-    };
-    
-    const suggestions: PracticeSuggestion[] = [];
     const parsed = job.jdParsed as JDParsedType | null;
 
+    const preliminaryCompanyData = await getCompanyAwarePracticeOptions(
+      job.companyName,
+      job.roleTitle,
+      null
+    );
+
     if (!parsed) {
-      suggestions.push({
-        type: "parse_jd",
-        priority: "high",
-        title: "Analyze Job Description",
-        description: "Parse the job description to get personalized practice recommendations",
-        action: { type: "parse_jd", jobId },
-      });
-    } else {
-      if (parsed.focusAreas && parsed.focusAreas.length > 0) {
-        suggestions.push({
-          type: "interview_practice",
+      return res.json({
+        success: true,
+        suggestions: [{
+          id: "parse_jd",
+          type: "parse_jd",
           priority: "high",
-          title: "Practice Interview Questions",
-          description: `Focus on: ${parsed.focusAreas.slice(0, 3).join(", ")}`,
-          action: { type: "start_interview", jobId, focusAreas: parsed.focusAreas },
-        });
-      }
-
-      if (parsed.requiredSkills && parsed.requiredSkills.length > 0) {
-        const technicalSkills = parsed.requiredSkills.filter(s => 
-          s.toLowerCase().includes("python") ||
-          s.toLowerCase().includes("javascript") ||
-          s.toLowerCase().includes("sql") ||
-          s.toLowerCase().includes("coding") ||
-          s.toLowerCase().includes("programming")
-        );
-        
-        if (technicalSkills.length > 0) {
-          suggestions.push({
-            type: "coding_practice",
-            priority: "medium",
-            title: "Coding Challenge Practice",
-            description: `Sharpen skills in: ${technicalSkills.slice(0, 3).join(", ")}`,
-            action: { type: "start_coding", jobId, skills: technicalSkills },
-          });
-        }
-      }
-
-      suggestions.push({
-        type: "case_study",
-        priority: "medium",
-        title: "Case Study Practice",
-        description: "Practice analytical thinking for behavioral questions",
-        action: { type: "start_case", jobId },
+          title: "Analyze Job Description",
+          description: "Parse the job description to get personalized practice recommendations",
+          focusAreas: [],
+          companySpecific: false,
+          action: { type: "parse_jd", jobId },
+        }],
+        job,
+        companyData: preliminaryCompanyData.companyData ? {
+          companyName: preliminaryCompanyData.companyData.companyName,
+          archetype: preliminaryCompanyData.companyData.archetype,
+          tier: preliminaryCompanyData.companyData.tier,
+          hasBlueprint: !!preliminaryCompanyData.companyData.blueprint,
+          blueprintNotes: preliminaryCompanyData.companyData.blueprint?.notes || null,
+          hasContext: true,
+        } : {
+          companyName: job.companyName || null,
+          archetype: null,
+          tier: null,
+          hasBlueprint: false,
+          blueprintNotes: null,
+          hasContext: false,
+        },
       });
     }
 
-    res.json({ success: true, suggestions, job });
+    const { options, companyData } = await getCompanyAwarePracticeOptions(
+      job.companyName,
+      job.roleTitle,
+      {
+        focusAreas: parsed.focusAreas,
+        requiredSkills: parsed.requiredSkills,
+        experienceLevel: parsed.experienceLevel,
+      }
+    );
+
+    const suggestions = options.map(opt => ({
+      ...opt,
+      action: {
+        ...opt.action,
+        jobId,
+      },
+    }));
+
+    res.json({ 
+      success: true, 
+      suggestions, 
+      job,
+      companyData: companyData ? {
+        companyName: companyData.companyName,
+        archetype: companyData.archetype,
+        tier: companyData.tier,
+        hasBlueprint: !!companyData.blueprint,
+        blueprintNotes: companyData.blueprint?.notes || null,
+        hasContext: true,
+      } : {
+        companyName: job.companyName || null,
+        archetype: null,
+        tier: null,
+        hasBlueprint: false,
+        blueprintNotes: null,
+        hasContext: false,
+      },
+    });
   } catch (error: any) {
     console.error("Error generating practice suggestions:", error);
     res.status(500).json({ success: false, error: error.message });
