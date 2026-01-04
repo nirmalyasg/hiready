@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { Briefcase, ChevronRight, Search, Filter, Clock, Target, Building2, Brain, AlertTriangle, Check, X } from "lucide-react";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { Briefcase, ChevronRight, Search, Filter, Clock, Target, Building2, Brain, AlertTriangle, Check, X, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SidebarLayout from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface CaseTemplate {
   id: number;
@@ -24,6 +25,29 @@ interface RoleKit {
   name: string;
   level: string;
   domain: string;
+}
+
+interface PracticeContext {
+  roundCategory: string;
+  taxonomy: {
+    label: string;
+    description: string;
+    typicalDuration: string;
+  };
+  companyContext: {
+    jobTargetId: string;
+    companyName: string | null;
+    roleTitle: string | null;
+    archetype: string | null;
+    hasBlueprint: boolean;
+    blueprintNotes: string | null;
+  };
+  promptHints: {
+    avatarPersona: string;
+    evaluationFocus: string[];
+    sampleQuestions: string[];
+    companySpecificGuidance: string | null;
+  };
 }
 
 const caseTypeConfig = {
@@ -57,9 +81,12 @@ export default function CaseStudyPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const preSelectedRoleKitId = searchParams.get("roleKitId");
+  const jobTargetId = searchParams.get("jobTargetId");
+  const roundCategory = searchParams.get("roundCategory");
 
   const [templates, setTemplates] = useState<CaseTemplate[]>([]);
   const [roleKits, setRoleKits] = useState<RoleKit[]>([]);
+  const [practiceContext, setPracticeContext] = useState<PracticeContext | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCaseType, setSelectedCaseType] = useState<string | null>(null);
@@ -69,10 +96,21 @@ export default function CaseStudyPage() {
   );
   const [filterOpen, setFilterOpen] = useState(false);
 
+  const isJobTargetMode = !!jobTargetId && !!roundCategory;
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
+        
+        if (isJobTargetMode) {
+          const contextRes = await fetch(`/api/jobs/job-targets/${jobTargetId}/practice-context/${roundCategory}`);
+          const contextData = await contextRes.json();
+          if (contextData.success) {
+            setPracticeContext(contextData);
+          }
+        }
+        
         const [templatesRes, roleKitsRes] = await Promise.all([
           fetch("/api/exercise-mode/case-templates"),
           fetch("/api/interview/role-kits")
@@ -94,7 +132,7 @@ export default function CaseStudyPage() {
       }
     };
     fetchData();
-  }, []);
+  }, [isJobTargetMode, jobTargetId, roundCategory]);
 
   const filteredTemplates = templates.filter(template => {
     if (searchQuery.trim()) {
@@ -125,6 +163,8 @@ export default function CaseStudyPage() {
   };
 
   const hasActiveFilters = selectedCaseType || selectedDifficulty || selectedRoleKitId || searchQuery;
+  const backLink = isJobTargetMode ? `/jobs/${jobTargetId}` : "/exercise-mode";
+  const backLabel = isJobTargetMode ? "← Back to Job" : "← Back to Exercise Mode";
 
   return (
     <SidebarLayout>
@@ -132,19 +172,48 @@ export default function CaseStudyPage() {
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="mb-8">
             <button 
-              onClick={() => navigate("/exercise-mode")}
+              onClick={() => navigate(backLink)}
               className="text-sm text-slate-500 hover:text-slate-700 mb-4 flex items-center gap-1"
             >
-              ← Back to Exercise Mode
+              {backLabel}
             </button>
             <div className="flex items-center gap-3 mb-2">
-              <Briefcase className="w-8 h-8 text-emerald-600" />
-              <h1 className="text-2xl font-bold text-slate-900">Case Study Mode</h1>
+              {isJobTargetMode ? (
+                <Building2 className="w-8 h-8 text-emerald-600" />
+              ) : (
+                <Briefcase className="w-8 h-8 text-emerald-600" />
+              )}
+              <h1 className="text-2xl font-bold text-slate-900">
+                {isJobTargetMode && practiceContext?.companyContext.companyName
+                  ? `${practiceContext.companyContext.companyName} Case Study`
+                  : "Case Study Mode"}
+              </h1>
+              {isJobTargetMode && practiceContext?.companyContext.hasBlueprint && (
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                  Blueprint Available
+                </span>
+              )}
             </div>
             <p className="text-slate-600">
-              Select a case to practice structured problem-solving with AI interviewer feedback.
+              {isJobTargetMode && practiceContext
+                ? `Practice ${practiceContext.taxonomy.label} for ${practiceContext.companyContext.roleTitle || "this role"}.`
+                : "Select a case to practice structured problem-solving with AI interviewer feedback."}
             </p>
           </div>
+
+          {isJobTargetMode && practiceContext?.promptHints.companySpecificGuidance && (
+            <Card className="border-amber-200 bg-amber-50/50 rounded-2xl overflow-hidden mb-6">
+              <CardContent className="p-4">
+                <div className="flex gap-3">
+                  <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-amber-900 mb-1">Company Insight</h4>
+                    <p className="text-sm text-amber-800">{practiceContext.promptHints.companySpecificGuidance}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="grid md:grid-cols-3 gap-4 mb-8">
             {Object.entries(caseTypeConfig).map(([type, config]) => {

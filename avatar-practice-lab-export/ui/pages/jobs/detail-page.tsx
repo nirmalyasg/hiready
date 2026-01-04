@@ -84,30 +84,6 @@ interface PracticeOption {
   focusHint: string | null;
 }
 
-interface PracticeSuggestion {
-  id: string;
-  type: string;
-  priority: "high" | "medium" | "low";
-  title: string;
-  description: string;
-  focusAreas: string[];
-  companySpecific: boolean;
-  roundType?: string;
-  duration?: number;
-  action: {
-    type: string;
-    jobId?: string;
-    interviewType?: string;
-    focusAreas?: string[];
-    roundType?: string;
-    companyContext?: {
-      companyName: string;
-      archetype: string;
-      blueprintNotes?: string;
-    };
-  };
-}
-
 interface CompanyData {
   companyName: string | null;
   archetype: string | null;
@@ -130,7 +106,6 @@ export default function JobDetailPage() {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const [job, setJob] = useState<JobTarget | null>(null);
-  const [suggestions, setSuggestions] = useState<PracticeSuggestion[]>([]);
   const [practiceOptions, setPracticeOptions] = useState<PracticeOption[]>([]);
   const [companyData, setCompanyData] = useState<CompanyData | null>(null);
   const [practiceHistory, setPracticeHistory] = useState<{ interviews: any[]; exercises: any[] }>({ interviews: [], exercises: [] });
@@ -242,46 +217,6 @@ export default function JobDetailPage() {
       }
     } catch (error) {
       console.error("Error deleting job:", error);
-    }
-  };
-
-  const handleStartPractice = (suggestion: PracticeSuggestion) => {
-    if (suggestion.action.type === "parse_jd") {
-      handleParseJD();
-      return;
-    }
-    
-    if (suggestion.action.type === "view_guide") {
-      setShowGuideModal(true);
-      return;
-    }
-    
-    const params = new URLSearchParams();
-    params.set("jobTargetId", job?.id || "");
-    
-    if (suggestion.action.interviewType) {
-      params.set("interviewType", suggestion.action.interviewType);
-    }
-    if (suggestion.action.roundType) {
-      params.set("roundType", suggestion.action.roundType);
-    }
-    if (suggestion.action.focusAreas && suggestion.action.focusAreas.length > 0) {
-      params.set("focusAreas", suggestion.action.focusAreas.join(","));
-    }
-    if (suggestion.action.companyContext) {
-      params.set("companyName", suggestion.action.companyContext.companyName);
-      params.set("archetype", suggestion.action.companyContext.archetype);
-      if (suggestion.action.companyContext.blueprintNotes) {
-        params.set("blueprintNotes", suggestion.action.companyContext.blueprintNotes.substring(0, 200));
-      }
-    }
-    
-    if (suggestion.action.type === "start_interview") {
-      navigate(`/interview/config?${params.toString()}`);
-    } else if (suggestion.action.type === "start_coding") {
-      navigate(`/exercise-mode/coding-lab?${params.toString()}`);
-    } else if (suggestion.action.type === "start_case") {
-      navigate(`/exercise-mode/case-study?${params.toString()}`);
     }
   };
 
