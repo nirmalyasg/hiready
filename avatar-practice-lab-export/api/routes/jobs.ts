@@ -180,8 +180,15 @@ jobsRouter.post("/import-linkedin", requireAuth, async (req: Request, res: Respo
 
     const browser = await puppeteer.launch({
       headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--no-zygote'
+      ],
       executablePath: getChromiumPath(),
+      timeout: 30000,
     });
 
     const page = await browser.newPage();
@@ -638,8 +645,18 @@ jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res:
       console.log("Launching Chromium from:", chromePath);
       browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process'],
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--disable-software-rasterizer',
+          '--disable-extensions',
+          '--no-first-run',
+          '--no-zygote'
+        ],
         executablePath: chromePath,
+        timeout: 30000,
       });
     } catch (launchError: any) {
       console.error("Failed to launch Chromium:", launchError.message);
@@ -653,10 +670,13 @@ jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res:
     let pageText = '';
 
     try {
+      console.log("Creating new page...");
       const page = await browser.newPage();
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
       
-      await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+      console.log("Navigating to URL...");
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
+      console.log("Page loaded, waiting for content...");
       
       const currentUrl = page.url();
       const pageTitle = await page.title();
