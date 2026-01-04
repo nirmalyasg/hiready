@@ -42,7 +42,13 @@ import {
   selectProbe,
   updateUserSkillMemory,
   getUserSkillTrends,
+  calculateReadinessScore,
+  getJobReadinessSummary,
+  generateSevenDayPlan,
+  generateAIPracticePlan,
   type InterviewContext,
+  type JobTargetForReadiness,
+  type ReadinessScore,
 } from "../lib/interview-intelligence.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -1572,6 +1578,307 @@ interviewRouter.get("/practice-links/:jobTargetId", requireAuth, async (req: Req
     res.json({ success: true, links });
   } catch (error: any) {
     console.error("Error fetching practice links:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// =====================
+// Readiness Score Endpoints
+// =====================
+
+interviewRouter.get("/readiness/:jobTargetId", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { jobTargetId } = req.params;
+    
+    const [job] = await db
+      .select()
+      .from(jobTargets)
+      .where(and(eq(jobTargets.id, parseInt(jobTargetId)), eq(jobTargets.userId, userId)))
+      .limit(1);
+    
+    if (!job) {
+      return res.status(404).json({ success: false, error: "Job target not found" });
+    }
+    
+    const jobForReadiness: JobTargetForReadiness = {
+      id: job.id,
+      roleTitle: job.roleTitle || "General",
+      company: job.company || undefined,
+      jdText: job.jdRaw || undefined,
+      mustHaveSkills: (job.jdParsed as any)?.mustHave || [],
+      niceToHaveSkills: (job.jdParsed as any)?.niceToHave || [],
+      seniority: (job.jdParsed as any)?.senioritySignal || undefined,
+    };
+    
+    const roleCategory = detectRoleCategoryFromTitle(job.roleTitle || "");
+    const readiness = await calculateReadinessScore(userId, jobForReadiness, roleCategory);
+    
+    res.json({ 
+      success: true, 
+      readiness,
+      job: {
+        id: job.id,
+        roleTitle: job.roleTitle,
+        company: job.company,
+        status: job.status,
+      }
+    });
+  } catch (error: any) {
+    console.error("Error calculating readiness:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.get("/readiness-summary", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    
+    const jobs = await db
+      .select()
+      .from(jobTargets)
+      .where(eq(jobTargets.userId, userId))
+      .orderBy(desc(jobTargets.priority));
+    
+    if (jobs.length === 0) {
+      return res.json({ 
+        success: true, 
+        summary: {
+          jobs: [],
+          overallFocus: ["Save some job targets to start tracking your readiness"],
+          commonWeaknesses: [],
+        }
+      });
+    }
+    
+    const jobsForReadiness: JobTargetForReadiness[] = jobs.map(job => ({
+      id: job.id,
+      roleTitle: job.roleTitle || "General",
+      company: job.company || undefined,
+      jdText: job.jdRaw || undefined,
+      mustHaveSkills: (job.jdParsed as any)?.mustHave || [],
+      niceToHaveSkills: (job.jdParsed as any)?.niceToHave || [],
+      seniority: (job.jdParsed as any)?.senioritySignal || undefined,
+    }));
+    
+    const summary = await getJobReadinessSummary(userId, jobsForReadiness);
+    
+    res.json({ success: true, summary });
+  } catch (error: any) {
+    console.error("Error fetching readiness summary:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+function detectRoleCategoryFromTitle(roleTitle: string): string {
+  const lower = roleTitle.toLowerCase();
+  if (lower.includes("engineer") || lower.includes("developer") || lower.includes("swe")) return "swe";
+  if (lower.includes("product") || lower.includes("pm")) return "pm";
+  if (lower.includes("data") || lower.includes("analyst") || lower.includes("scientist")) return "data";
+  if (lower.includes("design") || lower.includes("ux") || lower.includes("ui")) return "design";
+  if (lower.includes("sales") || lower.includes("account")) return "sales";
+  if (lower.includes("manager") || lower.includes("director") || lower.includes("lead")) return "manager";
+  return "general";
+}
+
+// =====================
+// Coach Agent Endpoints (7-Day Practice Plans)
+// =====================
+
+interviewRouter.post("/coach/plan", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { 
+      jobTargetId, 
+      dailyTimeAvailable = 45, 
+      useAI = true,
+      interviewDate,
+    } = req.body;
+    
+    let jobForReadiness: JobTargetForReadiness | undefined;
+    let roleCategory = "general";
+    
+    if (jobTargetId) {
+      const [job] = await db
+        .select()
+        .from(jobTargets)
+        .where(and(eq(jobTargets.id, parseInt(jobTargetId)), eq(jobTargets.userId, userId)))
+        .limit(1);
+      
+      if (job) {
+        jobForReadiness = {
+          id: job.id,
+          roleTitle: job.roleTitle || "General",
+          company: job.company || undefined,
+          jdText: job.jdRaw || undefined,
+          mustHaveSkills: (job.jdParsed as any)?.mustHave || [],
+          niceToHaveSkills: (job.jdParsed as any)?.niceToHave || [],
+          seniority: (job.jdParsed as any)?.senioritySignal || undefined,
+        };
+        roleCategory = detectRoleCategoryFromTitle(job.roleTitle || "");
+      }
+    }
+    
+    const readiness = await calculateReadinessScore(
+      userId, 
+      jobForReadiness || { id: 0, roleTitle: "General" }, 
+      roleCategory
+    );
+    
+    const coachingContext = {
+      userId,
+      readiness,
+      jobTarget: jobForReadiness,
+      roleCategory,
+      interviewDate: interviewDate ? new Date(interviewDate) : undefined,
+      dailyTimeAvailable,
+    };
+    
+    const plan = useAI 
+      ? await generateAIPracticePlan(coachingContext)
+      : await generateSevenDayPlan(coachingContext);
+    
+    res.json({ success: true, plan });
+  } catch (error: any) {
+    console.error("Error generating practice plan:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.get("/coach/plan/:jobTargetId", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { jobTargetId } = req.params;
+    const { dailyTimeAvailable = 45 } = req.query;
+    
+    const [job] = await db
+      .select()
+      .from(jobTargets)
+      .where(and(eq(jobTargets.id, parseInt(jobTargetId)), eq(jobTargets.userId, userId)))
+      .limit(1);
+    
+    if (!job) {
+      return res.status(404).json({ success: false, error: "Job target not found" });
+    }
+    
+    const jobForReadiness: JobTargetForReadiness = {
+      id: job.id,
+      roleTitle: job.roleTitle || "General",
+      company: job.company || undefined,
+      jdText: job.jdRaw || undefined,
+      mustHaveSkills: (job.jdParsed as any)?.mustHave || [],
+      niceToHaveSkills: (job.jdParsed as any)?.niceToHave || [],
+      seniority: (job.jdParsed as any)?.senioritySignal || undefined,
+    };
+    
+    const roleCategory = detectRoleCategoryFromTitle(job.roleTitle || "");
+    const readiness = await calculateReadinessScore(userId, jobForReadiness, roleCategory);
+    
+    const plan = await generateSevenDayPlan({
+      userId,
+      readiness,
+      jobTarget: jobForReadiness,
+      roleCategory,
+      dailyTimeAvailable: parseInt(dailyTimeAvailable as string) || 45,
+    });
+    
+    res.json({ 
+      success: true, 
+      plan,
+      job: {
+        id: job.id,
+        roleTitle: job.roleTitle,
+        company: job.company,
+      },
+      readiness: {
+        overall: readiness.overall,
+        level: readiness.readinessLevel,
+      }
+    });
+  } catch (error: any) {
+    console.error("Error generating practice plan for job:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.get("/coach/today", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { jobTargetId, startDate } = req.query;
+    
+    let jobForReadiness: JobTargetForReadiness | undefined;
+    let roleCategory = "general";
+    
+    if (jobTargetId) {
+      const [job] = await db
+        .select()
+        .from(jobTargets)
+        .where(and(eq(jobTargets.id, parseInt(jobTargetId as string)), eq(jobTargets.userId, userId)))
+        .limit(1);
+      
+      if (job) {
+        jobForReadiness = {
+          id: job.id,
+          roleTitle: job.roleTitle || "General",
+          company: job.company || undefined,
+          jdText: job.jdRaw || undefined,
+          mustHaveSkills: (job.jdParsed as any)?.mustHave || [],
+          niceToHaveSkills: (job.jdParsed as any)?.niceToHave || [],
+          seniority: (job.jdParsed as any)?.senioritySignal || undefined,
+        };
+        roleCategory = detectRoleCategoryFromTitle(job.roleTitle || "");
+      }
+    }
+    
+    const readiness = await calculateReadinessScore(
+      userId, 
+      jobForReadiness || { id: 0, roleTitle: "General" }, 
+      roleCategory
+    );
+    
+    const plan = await generateSevenDayPlan({
+      userId,
+      readiness,
+      jobTarget: jobForReadiness,
+      roleCategory,
+      dailyTimeAvailable: 45,
+    });
+    
+    let dayIndex = 0;
+    if (startDate) {
+      const start = new Date(startDate as string);
+      const now = new Date();
+      const diffTime = now.getTime() - start.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      dayIndex = Math.max(0, Math.min(6, diffDays));
+    } else {
+      const dayOfWeek = new Date().getDay();
+      dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    }
+    
+    const today = plan.days[dayIndex];
+    
+    res.json({ 
+      success: true, 
+      today: {
+        ...today,
+        dayNumber: dayIndex + 1,
+        isWeekday: dayIndex < 5,
+        readiness: {
+          overall: readiness.overall,
+          level: readiness.readinessLevel,
+          topGap: readiness.gaps[0]?.dimension,
+        }
+      },
+      planSummary: {
+        weeklyGoal: plan.weeklyGoal,
+        totalDays: 7,
+        currentDay: dayIndex + 1,
+        focusAreas: plan.focusAreas,
+      }
+    });
+  } catch (error: any) {
+    console.error("Error fetching today's plan:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

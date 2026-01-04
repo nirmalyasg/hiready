@@ -26,9 +26,84 @@ avatar-practice-lab-export/
     └── schema.ts           # Drizzle ORM schema
 ```
 
-## Recent Changes (January 2, 2026)
+## Recent Changes (January 4, 2026)
 
-### Resume Persistence & Profile Management (Latest)
+### Interview Intelligence System (Latest)
+Comprehensive AI-powered interview preparation with intelligent question patterns, skill tracking, and personalized coaching:
+
+1. **Question Pattern Library**
+   - 120+ question patterns with probe trees (ifVague, ifStrong, always, followUp)
+   - Pattern types: resume_claim, behavioral, jd_requirement, scenario, technical, situational
+   - Role-specific patterns for SWE, PM, Data, Design, Sales, Manager roles
+   - Template variables filled from resume/JD context
+
+2. **Answer Classification System**
+   - Real-time answer evaluation using GPT-4o-mini
+   - Quality classification: strong, adequate, weak, vague
+   - Metrics detection: hasMetrics, hasSpecificExample, hasOwnership
+   - Claims extraction for follow-up probing
+
+3. **User Skill Memory**
+   - Persistent skill tracking across sessions per dimension
+   - Baseline vs latest score comparison
+   - Trend detection: improving (score trending up), stable, declining
+   - 10-session rolling history per dimension
+   - Role-category specific tracking
+
+4. **Enhanced Readiness Score**
+   - Multi-factor scoring algorithm (100 points):
+     - Skill Coverage: 40% (weighted by dimension importance)
+     - Recent Performance: 25% (latest session scores)
+     - JD Alignment: 25% (focus on job-critical dimensions)
+     - Practice Volume: 5% (session count bonus)
+     - Trend Bonus: up to 10 points for improving trends
+   - Role-specific dimension weights (SWE prioritizes problem_solving, PM prioritizes clarity)
+   - Gap identification with priority levels (critical, high, medium, low)
+   - Personalized recommendations and estimated prep time
+
+5. **Coach Agent (7-Day Practice Plans)**
+   - Template-based and AI-powered plan generation
+   - Activity types: mock_interview, exercise, review, research, self_practice
+   - Commitment levels: light (≤30min), moderate (30-60min), intensive (>60min)
+   - Gap distribution prioritizes critical gaps early in week
+   - Mock interview days on Day 3 and Day 6
+   - Week recap on Day 7
+   - Daily time budgets strictly enforced
+
+6. **Company Intelligence**
+   - 50 companies seeded (25 India + 25 Global)
+   - Company archetypes: faang, startup, enterprise, consulting, fintech, healthcare
+   - Tier classification: tier1, tier2, tier3
+   - Cultural signals and interview focus areas
+   - Company role blueprints for common positions
+
+### New Intelligence API Endpoints
+- `GET /api/interview/intelligence/patterns` - Load question patterns by role/type
+- `GET /api/interview/intelligence/companies` - Browse company database
+- `GET /api/interview/intelligence/company/:name/blueprint` - Get company+role blueprint
+- `POST /api/interview/intelligence/plan/generate` - Generate enhanced interview plan
+- `POST /api/interview/intelligence/answer/classify` - Classify answer quality
+- `POST /api/interview/intelligence/probe/select` - Get next probe question
+- `GET /api/interview/intelligence/skill-trends` - Get user's skill history
+- `POST /api/interview/intelligence/skill-memory/update` - Update skill memory after session
+- `GET /api/interview/readiness/:jobTargetId` - Get readiness score for job
+- `GET /api/interview/readiness-summary` - Get readiness for all saved jobs
+- `POST /api/interview/coach/plan` - Generate 7-day practice plan (AI or template)
+- `GET /api/interview/coach/plan/:jobTargetId` - Get plan for specific job
+- `GET /api/interview/coach/today` - Get today's practice activities
+
+### New Database Tables (Migration 009)
+- `companies` - Company profiles with archetypes and interview style
+- `question_patterns` - Question templates with probe trees
+- `company_role_blueprints` - Role-specific interview guides per company
+- `job_practice_links` - Links practice sessions to job targets
+- `user_skill_memory` - Persistent skill tracking with trends
+
+---
+
+## Previous Changes (January 2, 2026)
+
+### Resume Persistence & Profile Management
 Users can now save their resume once and reuse it across all interview practice sessions:
 - **Profile Page Resume Section**: Shows saved resume with upload date, replace/delete options
 - **Interview Custom Integration**: Auto-detects saved resume and offers "Use This Resume" or "Upload New"
