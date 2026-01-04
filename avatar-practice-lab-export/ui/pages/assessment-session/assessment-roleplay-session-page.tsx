@@ -81,6 +81,8 @@ import {
   type InterviewPlan,
   type InterviewMode,
 } from "@/lib/interview-prompts";
+import { InterviewSessionLayout } from "@/components/interview/interview-session-layout";
+import type { SupportedLanguage } from "@/components/interview/coding-panel";
 
 function AssessmentRoleplaySessionPage() {
   return (
@@ -1099,6 +1101,7 @@ ${scenario?.instructions ? `## How to Play Your Character\n${scenario.instructio
           generateBlob={generateBlob}
           isAudioMuted={!isAudioPlaybackEnabled}
           onToggleAudioMute={() => setIsAudioPlaybackEnabled(prev => !prev)}
+          interviewSession={interviewSession}
         />
       </div>
     </SidebarLayout>
@@ -1118,6 +1121,7 @@ export interface TranscriptProps {
   generateBlob: () => Promise<Blob | null>;
   isAudioMuted: boolean;
   onToggleAudioMute: () => void;
+  interviewSession?: InterviewSessionData | null;
 }
 
 function Transcript({
@@ -1129,6 +1133,7 @@ function Transcript({
   generateBlob,
   isAudioMuted,
   onToggleAudioMute,
+  interviewSession,
 }: TranscriptProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -1450,6 +1455,29 @@ function Transcript({
   };
 
   const [isTranscriptExpanded, setIsTranscriptExpanded] = useState(false);
+  
+  const [workspaceCode, setWorkspaceCode] = useState("");
+  const [workspaceLanguage, setWorkspaceLanguage] = useState<SupportedLanguage>("javascript");
+  const [workspaceNotes, setWorkspaceNotes] = useState("");
+  const [workspaceCalculation, setWorkspaceCalculation] = useState("");
+  
+  const handleCodeChange = (code: string, language: SupportedLanguage) => {
+    setWorkspaceCode(code);
+    setWorkspaceLanguage(language);
+  };
+  
+  const handleNotesChange = (notes: string) => {
+    setWorkspaceNotes(notes);
+  };
+  
+  const handleCalculationChange = (calculation: string) => {
+    setWorkspaceCalculation(calculation);
+  };
+  
+  const interviewPlanForLayout = interviewSession?.plan ? {
+    phases: interviewSession.plan.phases || [],
+    focusAreas: interviewSession.plan.focusAreas || [],
+  } : null;
 
   const getTimerColor = () => {
     if (timeRemaining <= 60) return "text-red-400";
@@ -1461,118 +1489,129 @@ function Transcript({
     .filter((item) => item.type === "MESSAGE" && item.role !== "user")
     .slice(-1)[0];
 
-  return (
-    <div className="flex flex-col h-full">
-      {/* Main Call Area */}
-      <div className="flex-1 flex flex-col items-center justify-center relative">
-        {/* Scenario Info - Top */}
-        <div className="absolute top-4 left-4 right-4 text-center">
-          <p className="text-white/60 text-sm">
-            {scenario?.name || "Practice Session"}
+  const avatarContent = (
+    <div className="flex-1 flex flex-col items-center justify-center relative bg-gradient-to-b from-brand-dark via-[#0a3a5c] to-brand-dark">
+      {/* Scenario Info - Top */}
+      <div className="absolute top-4 left-4 right-4 text-center">
+        <p className="text-white/60 text-sm">
+          {scenario?.name || "Practice Session"}
+        </p>
+        {scenario?.avatarRole && (
+          <p className="text-white/40 text-xs mt-1">
+            Speaking with: {scenario.avatarRole}
           </p>
-          {scenario?.avatarRole && (
-            <p className="text-white/40 text-xs mt-1">
-              Speaking with: {scenario.avatarRole}
-            </p>
-          )}
-        </div>
-
-        {/* Avatar with Pulse Animation */}
-        <div className="relative mb-6">
-          {/* Outer pulse rings when connected */}
-          {isConnected && (
-            <>
-              <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" style={{ animationDuration: '2s' }} />
-              <div className="absolute -inset-4 rounded-full bg-emerald-500/10 animate-pulse" style={{ animationDuration: '1.5s' }} />
-            </>
-          )}
-          {isConnecting && (
-            <div className="absolute -inset-4 rounded-full bg-brand-accent/20 animate-pulse" />
-          )}
-          
-          {/* Avatar Circle */}
-          <div className={cn(
-            "relative w-32 h-32 rounded-full overflow-hidden ring-4 transition-all duration-300",
-            isConnected ? "ring-emerald-500 shadow-lg shadow-emerald-500/30" :
-            isConnecting ? "ring-brand-accent shadow-lg shadow-brand-accent/30" :
-            "ring-white/20"
-          )}>
-            {avatar?.imageUrl ? (
-              <img
-                src={avatar.imageUrl}
-                alt={avatar.name || "Avatar"}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-slate-700 flex items-center justify-center">
-                <User className="w-16 h-16 text-white/40" />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Avatar Name */}
-        <h2 className="text-white text-2xl font-semibold mb-2">
-          {avatar?.name || "AI Assistant"}
-        </h2>
-
-        {/* Call Status */}
-        <div className="flex items-center gap-2 mb-4">
-          {isConnecting && (
-            <>
-              <div className="w-2 h-2 bg-brand-accent rounded-full animate-pulse" />
-              <span className="text-brand-accent text-sm">Connecting...</span>
-            </>
-          )}
-          {isConnected && (
-            <>
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-emerald-400 text-sm">Connected</span>
-            </>
-          )}
-          {!isConnected && !isConnecting && !hasConnectedOnce && (
-            <span className="text-white/50 text-sm">Ready to connect</span>
-          )}
-          {!isConnected && !isConnecting && hasConnectedOnce && (
-            <span className="text-white/50 text-sm">Call ended</span>
-          )}
-        </div>
-
-        {/* Timer with Extend Button */}
-        {timerActive && (
-          <div className="flex items-center gap-3 mb-4">
-            <div className={cn("text-3xl font-mono", getTimerColor())}>
-              {formatTime(timeRemaining)}
-            </div>
-            {isConnected && timeRemaining > 0 && (
-              <button
-                onClick={() => setTimeRemaining(prev => prev + 60)}
-                className={cn(
-                  "flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium transition-all",
-                  timeRemaining <= 60
-                    ? "bg-red-500/20 text-red-400 hover:bg-red-500/30 animate-pulse"
-                    : "bg-white/10 text-white/70 hover:bg-white/20"
-                )}
-                title="Add 1 minute"
-              >
-                <Plus className="w-4 h-4" />
-                <span>1 min</span>
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Live Caption - Shows latest agent message */}
-        {isConnected && lastAgentMessage?.title && (
-          <div className="max-w-md mx-auto px-6 py-3 bg-black/30 rounded-xl backdrop-blur-sm">
-            <p className="text-white/80 text-center text-sm leading-relaxed">
-              "{lastAgentMessage.title.length > 150 
-                ? lastAgentMessage.title.slice(-150) + "..." 
-                : lastAgentMessage.title}"
-            </p>
-          </div>
         )}
       </div>
+  
+      {/* Avatar with Pulse Animation */}
+      <div className="relative mb-6">
+        {isConnected && (
+          <>
+            <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" style={{ animationDuration: '2s' }} />
+            <div className="absolute -inset-4 rounded-full bg-emerald-500/10 animate-pulse" style={{ animationDuration: '1.5s' }} />
+          </>
+        )}
+        {isConnecting && (
+          <div className="absolute -inset-4 rounded-full bg-brand-accent/20 animate-pulse" />
+        )}
+        
+        <div className={cn(
+          "relative w-32 h-32 rounded-full overflow-hidden ring-4 transition-all duration-300",
+          isConnected ? "ring-emerald-500 shadow-lg shadow-emerald-500/30" :
+          isConnecting ? "ring-brand-accent shadow-lg shadow-brand-accent/30" :
+          "ring-white/20"
+        )}>
+          {avatar?.imageUrl ? (
+            <img
+              src={avatar.imageUrl}
+              alt={avatar.name || "Avatar"}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-slate-700 flex items-center justify-center">
+              <User className="w-16 h-16 text-white/40" />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <h2 className="text-white text-2xl font-semibold mb-2">
+        {avatar?.name || "AI Assistant"}
+      </h2>
+
+      <div className="flex items-center gap-2 mb-4">
+        {isConnecting && (
+          <>
+            <div className="w-2 h-2 bg-brand-accent rounded-full animate-pulse" />
+            <span className="text-brand-accent text-sm">Connecting...</span>
+          </>
+        )}
+        {isConnected && (
+          <>
+            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="text-emerald-400 text-sm">Connected</span>
+          </>
+        )}
+        {!isConnected && !isConnecting && !hasConnectedOnce && (
+          <span className="text-white/50 text-sm">Ready to connect</span>
+        )}
+        {!isConnected && !isConnecting && hasConnectedOnce && (
+          <span className="text-white/50 text-sm">Call ended</span>
+        )}
+      </div>
+
+      {timerActive && (
+        <div className="flex items-center gap-3 mb-4">
+          <div className={cn("text-3xl font-mono", getTimerColor())}>
+            {formatTime(timeRemaining)}
+          </div>
+          {isConnected && timeRemaining > 0 && (
+            <button
+              onClick={() => setTimeRemaining(prev => prev + 60)}
+              className={cn(
+                "flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium transition-all",
+                timeRemaining <= 60
+                  ? "bg-red-500/20 text-red-400 hover:bg-red-500/30 animate-pulse"
+                  : "bg-white/10 text-white/70 hover:bg-white/20"
+              )}
+              title="Add 1 minute"
+            >
+              <Plus className="w-4 h-4" />
+              <span>1 min</span>
+            </button>
+          )}
+        </div>
+      )}
+
+      {isConnected && lastAgentMessage?.title && (
+        <div className="max-w-md mx-auto px-6 py-3 bg-black/30 rounded-xl backdrop-blur-sm">
+          <p className="text-white/80 text-center text-sm leading-relaxed">
+            "{lastAgentMessage.title.length > 150 
+              ? lastAgentMessage.title.slice(-150) + "..." 
+              : lastAgentMessage.title}"
+          </p>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Main Call Area - wrapped with InterviewSessionLayout for coding/case modes */}
+      {isInterviewMode && interviewPlanForLayout ? (
+        <InterviewSessionLayout
+          plan={interviewPlanForLayout}
+          currentPhaseIndex={0}
+          className="flex-1"
+          onCodeChange={handleCodeChange}
+          onNotesChange={handleNotesChange}
+          onCalculationChange={handleCalculationChange}
+        >
+          {avatarContent}
+        </InterviewSessionLayout>
+      ) : (
+        avatarContent
+      )}
 
       {/* Collapsible Transcript Panel */}
       <div className={cn(
