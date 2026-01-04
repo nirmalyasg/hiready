@@ -1532,6 +1532,7 @@ export const companyRoleBlueprints = pgTable("company_role_blueprints", {
     focus: string[];
     durationMins: number;
   }[]>(),
+  notes: text("notes"),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 

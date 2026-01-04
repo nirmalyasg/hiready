@@ -219,3 +219,261 @@ INSERT INTO question_patterns (pattern_type, role_category, interview_type, temp
 ('probe', 'general', 'hiring_manager', 'What did you learn from this that you still apply today?', '{"always": ["Can you give a recent example?"]}', '["learning", "growth", "application"]', 'curated'),
 ('probe', 'design', 'hiring_manager', 'How did you incorporate user feedback into your design?', '{"ifVague": ["What feedback did you receive?"], "always": ["What did you change based on feedback?"]}', '["user-research", "iteration", "design"]', 'curated')
 ON CONFLICT DO NOTHING;
+
+-- =====================
+-- COMPANY ROLE BLUEPRINTS
+-- Top 15 Companies with detailed interview structures
+-- =====================
+
+-- Google SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid', 
+  '["algorithms", "system-design", "coding", "googleyness", "problem-solving"]'::jsonb,
+  '{"dimensions": [{"key": "problem_solving", "weight": 30}, {"key": "coding", "weight": 25}, {"key": "system_design", "weight": 20}, {"key": "communication", "weight": 15}, {"key": "leadership", "weight": 10}], "passingScore": 70, "style": "structured"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 45, "focus": ["coding", "algorithms"]}, {"round": 2, "type": "onsite", "duration": 45, "focus": ["system-design"]}, {"round": 3, "type": "onsite", "duration": 45, "focus": ["behavioral", "googleyness"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["coding", "problem-solving"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["coding", "algorithms"]}]'::jsonb,
+  'Google uses structured interviews with 4-5 onsite rounds. Focus on problem-solving approach, not just correct answers. "Googleyness" evaluates culture fit and collaboration.'
+FROM companies c WHERE c.name = 'Google'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'senior',
+  '["algorithms", "system-design", "leadership", "technical-depth", "mentorship"]'::jsonb,
+  '{"dimensions": [{"key": "system_design", "weight": 30}, {"key": "problem_solving", "weight": 25}, {"key": "leadership", "weight": 20}, {"key": "coding", "weight": 15}, {"key": "communication", "weight": 10}], "passingScore": 75, "style": "structured"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 45, "focus": ["system-design", "coding"]}, {"round": 2, "type": "onsite", "duration": 45, "focus": ["system-design", "scale"]}, {"round": 3, "type": "onsite", "duration": 45, "focus": ["leadership", "behavioral"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["coding", "algorithms"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["technical-depth"]}]'::jsonb,
+  'Senior SWE at Google requires demonstrated technical leadership. System design is weighted heavily. Expect questions about mentoring and driving technical decisions.'
+FROM companies c WHERE c.name = 'Google'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'pm', 'mid',
+  '["product-sense", "analytical", "technical", "execution", "leadership"]'::jsonb,
+  '{"dimensions": [{"key": "product_sense", "weight": 30}, {"key": "analytical", "weight": 25}, {"key": "execution", "weight": 20}, {"key": "technical", "weight": 15}, {"key": "leadership", "weight": 10}], "passingScore": 70, "style": "structured"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 45, "focus": ["product-sense", "execution"]}, {"round": 2, "type": "onsite", "duration": 45, "focus": ["product-design"]}, {"round": 3, "type": "onsite", "duration": 45, "focus": ["analytical", "estimation"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["technical"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["leadership", "behavioral"]}]'::jsonb,
+  'Google PM interviews test product sense, analytical thinking, and technical depth. Expect estimation questions and product critique exercises.'
+FROM companies c WHERE c.name = 'Google'
+ON CONFLICT DO NOTHING;
+
+-- Amazon SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["leadership-principles", "system-design", "coding", "ownership", "customer-obsession"]'::jsonb,
+  '{"dimensions": [{"key": "ownership", "weight": 25}, {"key": "problem_solving", "weight": 25}, {"key": "coding", "weight": 20}, {"key": "customer_obsession", "weight": 15}, {"key": "communication", "weight": 15}], "passingScore": 70, "style": "behavioral-heavy"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 60, "focus": ["coding", "leadership-principles"]}, {"round": 2, "type": "onsite", "duration": 60, "focus": ["system-design", "ownership"]}, {"round": 3, "type": "onsite", "duration": 60, "focus": ["coding", "problem-solving"]}, {"round": 4, "type": "onsite", "duration": 60, "focus": ["behavioral", "leadership-principles"]}, {"round": 5, "type": "bar_raiser", "duration": 60, "focus": ["behavioral", "culture-fit"]}]'::jsonb,
+  'Amazon uses STAR format extensively. Every round includes Leadership Principles questions. Bar Raiser round is critical - they can veto any hire.'
+FROM companies c WHERE c.name = 'Amazon'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'senior',
+  '["leadership-principles", "system-design", "ownership", "dive-deep", "bias-for-action"]'::jsonb,
+  '{"dimensions": [{"key": "ownership", "weight": 25}, {"key": "system_design", "weight": 25}, {"key": "dive_deep", "weight": 20}, {"key": "leadership", "weight": 15}, {"key": "bias_for_action", "weight": 15}], "passingScore": 75, "style": "behavioral-heavy"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 60, "focus": ["system-design", "leadership-principles"]}, {"round": 2, "type": "onsite", "duration": 60, "focus": ["system-design", "scale"]}, {"round": 3, "type": "onsite", "duration": 60, "focus": ["behavioral", "ownership"]}, {"round": 4, "type": "onsite", "duration": 60, "focus": ["behavioral", "dive-deep"]}, {"round": 5, "type": "bar_raiser", "duration": 60, "focus": ["behavioral", "leadership"]}]'::jsonb,
+  'Senior SDEs must demonstrate Dive Deep and Ownership. Expect questions about influencing without authority and making high-judgment calls.'
+FROM companies c WHERE c.name = 'Amazon'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'pm', 'mid',
+  '["leadership-principles", "customer-obsession", "working-backwards", "metrics", "execution"]'::jsonb,
+  '{"dimensions": [{"key": "customer_obsession", "weight": 30}, {"key": "ownership", "weight": 25}, {"key": "analytical", "weight": 20}, {"key": "execution", "weight": 15}, {"key": "communication", "weight": 10}], "passingScore": 70, "style": "behavioral-heavy"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 60, "focus": ["product-sense", "leadership-principles"]}, {"round": 2, "type": "onsite", "duration": 60, "focus": ["working-backwards", "prfaq"]}, {"round": 3, "type": "onsite", "duration": 60, "focus": ["metrics", "analytical"]}, {"round": 4, "type": "onsite", "duration": 60, "focus": ["behavioral", "ownership"]}, {"round": 5, "type": "bar_raiser", "duration": 60, "focus": ["behavioral", "culture-fit"]}]'::jsonb,
+  'Amazon PMs must master Working Backwards and PRFAQ process. Customer Obsession is the most important LP. Expect to write press releases for hypothetical products.'
+FROM companies c WHERE c.name = 'Amazon'
+ON CONFLICT DO NOTHING;
+
+-- Microsoft SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["coding", "system-design", "problem-solving", "collaboration", "growth-mindset"]'::jsonb,
+  '{"dimensions": [{"key": "coding", "weight": 30}, {"key": "problem_solving", "weight": 25}, {"key": "collaboration", "weight": 20}, {"key": "system_design", "weight": 15}, {"key": "growth_mindset", "weight": 10}], "passingScore": 65, "style": "conversational"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 45, "focus": ["coding"]}, {"round": 2, "type": "onsite", "duration": 45, "focus": ["coding", "problem-solving"]}, {"round": 3, "type": "onsite", "duration": 45, "focus": ["system-design"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["behavioral"]}, {"round": 5, "type": "as_appropriate", "duration": 45, "focus": ["culture-fit", "collaboration"]}]'::jsonb,
+  'Microsoft emphasizes growth mindset. Interviewers are looking for curiosity and ability to learn. "As Appropriate" round is with hiring manager for final decision.'
+FROM companies c WHERE c.name = 'Microsoft'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'pm', 'mid',
+  '["product-sense", "customer-focus", "data-driven", "collaboration", "technical"]'::jsonb,
+  '{"dimensions": [{"key": "product_sense", "weight": 30}, {"key": "customer_focus", "weight": 25}, {"key": "analytical", "weight": 20}, {"key": "collaboration", "weight": 15}, {"key": "technical", "weight": 10}], "passingScore": 65, "style": "conversational"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 45, "focus": ["product-sense"]}, {"round": 2, "type": "onsite", "duration": 45, "focus": ["product-design"]}, {"round": 3, "type": "onsite", "duration": 45, "focus": ["analytical", "metrics"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["behavioral", "collaboration"]}, {"round": 5, "type": "as_appropriate", "duration": 45, "focus": ["culture-fit"]}]'::jsonb,
+  'Microsoft PM interviews focus on product sense and customer empathy. Less technical depth required compared to Google. Emphasis on collaboration and inclusive design.'
+FROM companies c WHERE c.name = 'Microsoft'
+ON CONFLICT DO NOTHING;
+
+-- Meta SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["coding", "system-design", "behavioral", "product-sense", "move-fast"]'::jsonb,
+  '{"dimensions": [{"key": "coding", "weight": 35}, {"key": "system_design", "weight": 25}, {"key": "behavioral", "weight": 20}, {"key": "communication", "weight": 10}, {"key": "product_sense", "weight": 10}], "passingScore": 70, "style": "intensive"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 45, "focus": ["coding"]}, {"round": 2, "type": "onsite", "duration": 45, "focus": ["coding", "algorithms"]}, {"round": 3, "type": "onsite", "duration": 45, "focus": ["coding", "product"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["system-design"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["behavioral"]}]'::jsonb,
+  'Meta (Facebook) interviews are coding-heavy. Expect 2-3 coding rounds. System design uses Meta-scale examples. Behavioral round focuses on "Move Fast" and impact.'
+FROM companies c WHERE c.name = 'Meta'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'pm', 'mid',
+  '["product-sense", "execution", "analytical", "technical", "impact"]'::jsonb,
+  '{"dimensions": [{"key": "product_sense", "weight": 35}, {"key": "execution", "weight": 25}, {"key": "analytical", "weight": 20}, {"key": "communication", "weight": 10}, {"key": "technical", "weight": 10}], "passingScore": 70, "style": "intensive"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 45, "focus": ["product-sense"]}, {"round": 2, "type": "onsite", "duration": 45, "focus": ["product-sense", "design"]}, {"round": 3, "type": "onsite", "duration": 45, "focus": ["execution"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["analytical", "metrics"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["leadership", "behavioral"]}]'::jsonb,
+  'Meta PM interviews emphasize product sense and impact at scale. Expect questions about improving Facebook/Instagram products. Execution round focuses on prioritization.'
+FROM companies c WHERE c.name = 'Meta'
+ON CONFLICT DO NOTHING;
+
+-- Apple SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["coding", "system-design", "attention-to-detail", "collaboration", "secrecy"]'::jsonb,
+  '{"dimensions": [{"key": "coding", "weight": 30}, {"key": "system_design", "weight": 25}, {"key": "attention_to_detail", "weight": 20}, {"key": "collaboration", "weight": 15}, {"key": "communication", "weight": 10}], "passingScore": 70, "style": "secretive"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 60, "focus": ["coding", "algorithms"]}, {"round": 2, "type": "onsite", "duration": 60, "focus": ["coding"]}, {"round": 3, "type": "onsite", "duration": 60, "focus": ["system-design"]}, {"round": 4, "type": "onsite", "duration": 60, "focus": ["behavioral"]}, {"round": 5, "type": "onsite", "duration": 60, "focus": ["team-fit"]}]'::jsonb,
+  'Apple is notoriously secretive about interview process. Emphasis on attention to detail and craft. Team-specific interviews mean experience varies by org.'
+FROM companies c WHERE c.name = 'Apple'
+ON CONFLICT DO NOTHING;
+
+-- Netflix SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'senior',
+  '["system-design", "ownership", "context-not-control", "judgment", "candor"]'::jsonb,
+  '{"dimensions": [{"key": "judgment", "weight": 30}, {"key": "system_design", "weight": 25}, {"key": "ownership", "weight": 20}, {"key": "candor", "weight": 15}, {"key": "coding", "weight": 10}], "passingScore": 75, "style": "culture-heavy"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 45, "focus": ["system-design", "culture"]}, {"round": 2, "type": "onsite", "duration": 60, "focus": ["system-design", "scale"]}, {"round": 3, "type": "onsite", "duration": 60, "focus": ["behavioral", "judgment"]}, {"round": 4, "type": "onsite", "duration": 60, "focus": ["culture", "candor"]}, {"round": 5, "type": "onsite", "duration": 60, "focus": ["team-fit", "ownership"]}]'::jsonb,
+  'Netflix hires experienced engineers only. Culture fit is paramount - read the culture memo. Expect questions about "Context not Control" and high-judgment decisions.'
+FROM companies c WHERE c.name = 'Netflix'
+ON CONFLICT DO NOTHING;
+
+-- Stripe SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["coding", "system-design", "debugging", "user-empathy", "rigor"]'::jsonb,
+  '{"dimensions": [{"key": "coding", "weight": 30}, {"key": "debugging", "weight": 25}, {"key": "system_design", "weight": 20}, {"key": "communication", "weight": 15}, {"key": "user_empathy", "weight": 10}], "passingScore": 70, "style": "practical"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 60, "focus": ["coding"]}, {"round": 2, "type": "onsite", "duration": 60, "focus": ["debugging", "practical-coding"]}, {"round": 3, "type": "onsite", "duration": 60, "focus": ["system-design"]}, {"round": 4, "type": "onsite", "duration": 60, "focus": ["integration", "api-design"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["manager", "culture"]}]'::jsonb,
+  'Stripe interviews are practical and product-focused. Famous debugging exercise - fix real bugs in codebase. Integration round tests API design for developer experience.'
+FROM companies c WHERE c.name = 'Stripe'
+ON CONFLICT DO NOTHING;
+
+-- Flipkart SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["dsa", "system-design", "problem-solving", "scale", "ownership"]'::jsonb,
+  '{"dimensions": [{"key": "dsa", "weight": 30}, {"key": "system_design", "weight": 25}, {"key": "problem_solving", "weight": 20}, {"key": "communication", "weight": 15}, {"key": "ownership", "weight": 10}], "passingScore": 65, "style": "standard"}'::jsonb,
+  '[{"round": 1, "type": "online_test", "duration": 90, "focus": ["dsa", "coding"]}, {"round": 2, "type": "phone_screen", "duration": 60, "focus": ["dsa", "problem-solving"]}, {"round": 3, "type": "onsite", "duration": 60, "focus": ["machine-coding"]}, {"round": 4, "type": "onsite", "duration": 60, "focus": ["system-design"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["hiring-manager"]}]'::jsonb,
+  'Flipkart uses machine coding rounds - build working code in 90 mins. System design questions often involve e-commerce scale (flash sales, inventory). DSA is heavily weighted.'
+FROM companies c WHERE c.name = 'Flipkart'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'pm', 'mid',
+  '["product-sense", "metrics", "execution", "customer-focus", "problem-solving"]'::jsonb,
+  '{"dimensions": [{"key": "product_sense", "weight": 30}, {"key": "metrics", "weight": 25}, {"key": "execution", "weight": 20}, {"key": "customer_focus", "weight": 15}, {"key": "communication", "weight": 10}], "passingScore": 65, "style": "standard"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 45, "focus": ["product-sense"]}, {"round": 2, "type": "case_study", "duration": 60, "focus": ["case-study", "presentation"]}, {"round": 3, "type": "onsite", "duration": 45, "focus": ["metrics", "analytical"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["behavioral"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["hiring-manager"]}]'::jsonb,
+  'Flipkart PM interviews include a take-home case study with presentation. Expect questions about e-commerce metrics (conversion, GMV, ARPU). India-specific market understanding valued.'
+FROM companies c WHERE c.name = 'Flipkart'
+ON CONFLICT DO NOTHING;
+
+-- Razorpay SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["coding", "system-design", "payments-domain", "reliability", "security"]'::jsonb,
+  '{"dimensions": [{"key": "coding", "weight": 25}, {"key": "system_design", "weight": 25}, {"key": "reliability", "weight": 20}, {"key": "problem_solving", "weight": 20}, {"key": "communication", "weight": 10}], "passingScore": 65, "style": "standard"}'::jsonb,
+  '[{"round": 1, "type": "online_test", "duration": 90, "focus": ["dsa"]}, {"round": 2, "type": "phone_screen", "duration": 60, "focus": ["coding"]}, {"round": 3, "type": "onsite", "duration": 60, "focus": ["system-design"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["behavioral"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["culture-fit"]}]'::jsonb,
+  'Razorpay values payments domain knowledge. System design questions often involve financial systems (payment routing, reconciliation). Reliability and idempotency are key themes.'
+FROM companies c WHERE c.name = 'Razorpay'
+ON CONFLICT DO NOTHING;
+
+-- Freshworks SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["coding", "system-design", "saas", "multi-tenancy", "customer-focus"]'::jsonb,
+  '{"dimensions": [{"key": "coding", "weight": 30}, {"key": "system_design", "weight": 25}, {"key": "problem_solving", "weight": 20}, {"key": "customer_focus", "weight": 15}, {"key": "communication", "weight": 10}], "passingScore": 65, "style": "standard"}'::jsonb,
+  '[{"round": 1, "type": "online_test", "duration": 90, "focus": ["dsa"]}, {"round": 2, "type": "phone_screen", "duration": 60, "focus": ["coding"]}, {"round": 3, "type": "onsite", "duration": 60, "focus": ["system-design", "saas"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["behavioral"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["hiring-manager"]}]'::jsonb,
+  'Freshworks focuses on SaaS architecture. Expect questions about multi-tenancy, subscription billing, and customer-facing reliability. Chennai-based with global product mindset.'
+FROM companies c WHERE c.name = 'Freshworks'
+ON CONFLICT DO NOTHING;
+
+-- Goldman Sachs SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["coding", "system-design", "finance-domain", "low-latency", "problem-solving"]'::jsonb,
+  '{"dimensions": [{"key": "coding", "weight": 30}, {"key": "problem_solving", "weight": 25}, {"key": "system_design", "weight": 20}, {"key": "finance_knowledge", "weight": 15}, {"key": "communication", "weight": 10}], "passingScore": 70, "style": "formal"}'::jsonb,
+  '[{"round": 1, "type": "online_test", "duration": 120, "focus": ["dsa", "coding"]}, {"round": 2, "type": "phone_screen", "duration": 60, "focus": ["coding", "finance"]}, {"round": 3, "type": "superday", "duration": 45, "focus": ["coding"]}, {"round": 4, "type": "superday", "duration": 45, "focus": ["system-design"]}, {"round": 5, "type": "superday", "duration": 45, "focus": ["behavioral"]}, {"round": 6, "type": "superday", "duration": 45, "focus": ["culture-fit"]}]'::jsonb,
+  'Goldman Sachs uses Superday format - multiple back-to-back interviews. Finance domain knowledge helps but not required. Low-latency systems are common design topics.'
+FROM companies c WHERE c.name = 'Goldman Sachs'
+ON CONFLICT DO NOTHING;
+
+-- Uber SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["coding", "system-design", "distributed-systems", "real-time", "problem-solving"]'::jsonb,
+  '{"dimensions": [{"key": "coding", "weight": 30}, {"key": "system_design", "weight": 25}, {"key": "problem_solving", "weight": 20}, {"key": "communication", "weight": 15}, {"key": "collaboration", "weight": 10}], "passingScore": 70, "style": "intensive"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 45, "focus": ["coding"]}, {"round": 2, "type": "onsite", "duration": 45, "focus": ["coding"]}, {"round": 3, "type": "onsite", "duration": 45, "focus": ["coding"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["system-design"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["behavioral"]}]'::jsonb,
+  'Uber interviews focus on real-time distributed systems. Expect questions about ride matching, surge pricing, and location services. Two coding rounds test different skills.'
+FROM companies c WHERE c.name = 'Uber'
+ON CONFLICT DO NOTHING;
+
+-- Airbnb SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["coding", "system-design", "core-values", "belonging", "host-guest-empathy"]'::jsonb,
+  '{"dimensions": [{"key": "coding", "weight": 25}, {"key": "core_values", "weight": 25}, {"key": "system_design", "weight": 20}, {"key": "problem_solving", "weight": 20}, {"key": "communication", "weight": 10}], "passingScore": 70, "style": "values-heavy"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 45, "focus": ["coding"]}, {"round": 2, "type": "onsite", "duration": 45, "focus": ["coding"]}, {"round": 3, "type": "onsite", "duration": 45, "focus": ["system-design"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["core-values"]}, {"round": 5, "type": "cross_functional", "duration": 45, "focus": ["collaboration", "values"]}]'::jsonb,
+  'Airbnb heavily weights core values (Belong Anywhere, Be a Host). Cross-functional round includes non-engineers. System design often involves marketplace dynamics.'
+FROM companies c WHERE c.name = 'Airbnb'
+ON CONFLICT DO NOTHING;
+
+-- Salesforce SWE Blueprints  
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["coding", "system-design", "crm-domain", "trust", "customer-success"]'::jsonb,
+  '{"dimensions": [{"key": "coding", "weight": 30}, {"key": "system_design", "weight": 25}, {"key": "problem_solving", "weight": 20}, {"key": "customer_success", "weight": 15}, {"key": "communication", "weight": 10}], "passingScore": 65, "style": "conversational"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 45, "focus": ["coding"]}, {"round": 2, "type": "onsite", "duration": 45, "focus": ["coding"]}, {"round": 3, "type": "onsite", "duration": 45, "focus": ["system-design"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["behavioral"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["values"]}]'::jsonb,
+  'Salesforce uses Ohana culture values. Trust is the #1 value. Multi-tenant architecture knowledge helps. Customer Success mindset is evaluated throughout.'
+FROM companies c WHERE c.name = 'Salesforce'
+ON CONFLICT DO NOTHING;
+
+-- LinkedIn SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["coding", "system-design", "data-intensive", "graph", "growth-mindset"]'::jsonb,
+  '{"dimensions": [{"key": "coding", "weight": 30}, {"key": "system_design", "weight": 25}, {"key": "problem_solving", "weight": 20}, {"key": "collaboration", "weight": 15}, {"key": "growth_mindset", "weight": 10}], "passingScore": 65, "style": "conversational"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 45, "focus": ["coding"]}, {"round": 2, "type": "onsite", "duration": 45, "focus": ["coding"]}, {"round": 3, "type": "onsite", "duration": 45, "focus": ["system-design"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["behavioral"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["hiring-manager"]}]'::jsonb,
+  'LinkedIn (Microsoft) uses social graph problems in system design. Data-intensive systems are common topics. Growth mindset from Microsoft culture is valued.'
+FROM companies c WHERE c.name = 'LinkedIn'
+ON CONFLICT DO NOTHING;
+
+-- Atlassian SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["coding", "system-design", "collaboration-tools", "values", "customer-focus"]'::jsonb,
+  '{"dimensions": [{"key": "coding", "weight": 25}, {"key": "values", "weight": 25}, {"key": "system_design", "weight": 20}, {"key": "problem_solving", "weight": 20}, {"key": "communication", "weight": 10}], "passingScore": 65, "style": "values-heavy"}'::jsonb,
+  '[{"round": 1, "type": "phone_screen", "duration": 60, "focus": ["coding", "values"]}, {"round": 2, "type": "onsite", "duration": 45, "focus": ["coding"]}, {"round": 3, "type": "onsite", "duration": 45, "focus": ["system-design"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["values"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["team-fit"]}]'::jsonb,
+  'Atlassian heavily weights company values (Open company, no bullshit; Play as a team; Be the change). Values round is often a dealbreaker. Australian-friendly work culture.'
+FROM companies c WHERE c.name = 'Atlassian'
+ON CONFLICT DO NOTHING;
+
+-- Swiggy SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["dsa", "system-design", "logistics", "real-time", "scale"]'::jsonb,
+  '{"dimensions": [{"key": "dsa", "weight": 30}, {"key": "system_design", "weight": 25}, {"key": "problem_solving", "weight": 20}, {"key": "communication", "weight": 15}, {"key": "ownership", "weight": 10}], "passingScore": 65, "style": "standard"}'::jsonb,
+  '[{"round": 1, "type": "online_test", "duration": 90, "focus": ["dsa"]}, {"round": 2, "type": "phone_screen", "duration": 60, "focus": ["dsa"]}, {"round": 3, "type": "onsite", "duration": 60, "focus": ["machine-coding"]}, {"round": 4, "type": "onsite", "duration": 60, "focus": ["system-design"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["hiring-manager"]}]'::jsonb,
+  'Swiggy uses machine coding rounds. System design focuses on logistics (delivery routing, ETA prediction, surge). India hyper-local market understanding is valued.'
+FROM companies c WHERE c.name = 'Swiggy'
+ON CONFLICT DO NOTHING;
+
+-- Zomato SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["dsa", "system-design", "food-tech", "real-time", "consumer"]'::jsonb,
+  '{"dimensions": [{"key": "dsa", "weight": 30}, {"key": "system_design", "weight": 25}, {"key": "problem_solving", "weight": 20}, {"key": "communication", "weight": 15}, {"key": "ownership", "weight": 10}], "passingScore": 65, "style": "standard"}'::jsonb,
+  '[{"round": 1, "type": "online_test", "duration": 90, "focus": ["dsa"]}, {"round": 2, "type": "phone_screen", "duration": 60, "focus": ["dsa"]}, {"round": 3, "type": "onsite", "duration": 60, "focus": ["system-design"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["behavioral"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["culture-fit"]}]'::jsonb,
+  'Zomato interviews focus on consumer tech at scale. System design covers restaurant discovery, ratings, and delivery. Startup mindset with attention to unit economics.'
+FROM companies c WHERE c.name = 'Zomato'
+ON CONFLICT DO NOTHING;
+
+-- PhonePe SWE Blueprints
+INSERT INTO company_role_blueprints (company_id, role_category, seniority, skill_focus, rubric_overrides, interview_rounds, notes)
+SELECT c.id, 'swe', 'mid',
+  '["dsa", "system-design", "payments", "upi", "reliability"]'::jsonb,
+  '{"dimensions": [{"key": "dsa", "weight": 25}, {"key": "system_design", "weight": 25}, {"key": "reliability", "weight": 20}, {"key": "problem_solving", "weight": 20}, {"key": "communication", "weight": 10}], "passingScore": 65, "style": "standard"}'::jsonb,
+  '[{"round": 1, "type": "online_test", "duration": 90, "focus": ["dsa"]}, {"round": 2, "type": "phone_screen", "duration": 60, "focus": ["dsa"]}, {"round": 3, "type": "onsite", "duration": 60, "focus": ["system-design", "payments"]}, {"round": 4, "type": "onsite", "duration": 45, "focus": ["behavioral"]}, {"round": 5, "type": "onsite", "duration": 45, "focus": ["hiring-manager"]}]'::jsonb,
+  'PhonePe (Walmart-backed) focuses on UPI and payments. System design covers transaction processing, idempotency, and reconciliation. Reliability is a key evaluation criterion.'
+FROM companies c WHERE c.name = 'PhonePe'
+ON CONFLICT DO NOTHING;
