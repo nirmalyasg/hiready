@@ -75,7 +75,16 @@ Comprehensive AI-powered interview preparation with intelligent question pattern
    - Company archetypes: faang, startup, enterprise, consulting, fintech, healthcare
    - Tier classification: tier1, tier2, tier3
    - Cultural signals and interview focus areas
-   - Company role blueprints for common positions
+
+7. **Company Role Blueprints (26 blueprints)**
+   - **Global Tech Giants**: Google (SWE mid/senior, PM), Amazon (SWE mid/senior, PM), Microsoft (SWE, PM), Meta (SWE, PM), Apple (SWE), Netflix (SWE senior), Stripe (SWE), Uber (SWE), Airbnb (SWE), Salesforce (SWE), LinkedIn (SWE), Atlassian (SWE), Goldman Sachs (SWE)
+   - **Indian Unicorns**: Flipkart (SWE, PM), Razorpay (SWE), Freshworks (SWE), Swiggy (SWE), Zomato (SWE), PhonePe (SWE)
+   - Each blueprint includes:
+     - Skill focus areas specific to company culture
+     - Interview round structure (phone screen, onsite, bar raiser, etc.)
+     - Rubric dimension weights and passing scores
+     - Detailed notes about interview style and what to expect
+   - Company-specific insights: Amazon Leadership Principles, Google Googleyness, Meta coding-heavy, Netflix culture fit, Stripe debugging exercise
 
 ### New Intelligence API Endpoints
 - `GET /api/interview/intelligence/patterns` - Load question patterns by role/type
