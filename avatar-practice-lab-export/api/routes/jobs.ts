@@ -150,9 +150,11 @@ jobsRouter.post("/import-linkedin", requireAuth, async (req: Request, res: Respo
       return res.status(400).json({ success: false, error: "Valid LinkedIn job URL required" });
     }
 
+    const chromiumPath = process.env.PUPPETEER_EXECUTABLE_PATH || "/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium";
     const browser = await puppeteer.launch({
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+      executablePath: chromiumPath,
     });
 
     const page = await browser.newPage();
@@ -603,9 +605,11 @@ jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res:
     const config = PORTAL_CONFIGS[portal];
     console.log(`Scraping job from ${config.name}: ${url}`);
 
+    const chromiumPath = process.env.PUPPETEER_EXECUTABLE_PATH || "/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium";
     const browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process']
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process'],
+      executablePath: chromiumPath,
     });
 
     let jobData = { title: '', company: '', location: '', description: '' };
