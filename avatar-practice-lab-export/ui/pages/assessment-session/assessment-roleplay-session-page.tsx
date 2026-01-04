@@ -148,6 +148,25 @@ const AvatarRoleplayPractice = () => {
   const [interviewSession, setInterviewSession] = useState<InterviewSessionData | null>(null);
   const [codingExercise, setCodingExercise] = useState<CodingProblem | null>(null);
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
+  
+  const [workspaceCode, setWorkspaceCode] = useState("");
+  const [workspaceLanguage, setWorkspaceLanguage] = useState<SupportedLanguage>("javascript");
+  const [workspaceNotes, setWorkspaceNotes] = useState("");
+  const [workspaceCalculation, setWorkspaceCalculation] = useState("");
+  
+  const handleCodeChange = (code: string, language: SupportedLanguage) => {
+    setWorkspaceCode(code);
+    setWorkspaceLanguage(language);
+  };
+  
+  const handleNotesChange = (notes: string) => {
+    setWorkspaceNotes(notes);
+  };
+  
+  const handleCalculationChange = (calculation: string) => {
+    setWorkspaceCalculation(calculation);
+  };
+  
   const [error, setError] = useState("");
   const [researchData, setResearchData] = useState<string>("");
   const avatarId = searchParams.get("avatarId");
@@ -1185,6 +1204,12 @@ ${scenario?.instructions ? `## How to Play Your Character\n${scenario.instructio
           isAudioMuted={!isAudioPlaybackEnabled}
           onToggleAudioMute={() => setIsAudioPlaybackEnabled(prev => !prev)}
           interviewSession={interviewSession}
+          currentPhaseIndex={currentPhaseIndex}
+          onPhaseChange={setCurrentPhaseIndex}
+          codingExercise={codingExercise}
+          onCodeChange={handleCodeChange}
+          onNotesChange={handleNotesChange}
+          onCalculationChange={handleCalculationChange}
         />
       </div>
     </SidebarLayout>
@@ -1205,6 +1230,12 @@ export interface TranscriptProps {
   isAudioMuted: boolean;
   onToggleAudioMute: () => void;
   interviewSession?: InterviewSessionData | null;
+  currentPhaseIndex: number;
+  onPhaseChange: (index: number) => void;
+  codingExercise?: CodingProblem | null;
+  onCodeChange?: (code: string, language: SupportedLanguage) => void;
+  onNotesChange?: (notes: string) => void;
+  onCalculationChange?: (calculation: string) => void;
 }
 
 function Transcript({
@@ -1217,6 +1248,12 @@ function Transcript({
   isAudioMuted,
   onToggleAudioMute,
   interviewSession,
+  currentPhaseIndex,
+  onPhaseChange,
+  codingExercise,
+  onCodeChange,
+  onNotesChange,
+  onCalculationChange,
 }: TranscriptProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -1539,24 +1576,6 @@ function Transcript({
 
   const [isTranscriptExpanded, setIsTranscriptExpanded] = useState(false);
   
-  const [workspaceCode, setWorkspaceCode] = useState("");
-  const [workspaceLanguage, setWorkspaceLanguage] = useState<SupportedLanguage>("javascript");
-  const [workspaceNotes, setWorkspaceNotes] = useState("");
-  const [workspaceCalculation, setWorkspaceCalculation] = useState("");
-  
-  const handleCodeChange = (code: string, language: SupportedLanguage) => {
-    setWorkspaceCode(code);
-    setWorkspaceLanguage(language);
-  };
-  
-  const handleNotesChange = (notes: string) => {
-    setWorkspaceNotes(notes);
-  };
-  
-  const handleCalculationChange = (calculation: string) => {
-    setWorkspaceCalculation(calculation);
-  };
-  
   const interviewPlanForLayout = interviewSession?.plan ? {
     phases: interviewSession.plan.phases || [],
     focusAreas: interviewSession.plan.focusAreas || [],
@@ -1688,10 +1707,10 @@ function Transcript({
           currentPhaseIndex={currentPhaseIndex}
           className="flex-1"
           codingProblem={codingExercise || interviewSession?.plan?.codingProblem}
-          onCodeChange={handleCodeChange}
-          onNotesChange={handleNotesChange}
-          onCalculationChange={handleCalculationChange}
-          onPhaseChange={setCurrentPhaseIndex}
+          onCodeChange={onCodeChange}
+          onNotesChange={onNotesChange}
+          onCalculationChange={onCalculationChange}
+          onPhaseChange={onPhaseChange}
         >
           {avatarContent}
         </InterviewSessionLayout>

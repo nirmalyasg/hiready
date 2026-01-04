@@ -1,0 +1,95 @@
+[vite] connecting...
+client:618 [vite] connected.
+chunk-RPCDYKBN.js?v=4077c32f:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+react-router-dom.js?v=4077c32f:4413 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+warnOnce @ react-router-dom.js?v=4077c32f:4413Understand this warning
+react-router-dom.js?v=4077c32f:4413 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+warnOnce @ react-router-dom.js?v=4077c32f:4413Understand this warning
+page.tsx:141 [AvatarSelect] Pre-warming OpenAI Realtime token...
+RealtimeSessionPrewarmContext.tsx:119 [PrewarmContext] Starting token prewarm...
+page.tsx:141 [AvatarSelect] Pre-warming OpenAI Realtime token...
+RealtimeSessionPrewarmContext.tsx:115 [PrewarmContext] Token fetch in progress, waiting...
+page.tsx:141 [AvatarSelect] Pre-warming OpenAI Realtime token...
+RealtimeSessionPrewarmContext.tsx:115 [PrewarmContext] Token fetch in progress, waiting...
+RealtimeSessionPrewarmContext.tsx:129 [PrewarmContext] Token fetched in 575ms
+page.tsx:141 [AvatarSelect] Pre-warming OpenAI Realtime token...
+RealtimeSessionPrewarmContext.tsx:110 [PrewarmContext] Token already cached and valid
+2assessment-roleplay-session-page.tsx:680 avatar Data undefined
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:680 avatar Data Object
+assessment-roleplay-session-page.tsx:680 avatar Data Object
+assessment-roleplay-session-page.tsx:680 avatar Data Object
+assessment-roleplay-session-page.tsx:680 avatar Data Object
+assessment-roleplay-session-page.tsx:262 [Interview] Loaded session: Object
+assessment-roleplay-session-page.tsx:680 avatar Data Object
+assessment-roleplay-session-page.tsx:1174 Object
+assessment-roleplay-session-page.tsx:680 avatar Data Object
+assessment-roleplay-session-page.tsx:1174 Object
+assessment-roleplay-session-page.tsx:1688 Uncaught ReferenceError: currentPhaseIndex is not defined
+    at Transcript (assessment-roleplay-session-page.tsx:1688:11)
+    at renderWithHooks (chunk-RPCDYKBN.js?v=4077c32f:11548:26)
+    at mountIndeterminateComponent (chunk-RPCDYKBN.js?v=4077c32f:14926:21)
+    at beginWork (chunk-RPCDYKBN.js?v=4077c32f:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js?v=4077c32f:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js?v=4077c32f:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js?v=4077c32f:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js?v=4077c32f:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js?v=4077c32f:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js?v=4077c32f:19137:13)Understand this error
+assessment-roleplay-session-page.tsx:680 avatar Data Object
+assessment-roleplay-session-page.tsx:1174 Object
+assessment-roleplay-session-page.tsx:680 avatar Data Object
+assessment-roleplay-session-page.tsx:1174 Object
+assessment-roleplay-session-page.tsx:1688 Uncaught ReferenceError: currentPhaseIndex is not defined
+    at Transcript (assessment-roleplay-session-page.tsx:1688:11)
+    at renderWithHooks (chunk-RPCDYKBN.js?v=4077c32f:11548:26)
+    at mountIndeterminateComponent (chunk-RPCDYKBN.js?v=4077c32f:14926:21)
+    at beginWork (chunk-RPCDYKBN.js?v=4077c32f:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js?v=4077c32f:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js?v=4077c32f:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js?v=4077c32f:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js?v=4077c32f:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js?v=4077c32f:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js?v=4077c32f:19137:13)Understand this error
+chunk-RPCDYKBN.js?v=4077c32f:14032 The above error occurred in the <Transcript> component:
+
+    at Transcript (https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/ui/pages/assessment-session/assessment-roleplay-session-page.tsx:928:3)
+    at div
+    at div
+    at main
+    at div
+    at SidebarLayout (https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/ui/components/layout/sidebar-layout.tsx:37:33)
+    at AvatarRoleplayPractice (https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/ui/pages/assessment-session/assessment-roleplay-session-page.tsx:70:20)
+    at EventProvider (https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/ui/contexts/EventContext.tsx:20:33)
+    at TranscriptProvider (https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/ui/contexts/TranscriptContext.tsx:20:38)
+    at AssessmentRoleplaySessionPage
+    at ProtectedRoute (https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/ui/components/auth/ProtectedRoute.tsx:21:34)
+    at RenderedRoute (https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=4077c32f:4108:5)
+    at Routes (https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=4077c32f:4578:5)
+    at RealtimeSessionPrewarmProvider (https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/ui/contexts/RealtimeSessionPrewarmContext.tsx:28:50)
+    at AvatarSessionProvider (https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/ui/contexts/AvatarSessionContext.tsx:41:41)
+    at App
+    at Router (https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=4077c32f:4521:15)
+    at BrowserRouter (https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=4077c32f:5267:5)
+    at QueryClientProvider (https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=4077c32f:3096:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-RPCDYKBN.js?v=4077c32f:14032Understand this error
+chunk-RPCDYKBN.js?v=4077c32f:19413 Uncaught ReferenceError: currentPhaseIndex is not defined
+    at Transcript (assessment-roleplay-session-page.tsx:1688:11)
+    at renderWithHooks (chunk-RPCDYKBN.js?v=4077c32f:11548:26)
+    at mountIndeterminateComponent (chunk-RPCDYKBN.js?v=4077c32f:14926:21)
+    at beginWork (chunk-RPCDYKBN.js?v=4077c32f:15914:22)
+    at beginWork$1 (chunk-RPCDYKBN.js?v=4077c32f:19753:22)
+    at performUnitOfWork (chunk-RPCDYKBN.js?v=4077c32f:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js?v=4077c32f:19137:13)
+    at renderRootSync (chunk-RPCDYKBN.js?v=4077c32f:19116:15)
+    at recoverFromConcurrentError (chunk-RPCDYKBN.js?v=4077c32f:18736:28)
+    at performConcurrentWorkOnRoot (chunk-RPCDYKBN.js?v=4077c32f:18684:30)Understand this error
+useAudioDownload.ts:303 Stopping recording...
+useAudioDownload.ts:266 Cleaning up audio resources...
+useAudioDownload.ts:296 Audio cleanup completed
+assessment-roleplay-session-page.tsx:262 [Interview] Loaded session: Object
