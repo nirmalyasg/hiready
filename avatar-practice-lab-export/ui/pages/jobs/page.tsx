@@ -181,12 +181,14 @@ export default function JobsPage() {
         setPastedUrl("");
         setAddDialogOpen(false);
         navigate(`/jobs/${data.job.id}`);
+      } else if (data.error === "IMPORT_BLOCKED") {
+        setUrlError(data.message || "This site requires login. Copy the job description and paste it in the 'Paste JD' tab instead.");
       } else {
-        setUrlError(data.error || "Failed to parse the job URL");
+        setUrlError(data.error || data.message || "Failed to parse the job URL");
       }
     } catch (error) {
       console.error("Error parsing URL:", error);
-      setUrlError("Failed to connect. Please try again.");
+      setUrlError("Failed to connect. Please try again or paste the job description instead.");
     } finally {
       setIsParsingUrl(false);
     }

@@ -13,6 +13,34 @@ import {
 import { requireAuth } from "../middleware/auth.js";
 import { getOpenAI } from "../utils/openai-client.js";
 import puppeteer from "puppeteer";
+import { execSync } from "child_process";
+
+let cachedChromiumPath: string | null = null;
+
+function getChromiumPath(): string {
+  if (cachedChromiumPath) return cachedChromiumPath;
+  
+  try {
+    cachedChromiumPath = execSync("which chromium", { encoding: "utf-8" }).trim();
+    console.log("Found Chromium at:", cachedChromiumPath);
+    return cachedChromiumPath;
+  } catch {
+    const fallbackPaths = [
+      "/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium",
+      "/usr/bin/chromium",
+      "/usr/bin/chromium-browser",
+    ];
+    for (const p of fallbackPaths) {
+      try {
+        execSync(`test -x "${p}"`, { encoding: "utf-8" });
+        cachedChromiumPath = p;
+        console.log("Using fallback Chromium at:", p);
+        return p;
+      } catch {}
+    }
+  }
+  throw new Error("Chromium not found. Please install chromium system package.");
+}
 
 export const jobsRouter = Router();
 
@@ -150,11 +178,10 @@ jobsRouter.post("/import-linkedin", requireAuth, async (req: Request, res: Respo
       return res.status(400).json({ success: false, error: "Valid LinkedIn job URL required" });
     }
 
-    const chromiumPath = process.env.PUPPETEER_EXECUTABLE_PATH || "/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium";
     const browser = await puppeteer.launch({
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
-      executablePath: chromiumPath,
+      executablePath: getChromiumPath(),
     });
 
     const page = await browser.newPage();
@@ -605,12 +632,22 @@ jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res:
     const config = PORTAL_CONFIGS[portal];
     console.log(`Scraping job from ${config.name}: ${url}`);
 
-    const chromiumPath = process.env.PUPPETEER_EXECUTABLE_PATH || "/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium";
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process'],
-      executablePath: chromiumPath,
-    });
+    let browser;
+    try {
+      const chromePath = getChromiumPath();
+      console.log("Launching Chromium from:", chromePath);
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process'],
+        executablePath: chromePath,
+      });
+    } catch (launchError: any) {
+      console.error("Failed to launch Chromium:", launchError.message);
+      return res.status(500).json({
+        success: false,
+        error: "Browser failed to start. Please try again or enter job details manually."
+      });
+    }
 
     let jobData = { title: '', company: '', location: '', description: '' };
     let pageText = '';
@@ -620,6 +657,29 @@ jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res:
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
       
       await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+      
+      const currentUrl = page.url();
+      const pageTitle = await page.title();
+      
+      const isLoginBlocked = 
+        currentUrl.includes('/login') ||
+        currentUrl.includes('/uas/') ||
+        currentUrl.includes('/authwall') ||
+        currentUrl.includes('/signup') ||
+        pageTitle.toLowerCase().includes('sign in') ||
+        pageTitle.toLowerCase().includes('log in') ||
+        pageTitle === 'LinkedIn';
+      
+      if (isLoginBlocked && portal === 'linkedin') {
+        await browser.close();
+        console.log("LinkedIn login wall detected");
+        return res.status(409).json({
+          success: false,
+          error: "IMPORT_BLOCKED",
+          message: "LinkedIn requires login to view this job. Please copy the job description text and paste it below instead.",
+          suggestion: "paste"
+        });
+      }
       
       if (config.waitSelector) {
         await page.waitForSelector(config.waitSelector, { timeout: 10000 }).catch(() => {});

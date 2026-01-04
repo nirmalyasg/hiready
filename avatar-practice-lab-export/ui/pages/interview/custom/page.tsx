@@ -27,7 +27,7 @@ interface JobTarget {
   lastResumeDocId: number | null;
 }
 
-type AddJobMode = "url" | "manual" | null;
+type AddJobMode = "url" | "paste" | "manual" | null;
 
 export default function InterviewCustomPage() {
   const navigate = useNavigate();
@@ -140,13 +140,21 @@ export default function InterviewCustomPage() {
       });
 
       const data = await response.json();
-      if (!data.success) throw new Error(data.error);
+      
+      if (data.error === "IMPORT_BLOCKED") {
+        setAddJobError(data.message || "This site requires login. Please copy the job description and paste it instead.");
+        setAddJobMode("paste");
+        setLinkedinUrl("");
+        return;
+      }
+      
+      if (!data.success) throw new Error(data.error || data.message);
 
       setSavedJobs(prev => [data.job, ...prev]);
       handleSelectJob(data.job);
       setLinkedinUrl("");
     } catch (e: any) {
-      setAddJobError(e.message || "Failed to import job from URL");
+      setAddJobError(e.message || "Failed to import job from URL. Try pasting the job description instead.");
     } finally {
       setAddingJob(false);
     }
@@ -447,7 +455,7 @@ export default function InterviewCustomPage() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
                         <button
                           onClick={() => setAddJobMode("url")}
                           className={`p-4 rounded-xl border-2 text-left transition-all ${
@@ -458,7 +466,20 @@ export default function InterviewCustomPage() {
                         >
                           <Link2 className={`w-5 h-5 mb-2 ${addJobMode === "url" ? "text-emerald-600" : "text-slate-400"}`} />
                           <p className="font-medium text-sm text-slate-900">Import from URL</p>
-                          <p className="text-xs text-slate-500 mt-1">LinkedIn, Indeed, Glassdoor, Naukri, etc.</p>
+                          <p className="text-xs text-slate-500 mt-1">Indeed, Naukri, Glassdoor, etc.</p>
+                        </button>
+
+                        <button
+                          onClick={() => setAddJobMode("paste")}
+                          className={`p-4 rounded-xl border-2 text-left transition-all ${
+                            addJobMode === "paste"
+                              ? "border-emerald-500 bg-emerald-50"
+                              : "border-slate-200 hover:border-emerald-300"
+                          }`}
+                        >
+                          <FileText className={`w-5 h-5 mb-2 ${addJobMode === "paste" ? "text-emerald-600" : "text-slate-400"}`} />
+                          <p className="font-medium text-sm text-slate-900">Paste JD</p>
+                          <p className="text-xs text-slate-500 mt-1">Copy & paste job description</p>
                         </button>
 
                         <button
@@ -471,7 +492,7 @@ export default function InterviewCustomPage() {
                         >
                           <FileText className={`w-5 h-5 mb-2 ${addJobMode === "manual" ? "text-emerald-600" : "text-slate-400"}`} />
                           <p className="font-medium text-sm text-slate-900">Enter Manually</p>
-                          <p className="text-xs text-slate-500 mt-1">Type title, company, location & JD</p>
+                          <p className="text-xs text-slate-500 mt-1">Type title, company, location</p>
                         </button>
                       </div>
 
@@ -501,6 +522,38 @@ export default function InterviewCustomPage() {
                               <>
                                 <Link2 className="w-4 h-4 mr-2" />
                                 Import Job
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      )}
+
+                      {addJobMode === "paste" && (
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Paste Job Description</Label>
+                            <Textarea
+                              placeholder="Copy the full job description from the job posting and paste it here. We'll extract the title, company, and requirements automatically."
+                              value={jdPasteText}
+                              onChange={(e) => setJdPasteText(e.target.value)}
+                              className="rounded-xl min-h-[200px]"
+                            />
+                            <p className="text-xs text-slate-500 mt-2">Tip: Select all text on the job page (Ctrl+A or Cmd+A) and paste it here</p>
+                          </div>
+                          <Button
+                            onClick={handleAddJobViaPaste}
+                            disabled={addingJob || !jdPasteText.trim()}
+                            className="rounded-xl"
+                          >
+                            {addingJob ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                Analyzing...
+                              </>
+                            ) : (
+                              <>
+                                <FileText className="w-4 h-4 mr-2" />
+                                Create Job from JD
                               </>
                             )}
                           </Button>
@@ -539,9 +592,9 @@ export default function InterviewCustomPage() {
                             </div>
                           </div>
                           <div>
-                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Job Description</Label>
+                            <Label className="text-sm font-medium text-slate-700 mb-2 block">Job Description (optional)</Label>
                             <Textarea
-                              placeholder="Paste the full job description here (optional, helps with practice focus)..."
+                              placeholder="Paste the full job description here for better practice focus..."
                               value={jdPasteText}
                               onChange={(e) => setJdPasteText(e.target.value)}
                               className="rounded-xl min-h-[120px]"
