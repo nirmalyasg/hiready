@@ -13,7 +13,14 @@ import {
 import { requireAuth } from "../middleware/auth.js";
 import { getOpenAI } from "../utils/openai-client.js";
 import puppeteer from "puppeteer";
-import { getCompanyAwarePracticeOptions } from "../lib/practice-suggestions-generator.js";
+import { getCompanyAwarePracticeOptions, findCompanyBlueprint } from "../lib/practice-suggestions-generator.js";
+import { 
+  generatePracticeOptions as generateTaxonomyPracticeOptions,
+  ROUND_TAXONOMY,
+  RoundCategory,
+  CompanyPracticeContext,
+  PracticeOption
+} from "../../shared/practice-context.js";
 import { execSync } from "child_process";
 
 let cachedChromiumPath: string | null = null;
@@ -1047,6 +1054,262 @@ jobsRouter.get("/job-targets/:id/practice-suggestions", requireAuth, async (req:
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+// V2 Practice suggestions using structured round taxonomy
+jobsRouter.get("/job-targets/:id/practice-options", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const jobId = req.params.id;
+
+    const [job] = await db
+      .select()
+      .from(jobTargets)
+      .where(and(eq(jobTargets.id, jobId), eq(jobTargets.userId, userId)));
+
+    if (!job) {
+      return res.status(404).json({ success: false, error: "Job target not found" });
+    }
+
+    const parsed = job.jdParsed as JDParsedType | null;
+    const blueprintData = await findCompanyBlueprint(
+      job.companyName,
+      job.roleTitle,
+      parsed?.experienceLevel
+    );
+
+    const blueprintRounds = blueprintData?.blueprint?.interviewRounds?.map(r => r.type) || null;
+    const leadershipPrinciples = blueprintData?.blueprint?.skillFocus?.filter(s => 
+      s.includes("ownership") || s.includes("leadership") || s.includes("customer")
+    ) || null;
+
+    const options = generateTaxonomyPracticeOptions(
+      jobId,
+      blueprintData?.companyName || job.companyName,
+      blueprintData?.companyId || null,
+      job.roleTitle,
+      blueprintData?.archetype || null,
+      blueprintData?.tier || null,
+      blueprintRounds,
+      blueprintData?.blueprint?.notes || null,
+      parsed?.focusAreas || [],
+      leadershipPrinciples
+    );
+
+    res.json({
+      success: true,
+      options,
+      job: {
+        id: job.id,
+        roleTitle: job.roleTitle,
+        companyName: job.companyName,
+        location: job.location,
+      },
+      companyContext: blueprintData ? {
+        companyId: blueprintData.companyId,
+        companyName: blueprintData.companyName,
+        archetype: blueprintData.archetype,
+        tier: blueprintData.tier,
+        hasBlueprint: !!blueprintData.blueprint,
+        blueprintNotes: blueprintData.blueprint?.notes || null,
+        interviewRounds: blueprintData.blueprint?.interviewRounds || null,
+        skillFocus: blueprintData.blueprint?.skillFocus || null,
+      } : null,
+      taxonomy: ROUND_TAXONOMY,
+    });
+  } catch (error: any) {
+    console.error("Error generating practice options:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get practice context for a specific round
+jobsRouter.get("/job-targets/:id/practice-context/:roundCategory", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const jobId = req.params.id;
+    const roundCategory = req.params.roundCategory as RoundCategory;
+
+    const [job] = await db
+      .select()
+      .from(jobTargets)
+      .where(and(eq(jobTargets.id, jobId), eq(jobTargets.userId, userId)));
+
+    if (!job) {
+      return res.status(404).json({ success: false, error: "Job target not found" });
+    }
+
+    const taxonomy = ROUND_TAXONOMY[roundCategory];
+    if (!taxonomy) {
+      return res.status(400).json({ success: false, error: "Invalid round category" });
+    }
+
+    const parsed = job.jdParsed as JDParsedType | null;
+    const blueprintData = await findCompanyBlueprint(
+      job.companyName,
+      job.roleTitle,
+      parsed?.experienceLevel
+    );
+
+    const companyContext: CompanyPracticeContext = {
+      jobTargetId: jobId,
+      companyName: blueprintData?.companyName || job.companyName,
+      companyId: blueprintData?.companyId || null,
+      roleTitle: job.roleTitle,
+      archetype: blueprintData?.archetype || null,
+      tier: blueprintData?.tier || null,
+      hasBlueprint: !!blueprintData?.blueprint,
+      blueprintNotes: blueprintData?.blueprint?.notes || null,
+      focusAreas: parsed?.focusAreas || [],
+      leadershipPrinciples: blueprintData?.blueprint?.skillFocus?.filter(s => 
+        s.includes("ownership") || s.includes("leadership") || s.includes("customer")
+      ) || null,
+      interviewStyle: blueprintData?.archetype === "faang" ? "structured" : 
+                      blueprintData?.archetype === "startup" ? "conversational" : "mixed",
+    };
+
+    const matchingRound = blueprintData?.blueprint?.interviewRounds?.find(r => {
+      const roundLower = r.type.toLowerCase();
+      if (roundCategory === "hr_screening" && roundLower.includes("phone")) return true;
+      if (roundCategory === "hiring_manager" && roundLower.includes("hiring")) return true;
+      if (roundCategory === "technical_interview" && roundLower.includes("technical")) return true;
+      if (roundCategory === "coding_assessment" && (roundLower.includes("coding") || roundLower.includes("dsa"))) return true;
+      if (roundCategory === "system_design" && roundLower.includes("system")) return true;
+      if (roundCategory === "case_study" && roundLower.includes("case")) return true;
+      if (roundCategory === "behavioral" && roundLower.includes("behavioral")) return true;
+      if (roundCategory === "culture_values" && (roundLower.includes("culture") || roundLower.includes("values"))) return true;
+      if (roundCategory === "bar_raiser" && roundLower.includes("bar_raiser")) return true;
+      return false;
+    });
+
+    res.json({
+      success: true,
+      roundCategory,
+      taxonomy,
+      companyContext,
+      roundDetails: matchingRound || null,
+      practiceMode: taxonomy.practiceMode,
+      promptHints: generatePromptHints(roundCategory, companyContext, matchingRound),
+    });
+  } catch (error: any) {
+    console.error("Error getting practice context:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+function generatePromptHints(
+  roundCategory: RoundCategory,
+  context: CompanyPracticeContext,
+  roundDetails: any
+): {
+  avatarPersona: string;
+  evaluationFocus: string[];
+  sampleQuestions: string[];
+  companySpecificGuidance: string | null;
+} {
+  const companyName = context.companyName || "the company";
+  const archetype = context.archetype || "enterprise";
+  
+  const basePersonas: Record<RoundCategory, string> = {
+    hr_screening: `You are a friendly but professional HR recruiter at ${companyName}. Your goal is to assess basic qualifications, communication skills, and culture fit. Ask about background, motivation for the role, and salary expectations.`,
+    hiring_manager: `You are the hiring manager for this ${context.roleTitle} position at ${companyName}. You're looking for someone who can hit the ground running. Ask about relevant experience, leadership style, and how they'd approach key challenges.`,
+    technical_interview: `You are a senior engineer at ${companyName} conducting a technical interview. Ask about technical concepts, past projects, and problem-solving approach. Probe for depth of understanding.`,
+    coding_assessment: `You are conducting a coding assessment for ${companyName}. Present algorithmic problems and evaluate code quality, problem decomposition, and communication during coding.`,
+    system_design: `You are a senior architect at ${companyName} conducting a system design interview. Ask the candidate to design a scalable system and probe their understanding of trade-offs, reliability, and performance.`,
+    case_study: `You are presenting a business case study at ${companyName}. Present a realistic business problem and evaluate the candidate's analytical thinking, structured approach, and recommendations.`,
+    behavioral: `You are conducting a behavioral interview at ${companyName}. Ask STAR-format questions about past experiences. Look for specific examples demonstrating key competencies.`,
+    culture_values: `You are assessing culture fit at ${companyName}. Ask about values alignment, collaboration style, and how they handle ambiguity and conflict.`,
+    bar_raiser: `You are a bar raiser at ${companyName} (cross-functional interviewer ensuring hiring standards). Ask probing questions across domains and evaluate if this candidate raises the bar for the team.`,
+    panel_interview: `You are leading a panel interview at ${companyName}. Cover multiple aspects of the role including technical skills, leadership, and culture fit.`,
+  };
+
+  const evaluationFocus: Record<RoundCategory, string[]> = {
+    hr_screening: ["communication clarity", "motivation", "cultural fit basics", "salary alignment"],
+    hiring_manager: ["relevant experience", "leadership potential", "problem-solving", "role fit"],
+    technical_interview: ["technical depth", "problem decomposition", "communication", "learning ability"],
+    coding_assessment: ["code quality", "algorithmic thinking", "testing mindset", "communication while coding"],
+    system_design: ["scalability", "trade-off analysis", "reliability thinking", "technical breadth"],
+    case_study: ["structured thinking", "hypothesis generation", "quantitative reasoning", "recommendation clarity"],
+    behavioral: ["STAR format usage", "specific examples", "self-awareness", "growth mindset"],
+    culture_values: ["values alignment", "collaboration style", "adaptability", "ethical reasoning"],
+    bar_raiser: ["overall bar-raising", "cross-functional impact", "long-term potential", "culture contribution"],
+    panel_interview: ["consistency across interviewers", "depth and breadth", "composure", "engagement"],
+  };
+
+  const sampleQuestions: Record<RoundCategory, string[]> = {
+    hr_screening: [
+      "Walk me through your background and what attracted you to this role.",
+      "What do you know about our company and why do you want to work here?",
+      "What are your salary expectations?",
+    ],
+    hiring_manager: [
+      "Tell me about a challenging project you led and how you handled it.",
+      "How would you approach the first 90 days in this role?",
+      "What's your leadership style when dealing with cross-functional teams?",
+    ],
+    technical_interview: [
+      "Explain the architecture of a system you've built.",
+      "How do you approach debugging a production issue?",
+      "Walk me through your thought process when learning a new technology.",
+    ],
+    coding_assessment: [
+      "Let's work through a problem: design an algorithm to...",
+      "How would you optimize this code for performance?",
+      "Write test cases for this function.",
+    ],
+    system_design: [
+      "Design a URL shortener that handles millions of requests per day.",
+      "How would you architect a real-time notification system?",
+      "Walk me through the trade-offs between consistency and availability.",
+    ],
+    case_study: [
+      "A client's revenue dropped 20% last quarter. How would you diagnose the issue?",
+      "Should we enter this new market? Walk me through your analysis.",
+      "How would you prioritize these three initiatives given limited resources?",
+    ],
+    behavioral: [
+      "Tell me about a time you had to influence without authority.",
+      "Describe a situation where you failed and what you learned.",
+      "How do you handle disagreements with teammates?",
+    ],
+    culture_values: [
+      "Describe your ideal work environment.",
+      "How do you handle ambiguity and changing priorities?",
+      "Tell me about a time you had to make an ethical decision at work.",
+    ],
+    bar_raiser: [
+      "What makes you uniquely qualified for this role?",
+      "How have you raised the bar in your previous teams?",
+      "Tell me about your biggest career accomplishment and why it matters.",
+    ],
+    panel_interview: [
+      "Give us an overview of your most impactful project.",
+      "How do you prioritize competing demands?",
+      "What questions do you have for us about the team and role?",
+    ],
+  };
+
+  let companySpecificGuidance: string | null = null;
+  if (context.blueprintNotes) {
+    companySpecificGuidance = context.blueprintNotes;
+  } else if (archetype === "faang" || archetype === "big_tech") {
+    companySpecificGuidance = "Focus on problem-solving approach, scalability thinking, and clear communication. Expect structured interview format with defined evaluation criteria.";
+  } else if (archetype === "startup") {
+    companySpecificGuidance = "Emphasize adaptability, ownership, and ability to wear multiple hats. Expect more conversational interview style with focus on cultural fit.";
+  } else if (archetype === "consulting") {
+    companySpecificGuidance = "Demonstrate structured thinking, hypothesis-driven approach, and client-facing communication skills.";
+  }
+
+  if (roundDetails?.focus?.length > 0) {
+    companySpecificGuidance = `${companySpecificGuidance || ""} Focus areas for this round: ${roundDetails.focus.join(", ")}`.trim();
+  }
+
+  return {
+    avatarPersona: basePersonas[roundCategory],
+    evaluationFocus: evaluationFocus[roundCategory],
+    sampleQuestions: sampleQuestions[roundCategory],
+    companySpecificGuidance,
+  };
+}
 
 // Compute and update readiness score for a job target
 jobsRouter.post("/job-targets/:id/compute-readiness", requireAuth, async (req: Request, res: Response) => {

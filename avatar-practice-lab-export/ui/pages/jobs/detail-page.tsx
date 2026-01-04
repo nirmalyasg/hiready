@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Building2, MapPin, Clock, ExternalLink, Target, Sparkles, Play, FileText, Code, BookOpen, CheckCircle2, AlertCircle, MoreVertical, Trash2, X, Lightbulb } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, Clock, ExternalLink, Target, Sparkles, Play, FileText, Code, BookOpen, CheckCircle2, AlertCircle, MoreVertical, Trash2, X, Lightbulb, Phone, User, Terminal, Boxes, Briefcase, MessageCircle, Heart, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SidebarLayout from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -41,6 +41,47 @@ interface JobTarget {
   lastPracticedAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+type RoundCategory = 
+  | "hr_screening"
+  | "hiring_manager" 
+  | "technical_interview"
+  | "coding_assessment"
+  | "system_design"
+  | "case_study"
+  | "behavioral"
+  | "culture_values"
+  | "bar_raiser"
+  | "panel_interview";
+
+type PracticeMode = "live_interview" | "coding_lab" | "case_study" | "presentation";
+
+interface CompanyPracticeContext {
+  jobTargetId: string;
+  companyName: string | null;
+  companyId: string | null;
+  roleTitle: string | null;
+  archetype: string | null;
+  tier: string | null;
+  hasBlueprint: boolean;
+  blueprintNotes: string | null;
+  focusAreas: string[];
+  leadershipPrinciples: string[] | null;
+  interviewStyle: string | null;
+}
+
+interface PracticeOption {
+  id: string;
+  roundCategory: RoundCategory;
+  label: string;
+  description: string;
+  practiceMode: PracticeMode;
+  typicalDuration: string;
+  icon: string;
+  companySpecific: boolean;
+  companyContext: CompanyPracticeContext;
+  focusHint: string | null;
 }
 
 interface PracticeSuggestion {
@@ -90,6 +131,7 @@ export default function JobDetailPage() {
   const navigate = useNavigate();
   const [job, setJob] = useState<JobTarget | null>(null);
   const [suggestions, setSuggestions] = useState<PracticeSuggestion[]>([]);
+  const [practiceOptions, setPracticeOptions] = useState<PracticeOption[]>([]);
   const [companyData, setCompanyData] = useState<CompanyData | null>(null);
   const [practiceHistory, setPracticeHistory] = useState<{ interviews: any[]; exercises: any[] }>({ interviews: [], exercises: [] });
   const [isLoading, setIsLoading] = useState(true);
@@ -103,23 +145,30 @@ export default function JobDetailPage() {
       
       try {
         setIsLoading(true);
-        const [jobRes, suggestionsRes] = await Promise.all([
+        const [jobRes, optionsRes] = await Promise.all([
           fetch(`/api/jobs/job-targets/${jobId}`),
-          fetch(`/api/jobs/job-targets/${jobId}/practice-suggestions`),
+          fetch(`/api/jobs/job-targets/${jobId}/practice-options`),
         ]);
         
         const jobData = await jobRes.json();
-        const suggestionsData = await suggestionsRes.json();
+        const optionsData = await optionsRes.json();
         
         if (jobData.success) {
           setJob(jobData.job);
           setPracticeHistory(jobData.practiceHistory || { interviews: [], exercises: [] });
         }
         
-        if (suggestionsData.success) {
-          setSuggestions(suggestionsData.suggestions);
-          if (suggestionsData.companyData) {
-            setCompanyData(suggestionsData.companyData);
+        if (optionsData.success) {
+          setPracticeOptions(optionsData.options || []);
+          if (optionsData.companyContext) {
+            setCompanyData({
+              companyName: optionsData.companyContext.companyName,
+              archetype: optionsData.companyContext.archetype,
+              tier: optionsData.companyContext.tier,
+              hasBlueprint: optionsData.companyContext.hasBlueprint,
+              blueprintNotes: optionsData.companyContext.blueprintNotes,
+              hasContext: !!optionsData.companyContext.companyId,
+            });
           }
         }
       } catch (error) {
@@ -143,12 +192,19 @@ export default function JobDetailPage() {
       const data = await response.json();
       if (data.success) {
         setJob(data.job);
-        const suggestionsRes = await fetch(`/api/jobs/job-targets/${job.id}/practice-suggestions`);
-        const suggestionsData = await suggestionsRes.json();
-        if (suggestionsData.success) {
-          setSuggestions(suggestionsData.suggestions);
-          if (suggestionsData.companyData) {
-            setCompanyData(suggestionsData.companyData);
+        const optionsRes = await fetch(`/api/jobs/job-targets/${job.id}/practice-options`);
+        const optionsData = await optionsRes.json();
+        if (optionsData.success) {
+          setPracticeOptions(optionsData.options || []);
+          if (optionsData.companyContext) {
+            setCompanyData({
+              companyName: optionsData.companyContext.companyName,
+              archetype: optionsData.companyContext.archetype,
+              tier: optionsData.companyContext.tier,
+              hasBlueprint: optionsData.companyContext.hasBlueprint,
+              blueprintNotes: optionsData.companyContext.blueprintNotes,
+              hasContext: !!optionsData.companyContext.companyId,
+            });
           }
         }
       }
@@ -156,6 +212,21 @@ export default function JobDetailPage() {
       console.error("Error parsing JD:", error);
     } finally {
       setIsParsing(false);
+    }
+  };
+
+  const handleStartPracticeOption = (option: PracticeOption) => {
+    const { roundCategory, practiceMode, companyContext } = option;
+    const params = new URLSearchParams();
+    params.set("jobTargetId", companyContext.jobTargetId);
+    params.set("roundCategory", roundCategory);
+    
+    if (practiceMode === "live_interview") {
+      navigate(`/interview/config?${params.toString()}`);
+    } else if (practiceMode === "coding_lab") {
+      navigate(`/exercise-mode/coding-lab?${params.toString()}`);
+    } else if (practiceMode === "case_study") {
+      navigate(`/exercise-mode/case-study?${params.toString()}`);
     }
   };
 
@@ -303,12 +374,35 @@ export default function JobDetailPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            {suggestions.length > 0 && (
+            {!job.jdParsed && (
+              <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-brand-accent/10 flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-brand-accent" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-brand-dark">Analyze Job Description</h4>
+                      <p className="text-sm text-brand-muted">Parse the JD to get personalized practice recommendations</p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleParseJD}
+                    className="bg-brand-accent hover:bg-brand-accent/90"
+                    disabled={isParsing}
+                  >
+                    {isParsing ? "Analyzing..." : "Analyze"}
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {practiceOptions.length > 0 && (
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-brand-dark flex items-center gap-2">
                     <Target className="w-5 h-5 text-brand-accent" />
-                    {companyData?.hasBlueprint && companyData.companyName ? `${companyData.companyName} Interview Rounds` : "Recommended Practice"}
+                    {companyData?.hasBlueprint && companyData.companyName ? `${companyData.companyName} Interview Rounds` : "Practice Interview Rounds"}
                   </h2>
                   {companyData?.hasBlueprint && companyData.hasContext && (
                     <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
@@ -317,19 +411,29 @@ export default function JobDetailPage() {
                   )}
                 </div>
                 <div className="space-y-3">
-                  {suggestions.map((suggestion) => {
+                  {practiceOptions.map((option, index) => {
                     const getIcon = () => {
-                      switch (suggestion.type) {
-                        case "coding_practice":
-                          return <Code className="w-5 h-5 text-blue-500" />;
+                      switch (option.roundCategory) {
+                        case "hr_screening":
+                          return <Phone className="w-5 h-5 text-green-500" />;
+                        case "hiring_manager":
+                          return <User className="w-5 h-5 text-blue-500" />;
+                        case "technical_interview":
+                          return <Code className="w-5 h-5 text-purple-500" />;
+                        case "coding_assessment":
+                          return <Terminal className="w-5 h-5 text-indigo-500" />;
+                        case "system_design":
+                          return <Boxes className="w-5 h-5 text-cyan-500" />;
                         case "case_study":
-                          return <BookOpen className="w-5 h-5 text-purple-500" />;
+                          return <Briefcase className="w-5 h-5 text-orange-500" />;
                         case "behavioral":
-                          return <Target className="w-5 h-5 text-orange-500" />;
-                        case "parse_jd":
-                          return <Sparkles className="w-5 h-5 text-brand-accent" />;
-                        case "interview_round":
-                        case "generic_interview":
+                          return <MessageCircle className="w-5 h-5 text-amber-500" />;
+                        case "culture_values":
+                          return <Heart className="w-5 h-5 text-pink-500" />;
+                        case "bar_raiser":
+                          return <TrendingUp className="w-5 h-5 text-red-500" />;
+                        case "panel_interview":
+                          return <Users className="w-5 h-5 text-teal-500" />;
                         default:
                           return <FileText className="w-5 h-5 text-brand-accent" />;
                       }
@@ -337,41 +441,38 @@ export default function JobDetailPage() {
                     
                     return (
                       <div
-                        key={suggestion.id}
+                        key={option.id}
                         className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                       >
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                            suggestion.priority === "high" ? "bg-brand-accent/10" : "bg-gray-100"
+                            index === 0 ? "bg-brand-accent/10" : "bg-gray-100"
                           }`}>
                             {getIcon()}
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <h4 className="font-medium text-brand-dark">{suggestion.title}</h4>
-                              {suggestion.companySpecific && (
+                              <h4 className="font-medium text-brand-dark">{option.label}</h4>
+                              {option.companySpecific && (
                                 <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
                                   Company-Specific
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm text-brand-muted">{suggestion.description}</p>
+                            <p className="text-sm text-brand-muted">
+                              {option.typicalDuration} | {option.description.substring(0, 60)}...
+                            </p>
+                            {option.focusHint && (
+                              <p className="text-xs text-brand-accent mt-0.5">{option.focusHint}</p>
+                            )}
                           </div>
                         </div>
                         <Button
-                          onClick={() => handleStartPractice(suggestion)}
+                          onClick={() => handleStartPracticeOption(option)}
                           size="sm"
-                          className={suggestion.type === "parse_jd" ? "bg-brand-accent hover:bg-brand-accent/90" : ""}
-                          disabled={suggestion.type === "parse_jd" && isParsing}
                         >
-                          {suggestion.type === "parse_jd" ? (
-                            isParsing ? "Analyzing..." : "Analyze"
-                          ) : (
-                            <>
-                              <Play className="w-4 h-4 mr-1" />
-                              Start
-                            </>
-                          )}
+                          <Play className="w-4 h-4 mr-1" />
+                          Practice
                         </Button>
                       </div>
                     );
@@ -548,15 +649,20 @@ export default function JobDetailPage() {
                 )}
               </div>
               <div className="space-y-2">
-                {suggestions.filter(s => s.type !== "parse_jd").slice(0, 4).map((suggestion, idx) => {
+                {practiceOptions.slice(0, 4).map((option, idx) => {
                   const getIcon = () => {
-                    switch (suggestion.type) {
-                      case "coding_practice":
-                        return <Code className="w-4 h-4" />;
+                    switch (option.roundCategory) {
+                      case "coding_assessment":
+                        return <Terminal className="w-4 h-4" />;
                       case "case_study":
-                        return <BookOpen className="w-4 h-4" />;
+                      case "system_design":
+                        return <Boxes className="w-4 h-4" />;
                       case "behavioral":
-                        return <Target className="w-4 h-4" />;
+                        return <MessageCircle className="w-4 h-4" />;
+                      case "hr_screening":
+                        return <Phone className="w-4 h-4" />;
+                      case "hiring_manager":
+                        return <User className="w-4 h-4" />;
                       default:
                         return <FileText className="w-4 h-4" />;
                     }
@@ -564,20 +670,18 @@ export default function JobDetailPage() {
                   
                   return (
                     <Button
-                      key={suggestion.id}
-                      onClick={() => handleStartPractice(suggestion)}
+                      key={option.id}
+                      onClick={() => handleStartPracticeOption(option)}
                       variant={idx === 0 ? "default" : "outline"}
                       className={`w-full justify-start gap-2 ${idx === 0 ? "bg-brand-dark hover:bg-brand-dark/90" : ""}`}
                     >
                       {getIcon()}
-                      <span className="truncate text-left flex-1">{suggestion.title}</span>
-                      {suggestion.companySpecific && (
-                        <span className="text-xs opacity-60">{suggestion.duration}m</span>
-                      )}
+                      <span className="truncate text-left flex-1">{option.label}</span>
+                      <span className="text-xs opacity-60">{option.typicalDuration}</span>
                     </Button>
                   );
                 })}
-                {suggestions.filter(s => s.type !== "parse_jd").length === 0 && (
+                {practiceOptions.length === 0 && (
                   <>
                     <Button
                       onClick={() => navigate(`/interview/config?jobTargetId=${job.id}`)}
@@ -691,9 +795,8 @@ export default function JobDetailPage() {
               <Button 
                 onClick={() => {
                   setShowGuideModal(false);
-                  if (suggestions.length > 0) {
-                    const firstPractice = suggestions.find(s => s.type !== "parse_jd");
-                    if (firstPractice) handleStartPractice(firstPractice);
+                  if (practiceOptions.length > 0) {
+                    handleStartPracticeOption(practiceOptions[0]);
                   }
                 }}
                 className="bg-brand-accent hover:bg-brand-accent/90"
