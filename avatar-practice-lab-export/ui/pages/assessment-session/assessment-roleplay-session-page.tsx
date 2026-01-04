@@ -126,6 +126,19 @@ interface InterviewSessionData {
   };
 }
 
+interface CodingExerciseFromDB {
+  id: number;
+  name: string;
+  activityType: "explain" | "debug" | "modify";
+  language: string;
+  difficulty: "easy" | "medium" | "hard";
+  codeSnippet: string;
+  bugDescription: string | null;
+  modificationRequirement: string | null;
+  expectedBehavior: string | null;
+  expectedSignals: { signal: string; importance: string }[] | null;
+}
+
 const AvatarRoleplayPractice = () => {
   const { user } = useAuth();
   const location = useLocation();
@@ -133,6 +146,7 @@ const AvatarRoleplayPractice = () => {
   const navigate = useNavigate();
   const [scenario, setScenario] = useState<ScenarioData | null>(null);
   const [interviewSession, setInterviewSession] = useState<InterviewSessionData | null>(null);
+  const [codingExercise, setCodingExercise] = useState<CodingProblem | null>(null);
   const [error, setError] = useState("");
   const [researchData, setResearchData] = useState<string>("");
   const avatarId = searchParams.get("avatarId");
@@ -268,6 +282,56 @@ const AvatarRoleplayPractice = () => {
     
     fetchInterviewSession();
   }, [isInterviewMode, interviewSessionId, interviewSession]);
+  
+  useEffect(() => {
+    if (!interviewSession) return;
+    if (interviewSession.config?.interviewType !== "technical") return;
+    if (codingExercise) return;
+    
+    const fetchCodingExercise = async () => {
+      try {
+        const roleKitId = interviewSession.roleKit?.id;
+        const url = roleKitId 
+          ? `/api/exercise-mode/coding-exercises?roleKitId=${roleKitId}`
+          : `/api/exercise-mode/coding-exercises`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.success && data.exercises && data.exercises.length > 0) {
+          const randomExercise = data.exercises[Math.floor(Math.random() * data.exercises.length)] as CodingExerciseFromDB;
+          
+          const activityDescriptions = {
+            explain: "Walk through this code and explain what it does, line by line.",
+            debug: randomExercise.bugDescription || "There's a bug in this code. Find and fix it.",
+            modify: randomExercise.modificationRequirement || "Modify this code to add the requested feature.",
+          };
+          
+          const problem: CodingProblem = {
+            id: `exercise-${randomExercise.id}`,
+            title: randomExercise.name,
+            difficulty: randomExercise.difficulty === "easy" ? "Easy" : 
+                       randomExercise.difficulty === "medium" ? "Medium" : "Hard",
+            description: `${activityDescriptions[randomExercise.activityType]}\n\n${randomExercise.expectedBehavior || ""}`,
+            examples: [],
+            constraints: [],
+            starterCode: {
+              [randomExercise.language]: randomExercise.codeSnippet,
+              javascript: randomExercise.language === "javascript" ? randomExercise.codeSnippet : undefined,
+              python: randomExercise.language === "python" ? randomExercise.codeSnippet : undefined,
+            } as Record<string, string>,
+          };
+          
+          setCodingExercise(problem);
+          console.log("[Interview] Loaded coding exercise:", problem.title);
+        }
+      } catch (err) {
+        console.error("Error fetching coding exercise:", err);
+      }
+    };
+    
+    fetchCodingExercise();
+  }, [interviewSession, codingExercise]);
   
   const getInterviewerRole = (type?: string): string => {
     const persona = getInterviewerPersona(type as InterviewConfig["interviewType"]);
@@ -1605,7 +1669,7 @@ function Transcript({
           plan={interviewPlanForLayout}
           currentPhaseIndex={0}
           className="flex-1"
-          codingProblem={interviewSession?.plan?.codingProblem}
+          codingProblem={codingExercise || interviewSession?.plan?.codingProblem}
           onCodeChange={handleCodeChange}
           onNotesChange={handleNotesChange}
           onCalculationChange={handleCalculationChange}
