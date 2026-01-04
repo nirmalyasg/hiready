@@ -82,7 +82,7 @@ import {
   type InterviewMode,
 } from "@/lib/interview-prompts";
 import { InterviewSessionLayout } from "@/components/interview/interview-session-layout";
-import type { SupportedLanguage } from "@/components/interview/coding-panel";
+import type { SupportedLanguage, CodingProblem } from "@/components/interview/coding-panel";
 
 function AssessmentRoleplaySessionPage() {
   return (
@@ -122,6 +122,7 @@ interface InterviewSessionData {
   plan?: {
     phases?: { name: string; duration: number; objectives?: string[]; questionPatterns?: string[] }[];
     focusAreas?: string[];
+    codingProblem?: CodingProblem;
   };
 }
 
@@ -1603,6 +1604,7 @@ function Transcript({
           plan={interviewPlanForLayout}
           currentPhaseIndex={0}
           className="flex-1"
+          codingProblem={interviewSession?.plan?.codingProblem}
           onCodeChange={handleCodeChange}
           onNotesChange={handleNotesChange}
           onCalculationChange={handleCalculationChange}

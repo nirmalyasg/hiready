@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { SplitPanelLayout } from "./split-panel-layout";
-import { CodingPanel, type SupportedLanguage } from "./coding-panel";
+import { CodingPanel, type SupportedLanguage, type CodingProblem } from "./coding-panel";
 import { CaseStudyPanel } from "./case-study-panel";
 import {
   detectInterviewLayoutMode,
@@ -16,6 +16,7 @@ interface InterviewSessionLayoutProps {
   children: React.ReactNode;
   className?: string;
   problemStatement?: string;
+  codingProblem?: CodingProblem;
   caseMaterials?: { id: string; title: string; type: "text" | "table" | "chart" | "data"; content: string }[];
   casePrompt?: string;
   onCodeChange?: (code: string, language: SupportedLanguage) => void;
@@ -35,6 +36,7 @@ export function InterviewSessionLayout({
   children,
   className,
   problemStatement,
+  codingProblem,
   caseMaterials,
   casePrompt,
   onCodeChange,
@@ -107,6 +109,7 @@ export function InterviewSessionLayout({
             initialLanguage={codeLanguage}
             initialCode={code}
             problemStatement={problemStatement}
+            problem={codingProblem}
             onCodeChange={handleCodeChange}
             onLanguageChange={handleLanguageChange}
             onRun={handleCodeRun}

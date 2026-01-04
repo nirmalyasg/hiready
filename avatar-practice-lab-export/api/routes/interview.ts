@@ -1302,8 +1302,38 @@ Generate a JSON interview plan with this structure:
   ],
   "focusAreas": ["Top 3-5 specific things to assess based on ALL inputs"],
   "interviewerTone": "Description of how the interviewer should behave based on style",
-  "keyQuestions": ["5-7 most important questions to ask, fully customized to this specific interview"]
+  "keyQuestions": ["5-7 most important questions to ask, fully customized to this specific interview"],
+  "codingProblem": null
 }
+
+5. CODING PROBLEMS (for technical interviews only):
+   When interviewType is "technical", you MUST include a coding problem tailored to the role and JD:
+   - For Software Engineer roles: algorithm/data structure problems
+   - For Data roles: SQL queries, data manipulation
+   - For Frontend roles: DOM manipulation, React components
+   - For Backend roles: API design, system problems
+   
+   The codingProblem field should be:
+   {
+     "id": "unique-problem-id",
+     "title": "Problem Title",
+     "difficulty": "Easy|Medium|Hard",
+     "description": "Full problem description with context. Be specific about what the function should do, inputs, and expected outputs.",
+     "examples": [
+       { "input": "example input", "output": "expected output", "explanation": "optional explanation" }
+     ],
+     "constraints": ["constraint 1", "constraint 2"],
+     "hints": ["hint 1 for when candidate is stuck"],
+     "starterCode": {
+       "javascript": "function solution(input) {\\n  // Your code here\\n}",
+       "python": "def solution(input):\\n    # Your code here\\n    pass"
+     }
+   }
+   
+   Make the problem RELEVANT to the job requirements. For example:
+   - If JD mentions "React", give a component optimization problem
+   - If JD mentions "algorithms", give a classic DSA problem
+   - If JD mentions "data processing", give a data transformation problem
 
 IMPORTANT: Do NOT use generic placeholder questions. Every question should be specific to the job target, candidate profile, and interview type provided. If company/role info is available, mention them by name.`;
 
