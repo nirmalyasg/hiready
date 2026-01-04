@@ -147,6 +147,7 @@ const AvatarRoleplayPractice = () => {
   const [scenario, setScenario] = useState<ScenarioData | null>(null);
   const [interviewSession, setInterviewSession] = useState<InterviewSessionData | null>(null);
   const [codingExercise, setCodingExercise] = useState<CodingProblem | null>(null);
+  const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
   const [error, setError] = useState("");
   const [researchData, setResearchData] = useState<string>("");
   const avatarId = searchParams.get("avatarId");
@@ -291,34 +292,51 @@ const AvatarRoleplayPractice = () => {
     const fetchCodingExercise = async () => {
       try {
         const roleKitId = interviewSession.roleKit?.id;
-        const url = roleKitId 
-          ? `/api/exercise-mode/coding-exercises?roleKitId=${roleKitId}`
-          : `/api/exercise-mode/coding-exercises`;
+        const configId = interviewSession.config?.id;
+        const interviewType = interviewSession.config?.interviewType;
         
-        const response = await fetch(url);
+        const response = await fetch("/api/interview/match-exercise", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            configId,
+            roleKitId,
+            interviewType,
+          }),
+        });
+        
         const data = await response.json();
         
-        if (data.success && data.exercises && data.exercises.length > 0) {
-          const randomExercise = data.exercises[Math.floor(Math.random() * data.exercises.length)] as CodingExerciseFromDB;
+        if (data.success && data.exercise) {
+          const matchedExercise = data.exercise as CodingExerciseFromDB;
+          console.log(`[Interview] Exercise matched via ${data.source}:`, {
+            name: matchedExercise.name,
+            matchedSkills: data.matchedSkills,
+            profile: data.profile,
+          });
           
           const activityDescriptions = {
             explain: "Walk through this code and explain what it does, line by line.",
-            debug: randomExercise.bugDescription || "There's a bug in this code. Find and fix it.",
-            modify: randomExercise.modificationRequirement || "Modify this code to add the requested feature.",
+            debug: matchedExercise.bugDescription || "There's a bug in this code. Find and fix it.",
+            modify: matchedExercise.modificationRequirement || "Modify this code to add the requested feature.",
           };
           
+          const skillsNote = data.matchedSkills?.length > 0 
+            ? `\n\n**Skills tested:** ${data.matchedSkills.join(", ")}`
+            : "";
+          
           const problem: CodingProblem = {
-            id: `exercise-${randomExercise.id}`,
-            title: randomExercise.name,
-            difficulty: randomExercise.difficulty === "easy" ? "Easy" : 
-                       randomExercise.difficulty === "medium" ? "Medium" : "Hard",
-            description: `${activityDescriptions[randomExercise.activityType]}\n\n${randomExercise.expectedBehavior || ""}`,
+            id: matchedExercise.id ? `exercise-${matchedExercise.id}` : "generated",
+            title: matchedExercise.name,
+            difficulty: matchedExercise.difficulty === "easy" ? "Easy" : 
+                       matchedExercise.difficulty === "medium" ? "Medium" : "Hard",
+            description: `${activityDescriptions[matchedExercise.activityType as keyof typeof activityDescriptions] || matchedExercise.expectedBehavior}\n\n${matchedExercise.expectedBehavior || ""}${skillsNote}`,
             examples: [],
             constraints: [],
             starterCode: {
-              [randomExercise.language]: randomExercise.codeSnippet,
-              javascript: randomExercise.language === "javascript" ? randomExercise.codeSnippet : undefined,
-              python: randomExercise.language === "python" ? randomExercise.codeSnippet : undefined,
+              [matchedExercise.language]: matchedExercise.codeSnippet,
+              javascript: matchedExercise.language === "javascript" ? matchedExercise.codeSnippet : undefined,
+              python: matchedExercise.language === "python" ? matchedExercise.codeSnippet : undefined,
             } as Record<string, string>,
           };
           
@@ -1667,12 +1685,13 @@ function Transcript({
       {isInterviewMode && interviewPlanForLayout ? (
         <InterviewSessionLayout
           plan={interviewPlanForLayout}
-          currentPhaseIndex={0}
+          currentPhaseIndex={currentPhaseIndex}
           className="flex-1"
           codingProblem={codingExercise || interviewSession?.plan?.codingProblem}
           onCodeChange={handleCodeChange}
           onNotesChange={handleNotesChange}
           onCalculationChange={handleCalculationChange}
+          onPhaseChange={setCurrentPhaseIndex}
         >
           {avatarContent}
         </InterviewSessionLayout>

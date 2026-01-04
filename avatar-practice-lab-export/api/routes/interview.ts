@@ -22,6 +22,7 @@ import {
   companyRoleBlueprints,
   userSkillMemory,
   jobPracticeLinks,
+  codingExercises,
   RoleKit,
   UserDocument,
   InterviewConfig,
@@ -30,6 +31,13 @@ import {
   InterviewRubric,
   InterviewAnalysisType,
 } from "../../shared/schema.js";
+import {
+  extractSkillsFromText,
+  combineSkillProfiles,
+  matchExercisesToProfile,
+  generateCompositeProblem,
+  type CapabilityProfile,
+} from "../lib/capability-vectorizer.js";
 import { requireAuth } from "../middleware/auth.js";
 import { getOpenAI } from "../utils/openai-client.js";
 import { PDFParse } from "pdf-parse";
@@ -1962,6 +1970,162 @@ interviewRouter.get("/coach/today", requireAuth, async (req: Request, res: Respo
     });
   } catch (error: any) {
     console.error("Error fetching today's plan:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ===================================================================
+// JD-Driven Coding Exercise Matching
+// ===================================================================
+
+interviewRouter.post("/match-exercise", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { configId, sessionId, roleKitId, interviewType } = req.body;
+    
+    if (interviewType !== "technical") {
+      return res.json({ success: true, exercise: null, reason: "Non-technical interview" });
+    }
+
+    let jdText = "";
+    let resumeText = "";
+    let roleKitSkills: string[] = [];
+    let targetRoleKitId = roleKitId;
+
+    if (configId) {
+      const [config] = await db
+        .select()
+        .from(interviewConfigs)
+        .where(and(eq(interviewConfigs.id, configId), eq(interviewConfigs.userId, userId)));
+
+      if (config) {
+        targetRoleKitId = config.roleKitId || roleKitId;
+
+        if (config.jdDocId) {
+          const [jdDoc] = await db.select().from(userDocuments).where(eq(userDocuments.id, config.jdDocId));
+          if (jdDoc?.rawText) {
+            jdText = jdDoc.rawText;
+          }
+        }
+
+        if (config.resumeDocId) {
+          const [resumeDoc] = await db.select().from(userDocuments).where(eq(userDocuments.id, config.resumeDocId));
+          if (resumeDoc?.rawText) {
+            resumeText = resumeDoc.rawText;
+          }
+        }
+      }
+    }
+
+    if (targetRoleKitId) {
+      const [kit] = await db.select().from(roleKits).where(eq(roleKits.id, targetRoleKitId));
+      if (kit?.skillsFocus) {
+        roleKitSkills = (kit.skillsFocus as string[]) || [];
+      }
+    }
+
+    const jdSkills = extractSkillsFromText(jdText, "jd");
+    const resumeSkills = extractSkillsFromText(resumeText, "resume");
+    const profile = combineSkillProfiles(jdSkills, resumeSkills, roleKitSkills);
+
+    const availableExercises = await db
+      .select()
+      .from(codingExercises)
+      .where(eq(codingExercises.isActive, true));
+
+    const matchedExercises = matchExercisesToProfile(
+      availableExercises.map(e => ({
+        id: e.id,
+        name: e.name,
+        activityType: e.activityType,
+        language: e.language,
+        difficulty: e.difficulty,
+        codeSnippet: e.codeSnippet,
+      })),
+      profile
+    );
+
+    if (matchedExercises.length > 0 && matchedExercises[0].score > 3) {
+      const bestMatch = matchedExercises[0];
+      const fullExercise = availableExercises.find(e => e.id === bestMatch.exercise.id);
+      
+      return res.json({
+        success: true,
+        exercise: fullExercise,
+        matchScore: bestMatch.score,
+        matchedSkills: bestMatch.matchedSkills,
+        source: "matched",
+        profile: {
+          primaryLanguages: profile.primaryLanguages,
+          combinedRequirements: profile.combinedRequirements,
+          seniorityLevel: profile.seniorityLevel,
+        },
+      });
+    }
+
+    if (profile.combinedRequirements.length > 0) {
+      try {
+        const openai = getOpenAI();
+        const generated = await generateCompositeProblem(
+          profile,
+          availableExercises.map(e => ({ name: e.name, activityType: e.activityType })),
+          openai
+        );
+
+        return res.json({
+          success: true,
+          exercise: {
+            id: null,
+            name: generated.title,
+            activityType: generated.activityType,
+            language: generated.language,
+            difficulty: generated.difficulty,
+            codeSnippet: generated.codeSnippet,
+            expectedBehavior: generated.expectedBehavior,
+            generated: true,
+          },
+          matchedSkills: generated.skillsCovered,
+          source: "generated",
+          profile: {
+            primaryLanguages: profile.primaryLanguages,
+            combinedRequirements: profile.combinedRequirements,
+            seniorityLevel: profile.seniorityLevel,
+          },
+        });
+      } catch (genError: any) {
+        console.error("Error generating composite problem:", genError);
+      }
+    }
+
+    if (targetRoleKitId) {
+      const roleKitExercises = availableExercises.filter(e => e.roleKitId === targetRoleKitId);
+      if (roleKitExercises.length > 0) {
+        const randomIndex = Math.floor(Math.random() * roleKitExercises.length);
+        return res.json({
+          success: true,
+          exercise: roleKitExercises[randomIndex],
+          source: "role_kit_fallback",
+          profile: {
+            primaryLanguages: profile.primaryLanguages,
+            combinedRequirements: profile.combinedRequirements,
+            seniorityLevel: profile.seniorityLevel,
+          },
+        });
+      }
+    }
+
+    if (availableExercises.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableExercises.length);
+      return res.json({
+        success: true,
+        exercise: availableExercises[randomIndex],
+        source: "random_fallback",
+      });
+    }
+
+    res.json({ success: true, exercise: null, reason: "No exercises available" });
+  } catch (error: any) {
+    console.error("Error matching exercise:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

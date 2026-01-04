@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SplitPanelLayout } from "./split-panel-layout";
 import { CodingPanel, type SupportedLanguage, type CodingProblem } from "./coding-panel";
 import { CaseStudyPanel } from "./case-study-panel";
+import { CompactPhaseIndicator } from "./phase-indicator";
 import {
-  detectInterviewLayoutMode,
   getCurrentPhaseMode,
   type InterviewLayoutMode,
   type InterviewPlanData,
@@ -22,6 +23,8 @@ interface InterviewSessionLayoutProps {
   onCodeChange?: (code: string, language: SupportedLanguage) => void;
   onNotesChange?: (notes: string) => void;
   onCalculationChange?: (calculation: string) => void;
+  showPhaseIndicator?: boolean;
+  onPhaseChange?: (newIndex: number) => void;
 }
 
 export interface InterviewWorkspaceRef {
@@ -42,15 +45,15 @@ export function InterviewSessionLayout({
   onCodeChange,
   onNotesChange,
   onCalculationChange,
+  showPhaseIndicator = true,
+  onPhaseChange,
 }: InterviewSessionLayoutProps) {
   const [code, setCode] = useState("");
   const [codeLanguage, setCodeLanguage] = useState<SupportedLanguage>("javascript");
   const [notes, setNotes] = useState("");
   const [calculation, setCalculation] = useState("");
 
-  const overallMode = detectInterviewLayoutMode(plan);
   const currentMode = getCurrentPhaseMode(plan, currentPhaseIndex);
-  const effectiveMode = currentMode !== "normal" ? currentMode : overallMode;
   
   const effectiveCodingProblem = codingProblem || (plan?.codingProblem as CodingProblem | undefined);
 
@@ -95,54 +98,121 @@ export function InterviewSessionLayout({
     [onCalculationChange]
   );
 
-  if (effectiveMode === "normal") {
-    return <div className={cn("h-full", className)}>{children}</div>;
-  }
+  const totalPhases = plan?.phases?.length || 0;
+  const canGoPrev = currentPhaseIndex > 0;
+  const canGoNext = currentPhaseIndex < totalPhases - 1;
 
-  if (effectiveMode === "coding") {
-    return (
-      <SplitPanelLayout
-        className={className}
-        initialLeftWidth={55}
-        minLeftWidth={35}
-        maxLeftWidth={70}
-        leftPanel={
-          <CodingPanel
-            initialLanguage={codeLanguage}
-            initialCode={code}
-            problemStatement={problemStatement}
-            problem={effectiveCodingProblem}
-            onCodeChange={handleCodeChange}
-            onLanguageChange={handleLanguageChange}
-            onRun={handleCodeRun}
-          />
-        }
-        rightPanel={<div className="h-full">{children}</div>}
+  const handlePrevPhase = useCallback(() => {
+    if (canGoPrev && onPhaseChange) {
+      onPhaseChange(currentPhaseIndex - 1);
+    }
+  }, [canGoPrev, currentPhaseIndex, onPhaseChange]);
+
+  const handleNextPhase = useCallback(() => {
+    if (canGoNext && onPhaseChange) {
+      onPhaseChange(currentPhaseIndex + 1);
+    }
+  }, [canGoNext, currentPhaseIndex, onPhaseChange]);
+
+  const phaseIndicator = showPhaseIndicator && plan?.phases && plan.phases.length > 0 ? (
+    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+      {onPhaseChange && (
+        <button
+          onClick={handlePrevPhase}
+          disabled={!canGoPrev}
+          className={cn(
+            "p-1.5 rounded-full bg-slate-800/80 backdrop-blur-sm transition-all",
+            canGoPrev ? "text-white hover:bg-slate-700" : "text-slate-500 cursor-not-allowed"
+          )}
+          title="Previous phase"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+      )}
+      <CompactPhaseIndicator
+        phases={plan.phases}
+        currentPhaseIndex={currentPhaseIndex}
       />
+      {onPhaseChange && (
+        <button
+          onClick={handleNextPhase}
+          disabled={!canGoNext}
+          className={cn(
+            "p-1.5 rounded-full bg-slate-800/80 backdrop-blur-sm transition-all",
+            canGoNext ? "text-white hover:bg-slate-700" : "text-slate-500 cursor-not-allowed"
+          )}
+          title="Next phase"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+  ) : null;
+
+  if (currentMode === "normal") {
+    return (
+      <div className={cn("h-full relative", className)}>
+        {phaseIndicator}
+        {children}
+      </div>
     );
   }
 
-  if (effectiveMode === "case_study") {
+  if (currentMode === "coding") {
     return (
-      <SplitPanelLayout
-        className={className}
-        initialLeftWidth={45}
-        minLeftWidth={30}
-        maxLeftWidth={60}
-        leftPanel={
-          <CaseStudyPanel
-            caseMaterials={caseMaterials}
-            casePrompt={casePrompt}
-            onNotesChange={handleNotesChange}
-            onCalculationChange={handleCalculationChange}
-          />
-        }
-        rightPanel={<div className="h-full">{children}</div>}
-      />
+      <div className={cn("h-full relative", className)}>
+        {phaseIndicator}
+        <SplitPanelLayout
+          className="h-full"
+          initialLeftWidth={55}
+          minLeftWidth={35}
+          maxLeftWidth={70}
+          leftPanel={
+            <CodingPanel
+              initialLanguage={codeLanguage}
+              initialCode={code}
+              problemStatement={problemStatement}
+              problem={effectiveCodingProblem}
+              onCodeChange={handleCodeChange}
+              onLanguageChange={handleLanguageChange}
+              onRun={handleCodeRun}
+            />
+          }
+          rightPanel={<div className="h-full">{children}</div>}
+        />
+      </div>
     );
   }
 
-  return <div className={cn("h-full", className)}>{children}</div>;
+  if (currentMode === "case_study") {
+    return (
+      <div className={cn("h-full relative", className)}>
+        {phaseIndicator}
+        <SplitPanelLayout
+          className="h-full"
+          initialLeftWidth={45}
+          minLeftWidth={30}
+          maxLeftWidth={60}
+          leftPanel={
+            <CaseStudyPanel
+              caseMaterials={caseMaterials}
+              casePrompt={casePrompt}
+              onNotesChange={handleNotesChange}
+              onCalculationChange={handleCalculationChange}
+            />
+          }
+          rightPanel={<div className="h-full">{children}</div>}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn("h-full relative", className)}>
+      {phaseIndicator}
+      {children}
+    </div>
+  );
 }
 
 export function useInterviewWorkspace() {

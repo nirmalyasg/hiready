@@ -1,10 +1,20 @@
 export type InterviewLayoutMode = "normal" | "coding" | "case_study";
 
+export type PhaseType = "warmup" | "behavioral" | "technical" | "coding" | "case_study" | "wrap_up" | "general";
+
+export interface PhaseChallenge {
+  challengeId?: string;
+  challengeType?: "coding" | "case_study";
+  skillTags?: string[];
+}
+
 export interface InterviewPhase {
   name: string;
   duration: number;
   objectives?: string[];
   questionPatterns?: string[];
+  phaseType?: PhaseType;
+  challenge?: PhaseChallenge;
 }
 
 export interface CodingProblemData {
@@ -90,6 +100,22 @@ export function getCurrentPhaseMode(
   }
 
   const phase = plan.phases[currentPhaseIndex];
+  
+  if (phase.challenge?.challengeType) {
+    return phase.challenge.challengeType;
+  }
+  
+  if (phase.phaseType === "coding") {
+    return "coding";
+  }
+  if (phase.phaseType === "case_study") {
+    return "case_study";
+  }
+  
+  if (phase.phaseType === "warmup" || phase.phaseType === "behavioral" || phase.phaseType === "wrap_up") {
+    return "normal";
+  }
+
   const phaseName = phase.name.toLowerCase();
   const objectives = (phase.objectives || []).map((o) => o.toLowerCase()).join(" ");
   const patterns = (phase.questionPatterns || []).map((p) => p.toLowerCase()).join(" ");
