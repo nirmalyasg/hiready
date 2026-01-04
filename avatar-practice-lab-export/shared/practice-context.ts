@@ -28,16 +28,16 @@ export interface RoundTaxonomy {
 export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
   hr_screening: {
     category: "hr_screening",
-    label: "HR Screening",
-    description: "Initial phone screen with HR/recruiter covering background, motivation, and basic qualifications",
+    label: "HR Interview",
+    description: "Behavioral assessment combined with general fit evaluation - covering motivation, background, cultural alignment, and teamwork",
     practiceMode: "live_interview",
-    typicalDuration: "30 min",
+    typicalDuration: "30-45 min",
     icon: "phone",
   },
   hiring_manager: {
     category: "hiring_manager",
     label: "Hiring Manager Interview",
-    description: "Deep dive into your experience, leadership, and fit for the specific role and team",
+    description: "Domain expertise deep-dive - industry knowledge, case studies, role-specific requirements, and strategic thinking derived from the JD",
     practiceMode: "live_interview",
     typicalDuration: "45-60 min",
     icon: "user",
@@ -45,7 +45,7 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
   technical_interview: {
     category: "technical_interview",
     label: "Technical Interview",
-    description: "Live technical discussion with coding, problem-solving, or domain knowledge questions",
+    description: "Technical problem solving, coding exercises, architecture discussions, and JD-derived technical skills verification",
     practiceMode: "live_interview",
     typicalDuration: "45-60 min",
     icon: "code",

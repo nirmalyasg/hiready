@@ -404,7 +404,7 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
     const userId = req.user!.id;
     const {
       roleKitId,
-      resumeDocId,
+      resumeDocId: providedResumeDocId,
       jdDocId,
       companyNotesDocId,
       interviewType,
@@ -414,10 +414,34 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
       jobTargetId,
     } = req.body;
     
-    const interviewMode = mode || (roleKitId && !resumeDocId ? "role_based" : "custom");
+    const interviewMode = mode || (roleKitId && !providedResumeDocId ? "role_based" : "custom");
+    
+    let resumeDocId = providedResumeDocId;
     
     if (interviewMode !== "role_based" && !resumeDocId) {
-      return res.status(400).json({ success: false, error: "Resume document is required for custom interviews" });
+      const [profile] = await db
+        .select({ latestResumeDocId: userProfileExtracted.latestResumeDocId })
+        .from(userProfileExtracted)
+        .where(eq(userProfileExtracted.userId, userId));
+      
+      if (profile?.latestResumeDocId) {
+        resumeDocId = profile.latestResumeDocId;
+      } else {
+        const [latestResume] = await db
+          .select({ id: userDocuments.id })
+          .from(userDocuments)
+          .where(and(eq(userDocuments.userId, userId), eq(userDocuments.docType, "resume")))
+          .orderBy(desc(userDocuments.createdAt))
+          .limit(1);
+        
+        if (latestResume) {
+          resumeDocId = latestResume.id;
+        }
+      }
+      
+      if (!resumeDocId) {
+        return res.status(400).json({ success: false, error: "No resume found. Please upload a resume first." });
+      }
     }
     
     if (interviewMode === "role_based" && !roleKitId) {
@@ -1466,6 +1490,35 @@ interviewRouter.post("/intelligence/plan/generate", requireAuth, async (req: Req
     }
     
     context.style = context.style || "neutral";
+    
+    if (context.companyName && !context.blueprintFocus) {
+      const blueprintData = await getCompanyBlueprint(context.companyName, context.roleCategory);
+      if (blueprintData?.blueprint) {
+        const interviewRounds = blueprintData.blueprint.interviewRounds as { type: string; focus: string[] }[] || [];
+        const focusAreas = interviewRounds.flatMap(r => r.focus || []);
+        const focusLower = focusAreas.map(f => f.toLowerCase());
+        
+        const hasCodingRounds = focusLower.some(f => 
+          ["coding", "dsa", "algorithms", "machine-coding", "leetcode"].includes(f)
+        );
+        const hasCaseStudyRounds = focusLower.some(f => 
+          ["case", "case-study", "estimation", "market-sizing", "business-case"].includes(f)
+        );
+        const hasSystemDesign = focusLower.some(f => 
+          ["system-design", "system_design", "architecture", "scale"].includes(f)
+        );
+        
+        context.blueprintFocus = {
+          focusAreas,
+          hasCodingRounds,
+          hasCaseStudyRounds,
+          hasSystemDesign,
+          interviewStyle: blueprintData.blueprint.rubricOverrides?.style,
+          notes: blueprintData.blueprint.notes,
+        };
+        context.companyArchetype = blueprintData.company.archetype;
+      }
+    }
     
     const plan = await generateEnhancedPlan(context);
     

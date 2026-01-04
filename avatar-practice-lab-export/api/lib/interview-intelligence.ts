@@ -13,6 +13,16 @@ export interface InterviewContext {
   resumeExtract?: ResumeExtract;
   jdExtract?: JDExtract;
   jobTarget?: JobTargetContext;
+  blueprintFocus?: BlueprintFocus;
+}
+
+export interface BlueprintFocus {
+  focusAreas: string[];
+  hasCodingRounds: boolean;
+  hasCaseStudyRounds: boolean;
+  hasSystemDesign: boolean;
+  interviewStyle?: string;
+  notes?: string;
 }
 
 export interface ResumeExtract {
@@ -329,44 +339,166 @@ export async function generateEnhancedPlan(
     patternTypes: [],
   });
 
-  if (context.resumeExtract?.projects?.length || context.resumeExtract?.workHistory?.length) {
+  if (context.interviewType === "hr") {
     phases.push({
-      id: "resume_deep_dive",
-      name: "Resume Deep Dive",
-      durationMins: 10,
-      objective: ["validate-claims", "assess-ownership", "verify-impact"],
-      patternTypes: ["resume_claim"],
+      id: "background",
+      name: "Background & Motivation",
+      durationMins: 8,
+      objective: ["career-journey", "motivation", "role-interest", "general-fit"],
+      patternTypes: ["resume_claim", "behavioral"],
       triggers: context.resumeExtract?.claimTriggers || [],
     });
-  }
 
-  if (context.interviewType === "technical" && ["swe", "data", "security"].includes(context.roleCategory)) {
     phases.push({
-      id: "technical",
-      name: "Technical Assessment",
-      durationMins: 15,
-      objective: ["problem-solving", "technical-depth", "system-thinking"],
-      patternTypes: ["technical"],
+      id: "behavioral",
+      name: "Behavioral Assessment",
+      durationMins: 12,
+      objective: ["values-fit", "collaboration", "conflict-handling", "ownership", "teamwork"],
+      patternTypes: ["behavioral", "situational"],
+    });
+
+    phases.push({
+      id: "cultural_fit",
+      name: "Cultural Alignment",
+      durationMins: 6,
+      objective: ["work-style", "team-dynamics", "company-values"],
+      patternTypes: ["behavioral"],
+    });
+  } else if (context.interviewType === "hiring_manager") {
+    const blueprintFocus = context.blueprintFocus;
+    const hasCaseStudy = blueprintFocus?.hasCaseStudyRounds ?? false;
+    
+    if (context.resumeExtract?.projects?.length || context.resumeExtract?.workHistory?.length) {
+      phases.push({
+        id: "resume_deep_dive",
+        name: "Experience Deep Dive",
+        durationMins: 10,
+        objective: ["validate-claims", "assess-ownership", "verify-impact"],
+        patternTypes: ["resume_claim"],
+        triggers: context.resumeExtract?.claimTriggers || [],
+      });
+    }
+
+    phases.push({
+      id: "domain_expertise",
+      name: "Domain & Industry Knowledge",
+      durationMins: 10,
+      objective: ["industry-understanding", "domain-depth", "market-awareness"],
+      patternTypes: ["jd_requirement", "situational"],
+    });
+
+    if (context.jdExtract?.mustHave?.length) {
+      phases.push({
+        id: "jd_requirements",
+        name: "Role-Specific Requirements",
+        durationMins: 8,
+        objective: ["skill-match", "experience-verification", "competency-assessment"],
+        patternTypes: ["jd_requirement"],
+      });
+    }
+
+    if (hasCaseStudy) {
+      phases.push({
+        id: "case_study",
+        name: "Case Study Analysis",
+        durationMins: 12,
+        objective: ["problem-framing", "strategic-thinking", "analytical-approach", "recommendation"],
+        patternTypes: ["situational", "behavioral"],
+      });
+    } else {
+      phases.push({
+        id: "case_scenario",
+        name: "Situational Analysis",
+        durationMins: 8,
+        objective: ["problem-framing", "strategic-thinking", "decision-making"],
+        patternTypes: ["situational", "behavioral"],
+      });
+    }
+  } else if (context.interviewType === "technical") {
+    const blueprintFocus = context.blueprintFocus;
+    const hasCoding = blueprintFocus?.hasCodingRounds ?? true;
+    const hasSystemDesign = blueprintFocus?.hasSystemDesign ?? true;
+    
+    if (context.resumeExtract?.projects?.length || context.resumeExtract?.workHistory?.length) {
+      phases.push({
+        id: "technical_background",
+        name: "Technical Background Review",
+        durationMins: 8,
+        objective: ["validate-claims", "technical-depth", "project-ownership"],
+        patternTypes: ["resume_claim", "technical"],
+        triggers: context.resumeExtract?.claimTriggers || [],
+      });
+    }
+
+    if (hasCoding) {
+      phases.push({
+        id: "technical_assessment",
+        name: "Technical Problem Solving",
+        durationMins: 15,
+        objective: ["problem-solving", "technical-depth", "system-thinking", "coding-approach"],
+        patternTypes: ["technical"],
+      });
+    }
+
+    if (context.jdExtract?.mustHave?.length) {
+      phases.push({
+        id: "skill_verification",
+        name: "Technical Skills Verification",
+        durationMins: 10,
+        objective: ["skill-match", "hands-on-knowledge", "practical-application"],
+        patternTypes: ["jd_requirement", "technical"],
+      });
+    }
+
+    if (hasSystemDesign) {
+      phases.push({
+        id: "architecture_design",
+        name: "Architecture & Design Discussion",
+        durationMins: 8,
+        objective: ["system-design", "trade-offs", "scalability"],
+        patternTypes: ["technical"],
+      });
+    }
+    
+    if (!hasCoding && !hasSystemDesign) {
+      phases.push({
+        id: "technical_discussion",
+        name: "Technical Discussion",
+        durationMins: 12,
+        objective: ["technical-knowledge", "domain-expertise", "problem-approach"],
+        patternTypes: ["technical", "jd_requirement"],
+      });
+    }
+  } else {
+    if (context.resumeExtract?.projects?.length || context.resumeExtract?.workHistory?.length) {
+      phases.push({
+        id: "resume_deep_dive",
+        name: "Resume Deep Dive",
+        durationMins: 10,
+        objective: ["validate-claims", "assess-ownership", "verify-impact"],
+        patternTypes: ["resume_claim"],
+        triggers: context.resumeExtract?.claimTriggers || [],
+      });
+    }
+
+    if (context.jdExtract?.mustHave?.length) {
+      phases.push({
+        id: "jd_requirements",
+        name: "Role Requirements",
+        durationMins: 8,
+        objective: ["skill-match", "experience-verification"],
+        patternTypes: ["jd_requirement"],
+      });
+    }
+
+    phases.push({
+      id: "behavioral",
+      name: "Behavioral Assessment",
+      durationMins: 10,
+      objective: ["values-fit", "collaboration", "conflict-handling", "ownership"],
+      patternTypes: ["behavioral", "situational"],
     });
   }
-
-  if (context.jdExtract?.mustHave?.length) {
-    phases.push({
-      id: "jd_requirements",
-      name: "Role Requirements",
-      durationMins: 8,
-      objective: ["skill-match", "experience-verification"],
-      patternTypes: ["jd_requirement"],
-    });
-  }
-
-  phases.push({
-    id: "behavioral",
-    name: "Behavioral Assessment",
-    durationMins: 10,
-    objective: ["values-fit", "collaboration", "conflict-handling", "ownership"],
-    patternTypes: ["behavioral", "situational"],
-  });
 
   phases.push({
     id: "close",
