@@ -17,6 +17,11 @@ import {
   interviewArtifacts,
   jobTargets,
   userSkillPatterns,
+  companies,
+  questionPatterns,
+  companyRoleBlueprints,
+  userSkillMemory,
+  jobPracticeLinks,
   RoleKit,
   UserDocument,
   InterviewConfig,
@@ -29,6 +34,16 @@ import { requireAuth } from "../middleware/auth.js";
 import { getOpenAI } from "../utils/openai-client.js";
 import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
+import {
+  loadQuestionPatterns,
+  getCompanyBlueprint,
+  generateEnhancedPlan,
+  classifyAnswer,
+  selectProbe,
+  updateUserSkillMemory,
+  getUserSkillTrends,
+  type InterviewContext,
+} from "../lib/interview-intelligence.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -1360,5 +1375,205 @@ PHASE TRACKING:
 - Include scenario/case questions
 - End with candidate questions and wrap-up
 `;
+
+// =====================
+// Interview Intelligence Endpoints
+// =====================
+
+interviewRouter.get("/intelligence/patterns", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { roleCategory = "general", interviewType = "hiring_manager", types } = req.query;
+    const patternTypes = types ? (types as string).split(",") : ["resume_claim", "behavioral", "jd_requirement"];
+    
+    const patterns = await loadQuestionPatterns(
+      roleCategory as string,
+      interviewType as string,
+      patternTypes
+    );
+    
+    res.json({ success: true, patterns, count: patterns.length });
+  } catch (error: any) {
+    console.error("Error loading patterns:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.get("/intelligence/companies", async (req: Request, res: Response) => {
+  try {
+    const { tier, archetype, search } = req.query;
+    
+    const conditions = [];
+    
+    if (tier) {
+      conditions.push(eq(companies.tier, tier as any));
+    }
+    if (archetype) {
+      conditions.push(eq(companies.archetype, archetype as any));
+    }
+    
+    let results;
+    if (conditions.length > 0) {
+      results = await db.select().from(companies).where(and(...conditions)).limit(100);
+    } else {
+      results = await db.select().from(companies).limit(100);
+    }
+    
+    if (search) {
+      const searchLower = (search as string).toLowerCase();
+      results = results.filter((c) => c.name.toLowerCase().includes(searchLower));
+    }
+    
+    res.json({ success: true, companies: results });
+  } catch (error: any) {
+    console.error("Error fetching companies:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.get("/intelligence/company/:name/blueprint", async (req: Request, res: Response) => {
+  try {
+    const { name } = req.params;
+    const { roleCategory = "swe" } = req.query;
+    
+    const result = await getCompanyBlueprint(name, roleCategory as string);
+    
+    if (!result) {
+      return res.status(404).json({ success: false, error: "Company not found" });
+    }
+    
+    res.json({ success: true, ...result });
+  } catch (error: any) {
+    console.error("Error fetching blueprint:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.post("/intelligence/plan/generate", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const context: InterviewContext = req.body;
+    
+    if (!context.roleCategory || !context.interviewType || !context.seniority) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Missing required fields: roleCategory, interviewType, seniority" 
+      });
+    }
+    
+    context.style = context.style || "neutral";
+    
+    const plan = await generateEnhancedPlan(context);
+    
+    res.json({ success: true, plan });
+  } catch (error: any) {
+    console.error("Error generating enhanced plan:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.post("/intelligence/answer/classify", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { answer, question, context } = req.body;
+    
+    if (!answer || !question) {
+      return res.status(400).json({ success: false, error: "Missing answer or question" });
+    }
+    
+    const classification = await classifyAnswer(answer, question, context || {});
+    
+    res.json({ success: true, classification });
+  } catch (error: any) {
+    console.error("Error classifying answer:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.post("/intelligence/probe/select", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { pattern, classification, probeCount = 0 } = req.body;
+    
+    if (!pattern || !classification) {
+      return res.status(400).json({ success: false, error: "Missing pattern or classification" });
+    }
+    
+    const decision = selectProbe(pattern, classification, probeCount);
+    
+    res.json({ success: true, decision });
+  } catch (error: any) {
+    console.error("Error selecting probe:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.get("/intelligence/skill-memory", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { roleCategory } = req.query;
+    
+    const trends = await getUserSkillTrends(userId, roleCategory as string | undefined);
+    
+    res.json({ success: true, ...trends });
+  } catch (error: any) {
+    console.error("Error fetching skill memory:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.post("/intelligence/skill-memory/update", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { roleCategory, dimensionScores, sessionId } = req.body;
+    
+    if (!roleCategory || !dimensionScores?.length) {
+      return res.status(400).json({ success: false, error: "Missing roleCategory or dimensionScores" });
+    }
+    
+    await updateUserSkillMemory(userId, roleCategory, dimensionScores, sessionId);
+    
+    res.json({ success: true, message: "Skill memory updated" });
+  } catch (error: any) {
+    console.error("Error updating skill memory:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.post("/practice-link", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { jobTargetId, interviewConfigId, interviewSessionId, exerciseSessionId, sessionType } = req.body;
+    
+    if (!jobTargetId || !sessionType) {
+      return res.status(400).json({ success: false, error: "Missing jobTargetId or sessionType" });
+    }
+    
+    const [link] = await db.insert(jobPracticeLinks).values({
+      jobTargetId,
+      interviewConfigId: interviewConfigId || null,
+      interviewSessionId: interviewSessionId || null,
+      exerciseSessionId: exerciseSessionId || null,
+      sessionType,
+    }).returning();
+    
+    res.json({ success: true, link });
+  } catch (error: any) {
+    console.error("Error creating practice link:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.get("/practice-links/:jobTargetId", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { jobTargetId } = req.params;
+    
+    const links = await db
+      .select()
+      .from(jobPracticeLinks)
+      .where(eq(jobPracticeLinks.jobTargetId, jobTargetId))
+      .orderBy(jobPracticeLinks.createdAt);
+    
+    res.json({ success: true, links });
+  } catch (error: any) {
+    console.error("Error fetching practice links:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 export default interviewRouter;

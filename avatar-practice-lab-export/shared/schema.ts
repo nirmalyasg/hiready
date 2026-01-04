@@ -1472,8 +1472,153 @@ export const userMediaPreferencesRelations = relations(userMediaPreferences, ({ 
 }));
 
 // =====================
+// Interview Intelligence Tables
+// =====================
+
+// Companies - for company-specific interview patterns
+export const companies = pgTable("companies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(),
+  country: text("country"),
+  tier: text("tier").$type<"top50" | "top200" | "other">().default("other"),
+  archetype: text("archetype").$type<
+    "startup" | "enterprise" | "regulated" | "consumer" | "saas" | "fintech" | "edtech" | "services" | "industrial"
+  >(),
+  tags: jsonb("tags").$type<string[]>(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Question Patterns - templated questions with probe trees
+export const questionPatterns = pgTable("question_patterns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  patternType: text("pattern_type")
+    .$type<"resume_claim" | "jd_requirement" | "behavioral" | "scenario" | "probe" | "technical" | "situational">()
+    .notNull(),
+  roleCategory: text("role_category")
+    .$type<"swe" | "data" | "pm" | "design" | "sales" | "marketing" | "ops" | "hr" | "finance" | "consulting" | "security" | "general">(),
+  interviewType: text("interview_type")
+    .$type<"hr" | "hiring_manager" | "technical" | "panel" | "behavioral">(),
+  template: text("template").notNull(),
+  probeTree: jsonb("probe_tree").$type<{
+    ifVague?: string[];
+    ifStrong?: string[];
+    always?: string[];
+    followUp?: string[];
+  }>(),
+  tags: jsonb("tags").$type<string[]>(),
+  sourceType: text("source_type").$type<"curated" | "generated" | "scraped">().default("curated"),
+  sourceRef: text("source_ref"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Company Role Blueprints - company-specific interview configurations
+export const companyRoleBlueprints = pgTable("company_role_blueprints", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").references(() => companies.id, { onDelete: "cascade" }),
+  roleCategory: text("role_category")
+    .$type<"swe" | "data" | "pm" | "design" | "sales" | "marketing" | "ops" | "hr" | "finance" | "consulting" | "security">()
+    .notNull(),
+  seniority: text("seniority").$type<"entry" | "mid" | "senior" | "staff" | "principal">(),
+  skillFocus: jsonb("skill_focus").$type<string[]>(),
+  questionPatternIds: jsonb("question_pattern_ids").$type<string[]>(),
+  rubricOverrides: jsonb("rubric_overrides").$type<{
+    dimensions?: { key: string; weight: number }[];
+    passingScore?: number;
+    style?: string;
+  }>(),
+  interviewRounds: jsonb("interview_rounds").$type<{
+    round: number;
+    type: string;
+    focus: string[];
+    durationMins: number;
+  }[]>(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Job Practice Links - connects saved jobs to practice sessions
+export const jobPracticeLinks = pgTable("job_practice_links", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  jobTargetId: varchar("job_target_id")
+    .notNull()
+    .references(() => jobTargets.id, { onDelete: "cascade" }),
+  interviewConfigId: integer("interview_config_id")
+    .references(() => interviewConfigs.id, { onDelete: "set null" }),
+  interviewSessionId: integer("interview_session_id")
+    .references(() => interviewSessions.id, { onDelete: "set null" }),
+  exerciseSessionId: integer("exercise_session_id")
+    .references(() => exerciseSessions.id, { onDelete: "set null" }),
+  sessionType: text("session_type").$type<"interview" | "case" | "coding">().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// User Skill Memory - tracks user improvement over time per dimension
+export const userSkillMemory = pgTable("user_skill_memory", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => authUsers.id, { onDelete: "cascade" }),
+  roleCategory: text("role_category")
+    .$type<"swe" | "data" | "pm" | "design" | "sales" | "marketing" | "ops" | "hr" | "finance" | "consulting" | "security" | "general">(),
+  dimension: text("dimension").notNull(),
+  baselineScore: real("baseline_score"),
+  latestScore: real("latest_score"),
+  trend: jsonb("trend").$type<{
+    scores: { date: string; score: number; sessionId?: number }[];
+    direction: "improving" | "stable" | "declining";
+  }>(),
+  commonIssues: jsonb("common_issues").$type<string[]>(),
+  resolvedIssues: jsonb("resolved_issues").$type<string[]>(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Interview Intelligence relations
+export const companiesRelations = relations(companies, ({ many }) => ({
+  blueprints: many(companyRoleBlueprints),
+}));
+
+export const companyRoleBlueprintsRelations = relations(companyRoleBlueprints, ({ one }) => ({
+  company: one(companies, {
+    fields: [companyRoleBlueprints.companyId],
+    references: [companies.id],
+  }),
+}));
+
+export const jobPracticeLinksRelations = relations(jobPracticeLinks, ({ one }) => ({
+  jobTarget: one(jobTargets, {
+    fields: [jobPracticeLinks.jobTargetId],
+    references: [jobTargets.id],
+  }),
+  interviewConfig: one(interviewConfigs, {
+    fields: [jobPracticeLinks.interviewConfigId],
+    references: [interviewConfigs.id],
+  }),
+  interviewSession: one(interviewSessions, {
+    fields: [jobPracticeLinks.interviewSessionId],
+    references: [interviewSessions.id],
+  }),
+  exerciseSession: one(exerciseSessions, {
+    fields: [jobPracticeLinks.exerciseSessionId],
+    references: [exerciseSessions.id],
+  }),
+}));
+
+export const userSkillMemoryRelations = relations(userSkillMemory, ({ one }) => ({
+  user: one(authUsers, {
+    fields: [userSkillMemory.userId],
+    references: [authUsers.id],
+  }),
+}));
+
+// =====================
 // Insert Schemas
 // =====================
+
+// Interview Intelligence Insert Schemas
+export const insertCompanySchema = createInsertSchema(companies).omit({ createdAt: true });
+export const insertQuestionPatternSchema = createInsertSchema(questionPatterns).omit({ createdAt: true });
+export const insertCompanyRoleBlueprintSchema = createInsertSchema(companyRoleBlueprints).omit({ updatedAt: true });
+export const insertJobPracticeLinkSchema = createInsertSchema(jobPracticeLinks).omit({ createdAt: true });
+export const insertUserSkillMemorySchema = createInsertSchema(userSkillMemory).omit({ updatedAt: true });
 
 export const insertCustomScenarioSchema = createInsertSchema(customScenarios).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertScenarioSchema = createInsertSchema(scenarios).omit({ id: true });
@@ -1624,3 +1769,15 @@ export type UserMediaPreference = typeof userMediaPreferences.$inferSelect;
 export type InsertUserMediaPreference = z.infer<typeof insertUserMediaPreferenceSchema>;
 export type ApiCostDailyRollup = typeof apiCostDailyRollup.$inferSelect;
 export type InsertApiCostDailyRollup = z.infer<typeof insertApiCostDailyRollupSchema>;
+
+// Interview Intelligence Types
+export type Company = typeof companies.$inferSelect;
+export type InsertCompany = z.infer<typeof insertCompanySchema>;
+export type QuestionPattern = typeof questionPatterns.$inferSelect;
+export type InsertQuestionPattern = z.infer<typeof insertQuestionPatternSchema>;
+export type CompanyRoleBlueprint = typeof companyRoleBlueprints.$inferSelect;
+export type InsertCompanyRoleBlueprint = z.infer<typeof insertCompanyRoleBlueprintSchema>;
+export type JobPracticeLink = typeof jobPracticeLinks.$inferSelect;
+export type InsertJobPracticeLink = z.infer<typeof insertJobPracticeLinkSchema>;
+export type UserSkillMemory = typeof userSkillMemory.$inferSelect;
+export type InsertUserSkillMemory = z.infer<typeof insertUserSkillMemorySchema>;
