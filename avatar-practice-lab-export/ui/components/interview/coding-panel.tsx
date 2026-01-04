@@ -20,7 +20,8 @@ interface CodingPanelProps {
   initialCode?: string;
   initialLanguage?: SupportedLanguage;
   problemStatement?: string;
-  onCodeChange?: (code: string) => void;
+  onCodeChange?: (code: string, language: SupportedLanguage) => void;
+  onLanguageChange?: (language: SupportedLanguage) => void;
   onRun?: (code: string, language: SupportedLanguage) => void;
 }
 
@@ -106,6 +107,7 @@ export function CodingPanel({
   initialLanguage = "javascript",
   problemStatement,
   onCodeChange,
+  onLanguageChange,
   onRun,
 }: CodingPanelProps) {
   const [language, setLanguage] = useState<SupportedLanguage>(initialLanguage);
@@ -121,21 +123,24 @@ export function CodingPanel({
   const handleCodeChange = useCallback(
     (value: string) => {
       setCode(value);
-      onCodeChange?.(value);
+      onCodeChange?.(value, language);
     },
-    [onCodeChange]
+    [onCodeChange, language]
   );
 
   const handleLanguageChange = useCallback((newLang: SupportedLanguage) => {
     setLanguage(newLang);
-    setCode(DEFAULT_CODE[newLang]);
+    const newCode = DEFAULT_CODE[newLang];
+    setCode(newCode);
     setShowLanguageDropdown(false);
-  }, []);
+    onLanguageChange?.(newLang);
+    onCodeChange?.(newCode, newLang);
+  }, [onLanguageChange, onCodeChange]);
 
   const handleReset = useCallback(() => {
     setCode(DEFAULT_CODE[language]);
     setOutput("");
-    onCodeChange?.(DEFAULT_CODE[language]);
+    onCodeChange?.(DEFAULT_CODE[language], language);
   }, [language, onCodeChange]);
 
   const handleRun = useCallback(() => {

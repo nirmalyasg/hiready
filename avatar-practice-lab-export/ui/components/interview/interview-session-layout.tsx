@@ -51,11 +51,19 @@ export function InterviewSessionLayout({
   const effectiveMode = currentMode !== "normal" ? currentMode : overallMode;
 
   const handleCodeChange = useCallback(
-    (newCode: string) => {
+    (newCode: string, language: SupportedLanguage) => {
       setCode(newCode);
-      onCodeChange?.(newCode, codeLanguage);
+      setCodeLanguage(language);
+      onCodeChange?.(newCode, language);
     },
-    [codeLanguage, onCodeChange]
+    [onCodeChange]
+  );
+
+  const handleLanguageChange = useCallback(
+    (language: SupportedLanguage) => {
+      setCodeLanguage(language);
+    },
+    []
   );
 
   const handleCodeRun = useCallback(
@@ -100,6 +108,7 @@ export function InterviewSessionLayout({
             initialCode={code}
             problemStatement={problemStatement}
             onCodeChange={handleCodeChange}
+            onLanguageChange={handleLanguageChange}
             onRun={handleCodeRun}
           />
         }
