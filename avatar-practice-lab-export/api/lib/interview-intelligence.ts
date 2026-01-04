@@ -49,6 +49,8 @@ export interface JobTargetContext {
   description?: string;
 }
 
+export type PhaseType = "warmup" | "behavioral" | "technical" | "coding" | "case_study" | "wrap_up" | "general";
+
 export interface InterviewPhase {
   id: string;
   name: string;
@@ -56,6 +58,7 @@ export interface InterviewPhase {
   objective: string[];
   patternTypes: string[];
   triggers?: string[];
+  phaseType?: PhaseType;
 }
 
 export interface EnhancedInterviewPlan {
@@ -337,6 +340,7 @@ export async function generateEnhancedPlan(
     durationMins: 3,
     objective: ["rapport", "role-context", "set-expectations"],
     patternTypes: [],
+    phaseType: "warmup",
   });
 
   if (context.interviewType === "hr") {
@@ -347,6 +351,7 @@ export async function generateEnhancedPlan(
       objective: ["career-journey", "motivation", "role-interest", "general-fit"],
       patternTypes: ["resume_claim", "behavioral"],
       triggers: context.resumeExtract?.claimTriggers || [],
+      phaseType: "behavioral",
     });
 
     phases.push({
@@ -355,6 +360,7 @@ export async function generateEnhancedPlan(
       durationMins: 12,
       objective: ["values-fit", "collaboration", "conflict-handling", "ownership", "teamwork"],
       patternTypes: ["behavioral", "situational"],
+      phaseType: "behavioral",
     });
 
     phases.push({
@@ -363,6 +369,7 @@ export async function generateEnhancedPlan(
       durationMins: 6,
       objective: ["work-style", "team-dynamics", "company-values"],
       patternTypes: ["behavioral"],
+      phaseType: "behavioral",
     });
   } else if (context.interviewType === "hiring_manager") {
     const blueprintFocus = context.blueprintFocus;
@@ -376,6 +383,7 @@ export async function generateEnhancedPlan(
         objective: ["validate-claims", "assess-ownership", "verify-impact"],
         patternTypes: ["resume_claim"],
         triggers: context.resumeExtract?.claimTriggers || [],
+        phaseType: "behavioral",
       });
     }
 
@@ -385,6 +393,7 @@ export async function generateEnhancedPlan(
       durationMins: 10,
       objective: ["industry-understanding", "domain-depth", "market-awareness"],
       patternTypes: ["jd_requirement", "situational"],
+      phaseType: "technical",
     });
 
     if (context.jdExtract?.mustHave?.length) {
@@ -394,6 +403,7 @@ export async function generateEnhancedPlan(
         durationMins: 8,
         objective: ["skill-match", "experience-verification", "competency-assessment"],
         patternTypes: ["jd_requirement"],
+        phaseType: "technical",
       });
     }
 
@@ -404,6 +414,7 @@ export async function generateEnhancedPlan(
         durationMins: 12,
         objective: ["problem-framing", "strategic-thinking", "analytical-approach", "recommendation"],
         patternTypes: ["situational", "behavioral"],
+        phaseType: "case_study",
       });
     } else {
       phases.push({
@@ -412,6 +423,7 @@ export async function generateEnhancedPlan(
         durationMins: 8,
         objective: ["problem-framing", "strategic-thinking", "decision-making"],
         patternTypes: ["situational", "behavioral"],
+        phaseType: "behavioral",
       });
     }
   } else if (context.interviewType === "technical") {
@@ -427,6 +439,7 @@ export async function generateEnhancedPlan(
         objective: ["validate-claims", "technical-depth", "project-ownership"],
         patternTypes: ["resume_claim", "technical"],
         triggers: context.resumeExtract?.claimTriggers || [],
+        phaseType: "behavioral",
       });
     }
 
@@ -437,6 +450,7 @@ export async function generateEnhancedPlan(
         durationMins: 15,
         objective: ["problem-solving", "technical-depth", "system-thinking", "coding-approach"],
         patternTypes: ["technical"],
+        phaseType: "coding",
       });
     }
 
@@ -447,6 +461,7 @@ export async function generateEnhancedPlan(
         durationMins: 10,
         objective: ["skill-match", "hands-on-knowledge", "practical-application"],
         patternTypes: ["jd_requirement", "technical"],
+        phaseType: "technical",
       });
     }
 
@@ -457,6 +472,7 @@ export async function generateEnhancedPlan(
         durationMins: 8,
         objective: ["system-design", "trade-offs", "scalability"],
         patternTypes: ["technical"],
+        phaseType: "technical",
       });
     }
     
@@ -467,6 +483,7 @@ export async function generateEnhancedPlan(
         durationMins: 12,
         objective: ["technical-knowledge", "domain-expertise", "problem-approach"],
         patternTypes: ["technical", "jd_requirement"],
+        phaseType: "technical",
       });
     }
   } else {
@@ -478,6 +495,7 @@ export async function generateEnhancedPlan(
         objective: ["validate-claims", "assess-ownership", "verify-impact"],
         patternTypes: ["resume_claim"],
         triggers: context.resumeExtract?.claimTriggers || [],
+        phaseType: "behavioral",
       });
     }
 
@@ -488,6 +506,7 @@ export async function generateEnhancedPlan(
         durationMins: 8,
         objective: ["skill-match", "experience-verification"],
         patternTypes: ["jd_requirement"],
+        phaseType: "technical",
       });
     }
 
@@ -497,6 +516,7 @@ export async function generateEnhancedPlan(
       durationMins: 10,
       objective: ["values-fit", "collaboration", "conflict-handling", "ownership"],
       patternTypes: ["behavioral", "situational"],
+      phaseType: "behavioral",
     });
   }
 
@@ -506,6 +526,7 @@ export async function generateEnhancedPlan(
     durationMins: 4,
     objective: ["candidate-questions", "wrap-up", "next-steps"],
     patternTypes: [],
+    phaseType: "wrap_up",
   });
 
   const allPatternTypes = [...new Set(phases.flatMap((p) => p.patternTypes))];

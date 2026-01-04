@@ -64,6 +64,46 @@ const __dirname = path.dirname(__filename);
 
 export const interviewRouter = Router();
 
+function mapPhasesToFrontendFormat(planJson: any): any {
+  if (!planJson || !planJson.phases) return planJson;
+  
+  return {
+    ...planJson,
+    phases: planJson.phases.map((phase: any) => ({
+      name: phase.name,
+      duration: phase.durationMins || phase.duration || 5,
+      objectives: phase.objective || phase.objectives || [],
+      questionPatterns: phase.patternTypes || phase.questionPatterns || [],
+      phaseType: phase.phaseType || inferPhaseType(phase.id, phase.name),
+    })),
+  };
+}
+
+function inferPhaseType(id: string, name: string): string {
+  const nameLower = name.toLowerCase();
+  const idLower = id?.toLowerCase() || "";
+  
+  if (idLower === "intro" || nameLower.includes("introduction") || nameLower.includes("rapport")) {
+    return "warmup";
+  }
+  if (idLower === "close" || nameLower.includes("closing") || nameLower.includes("wrap")) {
+    return "wrap_up";
+  }
+  if (nameLower.includes("coding") || nameLower.includes("problem solving")) {
+    return "coding";
+  }
+  if (nameLower.includes("case study") || nameLower.includes("case-study")) {
+    return "case_study";
+  }
+  if (nameLower.includes("behavioral") || nameLower.includes("cultural") || nameLower.includes("motivation")) {
+    return "behavioral";
+  }
+  if (nameLower.includes("technical") || nameLower.includes("skill") || nameLower.includes("domain")) {
+    return "technical";
+  }
+  return "general";
+}
+
 const uploadDir = path.join(__dirname, "..", "uploads", "documents");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -766,7 +806,7 @@ interviewRouter.get("/session/:id", requireAuth, async (req: Request, res: Respo
         ...session,
         roleKit,
         config,
-        plan: plan?.planJson,
+        plan: mapPhasesToFrontendFormat(plan?.planJson),
       },
       config, 
       plan, 
