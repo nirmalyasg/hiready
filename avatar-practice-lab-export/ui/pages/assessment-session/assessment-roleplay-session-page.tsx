@@ -1576,8 +1576,36 @@ function Transcript({
 
   const [isTranscriptExpanded, setIsTranscriptExpanded] = useState(false);
   
+  const normalizePhase = (phase: any) => {
+    const nameLower = phase.name?.toLowerCase() || "";
+    const idLower = phase.id?.toLowerCase() || "";
+    
+    let inferredType = "general";
+    if (idLower === "intro" || nameLower.includes("introduction") || nameLower.includes("rapport")) {
+      inferredType = "warmup";
+    } else if (idLower === "close" || nameLower.includes("closing") || nameLower.includes("wrap")) {
+      inferredType = "wrap_up";
+    } else if (nameLower.includes("coding") || nameLower.includes("problem solving")) {
+      inferredType = "coding";
+    } else if (nameLower.includes("case study") || nameLower.includes("case-study")) {
+      inferredType = "case_study";
+    } else if (nameLower.includes("behavioral") || nameLower.includes("cultural") || nameLower.includes("motivation")) {
+      inferredType = "behavioral";
+    } else if (nameLower.includes("technical") || nameLower.includes("skill") || nameLower.includes("domain")) {
+      inferredType = "technical";
+    }
+    
+    return {
+      name: phase.name,
+      duration: phase.durationMins || phase.duration || 5,
+      objectives: phase.objective || phase.objectives || [],
+      questionPatterns: phase.patternTypes || phase.questionPatterns || [],
+      phaseType: phase.phaseType || inferredType,
+    };
+  };
+  
   const interviewPlanForLayout = interviewSession?.plan ? {
-    phases: interviewSession.plan.phases || [],
+    phases: (interviewSession.plan.phases || []).map(normalizePhase),
     focusAreas: interviewSession.plan.focusAreas || [],
     codingProblem: interviewSession.plan.codingProblem,
   } : null;
