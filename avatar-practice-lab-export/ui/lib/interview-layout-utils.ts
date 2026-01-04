@@ -7,9 +7,22 @@ export interface InterviewPhase {
   questionPatterns?: string[];
 }
 
+export interface CodingProblemData {
+  id: string;
+  title: string;
+  difficulty: "Easy" | "Medium" | "Hard";
+  description: string;
+  examples: { input: string; output: string; explanation?: string }[];
+  constraints?: string[];
+  hints?: string[];
+  starterCode?: Record<string, string>;
+  testCases?: { input: string; expectedOutput: string }[];
+}
+
 export interface InterviewPlanData {
   phases?: InterviewPhase[];
   focusAreas?: string[];
+  codingProblem?: CodingProblemData;
 }
 
 const CODING_PHASE_KEYWORDS = [

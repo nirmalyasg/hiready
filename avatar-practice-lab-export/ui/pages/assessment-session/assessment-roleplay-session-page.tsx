@@ -1478,6 +1478,7 @@ function Transcript({
   const interviewPlanForLayout = interviewSession?.plan ? {
     phases: interviewSession.plan.phases || [],
     focusAreas: interviewSession.plan.focusAreas || [],
+    codingProblem: interviewSession.plan.codingProblem,
   } : null;
 
   const getTimerColor = () => {

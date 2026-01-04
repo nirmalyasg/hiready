@@ -51,6 +51,8 @@ export function InterviewSessionLayout({
   const overallMode = detectInterviewLayoutMode(plan);
   const currentMode = getCurrentPhaseMode(plan, currentPhaseIndex);
   const effectiveMode = currentMode !== "normal" ? currentMode : overallMode;
+  
+  const effectiveCodingProblem = codingProblem || (plan?.codingProblem as CodingProblem | undefined);
 
   const handleCodeChange = useCallback(
     (newCode: string, language: SupportedLanguage) => {
@@ -109,7 +111,7 @@ export function InterviewSessionLayout({
             initialLanguage={codeLanguage}
             initialCode={code}
             problemStatement={problemStatement}
-            problem={codingProblem}
+            problem={effectiveCodingProblem}
             onCodeChange={handleCodeChange}
             onLanguageChange={handleLanguageChange}
             onRun={handleCodeRun}
