@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Clock, Mic, MicOff, PhoneOff, Volume2, AlertCircle, Code, Briefcase } from "lucide-react";
+import { Clock, Mic, MicOff, PhoneOff, Volume2, AlertCircle, Code, Briefcase, PanelRightOpen } from "lucide-react";
 import { TranscriptProvider, useTranscript } from '@/contexts/TranscriptContext';
 import { EventProvider } from '@/contexts/EventContext';
 import { InterviewEventBusProvider, useInterviewEventBus, CodingChallenge, CaseStudyChallenge } from '@/contexts/InterviewEventBusContext';
@@ -82,6 +82,7 @@ function ContinuousSessionContent() {
     startCaseStudyChallenge, 
     endChallenge,
     isPanelExpanded,
+    setPanelExpanded,
     userCode,
     userNotes
   } = useInterviewEventBus();
@@ -514,17 +515,28 @@ IMPORTANT BEHAVIOR:
           "flex flex-col transition-all duration-300",
           activeChallenge !== 'none' && isPanelExpanded ? "w-1/2" : "w-full"
         )}>
-          <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 p-8">
+          <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-900 p-8 relative">
             <div className="relative">
               <div className={cn(
-                "w-48 h-48 rounded-full overflow-hidden border-4 transition-all duration-300",
+                "w-48 h-48 rounded-full overflow-hidden border-4 transition-all duration-300 bg-slate-700 flex items-center justify-center",
                 isSpeaking ? "border-emerald-500 shadow-lg shadow-emerald-500/30" : "border-slate-600"
               )}>
-                <img 
-                  src={selectedAvatar.imageUrl} 
-                  alt={selectedAvatar.name}
-                  className="w-full h-full object-cover"
-                />
+                {selectedAvatar.imageUrl ? (
+                  <img 
+                    src={selectedAvatar.imageUrl} 
+                    alt={selectedAvatar.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ) : null}
+                <span className="text-5xl font-bold text-slate-400 absolute">
+                  {selectedAvatar.name.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div className="text-center mt-3">
+                <span className="text-white font-medium">{selectedAvatar.name}</span>
               </div>
               {isSpeaking && (
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1">
@@ -533,30 +545,40 @@ IMPORTANT BEHAVIOR:
                 </div>
               )}
             </div>
+
+            {activeChallenge !== 'none' && !isPanelExpanded && (
+              <Button
+                onClick={() => setPanelExpanded(true)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <PanelRightOpen className="w-4 h-4 mr-2" />
+                Open {activeChallenge === 'coding' ? 'Code Editor' : 'Case Study'}
+              </Button>
+            )}
           </div>
 
           <div className="flex-shrink-0 bg-slate-800 border-t border-slate-700 p-4">
             <div className="flex items-center justify-center gap-3">
               <Button
-                variant={isMuted ? "destructive" : "outline"}
-                size="lg"
                 onClick={toggleMute}
                 className={cn(
-                  "rounded-full w-14 h-14",
-                  isMuted && "bg-red-500 hover:bg-red-600"
+                  "rounded-full h-14 px-6 flex items-center gap-2",
+                  isMuted 
+                    ? "bg-red-500 hover:bg-red-600 text-white" 
+                    : "bg-slate-700 hover:bg-slate-600 text-white"
                 )}
               >
-                {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+                {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                <span>{isMuted ? 'Unmute' : 'Mute'}</span>
               </Button>
               
               <Button
-                variant="destructive"
-                size="lg"
                 onClick={handleEnd}
                 disabled={isSaving}
-                className="rounded-full w-14 h-14 bg-red-600 hover:bg-red-700"
+                className="rounded-full h-14 px-6 bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
               >
-                <PhoneOff className="w-6 h-6" />
+                <PhoneOff className="w-5 h-5" />
+                <span>End Interview</span>
               </Button>
             </div>
             
