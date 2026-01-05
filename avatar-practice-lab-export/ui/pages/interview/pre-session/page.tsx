@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useToast } from "@/hooks/use-toast";
 
 interface InterviewPlan {
   phases: {
@@ -41,6 +42,7 @@ export default function InterviewPreSessionPage() {
   const configId = searchParams.get("configId");
   const planId = searchParams.get("planId");
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [plan, setPlan] = useState<InterviewPlan | null>(null);
   const [config, setConfig] = useState<InterviewConfig | null>(null);
@@ -87,12 +89,33 @@ export default function InterviewPreSessionPage() {
         }),
       });
 
+      if (response.status === 401) {
+        toast({
+          title: "Please sign in",
+          description: "You need to be signed in to start an interview session.",
+          variant: "destructive",
+        });
+        navigate("/login");
+        return;
+      }
+
       const data = await response.json();
       if (data.success) {
         navigate(`/interview/session?interviewSessionId=${data.session.id}&configId=${configId}`);
+      } else {
+        toast({
+          title: "Failed to start interview",
+          description: data.error || "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error starting session:", error);
+      toast({
+        title: "Connection error",
+        description: "Could not connect to the server. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setStarting(false);
     }
