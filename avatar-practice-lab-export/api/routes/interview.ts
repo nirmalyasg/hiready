@@ -719,7 +719,15 @@ interviewRouter.post("/session/start", requireAuth, async (req: Request, res: Re
       })
       .returning();
     
-    res.json({ success: true, session });
+    let planData = null;
+    if (interviewPlanId) {
+      const [plan] = await db.select().from(interviewPlans).where(eq(interviewPlans.id, interviewPlanId));
+      if (plan) {
+        planData = plan.planJson;
+      }
+    }
+    
+    res.json({ success: true, session: { ...session, plan: planData } });
   } catch (error: any) {
     console.error("Error starting interview session:", error);
     res.status(500).json({ success: false, error: error.message });

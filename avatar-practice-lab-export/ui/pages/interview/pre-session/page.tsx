@@ -89,7 +89,16 @@ export default function InterviewPreSessionPage() {
 
       const data = await response.json();
       if (data.success) {
-        navigate(`/avatar/practice/avatar-select?interviewSessionId=${data.session.id}&configId=${configId}`);
+        const interviewType = config?.interviewType;
+        const sessionPlan = data.session?.plan || {};
+        
+        if (interviewType === "technical" && sessionPlan.codingProblem) {
+          navigate(`/exercise-mode/coding-lab/session?exerciseId=${sessionPlan.codingProblem.id || sessionPlan.codingProblem.challengeId}&interviewSessionId=${data.session.id}&configId=${configId}`);
+        } else if (interviewType === "hiring_manager" && sessionPlan.caseStudy) {
+          navigate(`/exercise-mode/case-study/session?templateId=${sessionPlan.caseStudy.id || sessionPlan.caseStudy.challengeId}&interviewSessionId=${data.session.id}&configId=${configId}`);
+        } else {
+          navigate(`/avatar/practice/avatar-select?interviewSessionId=${data.session.id}&configId=${configId}`);
+        }
       }
     } catch (error) {
       console.error("Error starting session:", error);
