@@ -919,7 +919,7 @@ interviewRouter.get("/session/:id", requireAuth, async (req: Request, res: Respo
 interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, res: Response) => {
   try {
     const sessionId = parseInt(req.params.id);
-    const { transcript, transcriptId } = req.body;
+    const { transcript, transcriptId, codeSubmission, caseStudyNotes, codingChallenge, caseStudyChallenge } = req.body;
     
     const [session] = await db.select().from(interviewSessions).where(eq(interviewSessions.id, sessionId));
     
@@ -964,6 +964,18 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
       candidateProfile: resumeParsed,
       jobDescription: jdParsed,
       transcript,
+      codeSubmission: codeSubmission || null,
+      caseStudyNotes: caseStudyNotes || null,
+      codingChallenge: codingChallenge ? {
+        title: codingChallenge.title,
+        description: codingChallenge.description,
+        difficulty: codingChallenge.difficulty,
+      } : null,
+      caseStudyChallenge: caseStudyChallenge ? {
+        title: caseStudyChallenge.title,
+        prompt: caseStudyChallenge.prompt,
+        caseType: caseStudyChallenge.caseType,
+      } : null,
     };
     
     const openaiEval = getOpenAI();

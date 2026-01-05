@@ -84,7 +84,9 @@ function ContinuousSessionContent() {
     isPanelExpanded,
     setPanelExpanded,
     userCode,
-    userNotes
+    userNotes,
+    codingChallenge,
+    caseStudyChallenge
   } = useInterviewEventBus();
 
   const [selectedAvatar] = useState<SelectedAvatar>(() => {
@@ -397,7 +399,13 @@ IMPORTANT BEHAVIOR:
           await fetch(`/api/interview/session/${interviewSessionId}/analyze`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ transcript })
+            body: JSON.stringify({ 
+              transcript,
+              codeSubmission: userCode || null,
+              caseStudyNotes: userNotes || null,
+              codingChallenge: codingChallenge || null,
+              caseStudyChallenge: caseStudyChallenge || null,
+            })
           });
         }
       }
