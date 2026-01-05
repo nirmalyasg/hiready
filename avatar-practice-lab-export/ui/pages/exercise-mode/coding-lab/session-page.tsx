@@ -185,13 +185,24 @@ function CodingLabSessionContent() {
           
           if (data.success && data.session?.plan?.codingProblem) {
             const problem = data.session.plan.codingProblem;
+            const preferredLang = problem.language || "javascript";
+            
+            let codeSnippet = "";
+            if (typeof problem.starterCode === "string") {
+              codeSnippet = problem.starterCode;
+            } else if (problem.starterCode && typeof problem.starterCode === "object") {
+              codeSnippet = problem.starterCode[preferredLang] || problem.starterCode.javascript || problem.starterCode.python || Object.values(problem.starterCode)[0] || "";
+            } else if (typeof problem.codeSnippet === "string") {
+              codeSnippet = problem.codeSnippet;
+            }
+            
             setExercise({
               id: 0,
               name: problem.title || problem.name || "Coding Problem",
               activityType: problem.activityType || "explain",
-              language: problem.language || "javascript",
+              language: preferredLang,
               difficulty: problem.difficulty || "Medium",
-              codeSnippet: problem.starterCode || problem.codeSnippet || "",
+              codeSnippet: codeSnippet,
               expectedBehavior: problem.description || null,
               bugDescription: null,
               modificationRequirement: null,
