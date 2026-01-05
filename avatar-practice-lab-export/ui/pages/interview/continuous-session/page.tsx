@@ -385,6 +385,21 @@ IMPORTANT BEHAVIOR:
             userNotes,
           })
         });
+        
+        const transcript = transcriptItems
+          .filter(item => item.role && item.title)
+          .map(item => ({
+            role: item.role === 'assistant' ? 'interviewer' : 'candidate',
+            content: item.title || ''
+          }));
+        
+        if (transcript.length > 0) {
+          await fetch(`/api/interview/session/${interviewSessionId}/analyze`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ transcript })
+          });
+        }
       }
       
       navigate(`/interview/results?sessionId=${interviewSessionId}`);
@@ -393,7 +408,7 @@ IMPORTANT BEHAVIOR:
     } finally {
       setIsSaving(false);
     }
-  }, [disconnect, endChallenge, interviewSessionId, sessionDuration, userCode, userNotes, navigate]);
+  }, [disconnect, endChallenge, interviewSessionId, sessionDuration, userCode, userNotes, navigate, transcriptItems]);
 
   const toggleMute = useCallback(() => {
     mute(!isMuted);
