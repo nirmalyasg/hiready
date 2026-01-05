@@ -45,7 +45,7 @@ const defaultAvatar: SelectedAvatar = {
   id: "Wayne_20240711",
   name: "Wayne",
   gender: "male",
-  imageUrl: "https://files.heygen.ai/avatar/v3/Wayne_20240711/full_body.webp",
+  imageUrl: "https://files2.heygen.ai/avatar/v3/a3fdb0c652024f79984aaec11ebf2694_34350/preview_target.webp",
   personality: "professional technical interviewer"
 };
 
