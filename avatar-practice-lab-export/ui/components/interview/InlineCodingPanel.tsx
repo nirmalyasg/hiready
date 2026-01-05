@@ -3,15 +3,6 @@ import { Code, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Copy, Check, P
 import { Button } from '@/components/ui/button';
 import { useInterviewEventBus } from '@/contexts/InterviewEventBusContext';
 import { cn } from '@/lib/utils';
-import CodeMirror from '@uiw/react-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
-import { python } from '@codemirror/lang-python';
-
-const languageExtensions: Record<string, any> = {
-  javascript: javascript({ jsx: true, typescript: true }),
-  typescript: javascript({ jsx: true, typescript: true }),
-  python: python(),
-};
 
 export function InlineCodingPanel() {
   const { 
@@ -143,14 +134,13 @@ export function InlineCodingPanel() {
               </div>
             </div>
             
-            <div className="flex-1 overflow-auto">
-              <CodeMirror
+            <div className="flex-1 overflow-auto p-3">
+              <textarea
                 value={userCode}
-                height="100%"
-                theme="dark"
-                extensions={[languageExtensions[codingChallenge.language] || javascript()]}
-                onChange={(value) => updateUserCode(value)}
-                className="h-full text-sm"
+                onChange={(e) => updateUserCode(e.target.value)}
+                placeholder="Write your solution here..."
+                className="w-full h-full bg-slate-800/50 border border-slate-700 rounded-lg p-3 text-sm text-slate-200 placeholder:text-slate-500 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500/50 font-mono"
+                spellCheck={false}
               />
             </div>
           </div>

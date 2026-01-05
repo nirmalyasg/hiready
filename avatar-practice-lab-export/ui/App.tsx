@@ -30,6 +30,7 @@ import InterviewPracticePage from './pages/interview/page';
 import InterviewConfigPage from './pages/interview/config/page';
 import InterviewCustomPage from './pages/interview/custom/page';
 import InterviewPreSessionPage from './pages/interview/pre-session/page';
+import InterviewContinuousSessionPage from './pages/interview/continuous-session/page';
 import InterviewResultsPage from './pages/interview/results/page';
 import ExerciseModePage from './pages/exercise-mode/page';
 import CaseStudyPage from './pages/exercise-mode/case-study/page';
@@ -76,6 +77,7 @@ export default function App() {
         <Route path="/interview/config" element={<ProtectedRoute><InterviewConfigPage /></ProtectedRoute>} />
         <Route path="/interview/custom" element={<ProtectedRoute><InterviewCustomPage /></ProtectedRoute>} />
         <Route path="/interview/pre-session" element={<ProtectedRoute><InterviewPreSessionPage /></ProtectedRoute>} />
+        <Route path="/interview/session" element={<ProtectedRoute><InterviewContinuousSessionPage /></ProtectedRoute>} />
         <Route path="/interview/results" element={<ProtectedRoute><InterviewResultsPage /></ProtectedRoute>} />
         <Route path="/exercise-mode" element={<ProtectedRoute><ExerciseModePage /></ProtectedRoute>} />
         <Route path="/exercise-mode/case-study" element={<ProtectedRoute><CaseStudyPage /></ProtectedRoute>} />
