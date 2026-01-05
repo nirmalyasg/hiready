@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Code, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Copy, Check, RotateCcw, Play, Loader2, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Code, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Copy, Check, RotateCcw, Send, Loader2, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useInterviewEventBus } from '@/contexts/InterviewEventBusContext';
 import { cn } from '@/lib/utils';
@@ -19,28 +19,27 @@ const LANGUAGE_OPTIONS = [
 
 interface InlineCodingPanelProps {
   sessionId?: number;
+  sendEvent?: (event: any) => void;
 }
 
-export function InlineCodingPanel({ sessionId }: InlineCodingPanelProps) {
+export function InlineCodingPanel({ sessionId, sendEvent }: InlineCodingPanelProps) {
   const { 
     codingChallenge, 
     userCode, 
     updateUserCode, 
     isPanelExpanded, 
     togglePanelExpanded,
-    endChallenge,
     challengeStartTime,
     selectedLanguage,
     setSelectedLanguage,
-    codeReview,
+    codeSubmissionStatus,
     isReviewingCode,
-    submitCodeForReview,
+    submitCodeForInterviewerReview,
     clearCodeReview,
   } = useInterviewEventBus();
   
   const [copied, setCopied] = useState(false);
   const [showHints, setShowHints] = useState(false);
-  const [showReview, setShowReview] = useState(false);
 
   if (!codingChallenge) return null;
 
@@ -59,10 +58,9 @@ export function InlineCodingPanel({ sessionId }: InlineCodingPanelProps) {
     clearCodeReview();
   };
 
-  const handleSubmitForReview = async () => {
-    if (sessionId) {
-      await submitCodeForReview(sessionId);
-      setShowReview(true);
+  const handleSubmitSolution = async () => {
+    if (sessionId && sendEvent) {
+      await submitCodeForInterviewerReview(sessionId, sendEvent);
     }
   };
 
@@ -75,6 +73,8 @@ export function InlineCodingPanel({ sessionId }: InlineCodingPanelProps) {
   const availableLanguages = codingChallenge.supportedLanguages?.length 
     ? LANGUAGE_OPTIONS.filter(lang => codingChallenge.supportedLanguages?.includes(lang.value))
     : LANGUAGE_OPTIONS;
+
+  const isSubmitted = codeSubmissionStatus === 'submitted' || codeSubmissionStatus === 'reviewed';
 
   return (
     <div 
@@ -96,6 +96,12 @@ export function InlineCodingPanel({ sessionId }: InlineCodingPanelProps) {
                   {codingChallenge.difficulty}
                 </span>
                 <span className="text-xs text-slate-500">• {elapsedMinutes} min</span>
+                {isSubmitted && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3" />
+                    Submitted
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -137,7 +143,8 @@ export function InlineCodingPanel({ sessionId }: InlineCodingPanelProps) {
                 <select
                   value={selectedLanguage}
                   onChange={(e) => setSelectedLanguage(e.target.value)}
-                  className="bg-slate-700 text-slate-200 text-xs px-2 py-1 rounded border border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  disabled={isSubmitted}
+                  className="bg-slate-700 text-slate-200 text-xs px-2 py-1 rounded border border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
                 >
                   {availableLanguages.map(lang => (
                     <option key={lang.value} value={lang.value}>{lang.label}</option>
@@ -149,7 +156,8 @@ export function InlineCodingPanel({ sessionId }: InlineCodingPanelProps) {
                   variant="ghost"
                   size="sm"
                   onClick={resetCode}
-                  className="h-6 px-2 text-xs text-slate-400 hover:text-white"
+                  disabled={isSubmitted}
+                  className="h-6 px-2 text-xs text-slate-400 hover:text-white disabled:opacity-50"
                 >
                   <RotateCcw className="w-3 h-3 mr-1" />
                   Reset
@@ -169,99 +177,45 @@ export function InlineCodingPanel({ sessionId }: InlineCodingPanelProps) {
             <div className="flex-1 overflow-auto p-3">
               <textarea
                 value={userCode}
-                onChange={(e) => {
-                  updateUserCode(e.target.value);
-                  if (codeReview) clearCodeReview();
-                }}
+                onChange={(e) => updateUserCode(e.target.value)}
                 placeholder="Write your solution here..."
-                className="w-full h-full bg-slate-800/50 border border-slate-700 rounded-lg p-3 text-sm text-slate-200 placeholder:text-slate-500 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500/50 font-mono"
+                disabled={isSubmitted}
+                className="w-full h-full bg-slate-800/50 border border-slate-700 rounded-lg p-3 text-sm text-slate-200 placeholder:text-slate-500 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500/50 font-mono disabled:opacity-70"
                 spellCheck={false}
               />
             </div>
 
             <div className="flex-shrink-0 border-t border-slate-700 p-3">
-              <Button
-                onClick={handleSubmitForReview}
-                disabled={isReviewingCode || !userCode.trim() || !sessionId}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {isReviewingCode ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Reviewing Code...
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4 mr-2" />
-                    Check My Solution
-                  </>
-                )}
-              </Button>
-            </div>
-
-            {codeReview && (
-              <div className="flex-shrink-0 border-t border-slate-700 p-3 bg-slate-800/50 max-h-48 overflow-y-auto">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    {codeReview.isCorrect ? (
-                      <CheckCircle className="w-5 h-5 text-emerald-400" />
-                    ) : (
-                      <XCircle className="w-5 h-5 text-rose-400" />
-                    )}
-                    <span className={cn(
-                      "font-semibold text-sm",
-                      codeReview.isCorrect ? "text-emerald-400" : "text-rose-400"
-                    )}>
-                      {codeReview.isCorrect ? 'Correct!' : 'Needs Work'}
-                    </span>
-                    <span className="text-xs text-slate-400">Score: {codeReview.score}/100</span>
+              {isSubmitted ? (
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 text-emerald-400 mb-2">
+                    <CheckCircle className="w-5 h-5" />
+                    <span className="font-medium">Solution Submitted</span>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowReview(!showReview)}
-                    className="h-6 w-6 p-0 text-slate-400"
-                  >
-                    {showReview ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  </Button>
+                  <p className="text-xs text-slate-400">
+                    The interviewer will review your code and provide feedback.
+                  </p>
                 </div>
-                
-                {showReview && (
-                  <div className="space-y-2 text-xs">
-                    <p className="text-slate-300">{codeReview.feedback}</p>
-                    
-                    {codeReview.suggestions && codeReview.suggestions.length > 0 && (
-                      <div className="mt-2">
-                        <span className="text-slate-400 font-medium">Suggestions:</span>
-                        <ul className="mt-1 space-y-1">
-                          {codeReview.suggestions.map((suggestion, i) => (
-                            <li key={i} className="flex items-start gap-1 text-slate-300">
-                              <AlertCircle className="w-3 h-3 text-amber-400 mt-0.5 flex-shrink-0" />
-                              {suggestion}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    <div className="flex gap-4 mt-2 pt-2 border-t border-slate-700">
-                      {codeReview.efficiency && (
-                        <div>
-                          <span className="text-slate-500">Efficiency:</span>
-                          <span className="text-slate-300 ml-1">{codeReview.efficiency}</span>
-                        </div>
-                      )}
-                      {codeReview.style && (
-                        <div>
-                          <span className="text-slate-500">Style:</span>
-                          <span className="text-slate-300 ml-1">{codeReview.style}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+              ) : (
+                <Button
+                  onClick={handleSubmitSolution}
+                  disabled={isReviewingCode || !userCode.trim() || !sessionId || !sendEvent}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {isReviewingCode ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Submit Solution
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
           </div>
 
           {codingChallenge.hints && codingChallenge.hints.length > 0 && (

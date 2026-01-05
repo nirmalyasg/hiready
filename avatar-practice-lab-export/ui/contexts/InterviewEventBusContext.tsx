@@ -25,6 +25,8 @@ export interface CodeReviewResult {
   style?: string;
 }
 
+export type CodeSubmissionStatus = 'idle' | 'submitting' | 'submitted' | 'reviewed';
+
 export interface CaseStudyChallenge {
   id: string;
   title: string;
@@ -47,6 +49,7 @@ export interface InterviewEventBusState {
   isPanelExpanded: boolean;
   codeReview: CodeReviewResult | null;
   isReviewingCode: boolean;
+  codeSubmissionStatus: CodeSubmissionStatus;
 }
 
 interface InterviewEventBusContextValue extends InterviewEventBusState {
@@ -59,6 +62,7 @@ interface InterviewEventBusContextValue extends InterviewEventBusState {
   togglePanelExpanded: () => void;
   setPanelExpanded: (expanded: boolean) => void;
   submitCodeForReview: (sessionId: number) => Promise<void>;
+  submitCodeForInterviewerReview: (sessionId: number, sendEvent: (event: any) => void) => Promise<void>;
   clearCodeReview: () => void;
 }
 
@@ -76,6 +80,7 @@ export function InterviewEventBusProvider({ children }: { children: ReactNode })
     isPanelExpanded: true,
     codeReview: null,
     isReviewingCode: false,
+    codeSubmissionStatus: 'idle',
   });
 
   const startCodingChallenge = useCallback((challenge: CodingChallenge) => {
@@ -93,6 +98,7 @@ export function InterviewEventBusProvider({ children }: { children: ReactNode })
       isPanelExpanded: true,
       codeReview: null,
       isReviewingCode: false,
+      codeSubmissionStatus: 'idle',
     }));
   }, []);
 
@@ -223,6 +229,80 @@ export function InterviewEventBusProvider({ children }: { children: ReactNode })
     setState(prev => ({ ...prev, codeReview: null }));
   }, []);
 
+  const submitCodeForInterviewerReview = useCallback(async (
+    sessionId: number, 
+    sendEvent: (event: any) => void
+  ) => {
+    setState(prev => ({ ...prev, codeSubmissionStatus: 'submitting', isReviewingCode: true }));
+    
+    try {
+      const response = await fetch(`/api/interview/session/${sessionId}/code-review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: state.userCode,
+          language: state.selectedLanguage,
+          challengeId: state.codingChallenge?.id,
+          challengeTitle: state.codingChallenge?.title,
+          challengeDescription: state.codingChallenge?.description,
+          examples: state.codingChallenge?.examples,
+        }),
+      });
+
+      if (!response.ok) {
+        setState(prev => ({ ...prev, codeSubmissionStatus: 'idle', isReviewingCode: false }));
+        return;
+      }
+
+      const data = await response.json();
+      if (data.success && data.review) {
+        const review = data.review;
+        setState(prev => ({ 
+          ...prev, 
+          codeSubmissionStatus: 'submitted',
+          codeReview: review,
+          isReviewingCode: false,
+        }));
+        
+        const userMessage = `I've finished writing my ${state.selectedLanguage} solution for the coding problem.
+
+[For the interviewer - Code Analysis Results:
+- The solution is ${review.isCorrect ? 'correct' : 'not fully correct'}
+- Quality score: ${review.score}/100
+- Key feedback: ${review.feedback}
+- Efficiency: ${review.efficiency || 'standard'}
+- Areas to improve: ${review.suggestions?.slice(0, 2).join(', ') || 'minor refinements'}
+
+Please provide verbal feedback on my solution, discuss my approach, and ask follow-up questions about complexity or edge cases.]`;
+        
+        sendEvent({
+          type: "conversation.item.create",
+          item: {
+            type: "message",
+            role: "user",
+            content: [
+              {
+                type: "input_text",
+                text: userMessage
+              }
+            ]
+          }
+        });
+        
+        sendEvent({ type: "response.create" });
+        
+        setTimeout(() => {
+          setState(prev => ({ ...prev, codeSubmissionStatus: 'reviewed' }));
+        }, 2000);
+      } else {
+        setState(prev => ({ ...prev, codeSubmissionStatus: 'idle', isReviewingCode: false }));
+      }
+    } catch (error) {
+      console.error('Error submitting code for interviewer review:', error);
+      setState(prev => ({ ...prev, codeSubmissionStatus: 'idle', isReviewingCode: false }));
+    }
+  }, [state.userCode, state.selectedLanguage, state.codingChallenge]);
+
   return (
     <InterviewEventBusContext.Provider
       value={{
@@ -236,6 +316,7 @@ export function InterviewEventBusProvider({ children }: { children: ReactNode })
         togglePanelExpanded,
         setPanelExpanded,
         submitCodeForReview,
+        submitCodeForInterviewerReview,
         clearCodeReview,
       }}
     >

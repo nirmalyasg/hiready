@@ -130,7 +130,7 @@ function ContinuousSessionContent() {
 
   useHandleSessionHistory();
 
-  const { connect, disconnect, sendUserText, mute, status } = useRealtimeSession({
+  const { connect, disconnect, sendUserText, sendEvent, mute, status } = useRealtimeSession({
     onConnectionChange: (s) => {
       console.log('[ContinuousSession] Connection status:', s);
       if (s === 'CONNECTED') {
@@ -604,7 +604,12 @@ IMPORTANT BEHAVIOR:
 
         {activeChallenge !== 'none' && isPanelExpanded && (
           <div className="w-1/2 border-l border-slate-700">
-            {activeChallenge === 'coding' && <InlineCodingPanel sessionId={interviewSessionId ? parseInt(interviewSessionId) : undefined} />}
+            {activeChallenge === 'coding' && (
+              <InlineCodingPanel 
+                sessionId={interviewSessionId ? parseInt(interviewSessionId) : undefined}
+                sendEvent={sendEvent}
+              />
+            )}
             {activeChallenge === 'case_study' && <InlineCaseStudyPanel />}
           </div>
         )}
