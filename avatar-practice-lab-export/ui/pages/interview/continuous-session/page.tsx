@@ -436,12 +436,18 @@ IMPORTANT BEHAVIOR:
     return (
       <div className="h-screen bg-slate-900 flex items-center justify-center">
         <div className="max-w-lg mx-auto text-center p-8">
-          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-slate-600 mx-auto mb-6">
+          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-slate-600 mx-auto mb-6 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center relative">
             <img 
               src={selectedAvatar.imageUrl} 
               alt={selectedAvatar.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover absolute inset-0"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
             />
+            <span className="text-3xl font-bold text-white">
+              {selectedAvatar.name.charAt(0).toUpperCase()}
+            </span>
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">
             Ready to Start Your Interview
