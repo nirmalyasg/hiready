@@ -8,10 +8,21 @@ export interface CodingChallenge {
   description: string;
   difficulty: string;
   language: string;
+  supportedLanguages?: string[];
   starterCode: string;
+  starterCodeByLanguage?: Record<string, string>;
   examples?: { input: string; output: string; explanation?: string }[];
   constraints?: string[];
   hints?: string[];
+}
+
+export interface CodeReviewResult {
+  isCorrect: boolean;
+  score: number;
+  feedback: string;
+  suggestions: string[];
+  efficiency?: string;
+  style?: string;
 }
 
 export interface CaseStudyChallenge {
@@ -31,8 +42,11 @@ export interface InterviewEventBusState {
   caseStudyChallenge: CaseStudyChallenge | null;
   userCode: string;
   userNotes: string;
+  selectedLanguage: string;
   challengeStartTime: number | null;
   isPanelExpanded: boolean;
+  codeReview: CodeReviewResult | null;
+  isReviewingCode: boolean;
 }
 
 interface InterviewEventBusContextValue extends InterviewEventBusState {
@@ -41,8 +55,11 @@ interface InterviewEventBusContextValue extends InterviewEventBusState {
   endChallenge: () => void;
   updateUserCode: (code: string) => void;
   updateUserNotes: (notes: string) => void;
+  setSelectedLanguage: (language: string) => void;
   togglePanelExpanded: () => void;
   setPanelExpanded: (expanded: boolean) => void;
+  submitCodeForReview: (sessionId: number) => Promise<void>;
+  clearCodeReview: () => void;
 }
 
 const InterviewEventBusContext = createContext<InterviewEventBusContextValue | null>(null);
@@ -54,21 +71,28 @@ export function InterviewEventBusProvider({ children }: { children: ReactNode })
     caseStudyChallenge: null,
     userCode: '',
     userNotes: '',
+    selectedLanguage: '',
     challengeStartTime: null,
     isPanelExpanded: true,
+    codeReview: null,
+    isReviewingCode: false,
   });
 
   const startCodingChallenge = useCallback((challenge: CodingChallenge) => {
     console.log('[InterviewEventBus] Starting coding challenge:', challenge.title);
+    const defaultLanguage = challenge.language || (challenge.supportedLanguages?.[0]) || 'python';
     setState(prev => ({
       ...prev,
       activeChallenge: 'coding',
       codingChallenge: challenge,
       caseStudyChallenge: null,
-      userCode: challenge.starterCode || '',
+      userCode: challenge.starterCodeByLanguage?.[defaultLanguage] || challenge.starterCode || '',
       userNotes: '',
+      selectedLanguage: defaultLanguage,
       challengeStartTime: Date.now(),
       isPanelExpanded: true,
+      codeReview: null,
+      isReviewingCode: false,
     }));
   }, []);
 
@@ -112,6 +136,93 @@ export function InterviewEventBusProvider({ children }: { children: ReactNode })
     setState(prev => ({ ...prev, isPanelExpanded: expanded }));
   }, []);
 
+  const setSelectedLanguage = useCallback((language: string) => {
+    setState(prev => {
+      const newStarterCode = prev.codingChallenge?.starterCodeByLanguage?.[language] 
+        || prev.codingChallenge?.starterCode 
+        || '';
+      const prevStarterCode = prev.codingChallenge?.starterCodeByLanguage?.[prev.selectedLanguage]
+        || prev.codingChallenge?.starterCode
+        || '';
+      const userHasEdited = prev.userCode.trim() !== '' && prev.userCode !== prevStarterCode;
+      
+      return { 
+        ...prev, 
+        selectedLanguage: language,
+        userCode: userHasEdited ? prev.userCode : newStarterCode,
+        codeReview: null,
+      };
+    });
+  }, []);
+
+  const submitCodeForReview = useCallback(async (sessionId: number) => {
+    setState(prev => ({ ...prev, isReviewingCode: true, codeReview: null }));
+    
+    try {
+      const response = await fetch(`/api/interview/session/${sessionId}/code-review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: state.userCode,
+          language: state.selectedLanguage,
+          challengeId: state.codingChallenge?.id,
+          challengeTitle: state.codingChallenge?.title,
+          challengeDescription: state.codingChallenge?.description,
+          examples: state.codingChallenge?.examples,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Code review API error:', response.status, errorData);
+        setState(prev => ({ 
+          ...prev, 
+          isReviewingCode: false,
+          codeReview: {
+            isCorrect: false,
+            score: 0,
+            feedback: `Review failed: ${errorData.error || 'Unable to connect to review service'}`,
+            suggestions: ['Please try again'],
+          }
+        }));
+        return;
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setState(prev => ({ ...prev, codeReview: data.review, isReviewingCode: false }));
+      } else {
+        console.error('Code review failed:', data.error);
+        setState(prev => ({ 
+          ...prev, 
+          isReviewingCode: false,
+          codeReview: {
+            isCorrect: false,
+            score: 0,
+            feedback: data.error || 'Review failed. Please try again.',
+            suggestions: [],
+          }
+        }));
+      }
+    } catch (error) {
+      console.error('Error submitting code for review:', error);
+      setState(prev => ({ 
+        ...prev, 
+        isReviewingCode: false,
+        codeReview: {
+          isCorrect: false,
+          score: 0,
+          feedback: 'Connection error. Please check your internet and try again.',
+          suggestions: [],
+        }
+      }));
+    }
+  }, [state.userCode, state.selectedLanguage, state.codingChallenge]);
+
+  const clearCodeReview = useCallback(() => {
+    setState(prev => ({ ...prev, codeReview: null }));
+  }, []);
+
   return (
     <InterviewEventBusContext.Provider
       value={{
@@ -121,8 +232,11 @@ export function InterviewEventBusProvider({ children }: { children: ReactNode })
         endChallenge,
         updateUserCode,
         updateUserNotes,
+        setSelectedLanguage,
         togglePanelExpanded,
         setPanelExpanded,
+        submitCodeForReview,
+        clearCodeReview,
       }}
     >
       {children}

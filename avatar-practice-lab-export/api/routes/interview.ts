@@ -776,6 +776,92 @@ interviewRouter.post("/session/:id/end", requireAuth, async (req: Request, res: 
   }
 });
 
+// Code Review Endpoint - Uses OpenAI to review user's code submission
+interviewRouter.post("/session/:id/code-review", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { code, language, challengeId, challengeTitle, challengeDescription, examples } = req.body;
+    
+    if (!code || !challengeDescription) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Code and challenge description are required" 
+      });
+    }
+
+    const OpenAI = (await import("openai")).default;
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    
+    const examplesText = examples?.map((ex: any) => 
+      `Input: ${ex.input}\nExpected Output: ${ex.output}${ex.explanation ? `\nExplanation: ${ex.explanation}` : ''}`
+    ).join('\n\n') || 'No examples provided';
+    
+    const prompt = `You are an expert code reviewer evaluating a candidate's solution during a technical interview.
+
+## Problem
+**Title:** ${challengeTitle || 'Coding Challenge'}
+**Description:** ${challengeDescription}
+
+## Examples
+${examplesText}
+
+## Candidate's Solution (${language || 'Unknown language'})
+\`\`\`${language || ''}
+${code}
+\`\`\`
+
+## Your Task
+Evaluate this solution and provide a structured review. Be constructive but honest.
+
+Respond in this exact JSON format:
+{
+  "isCorrect": boolean (true if the solution would produce correct output for the examples),
+  "score": number (0-100, considering correctness, efficiency, and code quality),
+  "feedback": "2-3 sentence overall assessment",
+  "suggestions": ["specific improvement 1", "specific improvement 2", ...],
+  "efficiency": "Brief assessment of time/space complexity",
+  "style": "Brief assessment of code style and readability"
+}
+
+Only respond with valid JSON, no additional text.`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.3,
+      max_tokens: 1000,
+    });
+    
+    const content = response.choices[0]?.message?.content || '';
+    
+    // Parse JSON response
+    let review;
+    try {
+      // Extract JSON from response (in case there's any extra text)
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        review = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error("No JSON found in response");
+      }
+    } catch (parseError) {
+      console.error("Error parsing OpenAI response:", parseError);
+      review = {
+        isCorrect: false,
+        score: 0,
+        feedback: "Unable to analyze the code. Please ensure your solution is properly formatted.",
+        suggestions: ["Try writing a complete solution"],
+        efficiency: "N/A",
+        style: "N/A"
+      };
+    }
+    
+    res.json({ success: true, review });
+  } catch (error: any) {
+    console.error("Error reviewing code:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 interviewRouter.get("/session/:id", requireAuth, async (req: Request, res: Response) => {
   try {
     const sessionId = parseInt(req.params.id);

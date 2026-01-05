@@ -604,7 +604,7 @@ IMPORTANT BEHAVIOR:
 
         {activeChallenge !== 'none' && isPanelExpanded && (
           <div className="w-1/2 border-l border-slate-700">
-            {activeChallenge === 'coding' && <InlineCodingPanel />}
+            {activeChallenge === 'coding' && <InlineCodingPanel sessionId={interviewSessionId ? parseInt(interviewSessionId) : undefined} />}
             {activeChallenge === 'case_study' && <InlineCaseStudyPanel />}
           </div>
         )}
