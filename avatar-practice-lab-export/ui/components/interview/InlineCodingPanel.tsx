@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Code, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Copy, Check, Play, RotateCcw, Maximize2, Minimize2 } from 'lucide-react';
+import { Code, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Copy, Check, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useInterviewEventBus } from '@/contexts/InterviewEventBusContext';
 import { cn } from '@/lib/utils';
@@ -17,7 +17,6 @@ export function InlineCodingPanel() {
   
   const [copied, setCopied] = useState(false);
   const [showHints, setShowHints] = useState(false);
-  const [isFullWidth, setIsFullWidth] = useState(false);
 
   if (!codingChallenge) return null;
 
@@ -43,10 +42,7 @@ export function InlineCodingPanel() {
 
   return (
     <div 
-      className={cn(
-        "h-full bg-slate-900 border-l border-slate-700 flex flex-col transition-all duration-300",
-        isFullWidth ? "w-full" : "w-full"
-      )}
+      className="h-full bg-slate-900 border-l border-slate-700 flex flex-col transition-all duration-300 w-full"
     >
       <div className="flex-shrink-0 bg-slate-800 border-b border-slate-700 p-3">
         <div className="flex items-center justify-between">
@@ -68,24 +64,14 @@ export function InlineCodingPanel() {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsFullWidth(!isFullWidth)}
-              className="h-7 w-7 p-0 text-slate-400 hover:text-white"
-            >
-              {isFullWidth ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={togglePanelExpanded}
-              className="h-7 w-7 p-0 text-slate-400 hover:text-white"
-            >
-              {isPanelExpanded ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={togglePanelExpanded}
+            className="h-7 w-7 p-0 text-slate-400 hover:text-white"
+          >
+            {isPanelExpanded ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </Button>
         </div>
       </div>
 
