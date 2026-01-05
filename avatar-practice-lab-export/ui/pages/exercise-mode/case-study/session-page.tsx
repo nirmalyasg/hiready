@@ -81,6 +81,8 @@ function CaseStudySessionContent() {
   const templateId = searchParams.get("templateId");
   const avatarsParam = searchParams.get("avatars");
   const jobTargetId = searchParams.get("jobTargetId");
+  const interviewSessionId = searchParams.get("interviewSessionId");
+  const configId = searchParams.get("configId");
   const autoLinkedParam = searchParams.get("autoLinked") === "true";
   const autoLinkConfidenceParam = searchParams.get("autoLinkConfidence") as "high" | "medium" | "low" | null;
   const autoLinkSignalsParam = searchParams.get("autoLinkSignals");
@@ -149,20 +151,38 @@ function CaseStudySessionContent() {
 
   useEffect(() => {
     const fetchTemplate = async () => {
-      if (!templateId) {
-        setError("No case selected");
-        setIsLoading(false);
-        return;
-      }
-
       try {
-        const response = await fetch(`/api/exercise-mode/case-templates/${templateId}`);
-        const data = await response.json();
-        
-        if (data.success) {
-          setTemplate(data.template);
+        if (interviewSessionId) {
+          const response = await fetch(`/api/interview/session/${interviewSessionId}`);
+          const data = await response.json();
+          
+          if (data.success && data.session?.plan?.caseStudy) {
+            const caseStudy = data.session.plan.caseStudy;
+            setTemplate({
+              id: 0,
+              name: caseStudy.title || caseStudy.name || "Case Study",
+              caseType: caseStudy.caseType || "strategy",
+              difficulty: caseStudy.difficulty || "Medium",
+              promptStatement: caseStudy.prompt || caseStudy.description || "",
+              context: caseStudy.context || null,
+              evaluationFocus: caseStudy.evaluationFocus || null,
+              expectedDurationMinutes: caseStudy.expectedDurationMinutes || 30,
+              probingMap: caseStudy.probingMap || null,
+            });
+          } else {
+            setError("No case study found in interview session");
+          }
+        } else if (templateId && !isNaN(parseInt(templateId))) {
+          const response = await fetch(`/api/exercise-mode/case-templates/${templateId}`);
+          const data = await response.json();
+          
+          if (data.success) {
+            setTemplate(data.template);
+          } else {
+            setError("Failed to load case");
+          }
         } else {
-          setError("Failed to load case");
+          setError("No case selected");
         }
       } catch (err) {
         console.error("Error fetching template:", err);
@@ -172,7 +192,7 @@ function CaseStudySessionContent() {
       }
     };
     fetchTemplate();
-  }, [templateId]);
+  }, [templateId, interviewSessionId]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;

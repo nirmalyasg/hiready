@@ -93,9 +93,9 @@ export default function InterviewPreSessionPage() {
         const sessionPlan = data.session?.plan || {};
         
         if (interviewType === "technical" && sessionPlan.codingProblem) {
-          navigate(`/exercise-mode/coding-lab/session?exerciseId=${sessionPlan.codingProblem.id || sessionPlan.codingProblem.challengeId}&interviewSessionId=${data.session.id}&configId=${configId}`);
+          navigate(`/exercise-mode/coding-lab/session?interviewSessionId=${data.session.id}&configId=${configId}`);
         } else if (interviewType === "hiring_manager" && sessionPlan.caseStudy) {
-          navigate(`/exercise-mode/case-study/session?templateId=${sessionPlan.caseStudy.id || sessionPlan.caseStudy.challengeId}&interviewSessionId=${data.session.id}&configId=${configId}`);
+          navigate(`/exercise-mode/case-study/session?interviewSessionId=${data.session.id}&configId=${configId}`);
         } else {
           navigate(`/avatar/practice/avatar-select?interviewSessionId=${data.session.id}&configId=${configId}`);
         }

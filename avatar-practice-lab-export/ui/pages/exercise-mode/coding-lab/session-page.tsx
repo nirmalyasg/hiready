@@ -110,6 +110,8 @@ function CodingLabSessionContent() {
   const exerciseId = searchParams.get("exerciseId");
   const avatarsParam = searchParams.get("avatars");
   const jobTargetId = searchParams.get("jobTargetId");
+  const interviewSessionId = searchParams.get("interviewSessionId");
+  const configId = searchParams.get("configId");
 
   const [exercise, setExercise] = useState<CodingExercise | null>(null);
   const [session, setSession] = useState<ExerciseSession | null>(null);
@@ -176,20 +178,40 @@ function CodingLabSessionContent() {
 
   useEffect(() => {
     const fetchExercise = async () => {
-      if (!exerciseId) {
-        setError("No exercise selected");
-        setIsLoading(false);
-        return;
-      }
-
       try {
-        const response = await fetch(`/api/exercise-mode/coding-exercises/${exerciseId}`);
-        const data = await response.json();
-        
-        if (data.success) {
-          setExercise(data.exercise);
+        if (interviewSessionId) {
+          const response = await fetch(`/api/interview/session/${interviewSessionId}`);
+          const data = await response.json();
+          
+          if (data.success && data.session?.plan?.codingProblem) {
+            const problem = data.session.plan.codingProblem;
+            setExercise({
+              id: 0,
+              name: problem.title || problem.name || "Coding Problem",
+              activityType: problem.activityType || "explain",
+              language: problem.language || "javascript",
+              difficulty: problem.difficulty || "Medium",
+              codeSnippet: problem.starterCode || problem.codeSnippet || "",
+              expectedBehavior: problem.description || null,
+              bugDescription: null,
+              modificationRequirement: null,
+              probingQuestions: problem.probingQuestions || null,
+              expectedSignals: problem.expectedSignals || null,
+            });
+          } else {
+            setError("No coding problem found in interview session");
+          }
+        } else if (exerciseId && !isNaN(parseInt(exerciseId))) {
+          const response = await fetch(`/api/exercise-mode/coding-exercises/${exerciseId}`);
+          const data = await response.json();
+          
+          if (data.success) {
+            setExercise(data.exercise);
+          } else {
+            setError("Failed to load exercise");
+          }
         } else {
-          setError("Failed to load exercise");
+          setError("No exercise selected");
         }
       } catch (err) {
         console.error("Error fetching exercise:", err);
@@ -199,7 +221,7 @@ function CodingLabSessionContent() {
       }
     };
     fetchExercise();
-  }, [exerciseId]);
+  }, [exerciseId, interviewSessionId]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
