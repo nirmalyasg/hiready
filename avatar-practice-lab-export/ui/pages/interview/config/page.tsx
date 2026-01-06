@@ -52,8 +52,20 @@ export default function InterviewConfigPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [interviewType, setInterviewType] = useState<string>("behavioral");
   const [style, setStyle] = useState<string>("neutral");
+  const [language, setLanguage] = useState<string>("english");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const languages = [
+    { value: "english", label: "English" },
+    { value: "hindi", label: "Hindi" },
+    { value: "hinglish", label: "Hinglish" },
+    { value: "spanish", label: "Spanish" },
+    { value: "french", label: "French" },
+    { value: "german", label: "German" },
+    { value: "mandarin", label: "Mandarin" },
+    { value: "japanese", label: "Japanese" },
+  ];
 
   const isJobTargetMode = !!jobTargetId && !!roundCategory;
 
@@ -126,6 +138,7 @@ export default function InterviewConfigPage() {
             jobTargetId: practiceContext.companyContext.jobTargetId,
             interviewType,
             style,
+            language,
             mode: "job_target",
             roundCategory: practiceContext.roundCategory,
             companyContext: practiceContext.companyContext,
@@ -336,62 +349,89 @@ export default function InterviewConfigPage() {
               <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-slate-100">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Settings className="w-5 h-5 text-purple-600" />
-                  Interview Settings
+                  Session Settings
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-6">
                 <div>
-                  <Label className="text-sm font-medium text-slate-700 mb-3 block">Interview Type</Label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {[
-                      { value: "behavioral", label: "Behavioral", desc: "Tell me about a time..." },
-                      { value: "technical", label: "Technical", desc: "Role-specific skills" },
-                      { value: "situational", label: "Situational", desc: "What would you do if..." },
-                      { value: "mixed", label: "Mixed", desc: "All question types" },
-                    ].map((type) => (
+                  <Label className="text-sm font-medium text-slate-700 mb-3 block">Conversation Language</Label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {languages.map((lang) => (
                       <button
-                        key={type.value}
-                        onClick={() => setInterviewType(type.value)}
-                        className={`p-3 rounded-xl border-2 text-left transition-all ${
-                          interviewType === type.value
-                            ? "border-indigo-500 bg-indigo-50"
+                        key={lang.value}
+                        onClick={() => setLanguage(lang.value)}
+                        className={`p-2.5 rounded-lg border-2 text-center transition-all ${
+                          language === lang.value
+                            ? "border-[#ee7e65] bg-[#ee7e65]/5"
                             : "border-slate-200 hover:border-slate-300"
                         }`}
                       >
-                        <p className={`font-medium text-sm ${interviewType === type.value ? "text-indigo-700" : "text-slate-900"}`}>
-                          {type.label}
+                        <p className={`font-medium text-sm ${language === lang.value ? "text-[#ee7e65]" : "text-slate-700"}`}>
+                          {lang.label}
                         </p>
-                        <p className="text-xs text-slate-500 mt-0.5">{type.desc}</p>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-slate-700 mb-3 block">Interviewer Style</Label>
+                  <Label className="text-sm font-medium text-slate-700 mb-2 block">Interviewer Style</Label>
+                  <p className="text-xs text-slate-500 mb-3">This affects how the AI interviewer behaves - their tone, pace, and level of follow-up questions.</p>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { value: "friendly", label: "Friendly", desc: "Warm & supportive" },
-                      { value: "neutral", label: "Neutral", desc: "Professional" },
-                      { value: "challenging", label: "Challenging", desc: "Tough questions" },
+                      { value: "friendly", label: "Supportive", desc: "Encouraging, helpful hints", emoji: "😊" },
+                      { value: "neutral", label: "Professional", desc: "Balanced, realistic", emoji: "👔" },
+                      { value: "challenging", label: "Rigorous", desc: "Probing, tough follow-ups", emoji: "🎯" },
                     ].map((s) => (
                       <button
                         key={s.value}
                         onClick={() => setStyle(s.value)}
                         className={`p-3 rounded-xl border-2 text-left transition-all ${
                           style === s.value
-                            ? "border-indigo-500 bg-indigo-50"
+                            ? "border-[#042c4c] bg-[#042c4c]/5"
                             : "border-slate-200 hover:border-slate-300"
                         }`}
                       >
-                        <p className={`font-medium text-sm ${style === s.value ? "text-indigo-700" : "text-slate-900"}`}>
-                          {s.label}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-0.5">{s.desc}</p>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span>{s.emoji}</span>
+                          <p className={`font-medium text-sm ${style === s.value ? "text-[#042c4c]" : "text-slate-900"}`}>
+                            {s.label}
+                          </p>
+                        </div>
+                        <p className="text-xs text-slate-500">{s.desc}</p>
                       </button>
                     ))}
                   </div>
                 </div>
+
+                {!isJobTargetMode && (
+                  <div>
+                    <Label className="text-sm font-medium text-slate-700 mb-3 block">Interview Type</Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {[
+                        { value: "behavioral", label: "Behavioral", desc: "Tell me about a time..." },
+                        { value: "technical", label: "Technical", desc: "Role-specific skills" },
+                        { value: "situational", label: "Situational", desc: "What would you do if..." },
+                        { value: "mixed", label: "Mixed", desc: "All question types" },
+                      ].map((type) => (
+                        <button
+                          key={type.value}
+                          onClick={() => setInterviewType(type.value)}
+                          className={`p-3 rounded-xl border-2 text-left transition-all ${
+                            interviewType === type.value
+                              ? "border-indigo-500 bg-indigo-50"
+                              : "border-slate-200 hover:border-slate-300"
+                          }`}
+                        >
+                          <p className={`font-medium text-sm ${interviewType === type.value ? "text-indigo-700" : "text-slate-900"}`}>
+                            {type.label}
+                          </p>
+                          <p className="text-xs text-slate-500 mt-0.5">{type.desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
