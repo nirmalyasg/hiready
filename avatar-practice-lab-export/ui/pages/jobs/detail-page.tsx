@@ -304,18 +304,14 @@ export default function JobDetailPage() {
   };
 
   const handleStartPracticeOption = (option: PracticeOption) => {
-    const { roundCategory, practiceMode, companyContext } = option;
+    const { roundCategory, companyContext } = option;
     const params = new URLSearchParams();
     params.set("jobTargetId", companyContext.jobTargetId);
     params.set("roundCategory", roundCategory);
     
-    if (practiceMode === "live_interview") {
-      navigate(`/interview/config?${params.toString()}`);
-    } else if (practiceMode === "coding_lab") {
-      navigate(`/exercise-mode/coding-lab?${params.toString()}`);
-    } else if (practiceMode === "case_study") {
-      navigate(`/exercise-mode/case-study?${params.toString()}`);
-    }
+    // All interview rounds go to the unified interview config page
+    // This includes coding, case study, and live interview rounds
+    navigate(`/interview/config?${params.toString()}`);
   };
 
   const handleDelete = async () => {
