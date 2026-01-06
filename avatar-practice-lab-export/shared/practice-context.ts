@@ -3,13 +3,22 @@ export type RoundCategory =
   | "hr_screening"
   | "hiring_manager" 
   | "technical_interview"
-  | "coding_assessment"
-  | "system_design"
+  | "coding_assessment"  // Legacy - maps to technical_interview
+  | "system_design"      // Legacy - maps to technical_interview
   | "case_study"
   | "behavioral"
   | "culture_values"
   | "bar_raiser"
   | "group_discussion";
+
+export const TECHNICAL_CATEGORIES = ["technical_interview", "coding_assessment", "system_design", "coding"] as const;
+
+export function normalizeRoundCategory(category: string): RoundCategory {
+  if (TECHNICAL_CATEGORIES.includes(category as any)) {
+    return "technical_interview";
+  }
+  return category as RoundCategory;
+}
 
 export type PracticeMode = 
   | "live_interview"
@@ -45,26 +54,26 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
   technical_interview: {
     category: "technical_interview",
     label: "Technical Interview",
-    description: "Technical problem solving, coding exercises, architecture discussions, and JD-derived technical skills verification",
+    description: "Technical problem solving including coding, system design, and domain expertise verification",
     practiceMode: "live_interview",
     typicalDuration: "10-15 min",
     icon: "code",
   },
   coding_assessment: {
     category: "coding_assessment",
-    label: "Coding Assessment",
-    description: "Hands-on coding problems to demonstrate programming skills and algorithmic thinking",
-    practiceMode: "coding_lab",
-    typicalDuration: "15 min",
-    icon: "terminal",
+    label: "Technical Interview",
+    description: "Technical problem solving including coding, system design, and domain expertise verification",
+    practiceMode: "live_interview",
+    typicalDuration: "10-15 min",
+    icon: "code",
   },
   system_design: {
     category: "system_design",
-    label: "System Design",
-    description: "Design a scalable system architecture, discussing tradeoffs and technical decisions",
-    practiceMode: "case_study",
+    label: "Technical Interview",
+    description: "Technical problem solving including coding, system design, and domain expertise verification",
+    practiceMode: "live_interview",
     typicalDuration: "10-15 min",
-    icon: "boxes",
+    icon: "code",
   },
   case_study: {
     category: "case_study",

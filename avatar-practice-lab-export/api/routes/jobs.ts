@@ -1105,53 +1105,75 @@ jobsRouter.get("/job-targets/:id/practice-options", requireAuth, async (req: Req
       job.companyName || null
     );
     
-    const options = interviewPlan.phases.map((phase) => {
-      const blueprints = phase.blueprints || [];
-      const primaryBlueprint = blueprints[0];
-      
-      const taxonomy = ROUND_TAXONOMY[phase.category as RoundCategory];
-      return {
-        id: `${jobId}-${phase.phaseId}`,
-        phaseId: phase.phaseId,
-        roundCategory: phase.category as RoundCategory,
-        label: job.companyName ? `${job.companyName} ${phase.name}` : phase.name,
-        description: phase.description,
-        practiceMode: phase.practiceMode as PracticeMode,
-        typicalDuration: taxonomy?.typicalDuration || "10-15 min",
-        icon: taxonomy?.icon || "file-text",
-        companySpecific: !!job.companyArchetype,
-        provenance: phase.provenance || null,
-        companyContext: {
-          jobTargetId: jobId,
-          companyName: job.companyName,
-          companyId: null,
-          roleTitle: job.roleTitle,
-          archetype: job.companyArchetype || null,
-          tier: null,
-          hasBlueprint: !!companyNotes,
-          blueprintNotes: companyNotes,
-          focusAreas: parsed?.focusAreas || [],
-          leadershipPrinciples: null,
-          interviewStyle: job.companyArchetype === "big_tech" ? "structured" : 
-                          job.companyArchetype === "startup" ? "conversational" : "mixed",
-        },
-        focusHint: phase.subphases?.length ? `Focus areas: ${phase.subphases.join(", ")}` : null,
-        roleBlueprint: primaryBlueprint ? {
-          taskType: primaryBlueprint.taskType,
-          promptTemplate: primaryBlueprint.promptTemplate,
-          expectedSignals: primaryBlueprint.expectedSignals,
-          probeQuestions: primaryBlueprint.probeTree,
-          difficultyBand: primaryBlueprint.difficultyBand,
-        } : null,
-        allBlueprints: blueprints.map(b => ({
-          taskType: b.taskType,
-          promptTemplate: b.promptTemplate,
-          expectedSignals: b.expectedSignals,
-          probeQuestions: b.probeTree,
-          difficultyBand: b.difficultyBand,
-        })),
-      };
-    });
+    const technicalCategories = ["technical_interview", "coding_assessment", "system_design", "coding"];
+    const seenCategories = new Set<string>();
+    
+    const options = interviewPlan.phases
+      .filter((phase) => {
+        const normalizedCategory = technicalCategories.includes(phase.category) 
+          ? "technical_interview" 
+          : phase.category;
+        
+        if (seenCategories.has(normalizedCategory)) {
+          return false;
+        }
+        seenCategories.add(normalizedCategory);
+        return true;
+      })
+      .map((phase) => {
+        const blueprints = phase.blueprints || [];
+        const primaryBlueprint = blueprints[0];
+        
+        const isTechnical = technicalCategories.includes(phase.category);
+        const normalizedCategory = isTechnical ? "technical_interview" : phase.category;
+        const taxonomy = ROUND_TAXONOMY[normalizedCategory as RoundCategory];
+        
+        return {
+          id: `${jobId}-${phase.phaseId}`,
+          phaseId: phase.phaseId,
+          roundCategory: normalizedCategory as RoundCategory,
+          label: isTechnical 
+            ? (job.companyName ? `${job.companyName} Technical Interview` : "Technical Interview")
+            : (job.companyName ? `${job.companyName} ${phase.name}` : phase.name),
+          description: isTechnical 
+            ? "Technical problem solving including coding, system design, and domain expertise verification"
+            : phase.description,
+          practiceMode: "live_interview" as PracticeMode,
+          typicalDuration: taxonomy?.typicalDuration || "10-15 min",
+          icon: taxonomy?.icon || "code",
+          companySpecific: !!job.companyArchetype,
+          provenance: phase.provenance || null,
+          companyContext: {
+            jobTargetId: jobId,
+            companyName: job.companyName,
+            companyId: null,
+            roleTitle: job.roleTitle,
+            archetype: job.companyArchetype || null,
+            tier: null,
+            hasBlueprint: !!companyNotes,
+            blueprintNotes: companyNotes,
+            focusAreas: parsed?.focusAreas || [],
+            leadershipPrinciples: null,
+            interviewStyle: job.companyArchetype === "big_tech" ? "structured" : 
+                            job.companyArchetype === "startup" ? "conversational" : "mixed",
+          },
+          focusHint: phase.subphases?.length ? `Focus areas: ${phase.subphases.join(", ")}` : null,
+          roleBlueprint: primaryBlueprint ? {
+            taskType: primaryBlueprint.taskType,
+            promptTemplate: primaryBlueprint.promptTemplate,
+            expectedSignals: primaryBlueprint.expectedSignals,
+            probeQuestions: primaryBlueprint.probeTree,
+            difficultyBand: primaryBlueprint.difficultyBand,
+          } : null,
+          allBlueprints: blueprints.map(b => ({
+            taskType: b.taskType,
+            promptTemplate: b.promptTemplate,
+            expectedSignals: b.expectedSignals,
+            probeQuestions: b.probeTree,
+            difficultyBand: b.difficultyBand,
+          })),
+        };
+      });
 
     res.json({
       success: true,
