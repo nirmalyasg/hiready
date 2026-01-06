@@ -1109,6 +1109,7 @@ jobsRouter.get("/job-targets/:id/practice-options", requireAuth, async (req: Req
       const blueprints = phase.blueprints || [];
       const primaryBlueprint = blueprints[0];
       
+      const taxonomy = ROUND_TAXONOMY[phase.category as RoundCategory];
       return {
         id: `${jobId}-${phase.phaseId}`,
         phaseId: phase.phaseId,
@@ -1116,8 +1117,8 @@ jobsRouter.get("/job-targets/:id/practice-options", requireAuth, async (req: Req
         label: job.companyName ? `${job.companyName} ${phase.name}` : phase.name,
         description: phase.description,
         practiceMode: phase.practiceMode as PracticeMode,
-        typicalDuration: `${phase.mins} min`,
-        icon: ROUND_TAXONOMY[phase.category as RoundCategory]?.icon || "file-text",
+        typicalDuration: taxonomy?.typicalDuration || "10-15 min",
+        icon: taxonomy?.icon || "file-text",
         companySpecific: !!job.companyArchetype,
         provenance: phase.provenance || null,
         companyContext: {
