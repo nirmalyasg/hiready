@@ -28,7 +28,17 @@ avatar-practice-lab-export/
 
 ## Recent Changes (January 6, 2026)
 
-### Role-Aware Interview Intersection System (Latest)
+### Simplified Interview Round Taxonomy (Latest)
+Removed panel_interview and merged presentation into case_study for cleaner round structure:
+
+1. **Removed Panel Interview** - Eliminated duplicate/confusing round category
+2. **Merged Presentation into Case Study** - Presentation rounds now map to case_study category and practice mode
+3. **Updated Mappings** - ROLE_INTERVIEW_TYPE_TO_COMPONENTS, COMPONENT_TO_ROLE_TYPES, BLUEPRINT_ROUND_MAPPING all updated
+4. **Coding & Case Study** - These remain embedded in interview experience (panel-style) as requested
+
+---
+
+### Role-Aware Interview Intersection System
 Smart filtering that combines company interview components with role archetype requirements:
 
 1. **Intersection-Based Round Filtering**
