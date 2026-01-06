@@ -13,7 +13,8 @@ import {
   Video,
   Sparkles,
   CheckCircle2,
-  Play
+  Play,
+  Briefcase
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import a3cendLogo from '@/assets/a3cend-logo.png';
@@ -35,16 +36,21 @@ export default function HomePage() {
           </Link>
           
           <div className="hidden md:flex items-center gap-8">
-            <Link to="/avatar/start" className="text-white/70 hover:text-white font-medium transition-colors">
+            <Link to="/interview" className="text-white/70 hover:text-white font-medium transition-colors">
               Practice
             </Link>
-            <Link to="/interview" className="text-white/70 hover:text-white font-medium transition-colors">
-              Interviews
+            <Link to="/jobs" className="text-white/70 hover:text-white font-medium transition-colors">
+              Jobs
             </Link>
             {isAuthenticated ? (
-              <Link to="/avatar/dashboard" className="text-white/70 hover:text-white font-medium transition-colors">
-                Dashboard
-              </Link>
+              <>
+                <Link to="/avatar/dashboard" className="text-white/70 hover:text-white font-medium transition-colors">
+                  Dashboard
+                </Link>
+                <Link to="/avatar/results" className="text-white/70 hover:text-white font-medium transition-colors">
+                  Results
+                </Link>
+              </>
             ) : null}
           </div>
 
@@ -79,7 +85,7 @@ export default function HomePage() {
                   Sign in
                 </Link>
                 <Link
-                  to="/avatar/start"
+                  to="/interview"
                   className="px-6 py-2.5 bg-brand-accent text-white rounded-full font-semibold hover:bg-brand-accent/90 transition-all shadow-lg shadow-brand-accent/30"
                 >
                   Get Started
@@ -99,16 +105,21 @@ export default function HomePage() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 bg-brand-dark/95 backdrop-blur-xl border-t border-white/10 p-6 space-y-4">
-            <Link to="/avatar/start" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white font-medium">
+            <Link to="/interview" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white font-medium">
               Practice
             </Link>
-            <Link to="/interview" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white font-medium">
-              Interviews
+            <Link to="/jobs" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white font-medium">
+              Jobs
             </Link>
             {isAuthenticated && (
-              <Link to="/avatar/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white font-medium">
-                Dashboard
-              </Link>
+              <>
+                <Link to="/avatar/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white font-medium">
+                  Dashboard
+                </Link>
+                <Link to="/avatar/results" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white font-medium">
+                  Results
+                </Link>
+              </>
             )}
             <div className="pt-4 border-t border-white/10">
               {isAuthenticated ? (
@@ -119,7 +130,7 @@ export default function HomePage() {
                   Sign out
                 </button>
               ) : (
-                <Link to="/avatar/start" onClick={() => setMobileMenuOpen(false)} className="block w-full py-3 bg-brand-accent text-white text-center rounded-xl font-semibold">
+                <Link to="/interview" onClick={() => setMobileMenuOpen(false)} className="block w-full py-3 bg-brand-accent text-white text-center rounded-xl font-semibold">
                   Get Started
                 </Link>
               )}
@@ -155,7 +166,7 @@ export default function HomePage() {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
-                to="/avatar/start"
+                to="/interview"
                 className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-brand-accent text-white rounded-2xl font-semibold text-lg hover:bg-brand-accent/90 transition-all shadow-xl shadow-brand-accent/30 group"
               >
                 <Play className="w-5 h-5" />
@@ -163,11 +174,11 @@ export default function HomePage() {
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
-                to="/interview"
+                to="/jobs"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 text-white rounded-2xl font-semibold text-lg hover:bg-white/20 transition-all border border-white/20"
               >
-                <Video className="w-5 h-5" />
-                Interview Prep
+                <Briefcase className="w-5 h-5" />
+                My Jobs
               </Link>
             </div>
           </div>
@@ -264,10 +275,10 @@ export default function HomePage() {
               </div>
 
               <Link
-                to="/avatar/start"
+                to="/interview"
                 className="inline-flex items-center gap-2 mt-8 text-brand-accent font-semibold hover:gap-3 transition-all"
               >
-                Explore all scenarios
+                Explore interview types
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -284,7 +295,7 @@ export default function HomePage() {
                     No setup required. Just start talking.
                   </p>
                   <Link
-                    to="/avatar/start"
+                    to="/interview"
                     className="inline-flex items-center justify-center w-full py-4 bg-white text-brand-dark rounded-xl font-semibold hover:bg-white/90 transition-colors"
                   >
                     Begin Practice Session
