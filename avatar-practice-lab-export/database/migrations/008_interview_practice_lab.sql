@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS interview_configs (
     resume_doc_id INTEGER REFERENCES user_documents(id) ON DELETE SET NULL,
     jd_doc_id INTEGER REFERENCES user_documents(id) ON DELETE SET NULL,
     company_notes_doc_id INTEGER REFERENCES user_documents(id) ON DELETE SET NULL,
-    interview_type TEXT NOT NULL DEFAULT 'hr' CHECK (interview_type IN ('hr', 'hiring_manager', 'technical', 'panel')),
+    interview_type TEXT NOT NULL DEFAULT 'hr' CHECK (interview_type IN ('hr', 'hiring_manager', 'technical', 'panel', 'case_study', 'behavioral', 'coding', 'sql', 'analytics', 'ml', 'case', 'system_design', 'product_sense', 'general', 'skill_practice')),
     style TEXT NOT NULL DEFAULT 'neutral' CHECK (style IN ('friendly', 'neutral', 'stress')),
     seniority TEXT NOT NULL DEFAULT 'entry' CHECK (seniority IN ('entry', 'mid', 'senior')),
     created_at TIMESTAMP DEFAULT NOW() NOT NULL
