@@ -55,9 +55,32 @@ interface InterviewPlan {
 interface InterviewConfig {
   id: number;
   interviewType: string;
+  interviewMode?: string;
+  roleArchetypeId?: string;
   style: string;
   seniority: string;
 }
+
+interface ModeSetupData {
+  interviewMode: string;
+  taxonomy: {
+    label: string;
+    description: string;
+    typicalDuration: string;
+    includes?: string[];
+  };
+  roleArchetypeId: string;
+  seniority: string;
+  configId: number;
+}
+
+const modeLabels: Record<string, string> = {
+  coding_technical: "Coding & Technical",
+  case_problem_solving: "Case & Problem Solving",
+  behavioral: "Behavioral & Experience",
+  hiring_manager: "Hiring Manager / Role Fit",
+  system_deep_dive: "System / Deep Dive",
+};
 
 export default function InterviewConfigPage() {
   const [searchParams] = useSearchParams();
@@ -65,11 +88,14 @@ export default function InterviewConfigPage() {
   const jobTargetId = searchParams.get("jobTargetId");
   const roundCategory = searchParams.get("roundCategory");
   const typicalDurationParam = searchParams.get("typicalDuration");
+  const configIdParam = searchParams.get("configId");
+  const interviewModeParam = searchParams.get("interviewMode");
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const [roleKit, setRoleKit] = useState<RoleKit | null>(null);
   const [practiceContext, setPracticeContext] = useState<PracticeContext | null>(null);
+  const [modeSetupData, setModeSetupData] = useState<ModeSetupData | null>(null);
   const [plan, setPlan] = useState<InterviewPlan | null>(null);
   const [config, setConfig] = useState<InterviewConfig | null>(null);
   const [planId, setPlanId] = useState<number | null>(null);
@@ -95,13 +121,53 @@ export default function InterviewConfigPage() {
   ];
 
   const isJobTargetMode = !!jobTargetId && !!roundCategory;
-  const isSkillOnlyMode = !roleKitId && !jobTargetId && !!roundCategory;
+  const isSkillOnlyMode = !roleKitId && !jobTargetId && !!roundCategory && !configIdParam;
+  const isInterviewModeType = !!configIdParam && !!interviewModeParam;
 
   useEffect(() => {
     if (hasInitialized.current) return;
     hasInitialized.current = true;
     
     const fetchDataAndGeneratePlan = async () => {
+      if (isInterviewModeType && configIdParam) {
+        try {
+          const storedSetup = sessionStorage.getItem("interviewModeSetup");
+          if (storedSetup) {
+            const setupData = JSON.parse(storedSetup) as ModeSetupData;
+            setModeSetupData(setupData);
+            sessionStorage.removeItem("interviewModeSetup");
+          }
+          
+          setIsLoading(false);
+          setIsGeneratingPlan(true);
+          
+          const planResponse = await fetch(`/api/interview/config/${configIdParam}/plan`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({}),
+          });
+          const planData = await planResponse.json();
+          if (planData.success) {
+            setPlan(planData.plan.planJson);
+            setPlanId(planData.plan.id);
+            setConfig({ 
+              id: parseInt(configIdParam), 
+              interviewType: planData.plan.planJson?.interviewType || interviewModeParam || "behavioral",
+              interviewMode: interviewModeParam || undefined,
+              style: "neutral", 
+              seniority: "mid" 
+            });
+          }
+          setIsGeneratingPlan(false);
+        } catch (error) {
+          console.error("Error in interview mode setup:", error);
+          setError("Failed to generate plan");
+          setIsGeneratingPlan(false);
+          setIsLoading(false);
+        }
+        return;
+      }
+      
       if (isSkillOnlyMode) {
         try {
           const storedContext = sessionStorage.getItem("rolePracticeContext");
@@ -443,6 +509,12 @@ export default function InterviewConfigPage() {
   const backLink = isJobTargetMode ? `/jobs/${jobTargetId}` : "/interview";
   
   const getTitle = () => {
+    if (isInterviewModeType && modeSetupData) {
+      return modeSetupData.taxonomy.label;
+    }
+    if (isInterviewModeType && interviewModeParam) {
+      return modeLabels[interviewModeParam] || "Interview Practice";
+    }
     if (isJobTargetMode) {
       return practiceContext?.taxonomy?.label || "Interview Practice";
     }
@@ -468,6 +540,7 @@ export default function InterviewConfigPage() {
   const title = getTitle();
   const companyName = practiceContext?.companyContext.companyName;
   const roleTitle = practiceContext?.companyContext.roleTitle;
+  const modeDescription = modeSetupData?.taxonomy?.description;
 
   return (
     <SidebarLayout>
@@ -491,6 +564,11 @@ export default function InterviewConfigPage() {
                 {isJobTargetMode && (companyName || roleTitle) && (
                   <p className="text-white/70 text-sm mt-0.5">
                     {companyName}{companyName && roleTitle && " • "}{roleTitle}
+                  </p>
+                )}
+                {isInterviewModeType && modeDescription && (
+                  <p className="text-white/70 text-sm mt-0.5">
+                    {modeDescription}
                   </p>
                 )}
               </div>
@@ -522,8 +600,16 @@ export default function InterviewConfigPage() {
                     ~{getTotalDuration()} min
                   </Badge>
                   <Badge variant="outline" className="px-3 py-1 capitalize">
-                    {interviewType.replace(/_/g, " ")}
+                    {isInterviewModeType && interviewModeParam 
+                      ? modeLabels[interviewModeParam] || interviewModeParam.replace(/_/g, " ")
+                      : interviewType.replace(/_/g, " ")
+                    }
                   </Badge>
+                  {modeSetupData?.seniority && (
+                    <Badge variant="outline" className="px-3 py-1 capitalize">
+                      {modeSetupData.seniority} Level
+                    </Badge>
+                  )}
                 </div>
 
                 {plan.focusAreas && plan.focusAreas.length > 0 && (

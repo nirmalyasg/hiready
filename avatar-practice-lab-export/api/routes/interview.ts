@@ -24,6 +24,8 @@ import {
   userSkillMemory,
   jobPracticeLinks,
   codingExercises,
+  roleTaskBlueprints,
+  roleInterviewStructureDefaults,
   RoleKit,
   UserDocument,
   InterviewConfig,
@@ -103,6 +105,58 @@ function inferPhaseType(id: string, name: string): string {
     return "technical";
   }
   return "general";
+}
+
+const INTERVIEW_MODE_TO_TASK_TYPES: Record<string, string[]> = {
+  coding_technical: ["coding_explain", "debugging", "code_modification", "code_review"],
+  case_problem_solving: ["case_interview", "metrics_case", "metrics_investigation", "account_plan_case"],
+  behavioral: ["behavioral_star"],
+  hiring_manager: ["execution_scenario", "behavioral_star", "metrics_case"],
+  system_deep_dive: ["code_review", "debugging", "critique"],
+};
+
+async function loadBlueprintsForMode(
+  roleArchetypeId: string,
+  interviewMode: string,
+  seniority: string
+): Promise<{ taskBlueprints: any[]; structureDefaults: any | null }> {
+  const taskTypes = INTERVIEW_MODE_TO_TASK_TYPES[interviewMode] || [];
+  
+  let taskBlueprints: any[] = [];
+  if (taskTypes.length > 0) {
+    const allBlueprints = await db
+      .select()
+      .from(roleTaskBlueprints)
+      .where(eq(roleTaskBlueprints.roleArchetypeId, roleArchetypeId));
+    
+    taskBlueprints = allBlueprints.filter(bp => {
+      const matchesTaskType = taskTypes.includes(bp.taskType);
+      const matchesSeniority = bp.difficultyBand === "all" || 
+        bp.difficultyBand?.includes(seniority) ||
+        bp.difficultyBand?.includes("entry-mid") && (seniority === "entry" || seniority === "mid") ||
+        bp.difficultyBand?.includes("mid-senior") && (seniority === "mid" || seniority === "senior");
+      
+      return matchesTaskType && matchesSeniority;
+    });
+    
+    if (taskBlueprints.length === 0) {
+      taskBlueprints = allBlueprints.filter(bp => taskTypes.includes(bp.taskType));
+    }
+  }
+  
+  const seniorityMap: Record<string, string> = { entry: "l1_l2", mid: "l3_l4", senior: "l5_plus" };
+  const mappedSeniority = seniorityMap[seniority] || "l3_l4";
+  
+  const [structureDefaults] = await db
+    .select()
+    .from(roleInterviewStructureDefaults)
+    .where(and(
+      eq(roleInterviewStructureDefaults.roleArchetypeId, roleArchetypeId),
+      eq(roleInterviewStructureDefaults.seniority, mappedSeniority as any)
+    ))
+    .limit(1);
+  
+  return { taskBlueprints, structureDefaults };
 }
 
 const uploadDir = path.join(__dirname, "..", "uploads", "documents");
@@ -197,6 +251,38 @@ interviewRouter.get("/role-kits/:id", async (req: Request, res: Response) => {
     res.json({ success: true, roleKit: kit, rubric });
   } catch (error: any) {
     console.error("Error fetching role kit:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.get("/role-archetypes", async (req: Request, res: Response) => {
+  try {
+    const { category } = req.query;
+    
+    let archetypes = await db
+      .select()
+      .from(roleArchetypes)
+      .where(eq(roleArchetypes.isActive, true))
+      .orderBy(roleArchetypes.name);
+    
+    if (category && typeof category === "string" && category !== "all") {
+      archetypes = archetypes.filter(a => a.roleCategory === category);
+    }
+    
+    res.json({ 
+      success: true, 
+      archetypes: archetypes.map(a => ({
+        id: a.id,
+        name: a.name,
+        description: a.description,
+        roleCategory: a.roleCategory,
+        primarySkillDimensions: a.primarySkillDimensions || [],
+        commonInterviewTypes: a.commonInterviewTypes || [],
+        typicalTaskTypes: a.typicalTaskTypes || [],
+      }))
+    });
+  } catch (error: any) {
+    console.error("Error fetching role archetypes:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -535,6 +621,8 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
     const userId = req.user!.id;
     const {
       roleKitId,
+      roleArchetypeId,
+      interviewMode: requestedMode,
       resumeDocId: providedResumeDocId,
       jdDocId,
       companyNotesDocId,
@@ -545,11 +633,15 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
       jobTargetId,
     } = req.body;
     
-    const interviewMode = mode || (roleKitId && !providedResumeDocId ? "role_based" : "custom");
+    const interviewModeTypes = ["coding_technical", "case_problem_solving", "behavioral", "hiring_manager", "system_deep_dive"];
+    const isInterviewModeType = requestedMode && interviewModeTypes.includes(requestedMode);
+    
+    const interviewMode = requestedMode || mode || (roleKitId && !providedResumeDocId ? "role_based" : "custom");
     
     let resumeDocId = providedResumeDocId;
     
-    if (interviewMode !== "role_based" && interviewMode !== "skill_only" && !resumeDocId) {
+    const skipResumeModes = ["role_based", "skill_only", "interview_mode", ...interviewModeTypes];
+    if (!skipResumeModes.includes(interviewMode) && !resumeDocId) {
       const [profile] = await db
         .select({ latestResumeDocId: userProfileExtracted.latestResumeDocId })
         .from(userProfileExtracted)
@@ -579,9 +671,10 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
       return res.status(400).json({ success: false, error: "Role kit is required for role-based interviews" });
     }
     
-    // skill_only mode doesn't require roleKitId or resume
+    if (isInterviewModeType && !roleArchetypeId) {
+      return res.status(400).json({ success: false, error: "Role archetype is required for interview mode practice" });
+    }
     
-    // If jobTargetId provided, verify it belongs to this user
     if (jobTargetId) {
       const [jobTarget] = await db
         .select()
@@ -593,15 +686,29 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
       }
     }
     
+    const modeToInterviewType: Record<string, string> = {
+      coding_technical: "technical",
+      case_problem_solving: "case_study",
+      behavioral: "behavioral",
+      hiring_manager: "hiring_manager",
+      system_deep_dive: "technical",
+    };
+    
+    const resolvedInterviewType = isInterviewModeType 
+      ? modeToInterviewType[requestedMode] || "behavioral"
+      : interviewType || "behavioral";
+    
     const [config] = await db
       .insert(interviewConfigs)
       .values({
         userId,
         roleKitId: roleKitId || null,
+        roleArchetypeId: roleArchetypeId || null,
+        interviewMode: interviewMode as any,
         resumeDocId: resumeDocId || null,
         jdDocId: jdDocId || null,
         companyNotesDocId: companyNotesDocId || null,
-        interviewType: interviewType || "behavioral",
+        interviewType: resolvedInterviewType as any,
         style: style || "neutral",
         seniority: seniority || "entry",
         jobTargetId: jobTargetId || null,
@@ -677,6 +784,8 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
     let jdParsed: any = null;
     let roleKitData: RoleKit | null = null;
     let jobTargetData: any = null;
+    let roleArchetypeData: any = null;
+    let blueprintData: { taskBlueprints: any[]; structureDefaults: any | null } = { taskBlueprints: [], structureDefaults: null };
     
     if (config.resumeDocId) {
       const [doc] = await db.select().from(userDocuments).where(eq(userDocuments.id, config.resumeDocId));
@@ -690,7 +799,23 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
       const [kit] = await db.select().from(roleKits).where(eq(roleKits.id, config.roleKitId));
       roleKitData = kit;
     }
-    // Load job target for custom interviews
+    
+    if (config.roleArchetypeId) {
+      const [archetype] = await db
+        .select()
+        .from(roleArchetypes)
+        .where(eq(roleArchetypes.id, config.roleArchetypeId));
+      roleArchetypeData = archetype;
+      
+      if (config.interviewMode && INTERVIEW_MODE_TO_TASK_TYPES[config.interviewMode]) {
+        blueprintData = await loadBlueprintsForMode(
+          config.roleArchetypeId,
+          config.interviewMode,
+          config.seniority
+        );
+      }
+    }
+    
     if (config.jobTargetId) {
       const [job] = await db.select().from(jobTargets).where(eq(jobTargets.id, config.jobTargetId));
       if (job) {
@@ -701,24 +826,42 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
           description: job.jdText,
           parsedJd: job.jdParsed,
         };
-        // Use job target's parsed JD if no separate JD document
         if (!jdParsed && job.jdParsed) {
           jdParsed = job.jdParsed;
         }
       }
     }
     
-    const planContext = {
+    const planContext: any = {
       interviewType: config.interviewType,
+      interviewMode: config.interviewMode,
       style: config.style,
       seniority: config.seniority,
       roleKit: roleKitData ? { name: roleKitData.name, domain: roleKitData.domain, skillsFocus: roleKitData.skillsFocus } : null,
+      roleArchetype: roleArchetypeData ? { id: roleArchetypeData.id, name: roleArchetypeData.name, domain: roleArchetypeData.domain } : null,
       candidateProfile: resumeParsed,
       jobDescription: jdParsed,
       jobTarget: jobTargetData,
       roundCategory: roundCategory || null,
       targetDuration: typicalDuration || "30-45 min",
     };
+    
+    if (blueprintData.taskBlueprints.length > 0) {
+      planContext.taskBlueprints = blueprintData.taskBlueprints.map(bp => ({
+        taskType: bp.taskType,
+        difficultyBand: bp.difficultyBand,
+        promptTemplate: bp.promptTemplate,
+        expectedSignals: bp.expectedSignalsJson,
+        probeTree: bp.probeTreeJson,
+      }));
+    }
+    
+    if (blueprintData.structureDefaults) {
+      planContext.structureDefaults = {
+        phases: blueprintData.structureDefaults.phasesJson,
+        emphasisWeights: blueprintData.structureDefaults.emphasisWeightsJson,
+      };
+    }
     
     const openaiClient = getOpenAI();
     const response = await openaiClient.chat.completions.create({
@@ -1559,34 +1702,56 @@ Return a JSON object with relevant fields based on the content type.`;
 const INTERVIEW_PLAN_GENERATOR_PROMPT = `You are an interview planning expert. Create a CUSTOMIZED interview plan based on the provided context.
 
 INPUTS:
-- interviewType: "hr" | "hiring_manager" | "technical" | "panel"
+- interviewType: "hr" | "hiring_manager" | "technical" | "panel" | "behavioral" | "case_study"
+- interviewMode: "coding_technical" | "case_problem_solving" | "behavioral" | "hiring_manager" | "system_deep_dive" (optional - focused practice modes)
 - style: "friendly" | "neutral" | "stress"
 - seniority: "entry" | "mid" | "senior"
 - roleKit: role information and skills focus (may be null)
+- roleArchetype: role category like "core_software_engineer", "data_analyst", "product_manager" (may be null)
 - candidateProfile: parsed resume data (may be null)
 - jobDescription: parsed JD data (may be null)
 - jobTarget: target job details including company, role title, description
+- taskBlueprints: predefined question templates and expected signals for this role+mode (may be null)
+- structureDefaults: recommended phase structure and scoring weights for this role (may be null)
 
 CRITICAL CUSTOMIZATION RULES:
 
-1. INTERVIEW TYPE determines the focus:
+1. INTERVIEW MODE (if provided) determines the focus:
+   - "coding_technical": Live coding, debugging, code review - use coding/debugging blueprints
+   - "case_problem_solving": Business cases, metrics diagnosis, strategic thinking
+   - "behavioral": STAR-format questions, ownership, conflict resolution, leadership
+   - "hiring_manager": Role fit, team dynamics, execution scenarios, situational questions
+   - "system_deep_dive": Architecture, design patterns, deep technical probing
+
+2. TASK BLUEPRINTS (if provided):
+   - USE the promptTemplate from blueprints as question patterns
+   - ASSESS candidates based on expectedSignals from blueprints
+   - Use probeTree for follow-up questions when answers are vague or strong
+   - Adapt difficulty based on seniority level
+
+3. STRUCTURE DEFAULTS (if provided):
+   - Follow the phase structure (phases[]) from structureDefaults
+   - Use emphasisWeights to prioritize dimensions in evaluation
+   - Adjust phase durations proportionally for 10-15 min total
+
+4. INTERVIEW TYPE fallback (if no interviewMode):
    - "hr": Focus on culture fit, motivation, career goals, behavioral questions, soft skills
    - "hiring_manager": Focus on role fit, team dynamics, problem-solving, situational questions
    - "technical": Focus on technical skills, coding concepts, system design, hands-on scenarios
    - "panel": Mix of all above with multiple perspectives
 
-2. STYLE determines the tone and pressure:
+5. STYLE determines the tone and pressure:
    - "friendly": Supportive, encouraging follow-ups, hints when stuck, conversational
    - "neutral": Professional, balanced, standard interview pacing
    - "stress": Challenging, probing deeply, time pressure, pushback on answers
 
-3. JOB TARGET context:
+6. JOB TARGET context:
    - If jobTarget is provided, tailor ALL questions to that specific role and company
    - Reference the company name and role in warmup questions
    - Use job description requirements to create relevant scenario questions
    - Focus skills assessment on what the JD emphasizes
 
-4. CANDIDATE PROFILE:
+7. CANDIDATE PROFILE:
    - If candidateProfile (resume) is provided, create specific questions about their experience
    - Identify potential gaps between resume and job requirements
    - Probe claimed achievements and skills

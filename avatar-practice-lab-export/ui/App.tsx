@@ -29,6 +29,7 @@ import UserDetailPage from './pages/admin/user-detail-page';
 import InterviewPracticePage from './pages/interview/page';
 import InterviewRoleDetailPage from './pages/interview/role-detail-page';
 import InterviewConfigPage from './pages/interview/config/page';
+import InterviewModeSetupPage from './pages/interview/mode-setup/page';
 import InterviewCustomPage from './pages/interview/custom/page';
 import InterviewPreSessionPage from './pages/interview/pre-session/page';
 import InterviewContinuousSessionPage from './pages/interview/continuous-session/page';
@@ -77,6 +78,7 @@ export default function App() {
         <Route path="/interview" element={<ProtectedRoute><InterviewPracticePage /></ProtectedRoute>} />
         <Route path="/interview/role/:roleId" element={<ProtectedRoute><InterviewRoleDetailPage /></ProtectedRoute>} />
         <Route path="/interview/config" element={<ProtectedRoute><InterviewConfigPage /></ProtectedRoute>} />
+        <Route path="/interview/mode-setup" element={<ProtectedRoute><InterviewModeSetupPage /></ProtectedRoute>} />
         <Route path="/interview/custom" element={<ProtectedRoute><InterviewCustomPage /></ProtectedRoute>} />
         <Route path="/interview/pre-session" element={<ProtectedRoute><InterviewPreSessionPage /></ProtectedRoute>} />
         <Route path="/interview/session" element={<ProtectedRoute><InterviewContinuousSessionPage /></ProtectedRoute>} />

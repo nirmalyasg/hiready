@@ -66,78 +66,61 @@ const domainColors: Record<string, string> = {
   engineering_management: "bg-violet-500",
 };
 
-const skillPracticeOptions = [
+const interviewModeOptions = [
   { 
-    id: "coding", 
-    label: "Coding Interview", 
-    description: "DSA, algorithms, and problem-solving practice",
+    id: "coding_technical", 
+    label: "Coding & Technical Tasks", 
+    description: "Solve, explain, debug, or modify technical problems",
     icon: Code,
     color: "bg-indigo-500",
-    roundCategory: "coding",
-    duration: "15 min"
+    interviewMode: "coding_technical",
+    duration: "15 min",
+    includes: ["Coding", "Debugging", "Code Review", "SQL", "ML Basics"],
+    roleCategories: ["tech", "data"],
   },
   { 
-    id: "sql", 
-    label: "SQL Assessment", 
-    description: "Database queries, joins, and optimization",
-    icon: Database,
-    color: "bg-cyan-500",
-    roundCategory: "sql",
-    duration: "15 min"
+    id: "case_problem_solving", 
+    label: "Case & Problem Solving", 
+    description: "Structured thinking for ambiguous problems",
+    icon: Briefcase,
+    color: "bg-orange-500",
+    interviewMode: "case_problem_solving",
+    duration: "15 min",
+    includes: ["Business Cases", "Product Cases", "Analytics Cases", "Strategy"],
+    roleCategories: ["product", "business", "data"],
   },
   { 
     id: "behavioral", 
-    label: "Behavioral Interview", 
-    description: "STAR method, leadership, and situational questions",
+    label: "Behavioral & Experience", 
+    description: "Past behavior, judgment, and ownership",
     icon: MessageSquare,
     color: "bg-amber-500",
-    roundCategory: "behavioral",
-    duration: "15 min"
-  },
-  { 
-    id: "case", 
-    label: "Case Study", 
-    description: "Business cases, product sense, and strategy",
-    icon: Briefcase,
-    color: "bg-orange-500",
-    roundCategory: "case",
-    duration: "15 min"
-  },
-  { 
-    id: "technical", 
-    label: "Technical Deep Dive", 
-    description: "System design, architecture, and technical concepts",
-    icon: Brain,
-    color: "bg-violet-500",
-    roundCategory: "technical",
-    duration: "15 min"
-  },
-  { 
-    id: "analytics", 
-    label: "Analytics Round", 
-    description: "Metrics, data analysis, and insight storytelling",
-    icon: BarChart3,
-    color: "bg-teal-500",
-    roundCategory: "analytics",
-    duration: "15 min"
-  },
-  { 
-    id: "ml", 
-    label: "ML/AI Interview", 
-    description: "Machine learning concepts and model evaluation",
-    icon: TrendingUp,
-    color: "bg-fuchsia-500",
-    roundCategory: "ml",
-    duration: "15 min"
+    interviewMode: "behavioral",
+    duration: "15 min",
+    includes: ["STAR Stories", "Conflict Handling", "Leadership", "Failure Stories"],
+    roleCategories: ["all"],
   },
   { 
     id: "hiring_manager", 
-    label: "Hiring Manager", 
-    description: "Role fit, team dynamics, and career goals",
+    label: "Hiring Manager / Role Fit", 
+    description: "Role expectations, motivation, career alignment",
     icon: Users,
     color: "bg-blue-500",
-    roundCategory: "hiring_manager",
-    duration: "15 min"
+    interviewMode: "hiring_manager",
+    duration: "15 min",
+    includes: ["Why This Role", "Trade-offs", "Decision-making", "Role Realism"],
+    roleCategories: ["all"],
+  },
+  { 
+    id: "system_deep_dive", 
+    label: "System / Deep Dive", 
+    description: "Depth, trade-offs, architecture, reasoning",
+    icon: Brain,
+    color: "bg-violet-500",
+    interviewMode: "system_deep_dive",
+    duration: "15 min",
+    includes: ["System Design", "Program Execution", "Strategy Depth", "Design Critique"],
+    roleCategories: ["tech", "product"],
   },
 ];
 
@@ -245,28 +228,18 @@ export default function InterviewPracticePage() {
     navigate(`/jobs/${job.id}`);
   };
 
-  const handleSkillPractice = (skill: typeof skillPracticeOptions[0]) => {
-    sessionStorage.setItem("rolePracticeContext", JSON.stringify({
-      roundCategory: skill.roundCategory,
+  const handleInterviewMode = (mode: typeof interviewModeOptions[0]) => {
+    sessionStorage.setItem("interviewModeContext", JSON.stringify({
+      interviewMode: mode.interviewMode,
       taxonomy: {
-        label: skill.label,
-        description: skill.description,
-        typicalDuration: skill.duration,
+        label: mode.label,
+        description: mode.description,
+        typicalDuration: mode.duration,
+        includes: mode.includes,
       },
-      roleContext: {
-        roleKitId: 0,
-        roleName: "General Practice",
-        level: "mid",
-        domain: "general",
-        skillsFocus: [],
-        roleArchetypeId: null,
-      },
-      promptHints: {
-        focusAreas: [skill.label],
-        companySpecificGuidance: null,
-      },
+      roleCategories: mode.roleCategories,
     }));
-    navigate(`/interview/config?roundCategory=${skill.roundCategory}`);
+    navigate(`/interview/mode-setup?mode=${mode.interviewMode}`);
   };
 
   const handleAddViaUrl = async () => {
@@ -422,22 +395,22 @@ export default function InterviewPracticePage() {
               </div>
             </button>
 
-            {/* Practice by Skill */}
+            {/* Practice by Interview Type */}
             <button
               onClick={() => setSelectedPath("skill")}
               className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 hover:border-purple-400 hover:shadow-xl transition-all"
             >
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                <Brain className="w-6 h-6 text-white" />
+                <Target className="w-6 h-6 text-white" />
               </div>
               <h2 className="text-lg font-bold text-[#042c4c] mb-2 group-hover:text-purple-600 transition-colors">
-                Practice by Skill
+                Practice by Interview Type
               </h2>
               <p className="text-slate-500 text-sm mb-4">
-                Focus on specific skills: Coding, SQL, Behavioral, Case Study, System Design.
+                Coding, Case Study, Behavioral, Hiring Manager, or System Design.
               </p>
               <div className="flex items-center gap-2 text-purple-600 font-medium text-sm">
-                <span>Choose skill</span>
+                <span>Choose type</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </button>
@@ -810,7 +783,7 @@ export default function InterviewPracticePage() {
           </section>
         )}
 
-        {/* Practice by Skill */}
+        {/* Practice by Interview Type */}
         {selectedPath === "skill" && (
           <section>
             <button
@@ -823,38 +796,51 @@ export default function InterviewPracticePage() {
 
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                <Brain className="w-6 h-6 text-white" />
+                <Target className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-[#042c4c]">Practice by Skill</h2>
-                <p className="text-sm text-slate-500">Focus on specific interview skills</p>
+                <h2 className="text-xl font-bold text-[#042c4c]">Practice by Interview Type</h2>
+                <p className="text-sm text-slate-500">Choose the type of interview to practice</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {skillPracticeOptions.map((skill) => {
-                const IconComponent = skill.icon;
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {interviewModeOptions.map((mode) => {
+                const IconComponent = mode.icon;
                 return (
                   <button
-                    key={skill.id}
-                    onClick={() => handleSkillPractice(skill)}
-                    className="group text-left bg-white border border-slate-200 rounded-2xl p-4 hover:shadow-lg hover:border-purple-200 transition-all"
+                    key={mode.id}
+                    onClick={() => handleInterviewMode(mode)}
+                    className="group text-left bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-lg hover:border-purple-200 transition-all"
                   >
-                    <div className={`w-10 h-10 ${skill.color} rounded-xl flex items-center justify-center mb-3`}>
-                      <IconComponent className="w-5 h-5 text-white" />
+                    <div className={`w-12 h-12 ${mode.color} rounded-xl flex items-center justify-center mb-4`}>
+                      <IconComponent className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="font-semibold text-[#042c4c] text-sm mb-1 group-hover:text-purple-700 transition-colors">
-                      {skill.label}
+                    <h3 className="font-semibold text-[#042c4c] text-base mb-1 group-hover:text-purple-700 transition-colors">
+                      {mode.label}
                     </h3>
-                    <p className="text-xs text-slate-500 line-clamp-2 mb-3">
-                      {skill.description}
+                    <p className="text-sm text-slate-500 mb-3">
+                      {mode.description}
                     </p>
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {mode.includes.slice(0, 3).map((item, idx) => (
+                        <span key={idx} className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
+                          {item}
+                        </span>
+                      ))}
+                      {mode.includes.length > 3 && (
+                        <span className="text-xs text-slate-400">+{mode.includes.length - 3} more</span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                       <span className="text-xs text-slate-400 flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        {skill.duration}
+                        {mode.duration}
                       </span>
-                      <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-purple-600 transition-colors" />
+                      <span className="inline-flex items-center gap-1 text-sm font-medium text-purple-600 group-hover:gap-2 transition-all">
+                        Start
+                        <ArrowRight className="w-4 h-4" />
+                      </span>
                     </div>
                   </button>
                 );

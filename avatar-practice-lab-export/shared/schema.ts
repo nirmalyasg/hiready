@@ -810,6 +810,9 @@ export const interviewConfigs = pgTable("interview_configs", {
     .references(() => authUsers.id, { onDelete: "cascade" }),
   roleKitId: integer("role_kit_id")
     .references(() => roleKits.id, { onDelete: "set null" }),
+  roleArchetypeId: varchar("role_archetype_id"),
+  interviewMode: text("interview_mode")
+    .$type<"coding_technical" | "case_problem_solving" | "behavioral" | "hiring_manager" | "system_deep_dive" | "role_based" | "custom" | "skill_only">(),
   jobTargetId: varchar("job_target_id")
     .references(() => jobTargets.id, { onDelete: "set null" }),
   resumeDocId: integer("resume_doc_id")
@@ -819,7 +822,7 @@ export const interviewConfigs = pgTable("interview_configs", {
   companyNotesDocId: integer("company_notes_doc_id")
     .references(() => userDocuments.id, { onDelete: "set null" }),
   interviewType: text("interview_type")
-    .$type<"hr" | "hiring_manager" | "technical" | "panel">()
+    .$type<"hr" | "hiring_manager" | "technical" | "panel" | "case_study" | "behavioral" | "coding" | "sql" | "analytics" | "ml" | "case" | "system_design" | "product_sense" | "general" | "skill_practice">()
     .notNull()
     .default("hr"),
   style: text("style")
