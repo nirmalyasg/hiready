@@ -524,6 +524,39 @@ const COMPONENT_TO_ROUND: Record<keyof CompanyInterviewComponents, { name: strin
   presentation: { name: "Presentation", mins: 45, priority: 11 },
 };
 
+// Maps role archetype common_interview_types to company component keys
+// Role interview types → Which company components are relevant for that role
+const ROLE_INTERVIEW_TYPE_TO_COMPONENTS: Record<string, (keyof CompanyInterviewComponents)[]> = {
+  "technical": ["technicalDsaSql", "codingChallenge", "systemDesign"],
+  "coding": ["codingChallenge", "technicalDsaSql"],
+  "hiring_manager": ["hiringManager"],
+  "behavioral": ["behavioral"],
+  "hr": ["hrScreen"],
+  "case": ["caseStudy"],
+  "product": ["caseStudy", "presentation"],
+  "portfolio": ["presentation"],
+  "panel": ["panel"],
+  "sales_roleplay": ["behavioral", "hiringManager"],
+  "aptitude": ["aptitude"],
+  "group": ["groupDiscussion"],
+};
+
+// Maps company components to relevant role interview types
+// Used to check if a company component is relevant for a given role
+const COMPONENT_TO_ROLE_TYPES: Record<keyof CompanyInterviewComponents, string[]> = {
+  aptitude: ["aptitude"],
+  hrScreen: ["hr"],
+  codingChallenge: ["technical", "coding"],
+  technicalDsaSql: ["technical", "coding"],
+  systemDesign: ["technical"],
+  caseStudy: ["case", "product"],
+  behavioral: ["behavioral", "sales_roleplay"],
+  hiringManager: ["hiring_manager", "sales_roleplay"],
+  groupDiscussion: ["group"],
+  panel: ["panel"],
+  presentation: ["portfolio", "product"],
+};
+
 export async function getUnifiedInterviewPlan(
   roleArchetypeId: string | null,
   roleFamily: string | null,
@@ -537,13 +570,27 @@ export async function getUnifiedInterviewPlan(
     experienceLevel === "senior" || experienceLevel === "lead" || experienceLevel === "executive" ? "senior" :
     experienceLevel === "entry" ? "entry" : "mid";
 
-  let roleArchetypeDetails: { id: string; name: string; roleFamily: string | null } | null = null;
+  let roleArchetypeDetails: { 
+    id: string; 
+    name: string; 
+    roleFamily: string | null;
+    commonInterviewTypes: string[];
+    commonFailureModes: string[];
+    primarySkillDimensions: string[];
+  } | null = null;
   let structureDefaults: InterviewStructure | null = null;
   
   if (roleArchetypeId) {
     const details = await getRoleArchetypeDetails(roleArchetypeId);
     if (details) {
-      roleArchetypeDetails = { id: details.id, name: details.name, roleFamily: details.roleCategory || null };
+      roleArchetypeDetails = { 
+        id: details.id, 
+        name: details.name, 
+        roleFamily: details.roleCategory || null,
+        commonInterviewTypes: (details.commonInterviewTypes as string[]) || [],
+        commonFailureModes: (details.commonFailureModes as string[]) || [],
+        primarySkillDimensions: (details.primarySkillDimensions as string[]) || [],
+      };
     }
     structureDefaults = await getRoleInterviewStructure(roleArchetypeId, seniority);
   }
@@ -552,8 +599,86 @@ export async function getUnifiedInterviewPlan(
   let emphasisWeights: Record<string, number> = {};
   
   const companyComponents = companyName ? await getCompanyInterviewComponents(companyName) : null;
+  const roleInterviewTypes = roleArchetypeDetails?.commonInterviewTypes || [];
   
-  if (companyComponents) {
+  // CORE INTERSECTION LOGIC
+  // Only show rounds that are relevant to BOTH company AND role
+  if (companyComponents && roleInterviewTypes.length > 0) {
+    const relevantRounds: { name: string; mins: number; priority: number; provenance: "both" | "company" | "role" }[] = [];
+    
+    // Get company's active components
+    const activeCompanyComponents = Object.entries(companyComponents)
+      .filter(([_, value]) => value === true)
+      .map(([key]) => key as keyof CompanyInterviewComponents);
+    
+    // For each company component, check if it's relevant for this role
+    for (const componentKey of activeCompanyComponents) {
+      const componentRoleTypes = COMPONENT_TO_ROLE_TYPES[componentKey] || [];
+      const roundConfig = COMPONENT_TO_ROUND[componentKey];
+      
+      if (!roundConfig) continue;
+      
+      // Check if any of this component's role types match the role's interview types
+      const isRelevantForRole = componentRoleTypes.some(roleType => 
+        roleInterviewTypes.includes(roleType)
+      );
+      
+      // Always include hr_screen, behavioral, hiring_manager as they're common to most roles
+      const isUniversalRound = ["hrScreen", "behavioral", "hiringManager"].includes(componentKey);
+      
+      if (isRelevantForRole || isUniversalRound) {
+        relevantRounds.push({
+          ...roundConfig,
+          provenance: isRelevantForRole ? "both" : "company",
+        });
+      }
+    }
+    
+    // Add role-critical rounds that company might not have (e.g., case study for PM)
+    for (const roleType of roleInterviewTypes) {
+      const relevantComponents = ROLE_INTERVIEW_TYPE_TO_COMPONENTS[roleType] || [];
+      
+      for (const componentKey of relevantComponents) {
+        const roundConfig = COMPONENT_TO_ROUND[componentKey];
+        if (!roundConfig) continue;
+        
+        // If company doesn't have this component but role needs it, add as role-only
+        const alreadyAdded = relevantRounds.some(r => r.name === roundConfig.name);
+        if (!alreadyAdded && !activeCompanyComponents.includes(componentKey)) {
+          // Only add if it's a core role requirement (case for PM, coding for SWE)
+          const isCoreRoleRound = ["case", "product", "technical", "coding", "portfolio"].includes(roleType);
+          if (isCoreRoleRound) {
+            relevantRounds.push({
+              ...roundConfig,
+              provenance: "role",
+            });
+          }
+        }
+      }
+    }
+    
+    // Sort by priority and deduplicate
+    relevantRounds.sort((a, b) => a.priority - b.priority);
+    
+    phases = relevantRounds.map(round => {
+      const mapping = PHASE_TO_CATEGORY_MAP[round.name] || { 
+        category: "technical_interview", 
+        practiceMode: "live_interview" as const, 
+        description: "Interview round" 
+      };
+      
+      return {
+        name: round.name,
+        category: mapping.category,
+        mins: round.mins,
+        practiceMode: mapping.practiceMode,
+        description: mapping.description,
+        emphasisWeight: 1,
+      };
+    });
+    
+  } else if (companyComponents) {
+    // No role archetype - use company components only (fallback)
     const activeRounds: { name: string; mins: number; priority: number }[] = [];
     
     for (const [key, value] of Object.entries(companyComponents)) {
@@ -581,6 +706,7 @@ export async function getUnifiedInterviewPlan(
       };
     });
   } else if (structureDefaults && structureDefaults.phases.length > 0) {
+    // No company - use role archetype structure defaults
     phases = structureDefaults.phases.map(phase => {
       const mapping = PHASE_TO_CATEGORY_MAP[phase.name] || { 
         category: "technical_interview", 
@@ -600,6 +726,7 @@ export async function getUnifiedInterviewPlan(
     });
     emphasisWeights = structureDefaults.emphasisWeights;
   } else {
+    // No company and no role archetype - use role family defaults
     const family = roleFamily || "tech";
     const defaultPhases = DEFAULT_PHASES_BY_ROLE_FAMILY[family] || DEFAULT_PHASES_BY_ROLE_FAMILY.tech;
     

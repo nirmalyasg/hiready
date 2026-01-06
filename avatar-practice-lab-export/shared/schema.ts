@@ -1550,6 +1550,23 @@ export const roleInterviewStructureDefaults = pgTable("role_interview_structure_
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Role Task Blueprints - task prompts, expected signals, and probe trees per role archetype
+export const roleTaskBlueprints = pgTable("role_task_blueprints", {
+  id: serial("id").primaryKey(),
+  roleArchetypeId: varchar("role_archetype_id")
+    .notNull()
+    .references(() => roleArchetypes.id, { onDelete: "cascade" }),
+  taskType: varchar("task_type").notNull(),
+  difficultyBand: varchar("difficulty_band").default("entry-mid"),
+  promptTemplate: text("prompt_template").notNull(),
+  expectedSignalsJson: jsonb("expected_signals_json").$type<string[]>().default([]),
+  probeTreeJson: jsonb("probe_tree_json").$type<string[]>().default([]),
+  tagsJson: jsonb("tags_json").$type<string[]>().default([]),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Question Patterns - templated questions with probe trees
 export const questionPatterns = pgTable("question_patterns", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -1641,6 +1658,14 @@ export const companiesRelations = relations(companies, ({ many }) => ({
 
 export const roleArchetypesRelations = relations(roleArchetypes, ({ many }) => ({
   structureDefaults: many(roleInterviewStructureDefaults),
+  taskBlueprints: many(roleTaskBlueprints),
+}));
+
+export const roleTaskBlueprintsRelations = relations(roleTaskBlueprints, ({ one }) => ({
+  roleArchetype: one(roleArchetypes, {
+    fields: [roleTaskBlueprints.roleArchetypeId],
+    references: [roleArchetypes.id],
+  }),
 }));
 
 export const roleInterviewStructureDefaultsRelations = relations(roleInterviewStructureDefaults, ({ one }) => ({
