@@ -67,6 +67,43 @@ const __dirname = path.dirname(__filename);
 
 export const interviewRouter = Router();
 
+// Normalize exercise content: ensure both singular and array fields are populated
+function normalizePlanExercises(planJson: any, interviewMode?: string): any {
+  const normalized = { ...planJson };
+  
+  // Handle coding problems
+  if (normalized.codingProblems && normalized.codingProblems.length > 0) {
+    // If arrays exist but singular doesn't, populate singular from first array item
+    if (!normalized.codingProblem) {
+      normalized.codingProblem = normalized.codingProblems[0];
+    }
+  } else if (normalized.codingProblem) {
+    // If singular exists but array doesn't, create array from singular
+    normalized.codingProblems = [normalized.codingProblem];
+  }
+  
+  // Handle case studies
+  if (normalized.caseStudies && normalized.caseStudies.length > 0) {
+    if (!normalized.caseStudy) {
+      normalized.caseStudy = normalized.caseStudies[0];
+    }
+  } else if (normalized.caseStudy) {
+    normalized.caseStudies = [normalized.caseStudy];
+  }
+  
+  // Ensure puzzles array exists
+  if (!normalized.puzzles) {
+    normalized.puzzles = [];
+  }
+  
+  // Store the interview mode for downstream use
+  if (interviewMode) {
+    normalized.interviewMode = interviewMode;
+  }
+  
+  return normalized;
+}
+
 function mapPhasesToFrontendFormat(planJson: any): any {
   if (!planJson || !planJson.phases) return planJson;
   
@@ -881,7 +918,10 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
     });
     
     const rawPlanJson = JSON.parse(response.choices[0].message.content || "{}");
-    const mappedPlanJson = mapPhasesToFrontendFormat(rawPlanJson);
+    
+    // Normalize exercise content: populate both singular and array fields
+    const normalizedPlan = normalizePlanExercises(rawPlanJson, planContext.interviewMode);
+    const mappedPlanJson = mapPhasesToFrontendFormat(normalizedPlan);
     
     const [plan] = await db
       .insert(interviewPlans)
@@ -1161,8 +1201,10 @@ interviewRouter.get("/session/:id", requireAuth, async (req: Request, res: Respo
     // Map plan data and add case study if needed
     let mappedPlan: any = mapPhasesToFrontendFormat(plan?.planJson);
     
-    // Add case study data if interview type is case_study
-    if (config?.interviewType === 'case_study' && mappedPlan) {
+    // Add default case study data only if interview type is case_study and no case study exists in plan
+    const isCaseStudyMode = config?.interviewType === 'case_study' || config?.interviewMode === 'case_problem_solving';
+    
+    if (isCaseStudyMode && mappedPlan && !mappedPlan.caseStudy) {
       const caseStudyPhase = mappedPlan.phases?.find((p: any) => 
         p.name?.toLowerCase().includes('case') || 
         p.practiceMode === 'case_study' ||
@@ -1180,7 +1222,7 @@ interviewRouter.get("/session/:id", requireAuth, async (req: Request, res: Respo
         evaluationFocus: ['Problem structuring', 'Analytical thinking', 'Communication', 'Recommendations'],
         expectedDurationMinutes: caseStudyPhase?.duration || 30,
       };
-    } else if (config?.interviewType === 'case_study' && !mappedPlan) {
+    } else if (isCaseStudyMode && !mappedPlan) {
       mappedPlan = {
         phases: [],
         focusAreas: [],
@@ -1819,7 +1861,11 @@ Generate a JSON interview plan with this structure:
   "focusAreas": ["Top 3-5 specific things to assess based on ALL inputs"],
   "interviewerTone": "Description of how the interviewer should behave based on style",
   "keyQuestions": ["5-7 most important questions to ask, fully customized to this specific interview"],
-  "codingProblem": null
+  "codingProblem": null,
+  "codingProblems": [],
+  "caseStudy": null,
+  "caseStudies": [],
+  "puzzles": []
 }
 
 5. CODING PROBLEMS (for technical interviews only):
@@ -1850,6 +1896,64 @@ Generate a JSON interview plan with this structure:
    - If JD mentions "React", give a component optimization problem
    - If JD mentions "algorithms", give a classic DSA problem
    - If JD mentions "data processing", give a data transformation problem
+
+   When exerciseCount > 1, populate the "codingProblems" array with multiple distinct problems:
+   - Each problem should test different skills (e.g., arrays, trees, strings, dynamic programming)
+   - Vary difficulty slightly across problems
+   - Ensure they are all relevant to the role
+
+6. CASE STUDIES (for case_problem_solving mode or case_study interview type):
+   When interviewMode is "case_problem_solving" or interviewType is "case_study", you MUST include a case study:
+   {
+     "id": "unique-case-id",
+     "title": "Case Study Title",
+     "category": "strategy|product|metrics|market_sizing|operations|financial",
+     "difficulty": "Easy|Medium|Hard",
+     "scenario": "The full scenario description. Set up the business context clearly - company background, current situation, the challenge they face. Make it 2-3 paragraphs.",
+     "prompt": "The specific question or task the candidate needs to address.",
+     "timeLimit": 10,
+     "materials": [
+       {
+         "id": "material-1",
+         "title": "Revenue Data",
+         "type": "table|text|data|chart",
+         "content": "The actual data or text content. For tables, use markdown format."
+       }
+     ],
+     "evaluationCriteria": ["Framework application", "Quantitative analysis", "Logical structure", "Actionable recommendations"],
+     "hints": ["Consider the unit economics", "Think about customer segments"],
+     "sampleApproach": "A brief outline of how a strong candidate might structure their answer"
+   }
+
+   Tailor the case to the role:
+   - PM roles: Product strategy, feature prioritization, go-to-market
+   - Data roles: Metrics investigation, A/B test analysis, data interpretation
+   - Strategy roles: Market entry, competitive analysis, M&A evaluation
+   - Sales roles: Account planning, territory analysis, deal strategy
+   - Operations roles: Process optimization, supply chain, capacity planning
+
+   When exerciseCount > 1 for case studies, generate multiple distinct cases in a "caseStudies" array.
+
+7. PUZZLES AND BRAIN TEASERS (when includePuzzles is true):
+   Include puzzles in the "puzzles" array:
+   [
+     {
+       "id": "puzzle-1",
+       "type": "estimation|logic|pattern|market_sizing",
+       "title": "Puzzle Title",
+       "difficulty": "Easy|Medium|Hard",
+       "question": "The full puzzle question",
+       "hints": ["Hint 1 if stuck"],
+       "approach": "Brief description of how to approach this",
+       "solution": "The solution or reasonable answer range"
+     }
+   ]
+
+   Match puzzles to the role:
+   - PM/Strategy: Market sizing, Fermi estimation
+   - Engineering: Logic puzzles, algorithmic thinking
+   - Data: Statistical reasoning, probability puzzles
+   - General: Pattern recognition, lateral thinking
 
 IMPORTANT: Do NOT use generic placeholder questions. Every question should be specific to the job target, candidate profile, and interview type provided. If company/role info is available, mention them by name.`;
 

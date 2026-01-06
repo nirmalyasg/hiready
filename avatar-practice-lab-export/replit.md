@@ -28,7 +28,39 @@ avatar-practice-lab-export/
 
 ## Recent Changes (January 6, 2026)
 
-### Interview Mode Customization Options (Latest)
+### Exercise Content Generation During Plan Creation (Latest)
+Actual exercise content (coding problems, case studies, puzzles) is now generated during plan creation rather than using empty placeholders:
+
+1. **Coding Problems**
+   - Full problem with title, description, examples, constraints, hints, starterCode
+   - Language-appropriate templates (JavaScript, Python, etc.)
+   - Role-tailored problems (React for frontend, SQL for data, algorithms for SWE)
+   - Support for multiple problems via `codingProblems` array
+
+2. **Case Studies**
+   - Complete case study with scenario, prompt, materials, hints, sampleApproach
+   - Materials array with id, title, type (text/table/chart/data), content
+   - Category-based (strategy, product, metrics, market_sizing, operations)
+   - Support for multiple cases via `caseStudies` array
+
+3. **Puzzles**
+   - Array of puzzles with type, question, hints, approach, solution
+   - Role-matched (Fermi estimation for PM, logic for SWE, probability for Data)
+   - Only included when `includePuzzles` is enabled
+
+4. **Data Flow**
+   - Plan generation normalizes GPT output to populate both singular and array fields
+   - `normalizePlanExercises()` ensures backwards compatibility with singular fields
+   - Session endpoint preserves generated content (only adds defaults if missing)
+
+5. **Frontend Display**
+   - InlineCaseStudyPanel shows scenario, materials (collapsible), hints
+   - Materials displayed with type icons (text, table, chart, data)
+   - Hints section with amber styling (collapsed by default)
+
+---
+
+### Interview Mode Customization Options
 Added customization options for interview practice sessions:
 
 1. **Exercise Count Selection** (for Coding & Case Study modes)

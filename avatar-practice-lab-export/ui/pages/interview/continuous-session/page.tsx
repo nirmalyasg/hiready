@@ -20,7 +20,10 @@ interface InterviewSession {
     phases?: any[];
     focusAreas?: string[];
     codingProblem?: any;
+    codingProblems?: any[];
     caseStudy?: any;
+    caseStudies?: any[];
+    puzzles?: any[];
     interviewerTone?: string;
     keyQuestions?: string[];
   };
@@ -29,6 +32,7 @@ interface InterviewSession {
 interface InterviewConfig {
   id: number;
   interviewType: string;
+  interviewMode?: string;
   style: string;
   seniority: string;
 }
@@ -324,8 +328,12 @@ IMPORTANT BEHAVIOR:
         }, 2000);
       }
 
-      if (interviewSession?.plan?.codingProblem && config?.interviewType === 'technical') {
-        const problem = interviewSession.plan.codingProblem;
+      const isCodingType = config?.interviewType === 'technical' || config?.interviewMode === 'coding_technical';
+      const codingProblem = interviewSession?.plan?.codingProblem || 
+        (interviewSession?.plan?.codingProblems && interviewSession.plan.codingProblems[0]);
+      
+      if (codingProblem && isCodingType) {
+        const problem = codingProblem;
         let starterCode = '';
         if (typeof problem.starterCode === 'string') {
           starterCode = problem.starterCode;
@@ -348,7 +356,8 @@ IMPORTANT BEHAVIOR:
 
       // Check for case study data and trigger panel
       const effectiveInterviewType = config?.interviewType || (interviewSession as any)?.config?.interviewType;
-      const isCaseStudyType = effectiveInterviewType === 'hiring_manager' || effectiveInterviewType === 'panel' || effectiveInterviewType === 'case_study';
+      const effectiveInterviewMode = config?.interviewMode || (interviewSession as any)?.config?.interviewMode;
+      const isCaseStudyType = effectiveInterviewType === 'hiring_manager' || effectiveInterviewType === 'panel' || effectiveInterviewType === 'case_study' || effectiveInterviewMode === 'case_problem_solving';
       
       if (interviewSession?.plan?.caseStudy && isCaseStudyType) {
         const caseStudy = interviewSession.plan.caseStudy;
@@ -358,10 +367,14 @@ IMPORTANT BEHAVIOR:
           title: caseStudy.title || 'Case Study',
           prompt: caseStudy.prompt || caseStudy.description || '',
           context: caseStudy.context || '',
-          caseType: caseStudy.caseType || 'strategy',
+          scenario: caseStudy.scenario || '',
+          caseType: caseStudy.caseType || caseStudy.category || 'strategy',
           difficulty: caseStudy.difficulty || 'Medium',
-          evaluationFocus: caseStudy.evaluationFocus || [],
-          expectedDurationMinutes: caseStudy.expectedDurationMinutes || 15,
+          evaluationFocus: caseStudy.evaluationFocus || caseStudy.evaluationCriteria || [],
+          expectedDurationMinutes: caseStudy.expectedDurationMinutes || caseStudy.timeLimit || 15,
+          materials: caseStudy.materials || [],
+          hints: caseStudy.hints || [],
+          sampleApproach: caseStudy.sampleApproach || '',
         });
       } else if (isCaseStudyType) {
         // Case study type but no caseStudy data - create default panel

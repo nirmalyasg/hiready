@@ -27,15 +27,26 @@ export interface CodeReviewResult {
 
 export type CodeSubmissionStatus = 'idle' | 'submitting' | 'submitted' | 'reviewed';
 
+export interface CaseStudyMaterial {
+  id: string;
+  title: string;
+  type: 'text' | 'table' | 'chart' | 'data';
+  content: string;
+}
+
 export interface CaseStudyChallenge {
   id: string;
   title: string;
   prompt: string;
   context?: string;
+  scenario?: string;
   caseType: string;
   difficulty: string;
   evaluationFocus?: string[];
   expectedDurationMinutes?: number;
+  materials?: CaseStudyMaterial[];
+  hints?: string[];
+  sampleApproach?: string;
 }
 
 export interface InterviewEventBusState {
