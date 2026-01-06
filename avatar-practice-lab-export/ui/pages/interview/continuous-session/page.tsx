@@ -346,8 +346,13 @@ IMPORTANT BEHAVIOR:
         });
       }
 
-      if (interviewSession?.plan?.caseStudy && (config?.interviewType === 'hiring_manager' || config?.interviewType === 'panel' || config?.interviewType === 'case_study')) {
+      // Check for case study data and trigger panel
+      const effectiveInterviewType = config?.interviewType || (interviewSession as any)?.config?.interviewType;
+      const isCaseStudyType = effectiveInterviewType === 'hiring_manager' || effectiveInterviewType === 'panel' || effectiveInterviewType === 'case_study';
+      
+      if (interviewSession?.plan?.caseStudy && isCaseStudyType) {
         const caseStudy = interviewSession.plan.caseStudy;
+        console.log('[ContinuousSession] Starting case study panel:', caseStudy);
         startCaseStudyChallenge({
           id: caseStudy.id || 'interview-case',
           title: caseStudy.title || 'Case Study',
@@ -357,6 +362,19 @@ IMPORTANT BEHAVIOR:
           difficulty: caseStudy.difficulty || 'Medium',
           evaluationFocus: caseStudy.evaluationFocus || [],
           expectedDurationMinutes: caseStudy.expectedDurationMinutes || 15,
+        });
+      } else if (isCaseStudyType) {
+        // Case study type but no caseStudy data - create default panel
+        console.log('[ContinuousSession] Case study type detected but no data, creating default panel');
+        startCaseStudyChallenge({
+          id: 'default-case',
+          title: 'Business Case Study',
+          prompt: 'You will be presented with a business problem to analyze. Structure your approach, identify key factors, and present your recommendations.',
+          context: 'Business strategy and problem-solving',
+          caseType: 'strategy',
+          difficulty: 'Medium',
+          evaluationFocus: ['Problem structuring', 'Analytical thinking', 'Communication', 'Recommendations'],
+          expectedDurationMinutes: 30,
         });
       }
 

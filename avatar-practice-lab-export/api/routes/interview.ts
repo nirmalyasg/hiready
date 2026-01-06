@@ -920,13 +920,52 @@ interviewRouter.get("/session/:id", requireAuth, async (req: Request, res: Respo
     const [a] = await db.select().from(interviewAnalysis).where(eq(interviewAnalysis.interviewSessionId, sessionId));
     analysis = a;
     
+    // Map plan data and add case study if needed
+    let mappedPlan: any = mapPhasesToFrontendFormat(plan?.planJson);
+    
+    // Add case study data if interview type is case_study
+    if (config?.interviewType === 'case_study' && mappedPlan) {
+      const caseStudyPhase = mappedPlan.phases?.find((p: any) => 
+        p.name?.toLowerCase().includes('case') || 
+        p.practiceMode === 'case_study' ||
+        p.category === 'case_study'
+      );
+      
+      mappedPlan.caseStudy = {
+        id: `case-${config.id}`,
+        title: caseStudyPhase?.name || 'Business Case Study',
+        prompt: caseStudyPhase?.objectives?.join('. ') || 
+          'You will be presented with a business problem to analyze. Structure your approach, identify key factors, and present your recommendations.',
+        context: mappedPlan.focusAreas?.join(', ') || 'Business strategy and problem-solving',
+        caseType: 'strategy',
+        difficulty: config.seniority === 'senior' ? 'Hard' : config.seniority === 'entry' ? 'Easy' : 'Medium',
+        evaluationFocus: ['Problem structuring', 'Analytical thinking', 'Communication', 'Recommendations'],
+        expectedDurationMinutes: caseStudyPhase?.duration || 30,
+      };
+    } else if (config?.interviewType === 'case_study' && !mappedPlan) {
+      mappedPlan = {
+        phases: [],
+        focusAreas: [],
+        caseStudy: {
+          id: `case-${config.id}`,
+          title: 'Business Case Study',
+          prompt: 'You will be presented with a business problem to analyze. Structure your approach, identify key factors, and present your recommendations.',
+          context: 'Business strategy and problem-solving',
+          caseType: 'strategy',
+          difficulty: config.seniority === 'senior' ? 'Hard' : config.seniority === 'entry' ? 'Easy' : 'Medium',
+          evaluationFocus: ['Problem structuring', 'Analytical thinking', 'Communication', 'Recommendations'],
+          expectedDurationMinutes: 30,
+        }
+      };
+    }
+    
     res.json({ 
       success: true, 
       session: {
         ...session,
         roleKit,
         config,
-        plan: mapPhasesToFrontendFormat(plan?.planJson),
+        plan: mappedPlan,
       },
       config, 
       plan, 
