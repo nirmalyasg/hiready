@@ -1,121 +1,222 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserCheck, FileText, BookOpen, ArrowRight, Sparkles } from "lucide-react";
+import { 
+  UserCheck, 
+  MessageSquare, 
+  Mic, 
+  ArrowRight, 
+  Target,
+  Users,
+  Presentation,
+  ChevronLeft,
+  BookOpen,
+  Briefcase
+} from "lucide-react";
 import SidebarLayout from "@/components/layout/sidebar-layout";
 
-const practiceOptions = [
+type SelectedPath = "interview" | "communication" | null;
+
+const communicationOptions = [
   {
-    id: "interview",
-    icon: UserCheck,
-    title: "Interview Practice",
-    description: "Practice job interviews with AI interviewers. Choose from 15+ role kits including Software Engineer, Product Manager, Data Analyst, and more.",
-    features: ["Role-specific questions", "Real-time feedback", "Performance scoring"],
-    route: "/interview",
-    gradient: "from-indigo-600 to-purple-700",
-    iconBg: "bg-indigo-500",
+    id: "workplace",
+    title: "Workplace Conversations",
+    description: "Practice difficult conversations with managers, peers, and direct reports",
+    icon: Users,
+    route: "/practice",
+    features: ["Feedback delivery", "Conflict resolution", "Negotiation"],
   },
   {
-    id: "interview-custom",
-    icon: FileText,
-    title: "Create Your Own Interview",
-    description: "Upload your resume and job description for a personalized interview experience tailored to your target role.",
-    features: ["Custom question generation", "Resume-based prep", "JD alignment analysis"],
-    route: "/interview/custom",
-    gradient: "from-emerald-600 to-teal-700",
-    iconBg: "bg-emerald-500",
+    id: "presentation",
+    title: "Presentation Practice",
+    description: "Rehearse presentations and get feedback on delivery and content",
+    icon: Presentation,
+    route: "/practice/presentation",
+    features: ["Structure feedback", "Delivery coaching", "Q&A prep"],
   },
   {
-    id: "exercise",
-    icon: BookOpen,
-    title: "Case Study & Coding",
-    description: "Sharpen your problem-solving skills with technical exercises. Practice case studies and coding challenges with guided AI feedback.",
-    features: ["Business case studies", "Coding problems", "Step-by-step guidance"],
-    route: "/exercise-mode",
-    gradient: "from-slate-700 to-slate-900",
-    iconBg: "bg-slate-600",
+    id: "impromptu",
+    title: "Impromptu Speaking",
+    description: "Build confidence speaking off-the-cuff on various topics",
+    icon: Mic,
+    route: "/practice/impromptu",
+    features: ["Random topics", "Time-boxed responses", "Fluency training"],
   },
 ];
 
 export default function IntentEntryPage() {
   const navigate = useNavigate();
+  const [selectedPath, setSelectedPath] = useState<SelectedPath>(null);
 
   return (
     <SidebarLayout>
-      <div className="min-h-screen">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-          
-          <div className="text-center mb-10 sm:mb-14">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-accent/10 text-brand-accent rounded-full text-sm font-medium mb-4">
-              <Sparkles className="w-4 h-4" />
-              AI-Powered Practice
-            </div>
-            <h1 className="text-2xl sm:text-4xl font-bold text-brand-dark mb-3">
-              What would you like to practice?
-            </h1>
-            <p className="text-brand-muted text-sm sm:text-base max-w-xl mx-auto">
-              Choose a practice mode below to start building your skills with personalized AI coaching
-            </p>
-          </div>
+      <div className="max-w-5xl mx-auto space-y-8 pb-12">
+        <div>
+          <h1 className="text-2xl font-bold text-[#042c4c] mb-1">Practice Lab</h1>
+          <p className="text-slate-500">Build your skills with AI-powered practice sessions</p>
+        </div>
 
-          <div className="grid gap-5 sm:gap-6">
-            {practiceOptions.map((option) => {
-              const Icon = option.icon;
-              return (
-                <button
-                  key={option.id}
-                  onClick={() => navigate(option.route)}
-                  className="group relative bg-white rounded-2xl border border-gray-100 hover:border-transparent hover:shadow-xl transition-all duration-300 overflow-hidden text-left"
-                >
-                  <div className={`absolute inset-0 bg-gradient-to-r ${option.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-                  
-                  <div className="relative p-5 sm:p-7 flex flex-col sm:flex-row gap-4 sm:gap-6">
-                    <div className={`${option.iconBg} w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 transition-colors`}>
-                      <Icon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+        {!selectedPath && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <button
+              onClick={() => setSelectedPath("interview")}
+              className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-[#ee7e65] hover:shadow-xl transition-all"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <Target className="w-7 h-7 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-[#042c4c] mb-2 group-hover:text-[#ee7e65] transition-colors">
+                Interview Practice
+              </h2>
+              <p className="text-slate-500 text-sm mb-4">
+                Prepare for job interviews with AI interviewers. Practice behavioral, technical, and case interviews.
+              </p>
+              <div className="flex items-center gap-2 text-[#ee7e65] font-medium text-sm">
+                <span>Get started</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </button>
+
+            <button
+              onClick={() => setSelectedPath("communication")}
+              className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-purple-400 hover:shadow-xl transition-all"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <MessageSquare className="w-7 h-7 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-[#042c4c] mb-2 group-hover:text-purple-600 transition-colors">
+                Communication Skills
+              </h2>
+              <p className="text-slate-500 text-sm mb-4">
+                Build workplace communication skills with presentations, difficult conversations, and impromptu speaking.
+              </p>
+              <div className="flex items-center gap-2 text-purple-600 font-medium text-sm">
+                <span>Browse options</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </button>
+          </div>
+        )}
+
+        {selectedPath === "interview" && (
+          <>
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setSelectedPath(null)}
+                className="flex items-center gap-2 text-slate-500 hover:text-[#042c4c] text-sm font-medium transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Back to options
+              </button>
+            </div>
+
+            <div className="grid gap-4">
+              <button
+                onClick={() => navigate("/interview")}
+                className="group flex items-center gap-4 bg-white border-2 border-slate-200 rounded-2xl p-5 hover:border-[#ee7e65] hover:shadow-lg transition-all text-left"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <UserCheck className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-[#042c4c] mb-1 group-hover:text-[#ee7e65] transition-colors">Interview Hub</h3>
+                  <p className="text-sm text-slate-500 mb-2">Practice for specific jobs or browse 15+ role kits for quick practice</p>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
+                      15+ role kits
+                    </span>
+                    <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
+                      Custom interviews
+                    </span>
+                    <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
+                      8-dimension scoring
+                    </span>
+                  </div>
+                </div>
+                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-[#ee7e65] group-hover:translate-x-1 transition-all" />
+              </button>
+
+              <button
+                onClick={() => navigate("/exercise-mode")}
+                className="group flex items-center gap-4 bg-white border-2 border-slate-200 rounded-2xl p-5 hover:border-slate-400 hover:shadow-lg transition-all text-left"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <BookOpen className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-[#042c4c] mb-1 group-hover:text-slate-700 transition-colors">Case Study & Coding</h3>
+                  <p className="text-sm text-slate-500 mb-2">Standalone exercises for technical and business problem-solving</p>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
+                      Business cases
+                    </span>
+                    <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
+                      Coding problems
+                    </span>
+                    <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
+                      Step-by-step guidance
+                    </span>
+                  </div>
+                </div>
+                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-1 transition-all" />
+              </button>
+            </div>
+          </>
+        )}
+
+        {selectedPath === "communication" && (
+          <>
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setSelectedPath(null)}
+                className="flex items-center gap-2 text-slate-500 hover:text-[#042c4c] text-sm font-medium transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Back to options
+              </button>
+            </div>
+
+            <div className="grid gap-4">
+              {communicationOptions.map((option) => {
+                const Icon = option.icon;
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => navigate(option.route)}
+                    className="group flex items-center gap-4 bg-white border-2 border-slate-200 rounded-2xl p-5 hover:border-purple-400 hover:shadow-lg transition-all text-left"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <Icon className="w-7 h-7 text-white" />
                     </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <h3 className="text-lg sm:text-xl font-bold text-brand-dark group-hover:text-white transition-colors mb-1.5">
-                            {option.title}
-                          </h3>
-                          <p className="text-sm text-brand-muted group-hover:text-white/80 transition-colors mb-3 sm:mb-4">
-                            {option.description}
-                          </p>
-                        </div>
-                        <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 group-hover:bg-white/20 transition-colors flex-shrink-0">
-                          <ArrowRight className="w-5 h-5 text-brand-muted group-hover:text-white transition-colors" />
-                        </div>
-                      </div>
-                      
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-[#042c4c] mb-1 group-hover:text-purple-600 transition-colors">{option.title}</h3>
+                      <p className="text-sm text-slate-500 mb-2">{option.description}</p>
                       <div className="flex flex-wrap gap-2">
                         {option.features.map((feature, idx) => (
-                          <span 
-                            key={idx}
-                            className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-brand-dark/70 group-hover:bg-white/20 group-hover:text-white transition-colors"
-                          >
+                          <span key={idx} className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
                             {feature}
                           </span>
                         ))}
                       </div>
                     </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                    <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" />
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
 
-          <div className="mt-10 sm:mt-14 text-center">
-            <p className="text-sm text-brand-muted mb-3">
-              Track your progress and review past sessions
-            </p>
-            <button
-              onClick={() => navigate("/avatar/results")}
-              className="inline-flex items-center gap-2 text-brand-primary hover:text-brand-dark font-medium transition-colors"
-            >
-              View your results
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+        <div className="pt-6 border-t border-slate-100 text-center">
+          <p className="text-sm text-slate-400 mb-2">
+            Track your progress and review past sessions
+          </p>
+          <button
+            onClick={() => navigate("/results")}
+            className="inline-flex items-center gap-2 text-[#042c4c] hover:text-[#ee7e65] font-medium text-sm transition-colors"
+          >
+            View your results
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </SidebarLayout>
