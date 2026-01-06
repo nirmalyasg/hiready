@@ -646,13 +646,14 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
       temperature: 0.3,
     });
     
-    const planJson = JSON.parse(response.choices[0].message.content || "{}");
+    const rawPlanJson = JSON.parse(response.choices[0].message.content || "{}");
+    const mappedPlanJson = mapPhasesToFrontendFormat(rawPlanJson);
     
     const [plan] = await db
       .insert(interviewPlans)
       .values({
         interviewConfigId: configId,
-        planJson,
+        planJson: mappedPlanJson,
         version: 1,
         createdAt: new Date(),
       })
