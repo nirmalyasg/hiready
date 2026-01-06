@@ -32,8 +32,7 @@ interface JobTarget {
 }
 
 type AddMode = "url" | "paste" | "manual" | null;
-type PracticeTab = "roles" | "skills";
-type SelectedPath = "job" | "quick" | null;
+type SelectedPath = "role" | "skill" | "custom" | null;
 
 const domainIcons: Record<string, any> = {
   software: Code,
@@ -168,7 +167,6 @@ export default function InterviewPracticePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [practiceTab, setPracticeTab] = useState<PracticeTab>("roles");
   const [selectedPath, setSelectedPath] = useState<SelectedPath>(null);
   
   const [savedJobs, setSavedJobs] = useState<JobTarget[]>([]);
@@ -401,61 +399,78 @@ export default function InterviewPracticePage() {
           </div>
         )}
 
-        {/* Two-card choice when no path is selected */}
+        {/* Three-card choice when no path is selected */}
         {!selectedPath && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Job-based practice card */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Practice by Role */}
             <button
-              onClick={() => setSelectedPath("job")}
-              className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-[#ee7e65] hover:shadow-xl transition-all"
+              onClick={() => setSelectedPath("role")}
+              className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 hover:border-[#ee7e65] hover:shadow-xl transition-all"
             >
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                <Target className="w-7 h-7 text-white" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <Briefcase className="w-6 h-6 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-[#042c4c] mb-2 group-hover:text-[#ee7e65] transition-colors">
-                Practice for a Specific Job
+              <h2 className="text-lg font-bold text-[#042c4c] mb-2 group-hover:text-[#ee7e65] transition-colors">
+                Practice by Role
               </h2>
               <p className="text-slate-500 text-sm mb-4">
-                Add a job description to get tailored interview questions that match the role and company.
+                Choose from {roleKits.length}+ role kits like Software Engineer, Product Manager, Data Analyst.
               </p>
               <div className="flex items-center gap-2 text-[#ee7e65] font-medium text-sm">
+                <span>Browse roles</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </button>
+
+            {/* Practice by Skill */}
+            <button
+              onClick={() => setSelectedPath("skill")}
+              className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 hover:border-purple-400 hover:shadow-xl transition-all"
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="text-lg font-bold text-[#042c4c] mb-2 group-hover:text-purple-600 transition-colors">
+                Practice by Skill
+              </h2>
+              <p className="text-slate-500 text-sm mb-4">
+                Focus on specific skills: Coding, SQL, Behavioral, Case Study, System Design.
+              </p>
+              <div className="flex items-center gap-2 text-purple-600 font-medium text-sm">
+                <span>Choose skill</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </button>
+
+            {/* Custom Interview */}
+            <button
+              onClick={() => setSelectedPath("custom")}
+              className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 hover:border-emerald-400 hover:shadow-xl transition-all"
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <Target className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="text-lg font-bold text-[#042c4c] mb-2 group-hover:text-emerald-600 transition-colors">
+                Custom Interview
+              </h2>
+              <p className="text-slate-500 text-sm mb-4">
+                Upload your resume and job description for tailored questions.
+              </p>
+              <div className="flex items-center gap-2 text-emerald-600 font-medium text-sm">
                 <span>Get started</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
               {savedJobs.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-slate-100">
-                  <p className="text-xs text-slate-400 mb-2">{savedJobs.length} saved job{savedJobs.length !== 1 ? 's' : ''}</p>
+                <div className="mt-3 pt-3 border-t border-slate-100">
+                  <p className="text-xs text-slate-400">{savedJobs.length} saved job{savedJobs.length !== 1 ? 's' : ''}</p>
                 </div>
               )}
-            </button>
-
-            {/* Quick practice card */}
-            <button
-              onClick={() => setSelectedPath("quick")}
-              className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-purple-400 hover:shadow-xl transition-all"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                <Briefcase className="w-7 h-7 text-white" />
-              </div>
-              <h2 className="text-xl font-bold text-[#042c4c] mb-2 group-hover:text-purple-600 transition-colors">
-                Quick Practice
-              </h2>
-              <p className="text-slate-500 text-sm mb-4">
-                Jump into practice sessions by role or skill type without needing a specific job description.
-              </p>
-              <div className="flex items-center gap-2 text-purple-600 font-medium text-sm">
-                <span>Browse options</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </div>
-              <div className="mt-4 pt-4 border-t border-slate-100">
-                <p className="text-xs text-slate-400">{roleKits.length} roles • {skillPracticeOptions.length} skill types</p>
-              </div>
             </button>
           </div>
         )}
 
-        {/* Job-based practice details */}
-        {selectedPath === "job" && (
+        {/* Custom interview details */}
+        {selectedPath === "custom" && (
           <section>
             <button
               onClick={() => { setSelectedPath(null); resetForm(); }}
@@ -466,11 +481,11 @@ export default function InterviewPracticePage() {
             </button>
 
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
                 <Target className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-[#042c4c]">Practice for a Specific Job</h2>
+                <h2 className="text-xl font-bold text-[#042c4c]">Custom Interview</h2>
                 <p className="text-sm text-slate-500">Add a job to get tailored interview questions</p>
               </div>
             </div>
@@ -638,8 +653,165 @@ export default function InterviewPracticePage() {
           </section>
         )}
 
-        {/* Quick practice details */}
-        {selectedPath === "quick" && (
+        {/* Practice by Role */}
+        {selectedPath === "role" && (
+          <section>
+            <button
+              onClick={() => setSelectedPath(null)}
+              className="flex items-center gap-2 text-sm text-slate-500 hover:text-[#042c4c] mb-4 transition-colors"
+            >
+              <ChevronRight className="w-4 h-4 rotate-180" />
+              Back to options
+            </button>
+
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center">
+                <Briefcase className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-[#042c4c]">Practice by Role</h2>
+                <p className="text-sm text-slate-500">Choose a role kit tailored to your target position</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <div className="relative flex-1 max-w-xs">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  type="text"
+                  placeholder="Search roles..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 h-10 bg-white rounded-xl text-sm"
+                />
+              </div>
+
+              <div className="relative">
+                <button
+                  onClick={() => setFilterOpen(!filterOpen)}
+                  className={`inline-flex items-center gap-2 px-3 py-2 bg-white border rounded-xl text-sm font-medium transition-all ${
+                    selectedDomain 
+                      ? "border-[#ee7e65] text-[#ee7e65]" 
+                      : "border-slate-200 text-slate-600 hover:border-slate-300"
+                  }`}
+                >
+                  <Filter className="w-4 h-4" />
+                  <span className="max-w-[120px] truncate">
+                    {selectedDomain ? formatDomain(selectedDomain) : "All Domains"}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${filterOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {filterOpen && (
+                  <div className="absolute left-0 top-full mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-50 max-h-64 overflow-y-auto">
+                    <button
+                      onClick={() => { setSelectedDomain(null); setFilterOpen(false); }}
+                      className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left hover:bg-slate-50 ${
+                        !selectedDomain ? "bg-[#ee7e65]/10 text-[#ee7e65] font-medium" : "text-slate-700"
+                      }`}
+                    >
+                      All Domains
+                      {!selectedDomain && <Check className="w-4 h-4 text-[#ee7e65]" />}
+                    </button>
+                    {domains.map((domain) => (
+                      <button
+                        key={domain}
+                        onClick={() => { setSelectedDomain(domain); setFilterOpen(false); }}
+                        className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left hover:bg-slate-50 border-t border-slate-100 ${
+                          selectedDomain === domain ? "bg-[#ee7e65]/10 text-[#ee7e65] font-medium" : "text-slate-700"
+                        }`}
+                      >
+                        <span className="truncate pr-2">{formatDomain(domain)}</span>
+                        {selectedDomain === domain && <Check className="w-4 h-4 text-[#ee7e65] flex-shrink-0" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {selectedDomain && (
+                <button
+                  onClick={() => setSelectedDomain(null)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#ee7e65]/10 text-[#ee7e65] text-xs font-medium rounded-full hover:bg-[#ee7e65]/20 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                  Clear
+                </button>
+              )}
+
+              <span className="text-xs text-slate-400 ml-auto">
+                <span className="font-medium text-slate-600">{filteredKits.length}</span> roles
+              </span>
+            </div>
+
+            {filteredKits.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-2xl border border-slate-200">
+                <div className="w-12 h-12 mx-auto mb-3 bg-slate-100 rounded-xl flex items-center justify-center">
+                  <Briefcase className="w-6 h-6 text-slate-400" />
+                </div>
+                <h3 className="text-base font-semibold text-slate-700 mb-1">No roles found</h3>
+                <p className="text-sm text-slate-500 mb-4">
+                  Try adjusting your search or filters.
+                </p>
+                <Button variant="outline" size="sm" onClick={() => { setSelectedDomain(null); setSearchQuery(""); }}>
+                  Clear Filters
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredKits.map((kit) => {
+                  const IconComponent = domainIcons[kit.domain] || Briefcase;
+                  const bgColor = domainColors[kit.domain] || "bg-slate-500";
+                  const levelConfig = getLevelConfig(kit.level);
+
+                  return (
+                    <button
+                      key={kit.id}
+                      onClick={() => handleSelectRole(kit)}
+                      className="group text-left bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-lg hover:border-[#ee7e65] transition-all"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className={`w-10 h-10 ${bgColor} rounded-xl flex items-center justify-center`}>
+                          <IconComponent className="w-5 h-5 text-white" />
+                        </div>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${levelConfig.color}`}>
+                          {levelConfig.label}
+                        </span>
+                      </div>
+
+                      <h3 className="font-semibold text-[#042c4c] mb-0.5 group-hover:text-[#ee7e65] transition-colors">
+                        {kit.name}
+                      </h3>
+                      <p className="text-xs text-slate-500 mb-3">
+                        {formatDomain(kit.domain)}
+                      </p>
+
+                      {kit.description && (
+                        <p className="text-xs text-slate-500 line-clamp-2 mb-4">
+                          {kit.description}
+                        </p>
+                      )}
+
+                      <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                        <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>{kit.estimatedDuration || 30} min</span>
+                        </div>
+                        <span className="inline-flex items-center gap-1 text-sm font-medium text-[#ee7e65] group-hover:gap-2 transition-all">
+                          Start
+                          <ArrowRight className="w-4 h-4" />
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Practice by Skill */}
+        {selectedPath === "skill" && (
           <section>
             <button
               onClick={() => setSelectedPath(null)}
@@ -651,38 +823,14 @@ export default function InterviewPracticePage() {
 
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                <Briefcase className="w-6 h-6 text-white" />
+                <Brain className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-[#042c4c]">Quick Practice Library</h2>
-                <p className="text-sm text-slate-500">Jump into practice without a specific job</p>
+                <h2 className="text-xl font-bold text-[#042c4c]">Practice by Skill</h2>
+                <p className="text-sm text-slate-500">Focus on specific interview skills</p>
               </div>
             </div>
 
-          <div className="flex gap-1 mb-4 bg-slate-100 p-1 rounded-xl w-fit">
-            <button
-              onClick={() => setPracticeTab("roles")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                practiceTab === "roles"
-                  ? "bg-white text-[#042c4c] shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              By Role
-            </button>
-            <button
-              onClick={() => setPracticeTab("skills")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                practiceTab === "skills"
-                  ? "bg-white text-[#042c4c] shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              By Skill
-            </button>
-          </div>
-
-          {practiceTab === "skills" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {skillPracticeOptions.map((skill) => {
                 const IconComponent = skill.icon;
@@ -712,145 +860,6 @@ export default function InterviewPracticePage() {
                 );
               })}
             </div>
-          )}
-
-          {practiceTab === "roles" && (
-            <>
-              <div className="flex flex-wrap items-center gap-3 mb-4">
-                <div className="relative flex-1 max-w-xs">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input
-                    type="text"
-                    placeholder="Search roles..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 h-10 bg-white rounded-xl text-sm"
-                  />
-                </div>
-
-                <div className="relative">
-                  <button
-                    onClick={() => setFilterOpen(!filterOpen)}
-                    className={`inline-flex items-center gap-2 px-3 py-2 bg-white border rounded-xl text-sm font-medium transition-all ${
-                      selectedDomain 
-                        ? "border-purple-400 text-purple-700" 
-                        : "border-slate-200 text-slate-600 hover:border-slate-300"
-                    }`}
-                  >
-                    <Filter className="w-4 h-4" />
-                    <span className="max-w-[120px] truncate">
-                      {selectedDomain ? formatDomain(selectedDomain) : "All Domains"}
-                    </span>
-                    <ChevronDown className={`w-4 h-4 transition-transform ${filterOpen ? "rotate-180" : ""}`} />
-                  </button>
-
-                  {filterOpen && (
-                    <div className="absolute left-0 top-full mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-50 max-h-64 overflow-y-auto">
-                      <button
-                        onClick={() => { setSelectedDomain(null); setFilterOpen(false); }}
-                        className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left hover:bg-slate-50 ${
-                          !selectedDomain ? "bg-purple-50 text-purple-700 font-medium" : "text-slate-700"
-                        }`}
-                      >
-                        All Domains
-                        {!selectedDomain && <Check className="w-4 h-4 text-purple-600" />}
-                      </button>
-                      {domains.map((domain) => (
-                        <button
-                          key={domain}
-                          onClick={() => { setSelectedDomain(domain); setFilterOpen(false); }}
-                          className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left hover:bg-slate-50 border-t border-slate-100 ${
-                            selectedDomain === domain ? "bg-purple-50 text-purple-700 font-medium" : "text-slate-700"
-                          }`}
-                        >
-                          <span className="truncate pr-2">{formatDomain(domain)}</span>
-                          {selectedDomain === domain && <Check className="w-4 h-4 text-purple-600 flex-shrink-0" />}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {selectedDomain && (
-                  <button
-                    onClick={() => setSelectedDomain(null)}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-purple-100 text-purple-700 text-xs font-medium rounded-full hover:bg-purple-200 transition-colors"
-                  >
-                    <X className="w-3 h-3" />
-                    Clear
-                  </button>
-                )}
-
-                <span className="text-xs text-slate-400 ml-auto">
-                  <span className="font-medium text-slate-600">{filteredKits.length}</span> roles
-                </span>
-              </div>
-
-              {filteredKits.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-2xl border border-slate-200">
-                  <div className="w-12 h-12 mx-auto mb-3 bg-slate-100 rounded-xl flex items-center justify-center">
-                    <Briefcase className="w-6 h-6 text-slate-400" />
-                  </div>
-                  <h3 className="text-base font-semibold text-slate-700 mb-1">No roles found</h3>
-                  <p className="text-sm text-slate-500 mb-4">
-                    Try adjusting your search or filters.
-                  </p>
-                  <Button variant="outline" size="sm" onClick={() => { setSelectedDomain(null); setSearchQuery(""); }}>
-                    Clear Filters
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredKits.map((kit) => {
-                    const IconComponent = domainIcons[kit.domain] || Briefcase;
-                    const bgColor = domainColors[kit.domain] || "bg-slate-500";
-                    const levelConfig = getLevelConfig(kit.level);
-
-                    return (
-                      <button
-                        key={kit.id}
-                        onClick={() => handleSelectRole(kit)}
-                        className="group text-left bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-lg hover:border-purple-200 transition-all"
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className={`w-10 h-10 ${bgColor} rounded-xl flex items-center justify-center`}>
-                            <IconComponent className="w-5 h-5 text-white" />
-                          </div>
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${levelConfig.color}`}>
-                            {levelConfig.label}
-                          </span>
-                        </div>
-
-                        <h3 className="font-semibold text-[#042c4c] mb-0.5 group-hover:text-purple-700 transition-colors">
-                          {kit.name}
-                        </h3>
-                        <p className="text-xs text-slate-500 mb-3">
-                          {formatDomain(kit.domain)}
-                        </p>
-
-                        {kit.description && (
-                          <p className="text-xs text-slate-500 line-clamp-2 mb-4">
-                            {kit.description}
-                          </p>
-                        )}
-
-                        <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                          <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                            <Clock className="w-3.5 h-3.5" />
-                            <span>{kit.estimatedDuration || 30} min</span>
-                          </div>
-                          <span className="inline-flex items-center gap-1 text-sm font-medium text-purple-600 group-hover:gap-2 transition-all">
-                            Start
-                            <ArrowRight className="w-4 h-4" />
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </>
-          )}
           </section>
         )}
       </div>
