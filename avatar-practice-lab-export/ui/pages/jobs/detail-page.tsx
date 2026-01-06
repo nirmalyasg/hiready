@@ -370,7 +370,7 @@ export default function JobDetailPage() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/jobs")}
+            onClick={() => navigate("/interview/custom")}
             className="rounded-full"
           >
             <ArrowLeft className="w-5 h-5" />
