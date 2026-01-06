@@ -1,0 +1,369 @@
+This is a very important design moment for the product.
+You’re right: “Practice by Skill” is directionally good, but the current categories are mixed abstractions (some are interview rounds, some are domains, some are personas).
+
+Let’s fix this cleanly, logically, and in a way that your developer can implement without ambiguity.
+
+1️⃣ What’s wrong with the current categories (clear diagnosis)
+
+Your current cards mix 3 different things:
+
+Card	What it actually is
+Coding Interview	Activity type
+SQL Assessment	Narrow technical sub-skill
+Behavioral Interview	Interview round
+Case Study	Interview format
+Technical Deep Dive	Interview depth/style
+Analytics Round	Role-specific round
+ML/AI Interview	Domain
+Hiring Manager	Interviewer persona
+
+This causes confusion in workflow:
+
+What inputs are needed?
+
+What structure should the AI follow?
+
+How do you evaluate consistently?
+
+2️⃣ The correct mental model (this is the key)
+
+Interview practice can be cleanly decomposed into 3 layers:
+
+Layer A — What kind of activity is this?
+
+→ Interview Mode
+
+Layer B — What skill family is being tested?
+
+→ Skill Cluster
+
+Layer C — What context should be simulated?
+
+→ Role / Company / Seniority
+
+Your current UI collapses all three into one.
+
+3️⃣ Replace “Practice by Skill” with Practice by Interview Mode
+
+This is the right top-level abstraction.
+
+✅ Recommended new categories (clean & scalable)
+1️⃣ Coding & Technical Tasks
+
+“Solve, explain, debug, or modify technical problems”
+
+Includes:
+
+Coding
+
+Debugging
+
+Code review
+
+SQL
+
+ML basics (optional sub-track)
+
+2️⃣ Case & Problem Solving
+
+“Structured thinking for ambiguous problems”
+
+Includes:
+
+Business cases
+
+Product cases
+
+Analytics cases
+
+Ops / strategy cases
+
+3️⃣ Behavioral & Experience
+
+“Past behavior, judgment, and ownership”
+
+Includes:
+
+STAR stories
+
+Conflict handling
+
+Leadership
+
+Failure stories
+
+4️⃣ Hiring Manager / Role Fit
+
+“Role expectations, motivation, career alignment”
+
+Includes:
+
+Why this role/company
+
+Trade-offs
+
+Decision-making
+
+Role realism
+
+5️⃣ System / Deep Dive (Advanced)
+
+“Depth, trade-offs, architecture, reasoning”
+
+Includes:
+
+System design (tech)
+
+Program execution (TPM)
+
+Strategy depth (biz)
+
+Design critique (design roles)
+
+💡 This maps perfectly to your role archetypes and company archetypes.
+
+4️⃣ Now the MOST IMPORTANT part: workflow per mode
+
+Below is exactly what should happen when a user clicks each card.
+
+🧠 1️⃣ Coding & Technical Tasks — Workflow
+Step 1: Required Inputs
+
+Role (or inferred from profile)
+
+Seniority (entry / mid / senior)
+
+Optional: Company
+
+Optional: Skill focus (arrays, SQL joins, debugging, etc.)
+
+Step 2: System builds plan
+
+Resolve role_archetype
+
+Pick task type:
+
+solve
+
+debug
+
+modify
+
+review
+
+Select coding pattern (not question)
+
+Difficulty calibrated by seniority + company archetype
+
+Step 3: Session structure
+- Problem understanding
+- Approach explanation
+- Solution / reasoning
+- Edge cases & complexity
+- Modification / follow-ups
+
+Step 4: Evaluation
+
+Dimensions:
+
+Problem solving
+
+Correctness
+
+Explanation
+
+Trade-offs
+
+Calm under pressure
+
+🧩 2️⃣ Case & Problem Solving — Workflow
+Step 1: Required Inputs
+
+Role (PM / BizOps / Analyst / Consultant)
+
+Case type:
+
+Product
+
+Business
+
+Analytics
+
+Ops
+
+Seniority
+
+Optional: Company / Industry
+
+Step 2: System builds case
+
+Select case template
+
+Apply company archetype lens
+
+Decide complexity + ambiguity
+
+Stage the case (progressive reveal)
+
+Step 3: Session structure
+- Problem restatement
+- Structuring
+- Hypothesis & drivers
+- Data interpretation
+- Recommendation
+
+Step 4: Evaluation
+
+Dimensions:
+
+Structure
+
+Assumptions
+
+Clarity
+
+Insight quality
+
+Decision-making
+
+🧠 3️⃣ Behavioral & Experience — Workflow
+Step 1: Required Inputs
+
+Role
+
+Seniority
+
+Skill focus (leadership, conflict, ownership)
+
+Step 2: System builds questions
+
+Use resume triggers
+
+Select failure-mode probes
+
+Escalate depth if answers are vague
+
+Step 3: Session structure
+- Situation context
+- Actions & decisions
+- Outcomes
+- Reflection & learning
+
+Step 4: Evaluation
+
+Dimensions:
+
+Specificity
+
+Ownership
+
+Judgment
+
+Reflection
+
+Authenticity
+
+🧑‍💼 4️⃣ Hiring Manager / Role Fit — Workflow
+Step 1: Required Inputs
+
+Role
+
+Company (optional but powerful)
+
+Seniority
+
+Career goals (optional)
+
+Step 2: System builds interview
+
+Align with role archetype
+
+Apply company culture lens
+
+Probe motivation & trade-offs
+
+Step 3: Session structure
+- Career narrative
+- Role expectations
+- Trade-offs & decisions
+- Culture & fit
+
+Step 4: Evaluation
+
+Dimensions:
+
+Role clarity
+
+Motivation
+
+Decision rationale
+
+Alignment
+
+Maturity
+
+🏗 5️⃣ System / Deep Dive — Workflow
+Step 1: Required Inputs
+
+Role
+
+Seniority
+
+Domain focus (backend / data / infra / product)
+
+Step 2: System builds scenario
+
+Select deep-dive blueprint
+
+Emphasize trade-offs
+
+Stress-test assumptions
+
+Step 3: Session structure
+- Requirements clarification
+- Design / approach
+- Trade-offs
+- Failure handling
+- Scaling / extension
+
+Step 4: Evaluation
+
+Dimensions:
+
+Depth
+
+Trade-off reasoning
+
+Clarity
+
+Practicality
+
+Adaptability
+
+5️⃣ How this maps cleanly to your existing data model
+UI Mode	Data used
+Coding & Technical	role_task_blueprints + coding patterns
+Case & Problem Solving	case_templates
+Behavioral	resume triggers + behavioral patterns
+Hiring Manager	role archetype + company archetype
+System Deep Dive	role_interview_structure_defaults
+
+No new tables needed — just better orchestration.
+
+6️⃣ Recommendation for the UI (very concrete)
+
+Replace your current grid with:
+
+Practice by Interview Type
+
+🧠 Coding & Technical
+
+🧩 Case & Problem Solving
+
+🗣 Behavioral & Experience
+
+🧑‍💼 Hiring Manager / Role Fit
+
+🏗 System / Deep Dive
+
+When user clicks → guided setup modal asking only what’s needed for that mode.
