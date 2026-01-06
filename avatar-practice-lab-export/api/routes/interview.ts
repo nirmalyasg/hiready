@@ -7,6 +7,7 @@ import { db } from "../db.js";
 import { eq, desc, and } from "drizzle-orm";
 import {
   roleKits,
+  roleArchetypes,
   interviewRubrics,
   userDocuments,
   userProfileExtracted,
