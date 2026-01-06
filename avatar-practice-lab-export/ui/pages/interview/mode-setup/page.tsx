@@ -144,10 +144,14 @@ export default function InterviewModeSetupPage() {
         throw new Error(data.error || "Failed to create session");
       }
 
+      const selectedArchetypeData = filteredArchetypes.find(a => a.id === selectedArchetype);
+      
       sessionStorage.setItem("interviewModeSetup", JSON.stringify({
         interviewMode: modeContext.interviewMode,
         taxonomy: modeContext.taxonomy,
         roleArchetypeId: selectedArchetype,
+        roleArchetypeName: selectedArchetypeData?.name || null,
+        primarySkillDimensions: selectedArchetypeData?.primarySkillDimensions || [],
         seniority: selectedSeniority,
         companyName: companyName || null,
         configId: data.config.id,

@@ -70,8 +70,13 @@ interface ModeSetupData {
     includes?: string[];
   };
   roleArchetypeId: string;
+  roleArchetypeName?: string;
+  primarySkillDimensions?: string[];
   seniority: string;
   configId: number;
+  exerciseCount?: number;
+  includePuzzles?: boolean;
+  companyName?: string;
 }
 
 const modeLabels: Record<string, string> = {
@@ -625,7 +630,58 @@ export default function InterviewConfigPage() {
                       {modeSetupData.seniority} Level
                     </Badge>
                   )}
+                  {modeSetupData?.exerciseCount && modeSetupData.exerciseCount > 1 && (
+                    <Badge variant="outline" className="px-3 py-1">
+                      {modeSetupData.exerciseCount} Exercises
+                    </Badge>
+                  )}
+                  {modeSetupData?.includePuzzles && (
+                    <Badge variant="outline" className="px-3 py-1 bg-purple-50 border-purple-200 text-purple-700">
+                      Includes Puzzles
+                    </Badge>
+                  )}
                 </div>
+
+                {isInterviewModeType && modeSetupData && (
+                  <Card className="border-slate-200 rounded-xl bg-gradient-to-r from-[#042c4c]/5 to-transparent">
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs text-slate-500 mb-1">Role</p>
+                          <p className="text-sm font-medium text-[#042c4c]">
+                            {modeSetupData.roleArchetypeName || "General Practice"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500 mb-1">Difficulty</p>
+                          <p className="text-sm font-medium text-[#042c4c] capitalize">
+                            {modeSetupData.seniority || "Mid"} Level
+                          </p>
+                        </div>
+                        {modeSetupData.companyName && (
+                          <div className="col-span-2">
+                            <p className="text-xs text-slate-500 mb-1">Company Context</p>
+                            <p className="text-sm font-medium text-[#042c4c]">
+                              {modeSetupData.companyName}
+                            </p>
+                          </div>
+                        )}
+                        {modeSetupData.primarySkillDimensions && modeSetupData.primarySkillDimensions.length > 0 && (
+                          <div className="col-span-2">
+                            <p className="text-xs text-slate-500 mb-2">Skills Being Tested</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {modeSetupData.primarySkillDimensions.map((skill, idx) => (
+                                <span key={idx} className="text-xs px-2 py-1 bg-[#ee7e65]/10 text-[#ee7e65] rounded-full font-medium">
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {plan.focusAreas && plan.focusAreas.length > 0 && (
                   <Card className="border-slate-200 rounded-xl">
