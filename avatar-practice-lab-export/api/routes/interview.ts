@@ -1506,41 +1506,21 @@ CRITICAL CUSTOMIZATION RULES:
    - Identify potential gaps between resume and job requirements
    - Probe claimed achievements and skills
 
-PHASE DURATION GUIDELINES (durationMins field, in MINUTES not seconds):
-The input will include a "targetDuration" field (e.g., "30 min", "45 min", "45-60 min"). 
-You MUST ensure all phase durations add up to match this target.
+PHASE DURATION GUIDELINES (durationMins field, in MINUTES):
+IMPORTANT: All practice interviews are LIMITED TO 10-15 MINUTES TOTAL for cost optimization.
+Ignore any longer "targetDuration" - always create a focused 10-15 minute practice session.
 
-CRITICAL COST OPTIMIZATION RULES:
-1. NO single phase can exceed 10 minutes
-2. Break longer content into multiple smaller phases (e.g., "Technical Part 1", "Technical Part 2")
-3. This keeps each phase focused and manageable
-
-For a 30 min interview (4-5 phases):
-- Warmup/Introduction: 3 min
-- Phase 1: 8-10 min
-- Phase 2: 8-10 min
-- Wrap-up: 3 min
-
-For a 45 min interview (5-6 phases):
-- Warmup/Introduction: 5 min
-- Phase 1: 10 min
-- Phase 2: 10 min
-- Phase 3: 10 min
-- Wrap-up: 5 min
-
-For a 60 min interview (7-8 phases):
-- Warmup: 5 min
-- Phase 1: 10 min
-- Phase 2: 10 min
-- Phase 3: 10 min
-- Phase 4: 10 min
-- Phase 5: 10 min
-- Wrap-up: 5 min
+Standard interview structure (3-4 phases, 12-15 min total):
+- Warmup/Introduction: 2 min
+- Main Phase 1: 5 min (core questions)
+- Main Phase 2: 5 min (follow-up/deeper dive)
+- Wrap-up: 2 min
 
 CRITICAL RULES:
-- The sum of all phase durationMins MUST equal the targetDuration (use the lower number if a range is given)
-- NO phase can have durationMins greater than 10
-- Create more phases if needed to cover content while respecting the 10-min max
+1. Total interview duration MUST be between 10-15 minutes
+2. NO single phase can exceed 5 minutes
+3. Focus on the most important 3-5 questions for this interview type
+4. The sum of all phase durationMins MUST equal 12-15 minutes
 
 Generate a JSON interview plan with this structure:
 {

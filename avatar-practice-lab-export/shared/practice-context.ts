@@ -31,7 +31,7 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
     label: "HR Interview",
     description: "Behavioral assessment combined with general fit evaluation - covering motivation, background, cultural alignment, and teamwork",
     practiceMode: "live_interview",
-    typicalDuration: "30-45 min",
+    typicalDuration: "10-15 min",
     icon: "phone",
   },
   hiring_manager: {
@@ -39,7 +39,7 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
     label: "Hiring Manager Interview",
     description: "Domain expertise deep-dive - industry knowledge, case studies, role-specific requirements, and strategic thinking derived from the JD",
     practiceMode: "live_interview",
-    typicalDuration: "45-60 min",
+    typicalDuration: "10-15 min",
     icon: "user",
   },
   technical_interview: {
@@ -47,7 +47,7 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
     label: "Technical Interview",
     description: "Technical problem solving, coding exercises, architecture discussions, and JD-derived technical skills verification",
     practiceMode: "live_interview",
-    typicalDuration: "45-60 min",
+    typicalDuration: "10-15 min",
     icon: "code",
   },
   coding_assessment: {
@@ -55,7 +55,7 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
     label: "Coding Assessment",
     description: "Hands-on coding problems to demonstrate programming skills and algorithmic thinking",
     practiceMode: "coding_lab",
-    typicalDuration: "60-90 min",
+    typicalDuration: "15 min",
     icon: "terminal",
   },
   system_design: {
@@ -63,7 +63,7 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
     label: "System Design",
     description: "Design a scalable system architecture, discussing tradeoffs and technical decisions",
     practiceMode: "case_study",
-    typicalDuration: "45-60 min",
+    typicalDuration: "10-15 min",
     icon: "boxes",
   },
   case_study: {
@@ -71,7 +71,7 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
     label: "Case Study",
     description: "Analyze a business problem, structure your approach, and present recommendations",
     practiceMode: "case_study",
-    typicalDuration: "45-60 min",
+    typicalDuration: "10-15 min",
     icon: "briefcase",
   },
   behavioral: {
@@ -79,7 +79,7 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
     label: "Behavioral Interview",
     description: "STAR-format questions about past experiences demonstrating key competencies",
     practiceMode: "live_interview",
-    typicalDuration: "45 min",
+    typicalDuration: "10-15 min",
     icon: "message-circle",
   },
   culture_values: {
@@ -87,7 +87,7 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
     label: "Culture & Values",
     description: "Assessment of cultural fit, values alignment, and collaboration style",
     practiceMode: "live_interview",
-    typicalDuration: "30-45 min",
+    typicalDuration: "10-15 min",
     icon: "heart",
   },
   bar_raiser: {
@@ -95,7 +95,7 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
     label: "Bar Raiser",
     description: "Cross-functional interview focused on raising the hiring bar (common at Amazon)",
     practiceMode: "live_interview",
-    typicalDuration: "45-60 min",
+    typicalDuration: "10-15 min",
     icon: "trending-up",
   },
   aptitude_assessment: {
@@ -103,7 +103,7 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
     label: "Aptitude Assessment",
     description: "Quantitative, logical, and verbal reasoning assessment",
     practiceMode: "coding_lab",
-    typicalDuration: "60 min",
+    typicalDuration: "15 min",
     icon: "calculator",
   },
   group_discussion: {
@@ -111,7 +111,7 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
     label: "Group Discussion",
     description: "Group discussion evaluating communication and teamwork skills",
     practiceMode: "live_interview",
-    typicalDuration: "30-45 min",
+    typicalDuration: "10-15 min",
     icon: "users",
   },
 };
