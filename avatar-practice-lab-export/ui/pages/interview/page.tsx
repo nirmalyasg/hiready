@@ -33,6 +33,7 @@ interface JobTarget {
 
 type AddMode = "url" | "paste" | "manual" | null;
 type PracticeTab = "roles" | "skills";
+type SelectedPath = "job" | "quick" | null;
 
 const domainIcons: Record<string, any> = {
   software: Code,
@@ -168,6 +169,7 @@ export default function InterviewPracticePage() {
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const [practiceTab, setPracticeTab] = useState<PracticeTab>("roles");
+  const [selectedPath, setSelectedPath] = useState<SelectedPath>(null);
   
   const [savedJobs, setSavedJobs] = useState<JobTarget[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
@@ -399,20 +401,81 @@ export default function InterviewPracticePage() {
           </div>
         )}
 
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[#ee7e65]/10 flex items-center justify-center">
-                <Target className="w-4 h-4 text-[#ee7e65]" />
+        {/* Two-card choice when no path is selected */}
+        {!selectedPath && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Job-based practice card */}
+            <button
+              onClick={() => setSelectedPath("job")}
+              className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-[#ee7e65] hover:shadow-xl transition-all"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <Target className="w-7 h-7 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-[#042c4c] mb-2 group-hover:text-[#ee7e65] transition-colors">
+                Practice for a Specific Job
+              </h2>
+              <p className="text-slate-500 text-sm mb-4">
+                Add a job description to get tailored interview questions that match the role and company.
+              </p>
+              <div className="flex items-center gap-2 text-[#ee7e65] font-medium text-sm">
+                <span>Get started</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+              {savedJobs.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  <p className="text-xs text-slate-400 mb-2">{savedJobs.length} saved job{savedJobs.length !== 1 ? 's' : ''}</p>
+                </div>
+              )}
+            </button>
+
+            {/* Quick practice card */}
+            <button
+              onClick={() => setSelectedPath("quick")}
+              className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-purple-400 hover:shadow-xl transition-all"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <Briefcase className="w-7 h-7 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-[#042c4c] mb-2 group-hover:text-purple-600 transition-colors">
+                Quick Practice
+              </h2>
+              <p className="text-slate-500 text-sm mb-4">
+                Jump into practice sessions by role or skill type without needing a specific job description.
+              </p>
+              <div className="flex items-center gap-2 text-purple-600 font-medium text-sm">
+                <span>Browse options</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <p className="text-xs text-slate-400">{roleKits.length} roles • {skillPracticeOptions.length} skill types</p>
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* Job-based practice details */}
+        {selectedPath === "job" && (
+          <section>
+            <button
+              onClick={() => { setSelectedPath(null); resetForm(); }}
+              className="flex items-center gap-2 text-sm text-slate-500 hover:text-[#042c4c] mb-4 transition-colors"
+            >
+              <ChevronRight className="w-4 h-4 rotate-180" />
+              Back to options
+            </button>
+
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center">
+                <Target className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-[#042c4c]">Practice for a Specific Job</h2>
-                <p className="text-xs text-slate-500">Add a job to get tailored interview questions</p>
+                <h2 className="text-xl font-bold text-[#042c4c]">Practice for a Specific Job</h2>
+                <p className="text-sm text-slate-500">Add a job to get tailored interview questions</p>
               </div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 p-5">
+            <div className="bg-white rounded-2xl border border-slate-200 p-5">
             {!addMode ? (
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div className="flex flex-wrap gap-2 flex-1">
@@ -572,18 +635,29 @@ export default function InterviewPracticePage() {
               </div>
             )}
           </div>
-        </section>
+          </section>
+        )}
 
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
-              <Briefcase className="w-4 h-4 text-purple-600" />
+        {/* Quick practice details */}
+        {selectedPath === "quick" && (
+          <section>
+            <button
+              onClick={() => setSelectedPath(null)}
+              className="flex items-center gap-2 text-sm text-slate-500 hover:text-[#042c4c] mb-4 transition-colors"
+            >
+              <ChevronRight className="w-4 h-4 rotate-180" />
+              Back to options
+            </button>
+
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                <Briefcase className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-[#042c4c]">Quick Practice Library</h2>
+                <p className="text-sm text-slate-500">Jump into practice without a specific job</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-[#042c4c]">Quick Practice Library</h2>
-              <p className="text-xs text-slate-500">Jump into practice without a specific job</p>
-            </div>
-          </div>
 
           <div className="flex gap-1 mb-4 bg-slate-100 p-1 rounded-xl w-fit">
             <button
@@ -777,7 +851,8 @@ export default function InterviewPracticePage() {
               )}
             </>
           )}
-        </section>
+          </section>
+        )}
       </div>
     </SidebarLayout>
   );
