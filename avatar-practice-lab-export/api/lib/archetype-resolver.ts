@@ -1,6 +1,6 @@
 import { db } from "../db";
-import { companies, roleArchetypes, roleInterviewStructureDefaults, jobTargets } from "../../shared/schema";
-import { eq, sql, ilike } from "drizzle-orm";
+import { companies, roleArchetypes, roleInterviewStructureDefaults, jobTargets, roleTaskBlueprints } from "../../shared/schema";
+import { eq, sql, ilike, and } from "drizzle-orm";
 
 export type CompanyArchetype = 
   | "startup" | "enterprise" | "regulated" | "consumer" | "saas" | "fintech" | "edtech" | "services" | "industrial"
@@ -397,6 +397,17 @@ export async function updateJobArchetypes(
     .where(eq(jobTargets.id, jobTargetId));
 }
 
+export interface InterviewPhase {
+  name: string;
+  category: string;
+  mins: number;
+  practiceMode: "live_interview" | "coding_lab" | "case_study" | "presentation";
+  description: string;
+  subphases?: string[];
+  emphasisWeight?: number;
+  provenance?: "both" | "company" | "role";
+}
+
 export interface UnifiedInterviewPlan {
   roleArchetype: {
     id: string;
@@ -407,15 +418,7 @@ export interface UnifiedInterviewPlan {
     type: string;
     confidence: "high" | "medium" | "low";
   } | null;
-  phases: {
-    name: string;
-    category: string;
-    mins: number;
-    practiceMode: "live_interview" | "coding_lab" | "case_study" | "presentation";
-    description: string;
-    subphases?: string[];
-    emphasisWeight?: number;
-  }[];
+  phases: InterviewPhase[];
   emphasisWeights: Record<string, number>;
   companyNotes: string | null;
   seniority: "entry" | "mid" | "senior";
@@ -674,6 +677,7 @@ export async function getUnifiedInterviewPlan(
         practiceMode: mapping.practiceMode,
         description: mapping.description,
         emphasisWeight: 1,
+        provenance: round.provenance,
       };
     });
     
@@ -783,4 +787,120 @@ export async function resolveAndSaveJobArchetypes(
   );
   
   return { companyResolution, roleResolution };
+}
+
+export interface TaskBlueprint {
+  id: number;
+  taskType: string;
+  difficultyBand: string;
+  promptTemplate: string;
+  expectedSignals: string[];
+  probeTree: string[];
+  tags: string[];
+}
+
+export async function getRoleTaskBlueprints(
+  roleArchetypeId: string | null,
+  taskTypes?: string[]
+): Promise<TaskBlueprint[]> {
+  if (!roleArchetypeId) return [];
+  
+  const query = db
+    .select({
+      id: roleTaskBlueprints.id,
+      taskType: roleTaskBlueprints.taskType,
+      difficultyBand: roleTaskBlueprints.difficultyBand,
+      promptTemplate: roleTaskBlueprints.promptTemplate,
+      expectedSignalsJson: roleTaskBlueprints.expectedSignalsJson,
+      probeTreeJson: roleTaskBlueprints.probeTreeJson,
+      tagsJson: roleTaskBlueprints.tagsJson,
+    })
+    .from(roleTaskBlueprints)
+    .where(
+      and(
+        eq(roleTaskBlueprints.roleArchetypeId, roleArchetypeId),
+        eq(roleTaskBlueprints.isActive, true)
+      )
+    );
+  
+  const results = await query;
+  
+  let blueprints = results.map(r => ({
+    id: r.id,
+    taskType: r.taskType,
+    difficultyBand: r.difficultyBand || "entry-mid",
+    promptTemplate: r.promptTemplate,
+    expectedSignals: (r.expectedSignalsJson as string[]) || [],
+    probeTree: (r.probeTreeJson as string[]) || [],
+    tags: (r.tagsJson as string[]) || [],
+  }));
+  
+  if (taskTypes && taskTypes.length > 0) {
+    blueprints = blueprints.filter(b => taskTypes.includes(b.taskType));
+  }
+  
+  return blueprints;
+}
+
+// Maps phase names to likely task types for blueprint matching
+const PHASE_TO_TASK_TYPES: Record<string, string[]> = {
+  "Case Study": ["case_interview", "metrics_case", "execution_scenario"],
+  "HR Screening": ["behavioral_star"],
+  "Behavioral": ["behavioral_star"],
+  "Hiring Manager": ["behavioral_star", "execution_scenario"],
+  "Technical Interview": ["coding_explain", "debugging", "code_review"],
+  "Coding Round": ["coding_explain", "debugging", "code_modification"],
+  "System Design": ["code_review"],
+  "Presentation": ["portfolio_walkthrough", "insight_storytelling"],
+  "Panel Interview": ["behavioral_star", "case_interview"],
+  "Aptitude Assessment": [],
+  "Group Discussion": [],
+};
+
+export interface EnrichedInterviewPhase extends InterviewPhase {
+  phaseId: string;
+  blueprints: TaskBlueprint[];
+}
+
+export interface EnrichedInterviewPlan extends Omit<UnifiedInterviewPlan, 'phases'> {
+  phases: EnrichedInterviewPhase[];
+}
+
+export async function getEnrichedInterviewPlan(
+  roleArchetypeId: string | null,
+  roleFamily: string | null,
+  companyArchetype: string | null,
+  archetypeConfidence: "high" | "medium" | "low" | null,
+  experienceLevel: string | null,
+  companyNotes: string | null = null,
+  companyName: string | null = null
+): Promise<EnrichedInterviewPlan> {
+  const basePlan = await getUnifiedInterviewPlan(
+    roleArchetypeId,
+    roleFamily,
+    companyArchetype,
+    archetypeConfidence,
+    experienceLevel,
+    companyNotes,
+    companyName
+  );
+  
+  const allBlueprints = await getRoleTaskBlueprints(roleArchetypeId);
+  
+  const enrichedPhases: EnrichedInterviewPhase[] = basePlan.phases.map((phase, index) => {
+    const taskTypes = PHASE_TO_TASK_TYPES[phase.name] || [];
+    const matchingBlueprints = allBlueprints.filter(b => taskTypes.includes(b.taskType));
+    const phaseId = `${phase.category}-${index}`;
+    
+    return {
+      ...phase,
+      phaseId,
+      blueprints: matchingBlueprints,
+    };
+  });
+  
+  return {
+    ...basePlan,
+    phases: enrichedPhases,
+  };
 }

@@ -173,8 +173,17 @@ export interface CompanyPracticeContext {
   interviewStyle: string | null;
 }
 
+export interface RoleBlueprint {
+  taskType: string;
+  promptTemplate: string;
+  expectedSignals: string[];
+  probeQuestions: string[];
+  difficultyBand?: string;
+}
+
 export interface PracticeOption {
   id: string;
+  phaseId?: string;
   roundCategory: RoundCategory;
   label: string;
   description: string;
@@ -182,8 +191,11 @@ export interface PracticeOption {
   typicalDuration: string;
   icon: string;
   companySpecific: boolean;
+  provenance?: "both" | "company" | "role" | null;
   companyContext: CompanyPracticeContext;
   focusHint: string | null;
+  roleBlueprint?: RoleBlueprint | null;
+  allBlueprints?: RoleBlueprint[];
 }
 
 export function generatePracticeOptions(

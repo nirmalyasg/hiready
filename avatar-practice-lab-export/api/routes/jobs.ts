@@ -23,7 +23,7 @@ import {
   PracticeMode
 } from "../../shared/practice-context.js";
 import { execSync } from "child_process";
-import { resolveAndSaveJobArchetypes, resolveCompanyArchetype, resolveRoleArchetype, listAllRoleArchetypes, listAllCompanyArchetypes, getRoleInterviewStructure, getUnifiedInterviewPlan } from "../lib/archetype-resolver.js";
+import { resolveAndSaveJobArchetypes, resolveCompanyArchetype, resolveRoleArchetype, listAllRoleArchetypes, listAllCompanyArchetypes, getRoleInterviewStructure, getUnifiedInterviewPlan, getEnrichedInterviewPlan, getRoleTaskBlueprints } from "../lib/archetype-resolver.js";
 
 let cachedChromiumPath: string | null = null;
 
@@ -1095,7 +1095,7 @@ jobsRouter.get("/job-targets/:id/practice-options", requireAuth, async (req: Req
     );
     const companyNotes = blueprintData?.blueprint?.notes || null;
     
-    const interviewPlan = await getUnifiedInterviewPlan(
+    const interviewPlan = await getEnrichedInterviewPlan(
       job.roleArchetypeId || null,
       job.roleFamily || null,
       job.companyArchetype || null,
@@ -1105,31 +1105,52 @@ jobsRouter.get("/job-targets/:id/practice-options", requireAuth, async (req: Req
       job.companyName || null
     );
     
-    const options: PracticeOption[] = interviewPlan.phases.map((phase, index) => ({
-      id: `${jobId}-${phase.category}-${index}`,
-      roundCategory: phase.category as RoundCategory,
-      label: job.companyName ? `${job.companyName} ${phase.name}` : phase.name,
-      description: phase.description,
-      practiceMode: phase.practiceMode as PracticeMode,
-      typicalDuration: `${phase.mins} min`,
-      icon: ROUND_TAXONOMY[phase.category as RoundCategory]?.icon || "file-text",
-      companySpecific: !!job.companyArchetype,
-      companyContext: {
-        jobTargetId: jobId,
-        companyName: job.companyName,
-        companyId: null,
-        roleTitle: job.roleTitle,
-        archetype: job.companyArchetype || null,
-        tier: null,
-        hasBlueprint: !!companyNotes,
-        blueprintNotes: companyNotes,
-        focusAreas: parsed?.focusAreas || [],
-        leadershipPrinciples: null,
-        interviewStyle: job.companyArchetype === "big_tech" ? "structured" : 
-                        job.companyArchetype === "startup" ? "conversational" : "mixed",
-      },
-      focusHint: phase.subphases?.length ? `Focus areas: ${phase.subphases.join(", ")}` : null,
-    }));
+    const options = interviewPlan.phases.map((phase) => {
+      const blueprints = phase.blueprints || [];
+      const primaryBlueprint = blueprints[0];
+      
+      return {
+        id: `${jobId}-${phase.phaseId}`,
+        phaseId: phase.phaseId,
+        roundCategory: phase.category as RoundCategory,
+        label: job.companyName ? `${job.companyName} ${phase.name}` : phase.name,
+        description: phase.description,
+        practiceMode: phase.practiceMode as PracticeMode,
+        typicalDuration: `${phase.mins} min`,
+        icon: ROUND_TAXONOMY[phase.category as RoundCategory]?.icon || "file-text",
+        companySpecific: !!job.companyArchetype,
+        provenance: phase.provenance || null,
+        companyContext: {
+          jobTargetId: jobId,
+          companyName: job.companyName,
+          companyId: null,
+          roleTitle: job.roleTitle,
+          archetype: job.companyArchetype || null,
+          tier: null,
+          hasBlueprint: !!companyNotes,
+          blueprintNotes: companyNotes,
+          focusAreas: parsed?.focusAreas || [],
+          leadershipPrinciples: null,
+          interviewStyle: job.companyArchetype === "big_tech" ? "structured" : 
+                          job.companyArchetype === "startup" ? "conversational" : "mixed",
+        },
+        focusHint: phase.subphases?.length ? `Focus areas: ${phase.subphases.join(", ")}` : null,
+        roleBlueprint: primaryBlueprint ? {
+          taskType: primaryBlueprint.taskType,
+          promptTemplate: primaryBlueprint.promptTemplate,
+          expectedSignals: primaryBlueprint.expectedSignals,
+          probeQuestions: primaryBlueprint.probeTree,
+          difficultyBand: primaryBlueprint.difficultyBand,
+        } : null,
+        allBlueprints: blueprints.map(b => ({
+          taskType: b.taskType,
+          promptTemplate: b.promptTemplate,
+          expectedSignals: b.expectedSignals,
+          probeQuestions: b.probeTree,
+          difficultyBand: b.difficultyBand,
+        })),
+      };
+    });
 
     res.json({
       success: true,
