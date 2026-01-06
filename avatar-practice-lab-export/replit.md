@@ -26,9 +26,53 @@ avatar-practice-lab-export/
     └── schema.ts           # Drizzle ORM schema
 ```
 
-## Recent Changes (January 4, 2026)
+## Recent Changes (January 6, 2026)
 
-### Interview Intelligence System (Latest)
+### Company & Role Archetype Integration (Latest)
+Enhanced interview preparation with intelligent company and role classification:
+
+1. **Company Archetypes (18 types)**
+   - IT Services, Big Tech, BFSI, FMCG, Manufacturing, Consulting, BPM, Telecom, Conglomerate
+   - Startup, Enterprise, SaaS, Fintech, EdTech, Consumer Tech, Regulated, Services, Industrial
+   - 96 Indian companies seeded with archetype assignments
+   - 3-stage matching: direct name → alias matching → JD inference
+
+2. **Role Archetypes (18 types)**
+   - Tech roles: Core SWE, Infra/Platform, Security, QA/Test
+   - Data roles: Analyst, Engineer, Scientist, ML Engineer
+   - Product roles: PM, TPM, Designer
+   - Business roles: Marketing/Growth, Sales, Customer Success, BizOps, Operations, Finance, Consulting
+   - 54 interview structure defaults by role × seniority (entry/mid/senior)
+
+3. **Auto-Detection & Override**
+   - Automatic archetype detection when jobs are created
+   - Confidence badges: high (green), medium (amber), low (gray)
+   - Manual override dropdowns in job detail page
+   - Role family classification: tech, data, product, sales, business
+
+4. **Interview Structure Defaults**
+   - Phase-based interview configurations per role archetype
+   - Seniority-adjusted timing and emphasis weights
+   - Recommended scoring dimensions per phase
+
+5. **New API Endpoints**
+   - `GET /api/jobs/archetypes/roles` - List all role archetypes
+   - `GET /api/jobs/archetypes/companies` - List company archetype counts
+   - `GET /api/jobs/archetypes/structure/:roleArchetypeId/:seniority` - Get interview structure
+   - `PUT /api/jobs/job-targets/:id/archetype` - Manual override
+   - `POST /api/jobs/job-targets/:id/resolve-archetypes` - Re-run detection
+
+6. **Database Changes**
+   - `role_archetypes` table: 18 role types with skill dimensions
+   - `role_interview_structure_defaults` table: 54 structure configs
+   - New fields in `job_targets`: companyArchetype, archetypeConfidence, roleArchetypeId, roleFamily
+   - New fields in `companies`: archetype, confidence, aliases, interviewComponents
+
+---
+
+## Previous Changes (January 4, 2026)
+
+### Interview Intelligence System
 Comprehensive AI-powered interview preparation with intelligent question patterns, skill tracking, and personalized coaching:
 
 1. **Question Pattern Library**

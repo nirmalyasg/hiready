@@ -1,0 +1,136 @@
+-- Top 100 India Recruiters with Interview Components
+-- Each company includes sector, archetype, and interview components
+
+INSERT INTO companies (name, country, sector, archetype, confidence, aliases, interview_components, tier)
+VALUES
+-- IT Services Companies
+('Tata Consultancy Services (TCS)', 'India', 'IT Services', 'it_services', 'high', '["TCS", "Tata Consultancy", "TCSL"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top50'),
+('Infosys', 'India', 'IT Services', 'it_services', 'high', '["Infy", "Infosys Limited"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top50'),
+('Wipro', 'India', 'IT Services', 'it_services', 'medium', '["Wipro Limited", "Wipro Technologies"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top50'),
+('HCLTech', 'India', 'IT Services', 'it_services', 'medium', '["HCL", "HCL Technologies"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top50'),
+('Tech Mahindra', 'India', 'IT Services', 'it_services', 'medium', '["TechM", "Tech Mahindra Limited"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top50'),
+('Cognizant', 'India', 'IT Services', 'it_services', 'medium', '["CTS", "Cognizant Technology Solutions"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top50'),
+('Capgemini', 'India', 'IT Services', 'it_services', 'medium', '["Cap Gemini"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top50'),
+('Accenture', 'India', 'IT Services', 'consulting', 'high', '["ACN"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top50'),
+('IBM', 'India', 'IT Services', 'it_services', 'medium', '["International Business Machines"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top50'),
+('LTIMindtree', 'India', 'IT Services', 'it_services', 'medium', '["LTI", "L&T Infotech", "Mindtree"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top50'),
+('Mphasis', 'India', 'IT Services', 'it_services', 'medium', '[]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top200'),
+('Persistent Systems', 'India', 'IT Services', 'it_services', 'medium', '["Persistent"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top200'),
+('Coforge', 'India', 'IT Services', 'it_services', 'medium', '["NIIT Technologies"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top200'),
+('Birlasoft', 'India', 'IT Services', 'it_services', 'medium', '[]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top200'),
+('Hexaware', 'India', 'IT Services', 'it_services', 'medium', '[]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top200'),
+
+-- BPM/Services Companies
+('Genpact', 'India', 'BPM/Services', 'bpm', 'medium', '[]'::jsonb, '{"aptitude": true, "hrScreen": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('WNS', 'India', 'BPM/Services', 'bpm', 'medium', '["WNS Global Services"]'::jsonb, '{"aptitude": true, "hrScreen": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top200'),
+
+-- Big Tech / Product Companies
+('Amazon', 'India', 'Big Tech', 'big_tech', 'high', '["Amazon India", "AMZN"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Google', 'India', 'Big Tech', 'big_tech', 'high', '["Google India", "Alphabet"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Microsoft', 'India', 'Big Tech', 'big_tech', 'high', '["Microsoft India", "MSFT"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Meta', 'India', 'Big Tech', 'big_tech', 'high', '["Facebook", "Facebook India", "META"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Apple', 'India', 'Big Tech', 'big_tech', 'high', '["Apple India", "AAPL"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Netflix', 'India', 'Big Tech', 'big_tech', 'high', '["Netflix India", "NFLX"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Uber', 'India', 'Consumer Tech', 'big_tech', 'high', '["Uber India"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Airbnb', 'India', 'Consumer Tech', 'big_tech', 'high', '["Airbnb India"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Stripe', 'India', 'Fintech', 'fintech', 'high', '["Stripe India"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Salesforce', 'India', 'SaaS', 'saas', 'high', '["Salesforce India", "CRM"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Adobe', 'India', 'Product', 'big_tech', 'high', '["Adobe India", "ADBE"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Oracle', 'India', 'Enterprise', 'enterprise', 'medium', '["Oracle India", "ORCL"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('SAP', 'India', 'Enterprise', 'enterprise', 'medium', '["SAP India", "SAP Labs"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('ServiceNow', 'India', 'SaaS', 'saas', 'medium', '["ServiceNow India"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('VMware', 'India', 'Product', 'big_tech', 'medium', '["VMware India", "Broadcom"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Qualcomm', 'India', 'Semiconductors', 'big_tech', 'medium', '["Qualcomm India", "QCOM"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Intel', 'India', 'Semiconductors', 'big_tech', 'medium', '["Intel India", "INTC"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('NVIDIA', 'India', 'Semiconductors', 'big_tech', 'high', '["NVIDIA India", "NVDA"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('AMD', 'India', 'Semiconductors', 'big_tech', 'medium', '["AMD India"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Cisco', 'India', 'Networking', 'enterprise', 'medium', '["Cisco India", "CSCO"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Dell', 'India', 'Hardware', 'enterprise', 'medium', '["Dell India", "Dell Technologies"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('PayPal', 'India', 'Fintech', 'fintech', 'high', '["PayPal India", "PYPL"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Intuit', 'India', 'Fintech', 'fintech', 'medium', '["Intuit India"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Atlassian', 'India', 'SaaS', 'saas', 'high', '["Atlassian India", "TEAM"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Shopify', 'India', 'E-commerce', 'big_tech', 'high', '["Shopify India", "SHOP"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Twilio', 'India', 'SaaS', 'saas', 'medium', '["Twilio India", "TWLO"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('MongoDB', 'India', 'Database', 'saas', 'high', '["MongoDB India", "MDB"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Confluent', 'India', 'Data Platform', 'saas', 'medium', '["Confluent India"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top200'),
+('Databricks', 'India', 'Data Platform', 'saas', 'high', '["Databricks India"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Snowflake', 'India', 'Data Platform', 'saas', 'high', '["Snowflake India", "SNOW"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Elastic', 'India', 'Search Platform', 'saas', 'medium', '["Elastic India", "ESTC"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top200'),
+
+-- Indian Startups / Consumer Tech
+('Flipkart', 'India', 'E-commerce', 'consumer', 'high', '["Flipkart India"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Swiggy', 'India', 'Food Tech', 'consumer', 'high', '[]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Zomato', 'India', 'Food Tech', 'consumer', 'high', '["ZOMATO"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Ola', 'India', 'Mobility', 'consumer', 'high', '["Ola Cabs", "Ola Electric"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Paytm', 'India', 'Fintech', 'fintech', 'high', '["One97 Communications"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('PhonePe', 'India', 'Fintech', 'fintech', 'high', '[]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Razorpay', 'India', 'Fintech', 'fintech', 'high', '[]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Zerodha', 'India', 'Fintech', 'fintech', 'high', '[]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('CRED', 'India', 'Fintech', 'fintech', 'high', '[]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Groww', 'India', 'Fintech', 'fintech', 'medium', '[]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Meesho', 'India', 'E-commerce', 'consumer', 'medium', '[]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Nykaa', 'India', 'E-commerce', 'consumer', 'medium', '["FSN E-Commerce"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Dream11', 'India', 'Gaming', 'consumer', 'high', '["Dream Sports"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('MPL', 'India', 'Gaming', 'consumer', 'medium', '["Mobile Premier League"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top200'),
+('Dunzo', 'India', 'Delivery', 'consumer', 'medium', '[]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top200'),
+('Urban Company', 'India', 'Services', 'consumer', 'medium', '["UrbanClap"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top200'),
+('ShareChat', 'India', 'Social', 'consumer', 'medium', '["Mohalla Tech"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "systemDesign": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top200'),
+('Byju''s', 'India', 'EdTech', 'edtech', 'medium', '["Think & Learn"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Unacademy', 'India', 'EdTech', 'edtech', 'medium', '["Sorting Hat Technologies"]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('upGrad', 'India', 'EdTech', 'edtech', 'medium', '[]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top200'),
+('Vedantu', 'India', 'EdTech', 'edtech', 'medium', '[]'::jsonb, '{"codingChallenge": true, "technicalDsaSql": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top200'),
+
+-- BFSI Companies
+('HDFC Bank', 'India', 'BFSI', 'bfsi', 'high', '["HDFC", "Housing Development Finance Corporation"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('ICICI Bank', 'India', 'BFSI', 'bfsi', 'high', '["ICICI"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Axis Bank', 'India', 'BFSI', 'bfsi', 'medium', '["Axis"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('Kotak Mahindra Bank', 'India', 'BFSI', 'bfsi', 'medium', '["Kotak"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('State Bank of India', 'India', 'BFSI', 'bfsi', 'high', '["SBI"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true}'::jsonb, 'top50'),
+('Goldman Sachs', 'India', 'BFSI', 'bfsi', 'high', '["GS", "Goldman India"]'::jsonb, '{"aptitude": true, "codingChallenge": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('JPMorgan Chase', 'India', 'BFSI', 'bfsi', 'high', '["JPM", "JPMC", "JP Morgan"]'::jsonb, '{"aptitude": true, "codingChallenge": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Morgan Stanley', 'India', 'BFSI', 'bfsi', 'medium', '["MS"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Barclays', 'India', 'BFSI', 'bfsi', 'medium', '["Barclays India"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('HSBC', 'India', 'BFSI', 'bfsi', 'medium', '["HSBC India"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Standard Chartered', 'India', 'BFSI', 'bfsi', 'medium', '["StanChart", "SC"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Deutsche Bank', 'India', 'BFSI', 'bfsi', 'medium', '["DB"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('UBS', 'India', 'BFSI', 'bfsi', 'medium', '["UBS India"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Citibank', 'India', 'BFSI', 'bfsi', 'medium', '["Citi", "Citi India"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('American Express', 'India', 'BFSI', 'bfsi', 'medium', '["Amex", "AMEX India"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+
+-- FMCG Companies
+('Hindustan Unilever (HUL)', 'India', 'FMCG', 'fmcg', 'high', '["HUL", "Hindustan Lever", "Unilever India"]'::jsonb, '{"aptitude": true, "caseStudy": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true, "presentation": true}'::jsonb, 'top50'),
+('ITC', 'India', 'FMCG', 'fmcg', 'medium', '["ITC Limited"]'::jsonb, '{"aptitude": true, "caseStudy": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true, "presentation": true}'::jsonb, 'top50'),
+('Nestle India', 'India', 'FMCG', 'fmcg', 'medium', '["Nestle"]'::jsonb, '{"aptitude": true, "caseStudy": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true, "presentation": true}'::jsonb, 'top50'),
+('Procter & Gamble (P&G)', 'India', 'FMCG', 'fmcg', 'medium', '["P&G", "PG India", "Procter and Gamble"]'::jsonb, '{"aptitude": true, "caseStudy": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true, "presentation": true}'::jsonb, 'top50'),
+('PepsiCo India', 'India', 'FMCG', 'fmcg', 'medium', '["PepsiCo", "Pepsi"]'::jsonb, '{"aptitude": true, "caseStudy": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true, "presentation": true}'::jsonb, 'top50'),
+('Coca-Cola India', 'India', 'FMCG', 'fmcg', 'medium', '["Coca-Cola", "Coke"]'::jsonb, '{"aptitude": true, "caseStudy": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true, "presentation": true}'::jsonb, 'top50'),
+('Britannia', 'India', 'FMCG', 'fmcg', 'medium', '["Britannia Industries"]'::jsonb, '{"aptitude": true, "caseStudy": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true, "presentation": true}'::jsonb, 'top50'),
+('Marico', 'India', 'FMCG', 'fmcg', 'medium', '[]'::jsonb, '{"aptitude": true, "caseStudy": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true, "presentation": true}'::jsonb, 'top50'),
+('Dabur', 'India', 'FMCG', 'fmcg', 'medium', '["Dabur India"]'::jsonb, '{"aptitude": true, "caseStudy": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "groupDiscussion": true, "presentation": true}'::jsonb, 'top50'),
+
+-- Manufacturing/Conglomerate
+('Asian Paints', 'India', 'Manufacturing/Consumer', 'manufacturing', 'medium', '[]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Reliance Industries', 'India', 'Conglomerate', 'conglomerate', 'medium', '["RIL", "Reliance"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Tata Group', 'India', 'Conglomerate', 'conglomerate', 'high', '["Tata", "Tata Sons"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+
+-- Telecom
+('Reliance Jio', 'India', 'Telecom', 'telecom', 'medium', '["Jio", "JIO"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Bharti Airtel', 'India', 'Telecom', 'telecom', 'medium', '["Airtel"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('Vodafone Idea', 'India', 'Telecom', 'telecom', 'medium', '["Vi", "Vodafone India", "Idea Cellular"]'::jsonb, '{"aptitude": true, "technicalDsaSql": true, "hrScreen": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+
+-- Consulting
+('McKinsey & Company', 'India', 'Consulting', 'consulting', 'high', '["McKinsey", "McK"]'::jsonb, '{"caseStudy": true, "behavioral": true, "panel": true, "presentation": true}'::jsonb, 'top50'),
+('Boston Consulting Group', 'India', 'Consulting', 'consulting', 'high', '["BCG"]'::jsonb, '{"caseStudy": true, "behavioral": true, "panel": true, "presentation": true}'::jsonb, 'top50'),
+('Bain & Company', 'India', 'Consulting', 'consulting', 'high', '["Bain"]'::jsonb, '{"caseStudy": true, "behavioral": true, "panel": true, "presentation": true}'::jsonb, 'top50'),
+('Deloitte', 'India', 'Consulting', 'consulting', 'high', '["Deloitte India"]'::jsonb, '{"aptitude": true, "caseStudy": true, "hrScreen": true, "behavioral": true, "hiringManager": true, "panel": true}'::jsonb, 'top50'),
+('PwC', 'India', 'Consulting', 'consulting', 'high', '["PricewaterhouseCoopers"]'::jsonb, '{"aptitude": true, "caseStudy": true, "hrScreen": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('EY', 'India', 'Consulting', 'consulting', 'high', '["Ernst & Young", "Ernst Young"]'::jsonb, '{"aptitude": true, "caseStudy": true, "hrScreen": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50'),
+('KPMG', 'India', 'Consulting', 'consulting', 'high', '["KPMG India"]'::jsonb, '{"aptitude": true, "caseStudy": true, "hrScreen": true, "behavioral": true, "hiringManager": true}'::jsonb, 'top50')
+
+ON CONFLICT (name) DO UPDATE SET
+  sector = EXCLUDED.sector,
+  archetype = EXCLUDED.archetype,
+  confidence = EXCLUDED.confidence,
+  aliases = EXCLUDED.aliases,
+  interview_components = EXCLUDED.interview_components,
+  tier = EXCLUDED.tier;

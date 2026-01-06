@@ -30,7 +30,9 @@ export const sessions = pgTable(
     sess: jsonb("sess").notNull(),
     expire: timestamp("expire").notNull(),
   },
-  (table) => [index("IDX_session_expire").on(table.expire)],
+  (table) => ({
+    expireIdx: index("IDX_session_expire").on(table.expire),
+  }),
 );
 
 // Auth users table for username/password authentication
@@ -637,6 +639,8 @@ export const roleKits = pgTable("role_kits", {
   skillsFocus: jsonb("skills_focus").$type<string[]>(),
   estimatedDuration: integer("estimated_duration").default(360),
   trackTags: jsonb("track_tags").$type<string[]>(),
+  roleArchetypeId: varchar("role_archetype_id"),
+  roleCategory: text("role_category").$type<"tech" | "data" | "product" | "sales" | "business">(),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -765,6 +769,13 @@ export const jobTargets = pgTable("job_targets", {
     focusAreas?: string[];
     salaryRange?: string;
   }>(),
+  companyArchetype: text("company_archetype").$type<
+    "startup" | "enterprise" | "regulated" | "consumer" | "saas" | "fintech" | "edtech" | "services" | "industrial" |
+    "it_services" | "big_tech" | "bfsi" | "fmcg" | "manufacturing" | "consulting" | "bpm" | "telecom" | "conglomerate"
+  >(),
+  archetypeConfidence: text("archetype_confidence").$type<"high" | "medium" | "low">(),
+  roleArchetypeId: varchar("role_archetype_id"),
+  roleFamily: text("role_family").$type<"tech" | "data" | "product" | "sales" | "business">(),
   status: text("status")
     .$type<"saved" | "applied" | "interview" | "offer" | "rejected" | "archived">()
     .notNull()
@@ -1480,12 +1491,63 @@ export const companies = pgTable("companies", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull().unique(),
   country: text("country"),
+  sector: text("sector"),
   tier: text("tier").$type<"top50" | "top200" | "other">().default("other"),
   archetype: text("archetype").$type<
-    "startup" | "enterprise" | "regulated" | "consumer" | "saas" | "fintech" | "edtech" | "services" | "industrial"
+    "startup" | "enterprise" | "regulated" | "consumer" | "saas" | "fintech" | "edtech" | "services" | "industrial" |
+    "it_services" | "big_tech" | "bfsi" | "fmcg" | "manufacturing" | "consulting" | "bpm" | "telecom" | "conglomerate"
   >(),
+  aliases: jsonb("aliases").$type<string[]>(),
+  interviewComponents: jsonb("interview_components").$type<{
+    aptitude?: boolean;
+    codingChallenge?: boolean;
+    technicalDsaSql?: boolean;
+    systemDesign?: boolean;
+    caseStudy?: boolean;
+    hrScreen?: boolean;
+    behavioral?: boolean;
+    hiringManager?: boolean;
+    groupDiscussion?: boolean;
+    panel?: boolean;
+    presentation?: boolean;
+  }>(),
+  confidence: text("confidence").$type<"high" | "medium" | "low">().default("medium"),
   tags: jsonb("tags").$type<string[]>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Role Archetypes - defines role types with skill dimensions and interview patterns
+export const roleArchetypes = pgTable("role_archetypes", {
+  id: varchar("id").primaryKey(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  primarySkillDimensions: jsonb("primary_skill_dimensions").$type<string[]>(),
+  commonInterviewTypes: jsonb("common_interview_types").$type<string[]>(),
+  typicalTaskTypes: jsonb("typical_task_types").$type<string[]>(),
+  commonFailureModes: jsonb("common_failure_modes").$type<string[]>(),
+  roleCategory: text("role_category").$type<"tech" | "data" | "product" | "sales" | "business">(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Role Interview Structure Defaults - phase structure and scoring weights per archetype + seniority
+export const roleInterviewStructureDefaults = pgTable("role_interview_structure_defaults", {
+  id: serial("id").primaryKey(),
+  roleArchetypeId: varchar("role_archetype_id")
+    .notNull()
+    .references(() => roleArchetypes.id, { onDelete: "cascade" }),
+  seniority: text("seniority")
+    .$type<"entry" | "mid" | "senior">()
+    .notNull(),
+  phasesJson: jsonb("phases_json").$type<{
+    name: string;
+    mins: number;
+    subphases?: string[];
+  }[]>().notNull(),
+  emphasisWeightsJson: jsonb("emphasis_weights_json").$type<Record<string, number>>().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // Question Patterns - templated questions with probe trees
@@ -1577,6 +1639,17 @@ export const companiesRelations = relations(companies, ({ many }) => ({
   blueprints: many(companyRoleBlueprints),
 }));
 
+export const roleArchetypesRelations = relations(roleArchetypes, ({ many }) => ({
+  structureDefaults: many(roleInterviewStructureDefaults),
+}));
+
+export const roleInterviewStructureDefaultsRelations = relations(roleInterviewStructureDefaults, ({ one }) => ({
+  roleArchetype: one(roleArchetypes, {
+    fields: [roleInterviewStructureDefaults.roleArchetypeId],
+    references: [roleArchetypes.id],
+  }),
+}));
+
 export const companyRoleBlueprintsRelations = relations(companyRoleBlueprints, ({ one }) => ({
   company: one(companies, {
     fields: [companyRoleBlueprints.companyId],
@@ -1620,6 +1693,8 @@ export const insertQuestionPatternSchema = createInsertSchema(questionPatterns).
 export const insertCompanyRoleBlueprintSchema = createInsertSchema(companyRoleBlueprints).omit({ updatedAt: true });
 export const insertJobPracticeLinkSchema = createInsertSchema(jobPracticeLinks).omit({ createdAt: true });
 export const insertUserSkillMemorySchema = createInsertSchema(userSkillMemory).omit({ updatedAt: true });
+export const insertRoleArchetypeSchema = createInsertSchema(roleArchetypes).omit({ createdAt: true, updatedAt: true });
+export const insertRoleInterviewStructureDefaultSchema = createInsertSchema(roleInterviewStructureDefaults).omit({ id: true, createdAt: true, updatedAt: true });
 
 export const insertCustomScenarioSchema = createInsertSchema(customScenarios).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertScenarioSchema = createInsertSchema(scenarios).omit({ id: true });
@@ -1782,3 +1857,7 @@ export type JobPracticeLink = typeof jobPracticeLinks.$inferSelect;
 export type InsertJobPracticeLink = z.infer<typeof insertJobPracticeLinkSchema>;
 export type UserSkillMemory = typeof userSkillMemory.$inferSelect;
 export type InsertUserSkillMemory = z.infer<typeof insertUserSkillMemorySchema>;
+export type RoleArchetype = typeof roleArchetypes.$inferSelect;
+export type InsertRoleArchetype = z.infer<typeof insertRoleArchetypeSchema>;
+export type RoleInterviewStructureDefault = typeof roleInterviewStructureDefaults.$inferSelect;
+export type InsertRoleInterviewStructureDefault = z.infer<typeof insertRoleInterviewStructureDefaultSchema>;

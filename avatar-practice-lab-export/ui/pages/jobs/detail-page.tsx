@@ -41,7 +41,65 @@ interface JobTarget {
   lastPracticedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  companyArchetype?: string | null;
+  archetypeConfidence?: "high" | "medium" | "low" | null;
+  roleArchetypeId?: string | null;
+  roleFamily?: string | null;
 }
+
+interface RoleArchetype {
+  id: string;
+  name: string;
+  roleFamily: string;
+}
+
+const confidenceBadgeColors: Record<string, { bg: string; text: string; border: string }> = {
+  high: { bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
+  medium: { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200" },
+  low: { bg: "bg-gray-50", text: "text-gray-600", border: "border-gray-200" },
+};
+
+const archetypeLabels: Record<string, string> = {
+  it_services: "IT Services",
+  big_tech: "Big Tech",
+  bfsi: "BFSI",
+  fmcg: "FMCG",
+  manufacturing: "Manufacturing",
+  consulting: "Consulting",
+  bpm: "BPM",
+  telecom: "Telecom",
+  conglomerate: "Conglomerate",
+  startup: "Startup",
+  enterprise: "Enterprise",
+  regulated: "Regulated",
+  consumer: "Consumer Tech",
+  saas: "SaaS",
+  fintech: "Fintech",
+  edtech: "EdTech",
+  services: "Services",
+  industrial: "Industrial",
+};
+
+const companyArchetypeOptions = [
+  { value: "it_services", label: "IT Services" },
+  { value: "big_tech", label: "Big Tech" },
+  { value: "bfsi", label: "BFSI" },
+  { value: "fmcg", label: "FMCG" },
+  { value: "manufacturing", label: "Manufacturing" },
+  { value: "consulting", label: "Consulting" },
+  { value: "bpm", label: "BPM" },
+  { value: "telecom", label: "Telecom" },
+  { value: "conglomerate", label: "Conglomerate" },
+  { value: "startup", label: "Startup" },
+  { value: "enterprise", label: "Enterprise" },
+  { value: "saas", label: "SaaS" },
+  { value: "fintech", label: "Fintech" },
+  { value: "edtech", label: "EdTech" },
+  { value: "consumer", label: "Consumer Tech" },
+  { value: "regulated", label: "Regulated" },
+  { value: "services", label: "Services" },
+  { value: "industrial", label: "Industrial" },
+];
 
 type RoundCategory = 
   | "hr_screening"
@@ -113,6 +171,8 @@ export default function JobDetailPage() {
   const [isParsing, setIsParsing] = useState(false);
   const [jdExpanded, setJdExpanded] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
+  const [roleArchetypes, setRoleArchetypes] = useState<RoleArchetype[]>([]);
+  const [isUpdatingArchetype, setIsUpdatingArchetype] = useState(false);
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -155,6 +215,42 @@ export default function JobDetailPage() {
     
     fetchJob();
   }, [jobId]);
+
+  useEffect(() => {
+    const fetchRoleArchetypes = async () => {
+      try {
+        const response = await fetch("/api/jobs/archetypes/roles");
+        const data = await response.json();
+        if (data.success) {
+          setRoleArchetypes(data.archetypes || []);
+        }
+      } catch (error) {
+        console.error("Error fetching role archetypes:", error);
+      }
+    };
+    fetchRoleArchetypes();
+  }, []);
+
+  const handleUpdateArchetype = async (updates: { companyArchetype?: string; roleArchetypeId?: string; roleFamily?: string }) => {
+    if (!job?.id) return;
+    
+    try {
+      setIsUpdatingArchetype(true);
+      const response = await fetch(`/api/jobs/job-targets/${job.id}/archetype`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setJob(data.job);
+      }
+    } catch (error) {
+      console.error("Error updating archetype:", error);
+    } finally {
+      setIsUpdatingArchetype(false);
+    }
+  };
 
   const handleParseJD = async () => {
     if (!job?.id) return;
@@ -539,6 +635,74 @@ export default function JobDetailPage() {
           </div>
 
           <div className="space-y-6">
+            {(job.companyArchetype || job.roleFamily || companyArchetypeOptions.length > 0) && (
+              <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                <h3 className="text-sm font-medium text-brand-muted mb-4">Interview Configuration</h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs font-medium text-brand-muted block mb-1.5">Company Type</label>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={job.companyArchetype || ""}
+                        onChange={(e) => handleUpdateArchetype({ companyArchetype: e.target.value })}
+                        disabled={isUpdatingArchetype}
+                        className="flex-1 px-3 py-2 text-sm border rounded-lg bg-white focus:ring-2 focus:ring-brand-accent focus:border-brand-accent"
+                      >
+                        <option value="">Auto-detect</option>
+                        {companyArchetypeOptions.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                      {job.companyArchetype && job.archetypeConfidence && (
+                        <span className={`shrink-0 px-2 py-0.5 text-xs rounded-full border ${
+                          confidenceBadgeColors[job.archetypeConfidence]?.bg || "bg-gray-50"
+                        } ${
+                          confidenceBadgeColors[job.archetypeConfidence]?.text || "text-gray-600"
+                        } ${
+                          confidenceBadgeColors[job.archetypeConfidence]?.border || "border-gray-200"
+                        }`}>
+                          {job.archetypeConfidence}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="text-xs font-medium text-brand-muted block mb-1.5">Role Type</label>
+                    <select
+                      value={job.roleArchetypeId || ""}
+                      onChange={(e) => {
+                        const selected = roleArchetypes.find(r => r.id === e.target.value);
+                        handleUpdateArchetype({ 
+                          roleArchetypeId: e.target.value,
+                          roleFamily: selected?.roleFamily || undefined
+                        });
+                      }}
+                      disabled={isUpdatingArchetype}
+                      className="w-full px-3 py-2 text-sm border rounded-lg bg-white focus:ring-2 focus:ring-brand-accent focus:border-brand-accent"
+                    >
+                      <option value="">Auto-detect</option>
+                      {roleArchetypes.map((arch) => (
+                        <option key={arch.id} value={arch.id}>
+                          {arch.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {job.roleFamily && (
+                    <div className="flex items-center gap-2 text-xs text-brand-muted">
+                      <Briefcase className="w-3.5 h-3.5" />
+                      <span>Role Family: <span className="font-medium text-brand-dark">{job.roleFamily.charAt(0).toUpperCase() + job.roleFamily.slice(1)}</span></span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {job.readinessScore !== null && (
               <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
                 <h3 className="text-sm font-medium text-brand-muted mb-3">Interview Readiness</h3>

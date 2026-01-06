@@ -22,6 +22,7 @@ import {
   PracticeOption
 } from "../../shared/practice-context.js";
 import { execSync } from "child_process";
+import { resolveAndSaveJobArchetypes, resolveCompanyArchetype, resolveRoleArchetype, listAllRoleArchetypes, listAllCompanyArchetypes, getRoleInterviewStructure } from "../lib/archetype-resolver.js";
 
 let cachedChromiumPath: string | null = null;
 
@@ -383,7 +384,21 @@ jobsRouter.post("/job-targets", requireAuth, async (req: Request, res: Response)
       })
       .returning();
 
-    res.status(201).json({ success: true, job: newJob });
+    let archetypeInfo: any = null;
+    if (companyName || roleTitle) {
+      try {
+        archetypeInfo = await resolveAndSaveJobArchetypes(
+          newJob.id,
+          companyName || "",
+          roleTitle,
+          jdText || undefined
+        );
+      } catch (archetypeError) {
+        console.error("Error resolving archetypes:", archetypeError);
+      }
+    }
+
+    res.status(201).json({ success: true, job: newJob, archetypeInfo });
   } catch (error: any) {
     console.error("Error creating job target:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -1813,6 +1828,137 @@ jobsRouter.post("/skill-patterns/update", requireAuth, async (req: Request, res:
     res.json({ success: true, patterns: updatedPatterns });
   } catch (error: any) {
     console.error("Error updating skill patterns:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+jobsRouter.get("/archetypes/roles", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const archetypes = await listAllRoleArchetypes();
+    res.json({ success: true, archetypes });
+  } catch (error: any) {
+    console.error("Error fetching role archetypes:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+jobsRouter.get("/archetypes/companies", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const archetypes = await listAllCompanyArchetypes();
+    res.json({ success: true, archetypes });
+  } catch (error: any) {
+    console.error("Error fetching company archetypes:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+jobsRouter.get("/archetypes/structure/:roleArchetypeId/:seniority", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { roleArchetypeId, seniority } = req.params;
+    const validSeniorities = ["entry", "mid", "senior"];
+    
+    if (!validSeniorities.includes(seniority)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: `Invalid seniority. Must be one of: ${validSeniorities.join(", ")}` 
+      });
+    }
+    
+    const structure = await getRoleInterviewStructure(
+      roleArchetypeId, 
+      seniority as "entry" | "mid" | "senior"
+    );
+    
+    if (!structure) {
+      return res.status(404).json({ success: false, error: "Structure not found for this archetype and seniority" });
+    }
+    
+    res.json({ success: true, structure });
+  } catch (error: any) {
+    console.error("Error fetching interview structure:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+jobsRouter.put("/job-targets/:id/archetype", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const jobId = req.params.id;
+    const { companyArchetype, roleArchetypeId, roleFamily, autoDetect } = req.body;
+
+    const [existing] = await db
+      .select()
+      .from(jobTargets)
+      .where(and(eq(jobTargets.id, jobId), eq(jobTargets.userId, userId)));
+
+    if (!existing) {
+      return res.status(404).json({ success: false, error: "Job target not found" });
+    }
+
+    if (autoDetect) {
+      const archetypeInfo = await resolveAndSaveJobArchetypes(
+        jobId,
+        existing.companyName || "",
+        existing.roleTitle,
+        existing.jdText || undefined
+      );
+      
+      const [updated] = await db
+        .select()
+        .from(jobTargets)
+        .where(eq(jobTargets.id, jobId));
+
+      return res.json({ success: true, job: updated, archetypeInfo });
+    }
+
+    const [updated] = await db
+      .update(jobTargets)
+      .set({
+        companyArchetype: companyArchetype === "" ? null : (companyArchetype !== undefined ? companyArchetype : existing.companyArchetype),
+        archetypeConfidence: companyArchetype === "" ? null : (companyArchetype ? "high" : existing.archetypeConfidence),
+        roleArchetypeId: roleArchetypeId === "" ? null : (roleArchetypeId !== undefined ? roleArchetypeId : existing.roleArchetypeId),
+        roleFamily: roleFamily === "" ? null : (roleFamily !== undefined ? roleFamily : existing.roleFamily),
+        updatedAt: new Date(),
+      })
+      .where(eq(jobTargets.id, jobId))
+      .returning();
+
+    res.json({ success: true, job: updated });
+  } catch (error: any) {
+    console.error("Error updating job archetype:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+jobsRouter.post("/job-targets/:id/resolve-archetypes", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const jobId = req.params.id;
+
+    const [existing] = await db
+      .select()
+      .from(jobTargets)
+      .where(and(eq(jobTargets.id, jobId), eq(jobTargets.userId, userId)));
+
+    if (!existing) {
+      return res.status(404).json({ success: false, error: "Job target not found" });
+    }
+
+    const archetypeInfo = await resolveAndSaveJobArchetypes(
+      jobId,
+      existing.companyName || "",
+      existing.roleTitle,
+      existing.jdText || undefined
+    );
+
+    const [updated] = await db
+      .select()
+      .from(jobTargets)
+      .where(eq(jobTargets.id, jobId));
+
+    res.json({ success: true, job: updated, archetypeInfo });
+  } catch (error: any) {
+    console.error("Error resolving job archetypes:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

@@ -24,6 +24,9 @@ async function runSeeds() {
     const seedFiles = [
       "init.sql",
       "cultural_presets.sql",
+      "role_archetypes.sql",
+      "role_interview_structure_defaults.sql",
+      "companies_india.sql",
     ];
 
     console.log(`Running ${seedFiles.length} seed files:\n`);

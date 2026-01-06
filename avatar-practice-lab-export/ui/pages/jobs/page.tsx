@@ -40,6 +40,10 @@ interface JobTarget {
   lastPracticedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  companyArchetype?: string | null;
+  archetypeConfidence?: "high" | "medium" | "low" | null;
+  roleArchetypeId?: string | null;
+  roleFamily?: string | null;
   practiceStats?: {
     totalSessions: number;
     interviewSessions: number;
@@ -47,6 +51,33 @@ interface JobTarget {
     avgScore: number | null;
   };
 }
+
+const confidenceBadgeColors: Record<string, { bg: string; text: string; border: string }> = {
+  high: { bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
+  medium: { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200" },
+  low: { bg: "bg-gray-50", text: "text-gray-600", border: "border-gray-200" },
+};
+
+const archetypeLabels: Record<string, string> = {
+  it_services: "IT Services",
+  big_tech: "Big Tech",
+  bfsi: "BFSI",
+  fmcg: "FMCG",
+  manufacturing: "Manufacturing",
+  consulting: "Consulting",
+  bpm: "BPM",
+  telecom: "Telecom",
+  conglomerate: "Conglomerate",
+  startup: "Startup",
+  enterprise: "Enterprise",
+  regulated: "Regulated",
+  consumer: "Consumer Tech",
+  saas: "SaaS",
+  fintech: "Fintech",
+  edtech: "EdTech",
+  services: "Services",
+  industrial: "Industrial",
+};
 
 const statusConfig: Record<string, { label: string; color: string; icon: any; bgColor: string }> = {
   saved: { label: "Saved", color: "text-gray-600", icon: Target, bgColor: "bg-gray-100" },
@@ -506,6 +537,28 @@ export default function JobsPage() {
                                 {formatDate(job.createdAt)}
                               </span>
                             </div>
+                            {(job.companyArchetype || job.roleFamily) && (
+                              <div className="flex flex-wrap items-center gap-2 mt-2">
+                                {job.companyArchetype && (
+                                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full border ${
+                                    confidenceBadgeColors[job.archetypeConfidence || "low"]?.bg || "bg-gray-50"
+                                  } ${
+                                    confidenceBadgeColors[job.archetypeConfidence || "low"]?.text || "text-gray-600"
+                                  } ${
+                                    confidenceBadgeColors[job.archetypeConfidence || "low"]?.border || "border-gray-200"
+                                  }`}>
+                                    <Building2 className="w-3 h-3" />
+                                    {archetypeLabels[job.companyArchetype] || job.companyArchetype}
+                                  </span>
+                                )}
+                                {job.roleFamily && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+                                    <Briefcase className="w-3 h-3" />
+                                    {job.roleFamily.charAt(0).toUpperCase() + job.roleFamily.slice(1)}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </div>
                           
                           <div className="flex items-center gap-3">
