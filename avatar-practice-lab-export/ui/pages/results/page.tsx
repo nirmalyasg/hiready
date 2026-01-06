@@ -782,7 +782,7 @@ export default function ResultsPage() {
                   {(activeJobs[0] as { companyName: string | null }).companyName && ` at ${(activeJobs[0] as { companyName: string | null }).companyName}`}
                 </p>
               </div>
-              <Link to={`/interview/custom?jobId=${(activeJobs[0] as { id: string }).id}`}>
+              <Link to={`/jobs/${(activeJobs[0] as { id: string }).id}`}>
                 <Button className="bg-white text-brand-dark hover:bg-white/90 gap-2 w-full sm:w-auto">
                   <Play className="w-4 h-4" />
                   Practice Now

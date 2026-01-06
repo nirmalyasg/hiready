@@ -515,7 +515,7 @@ export default function InterviewResultsPage() {
                     {jobContext.companyName && ` at ${jobContext.companyName}`}
                   </p>
                 </div>
-                <Link to={`/interview/custom?jobId=${jobContext.id}`}>
+                <Link to={`/jobs/${jobContext.id}`}>
                   <Button className="bg-white text-purple-700 hover:bg-white/90 gap-2 w-full sm:w-auto">
                     <Play className="w-4 h-4" />
                     Practice Again

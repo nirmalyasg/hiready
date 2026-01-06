@@ -384,7 +384,7 @@ export default function AvatarSimulatorDashboard() {
                       )}
                     </div>
 
-                    <Link to={`/interview/custom?jobId=${job.id}`}>
+                    <Link to={`/jobs/${job.id}`}>
                       <Button size="sm" className="w-full gap-2">
                         <Play className="w-3.5 h-3.5" />
                         Practice Now
@@ -536,7 +536,7 @@ export default function AvatarSimulatorDashboard() {
                 <div className="space-y-3">
                   {activeJobs.length > 0 && activeJobs[0] && (
                     <Link 
-                      to={`/interview/custom?jobId=${activeJobs[0].id}`}
+                      to={`/jobs/${activeJobs[0].id}`}
                       className="flex items-center gap-4 p-4 rounded-xl bg-brand-dark/5 hover:bg-brand-dark/10 transition-colors"
                     >
                       <div className="w-10 h-10 bg-brand-accent rounded-xl flex items-center justify-center">
