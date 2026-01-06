@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ChevronRight, Code, Briefcase, MessageSquare, Users, Clock, ArrowRight, Loader2, Check, Building2, Plus, FileText } from "lucide-react";
+import { ChevronRight, Code, Briefcase, MessageSquare, Users, Clock, ArrowRight, Loader2, Check, Building2, Plus, FileText, ChevronDown, Search, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
@@ -27,17 +28,17 @@ interface ModeContext {
   roleCategories: string[];
 }
 
-const modeConfig: Record<string, { icon: any; color: string; gradient: string }> = {
-  coding_technical: { icon: Code, color: "text-indigo-600", gradient: "from-indigo-500 to-indigo-600" },
-  case_problem_solving: { icon: Briefcase, color: "text-orange-600", gradient: "from-orange-500 to-orange-600" },
-  behavioral: { icon: MessageSquare, color: "text-amber-600", gradient: "from-amber-500 to-amber-600" },
-  hiring_manager: { icon: Users, color: "text-blue-600", gradient: "from-blue-500 to-blue-600" },
+const modeConfig: Record<string, { icon: any; color: string; gradient: string; bgLight: string }> = {
+  coding_technical: { icon: Code, color: "text-indigo-600", gradient: "from-indigo-500 to-indigo-600", bgLight: "bg-indigo-50" },
+  case_problem_solving: { icon: Briefcase, color: "text-orange-600", gradient: "from-orange-500 to-orange-600", bgLight: "bg-orange-50" },
+  behavioral: { icon: MessageSquare, color: "text-amber-600", gradient: "from-amber-500 to-amber-600", bgLight: "bg-amber-50" },
+  hiring_manager: { icon: Users, color: "text-blue-600", gradient: "from-blue-500 to-blue-600", bgLight: "bg-blue-50" },
 };
 
 const seniorityOptions = [
-  { value: "entry", label: "Entry Level", description: "0-2 years experience" },
-  { value: "mid", label: "Mid Level", description: "2-5 years experience" },
-  { value: "senior", label: "Senior Level", description: "5+ years experience" },
+  { value: "entry", label: "Entry", description: "0-2 yrs" },
+  { value: "mid", label: "Mid", description: "2-5 yrs" },
+  { value: "senior", label: "Senior", description: "5+ yrs" },
 ];
 
 export default function InterviewModeSetupPage() {
@@ -55,7 +56,8 @@ export default function InterviewModeSetupPage() {
   const [selectedArchetype, setSelectedArchetype] = useState<string | null>(null);
   const [selectedSeniority, setSelectedSeniority] = useState<string>("mid");
   const [companyName, setCompanyName] = useState<string>("");
-  const [showAddJD, setShowAddJD] = useState(false);
+  const [roleSearchQuery, setRoleSearchQuery] = useState<string>("");
+  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
 
   useEffect(() => {
     const storedContext = sessionStorage.getItem("interviewModeContext");
@@ -137,6 +139,11 @@ export default function InterviewModeSetupPage() {
     }
   };
 
+  const handleGoToCustom = () => {
+    sessionStorage.setItem("customInterviewMode", mode || "");
+    navigate("/interview");
+  };
+
   if (isLoading) {
     return (
       <SidebarLayout>
@@ -155,205 +162,197 @@ export default function InterviewModeSetupPage() {
   const IconComponent = config.icon;
   const selectedArchetypeData = roleArchetypes.find(a => a.id === selectedArchetype);
 
+  const searchFilteredArchetypes = filteredArchetypes.filter(a =>
+    a.name.toLowerCase().includes(roleSearchQuery.toLowerCase()) ||
+    a.description.toLowerCase().includes(roleSearchQuery.toLowerCase())
+  );
+
   return (
     <SidebarLayout>
       <div className="min-h-screen bg-[#f8f9fb]">
         <div className={`bg-gradient-to-br ${config.gradient} text-white`}>
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-2xl">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-5 max-w-xl">
             <button
               onClick={() => navigate("/interview")}
-              className="inline-flex items-center text-white/70 hover:text-white mb-4 text-sm transition-colors"
+              className="inline-flex items-center text-white/70 hover:text-white mb-3 text-sm transition-colors"
             >
               <ChevronRight className="w-4 h-4 rotate-180 mr-1" />
               Back
             </button>
 
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                <IconComponent className="w-7 h-7 text-white" />
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                <IconComponent className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">{modeContext.taxonomy.label}</h1>
-                <p className="text-white/80 mt-1">{modeContext.taxonomy.description}</p>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {modeContext.taxonomy.includes.map((item, idx) => (
-                    <span key={idx} className="text-xs bg-white/20 px-2 py-1 rounded-full">
-                      {item}
-                    </span>
-                  ))}
-                </div>
+                <h1 className="text-xl font-bold">{modeContext.taxonomy.label}</h1>
+                <p className="text-white/80 text-sm">{modeContext.taxonomy.typicalDuration}</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-2xl">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-xl">
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
               {error}
             </div>
           )}
 
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl border border-slate-200 p-6">
-              <Label className="text-base font-semibold text-[#042c4c] mb-4 block">
-                What role are you practicing for?
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl border border-slate-200 p-4">
+              <Label className="text-sm font-semibold text-[#042c4c] mb-3 block">
+                Select your target role
               </Label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {filteredArchetypes.map((archetype) => (
-                  <button
-                    key={archetype.id}
-                    onClick={() => { setSelectedArchetype(archetype.id); setShowAddJD(false); }}
-                    className={`text-left p-4 rounded-xl border-2 transition-all ${
-                      selectedArchetype === archetype.id && !showAddJD
-                        ? `border-current ${config.color} bg-slate-50`
-                        : "border-slate-200 hover:border-slate-300"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                        selectedArchetype === archetype.id && !showAddJD
-                          ? `border-current ${config.color} bg-current`
-                          : "border-slate-300"
-                      }`}>
-                        {selectedArchetype === archetype.id && !showAddJD && (
-                          <Check className="w-3 h-3 text-white" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium text-[#042c4c] text-sm">{archetype.name}</p>
-                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{archetype.description}</p>
-                      </div>
-                    </div>
-                  </button>
-                ))}
+              
+              <div className="relative">
                 <button
-                  onClick={() => { setShowAddJD(true); setSelectedArchetype(null); }}
-                  className={`text-left p-4 rounded-xl border-2 border-dashed transition-all ${
-                    showAddJD
-                      ? `border-current ${config.color} bg-slate-50`
-                      : "border-slate-300 hover:border-slate-400"
+                  onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                  className={`w-full flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
+                    isRoleDropdownOpen 
+                      ? `border-current ${config.color}` 
+                      : "border-slate-200 hover:border-slate-300"
                   }`}
                 >
-                  <div className="flex items-start gap-3">
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                      showAddJD
-                        ? `border-current ${config.color} bg-current`
-                        : "border-slate-300"
-                    }`}>
-                      {showAddJD ? (
-                        <Check className="w-3 h-3 text-white" />
-                      ) : (
-                        <Plus className="w-3 h-3 text-slate-400" />
-                      )}
+                  <div className="flex items-center gap-2">
+                    <Briefcase className={`w-4 h-4 ${selectedArchetypeData ? config.color : "text-slate-400"}`} />
+                    <span className={`font-medium ${selectedArchetypeData ? "text-[#042c4c]" : "text-slate-400"}`}>
+                      {selectedArchetypeData?.name || "Choose a role..."}
+                    </span>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isRoleDropdownOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {isRoleDropdownOpen && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-72 overflow-hidden">
+                    <div className="p-2 border-b border-slate-100">
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <Input
+                          placeholder="Search roles..."
+                          value={roleSearchQuery}
+                          onChange={(e) => setRoleSearchQuery(e.target.value)}
+                          className="pl-8 h-9 text-sm rounded-lg"
+                          autoFocus
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-[#042c4c] text-sm">Add Job Description</p>
-                      <p className="text-xs text-slate-500 mt-0.5">Upload or paste your target job</p>
+                    <div className="max-h-52 overflow-y-auto p-1">
+                      {searchFilteredArchetypes.map((archetype) => (
+                        <button
+                          key={archetype.id}
+                          onClick={() => {
+                            setSelectedArchetype(archetype.id);
+                            setIsRoleDropdownOpen(false);
+                            setRoleSearchQuery("");
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors ${
+                            selectedArchetype === archetype.id
+                              ? `${config.bgLight} ${config.color}`
+                              : "hover:bg-slate-50"
+                          }`}
+                        >
+                          <div>
+                            <p className={`font-medium text-sm ${selectedArchetype === archetype.id ? config.color : "text-[#042c4c]"}`}>
+                              {archetype.name}
+                            </p>
+                            <p className="text-xs text-slate-500 line-clamp-1">{archetype.description}</p>
+                          </div>
+                          {selectedArchetype === archetype.id && (
+                            <Check className={`w-4 h-4 ${config.color} flex-shrink-0`} />
+                          )}
+                        </button>
+                      ))}
+                      <button
+                        onClick={handleGoToCustom}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left transition-colors hover:bg-slate-50 border-t border-slate-100 mt-1"
+                      >
+                        <Plus className="w-4 h-4 text-slate-400" />
+                        <div>
+                          <p className="font-medium text-sm text-[#042c4c]">Add Job Description</p>
+                          <p className="text-xs text-slate-500">Use a specific job posting</p>
+                        </div>
+                      </button>
                     </div>
                   </div>
-                </button>
-              </div>
-              {showAddJD && (
-                <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                  <p className="text-sm text-slate-600 mb-2">
-                    To use a specific job description, go to Custom Interview from the main page.
-                  </p>
-                  <button
-                    onClick={() => navigate("/interview")}
-                    className={`text-sm font-medium ${config.color} hover:underline`}
-                  >
-                    Go to Custom Interview →
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-200 p-6">
-              <Label className="text-base font-semibold text-[#042c4c] mb-2 block">
-                Target Company (Optional)
-              </Label>
-              <p className="text-sm text-slate-500 mb-4">
-                Questions will be tailored to this company's interview style
-              </p>
-              <div className="relative">
-                <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input
-                  placeholder="e.g., Google, Amazon, Microsoft..."
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  className="pl-10 rounded-xl"
-                />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-200 p-6">
-              <Label className="text-base font-semibold text-[#042c4c] mb-4 block">
-                What's your experience level?
-              </Label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {seniorityOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => setSelectedSeniority(option.value)}
-                    className={`text-left p-4 rounded-xl border-2 transition-all ${
-                      selectedSeniority === option.value
-                        ? `border-current ${config.color} bg-slate-50`
-                        : "border-slate-200 hover:border-slate-300"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                        selectedSeniority === option.value
-                          ? `border-current ${config.color} bg-current`
-                          : "border-slate-300"
-                      }`}>
-                        {selectedSeniority === option.value && (
-                          <Check className="w-2.5 h-2.5 text-white" />
-                        )}
-                      </div>
-                      <span className="font-medium text-[#042c4c] text-sm">{option.label}</span>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-1 ml-6">{option.description}</p>
-                  </button>
-                ))}
+                )}
               </div>
             </div>
 
             {selectedArchetypeData && (
-              <div className="bg-slate-50 rounded-2xl border border-slate-200 p-6">
-                <h3 className="font-semibold text-[#042c4c] mb-3">Session Preview</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Role</span>
-                    <span className="font-medium text-[#042c4c]">{selectedArchetypeData.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Level</span>
-                    <span className="font-medium text-[#042c4c] capitalize">{selectedSeniority}</span>
-                  </div>
-                  {companyName && (
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Company</span>
-                      <span className="font-medium text-[#042c4c]">{companyName}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Duration</span>
-                    <span className="font-medium text-[#042c4c]">{modeContext.taxonomy.typicalDuration}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Focus Areas</span>
-                    <span className="font-medium text-[#042c4c]">{modeContext.taxonomy.includes.length} skills</span>
-                  </div>
+              <div className={`rounded-xl border-2 ${config.color} border-current/20 p-4 ${config.bgLight}`}>
+                <div className="flex items-center gap-2 mb-3">
+                  <Target className={`w-4 h-4 ${config.color}`} />
+                  <span className={`text-sm font-semibold ${config.color}`}>Skills Being Tested</span>
                 </div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedArchetypeData.primarySkillDimensions?.slice(0, 6).map((skill, idx) => (
+                    <Badge 
+                      key={idx} 
+                      variant="secondary"
+                      className="bg-white/80 text-slate-700 text-xs font-medium"
+                    >
+                      {skill}
+                    </Badge>
+                  ))}
+                  {(selectedArchetypeData.primarySkillDimensions?.length || 0) > 6 && (
+                    <Badge variant="secondary" className="bg-white/50 text-slate-500 text-xs">
+                      +{(selectedArchetypeData.primarySkillDimensions?.length || 0) - 6} more
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-slate-600 mt-3">
+                  {selectedArchetypeData.description}
+                </p>
               </div>
             )}
+
+            <div className="bg-white rounded-xl border border-slate-200 p-4">
+              <Label className="text-sm font-semibold text-[#042c4c] mb-3 block">
+                Experience Level
+              </Label>
+              <div className="flex gap-2">
+                {seniorityOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setSelectedSeniority(option.value)}
+                    className={`flex-1 p-3 rounded-lg border-2 transition-all text-center ${
+                      selectedSeniority === option.value
+                        ? `border-current ${config.color} ${config.bgLight}`
+                        : "border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <p className={`font-semibold text-sm ${selectedSeniority === option.value ? config.color : "text-[#042c4c]"}`}>
+                      {option.label}
+                    </p>
+                    <p className="text-xs text-slate-500">{option.description}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-slate-200 p-4">
+              <Label className="text-sm font-semibold text-[#042c4c] mb-1 block">
+                Target Company <span className="font-normal text-slate-400">(Optional)</span>
+              </Label>
+              <p className="text-xs text-slate-500 mb-3">
+                Questions tailored to this company's style
+              </p>
+              <div className="relative">
+                <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  placeholder="e.g., Google, Amazon..."
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  className="pl-10 rounded-lg h-10"
+                />
+              </div>
+            </div>
 
             <Button
               onClick={handleStartPractice}
               disabled={!selectedArchetype || isStarting}
-              className={`w-full h-14 text-lg font-semibold rounded-xl bg-gradient-to-r ${config.gradient} hover:opacity-90 transition-opacity`}
+              className={`w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r ${config.gradient} hover:opacity-90 transition-opacity`}
             >
               {isStarting ? (
                 <>

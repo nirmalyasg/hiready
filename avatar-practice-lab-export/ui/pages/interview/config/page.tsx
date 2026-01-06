@@ -134,7 +134,6 @@ export default function InterviewConfigPage() {
           if (storedSetup) {
             const setupData = JSON.parse(storedSetup) as ModeSetupData;
             setModeSetupData(setupData);
-            sessionStorage.removeItem("interviewModeSetup");
           }
           
           setIsLoading(false);
@@ -480,6 +479,8 @@ export default function InterviewConfigPage() {
 
       const data = await response.json();
       if (data.success) {
+        sessionStorage.removeItem("interviewModeSetup");
+        sessionStorage.removeItem("interviewModeContext");
         navigate(`/interview/session?interviewSessionId=${data.session.id}&configId=${config.id}`);
       } else {
         throw new Error(data.error);
@@ -505,7 +506,22 @@ export default function InterviewConfigPage() {
     return null;
   }
 
-  const backLink = isJobTargetMode ? `/jobs/${jobTargetId}` : "/interview";
+  const handleBack = () => {
+    if (isJobTargetMode) {
+      navigate(`/jobs/${jobTargetId}`);
+      return;
+    }
+    if (isInterviewModeType && interviewModeParam && modeSetupData) {
+      sessionStorage.setItem("interviewModeContext", JSON.stringify({
+        interviewMode: modeSetupData.interviewMode,
+        taxonomy: modeSetupData.taxonomy,
+        roleCategories: ["all"],
+      }));
+      navigate(`/interview/mode-setup?mode=${interviewModeParam}`);
+      return;
+    }
+    navigate("/interview");
+  };
   
   const getTitle = () => {
     if (isInterviewModeType && modeSetupData) {
@@ -547,7 +563,7 @@ export default function InterviewConfigPage() {
         <div className="bg-[#042c4c] text-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-3xl">
             <button
-              onClick={() => navigate(backLink)}
+              onClick={handleBack}
               className="inline-flex items-center text-white/70 hover:text-white mb-4 text-sm transition-colors"
             >
               <ChevronRight className="w-4 h-4 rotate-180 mr-1" />
