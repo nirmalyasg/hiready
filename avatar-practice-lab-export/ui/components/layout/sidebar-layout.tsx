@@ -7,12 +7,7 @@ import {
   User, 
   LogOut, 
   ChevronLeft,
-  Sparkles,
-  ChevronDown,
-  UserCheck,
-  FileText,
-  BookOpen,
-  Briefcase
+  Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,38 +17,20 @@ interface SidebarLayoutProps {
   children: React.ReactNode;
 }
 
-interface NavSubItem {
-  href: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-}
-
 interface NavItem {
   href: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
-  subItems?: NavSubItem[];
 }
 
 export function SidebarLayout({ children }: SidebarLayoutProps) {
   const location = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
-  const [practiceExpanded, setPracticeExpanded] = useState(true);
 
   const navItems: NavItem[] = [
     { href: '/avatar/dashboard', label: 'Dashboard', icon: Home },
-    { href: '/jobs', label: 'My Jobs', icon: Briefcase },
-    { 
-      href: '/avatar/start', 
-      label: 'Practice', 
-      icon: Target,
-      subItems: [
-        { href: '/interview', label: 'Interview Practice', icon: UserCheck },
-        { href: '/interview/custom', label: 'Create Your Own', icon: FileText },
-        { href: '/exercise-mode', label: 'Case Study & Coding', icon: BookOpen },
-      ]
-    },
+    { href: '/interview', label: 'Practice', icon: Target },
     { href: '/avatar/results', label: 'Results', icon: BarChart3 },
   ];
 
@@ -94,62 +71,6 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
-              const hasSubItems = item.subItems && item.subItems.length > 0;
-              const isSubItemActive = hasSubItems && item.subItems?.some(sub => isActive(sub.href));
-              
-              if (hasSubItems) {
-                return (
-                  <div key={item.href}>
-                    <button
-                      onClick={() => {
-                        if (!collapsed) {
-                          setPracticeExpanded(!practiceExpanded);
-                        }
-                      }}
-                      className={cn(
-                        "w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200",
-                        (active || isSubItemActive)
-                          ? "bg-white/10 text-white" 
-                          : "text-white/70 hover:text-white hover:bg-white/10",
-                        collapsed && "justify-center px-0"
-                      )}
-                    >
-                      <Icon className={cn("w-5 h-5 flex-shrink-0", (active || isSubItemActive) && "text-brand-accent")} />
-                      <span className={cn("flex-1 text-left", collapsed && "hidden")}>{item.label}</span>
-                      {!collapsed && (
-                        <ChevronDown className={cn(
-                          "w-4 h-4 transition-transform duration-200",
-                          practiceExpanded && "rotate-180"
-                        )} />
-                      )}
-                    </button>
-                    
-                    {practiceExpanded && !collapsed && item.subItems && (
-                      <div className="mt-1 ml-4 space-y-1">
-                        {item.subItems.map((subItem) => {
-                          const SubIcon = subItem.icon;
-                          const subActive = isActive(subItem.href);
-                          return (
-                            <Link
-                              key={subItem.href}
-                              to={subItem.href}
-                              className={cn(
-                                "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                                subActive 
-                                  ? "bg-white text-brand-dark shadow-lg" 
-                                  : "text-white/60 hover:text-white hover:bg-white/10"
-                              )}
-                            >
-                              <SubIcon className={cn("w-4 h-4 flex-shrink-0", subActive && "text-brand-accent")} />
-                              <span>{subItem.label}</span>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              }
               
               return (
                 <Link

@@ -549,7 +549,7 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
     
     let resumeDocId = providedResumeDocId;
     
-    if (interviewMode !== "role_based" && !resumeDocId) {
+    if (interviewMode !== "role_based" && interviewMode !== "skill_only" && !resumeDocId) {
       const [profile] = await db
         .select({ latestResumeDocId: userProfileExtracted.latestResumeDocId })
         .from(userProfileExtracted)
@@ -578,6 +578,8 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
     if (interviewMode === "role_based" && !roleKitId) {
       return res.status(400).json({ success: false, error: "Role kit is required for role-based interviews" });
     }
+    
+    // skill_only mode doesn't require roleKitId or resume
     
     // If jobTargetId provided, verify it belongs to this user
     if (jobTargetId) {

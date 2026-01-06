@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Target, BarChart3, User, Briefcase } from "lucide-react";
+import { Home, Target, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -10,8 +10,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { path: "/avatar/dashboard", icon: Home, label: "Home" },
-  { path: "/jobs", icon: Briefcase, label: "Jobs" },
-  { path: "/avatar/start", icon: Target, label: "Practice" },
+  { path: "/interview", icon: Target, label: "Practice" },
   { path: "/avatar/results", icon: BarChart3, label: "Results" },
 ];
 
@@ -22,22 +21,15 @@ export default function MobileBottomNav() {
     if (path === "/avatar/dashboard") {
       return location.pathname === "/avatar/dashboard";
     }
-    if (path === "/jobs") {
-      return location.pathname.startsWith("/jobs");
-    }
-    if (path === "/avatar/start") {
-      return location.pathname === "/avatar/start" ||
-             location.pathname.startsWith("/avatar/practice") || 
-             location.pathname.startsWith("/interview") ||
+    if (path === "/interview") {
+      return location.pathname.startsWith("/interview") ||
+             location.pathname.startsWith("/jobs") ||
              location.pathname.startsWith("/exercise-mode");
     }
     if (path === "/avatar/results") {
       return location.pathname.startsWith("/avatar/results") || 
              location.pathname.includes("/session-analysis") ||
              location.pathname.includes("/results");
-    }
-    if (path === "/profile") {
-      return location.pathname === "/profile";
     }
     return false;
   };

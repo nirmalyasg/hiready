@@ -94,10 +94,82 @@ export default function InterviewConfigPage() {
   ];
 
   const isJobTargetMode = !!jobTargetId && !!roundCategory;
+  const isSkillOnlyMode = !roleKitId && !jobTargetId && !!roundCategory;
 
   useEffect(() => {
     const fetchDataAndGeneratePlan = async () => {
-      if (isJobTargetMode) {
+      if (isSkillOnlyMode) {
+        try {
+          const storedContext = sessionStorage.getItem("rolePracticeContext");
+          if (!storedContext) {
+            navigate("/interview");
+            return;
+          }
+          
+          const skillContext = JSON.parse(storedContext);
+          sessionStorage.removeItem("rolePracticeContext");
+          
+          setPracticeContext({
+            roundCategory: skillContext.roundCategory,
+            taxonomy: skillContext.taxonomy,
+            companyContext: {
+              jobTargetId: "",
+              companyName: null,
+              roleTitle: "Skill Practice",
+              archetype: null,
+              hasBlueprint: false,
+              blueprintNotes: null,
+            },
+            promptHints: skillContext.promptHints || {
+              avatarPersona: "Interviewer",
+              evaluationFocus: skillContext.taxonomy?.label ? [skillContext.taxonomy.label] : [],
+              sampleQuestions: [],
+              companySpecificGuidance: null,
+            },
+          });
+          
+          setInterviewType(skillContext.roundCategory || "behavioral");
+          setIsLoading(false);
+          
+          setIsGeneratingPlan(true);
+          const configResponse = await fetch("/api/interview/config", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              roleKitId: null,
+              resumeDocId: null,
+              jdDocId: null,
+              interviewType: skillContext.roundCategory,
+              style: "neutral",
+              seniority: "mid",
+              mode: "skill_only",
+              roundCategory: skillContext.roundCategory,
+            }),
+          });
+          const configData = await configResponse.json();
+          if (configData.success) {
+            setConfig(configData.config);
+            
+            const planResponse = await fetch(`/api/interview/config/${configData.config.id}/plan`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                roundCategory: skillContext.roundCategory,
+                typicalDuration: skillContext.taxonomy?.typicalDuration || "15 min",
+              }),
+            });
+            const planData = await planResponse.json();
+            if (planData.success) {
+              setPlan(planData.plan.planJson);
+              setPlanId(planData.plan.id);
+            }
+          }
+          setIsGeneratingPlan(false);
+        } catch (error) {
+          console.error("Error in skill-only mode:", error);
+          navigate("/interview");
+        }
+      } else if (isJobTargetMode) {
         try {
           const response = await fetch(`/api/jobs/job-targets/${jobTargetId}/practice-context/${roundCategory}`);
           const data = await response.json();
