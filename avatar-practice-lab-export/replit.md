@@ -28,7 +28,38 @@ avatar-practice-lab-export/
 
 ## Recent Changes (January 6, 2026)
 
-### Unified Archetype-Based Interview Structure (Latest)
+### Role-Aware Interview Intersection System (Latest)
+Smart filtering that combines company interview components with role archetype requirements:
+
+1. **Intersection-Based Round Filtering**
+   - `getUnifiedInterviewPlan()` now intersects company components with role archetype's `common_interview_types`
+   - Universal rounds (HR, Behavioral, Hiring Manager) always included
+   - Role-critical rounds added even if company doesn't list them
+   - Provenance tracking: "both" (company + role), "company" (company-only), "role" (role-added)
+
+2. **Role Task Blueprints**
+   - 36 task blueprints seeded for 6 role archetypes × 6 interview types
+   - Each blueprint contains: promptTemplate, expectedSignals[], probeQuestions[], difficultyBand
+   - Attached to each practice option via `getEnrichedInterviewPlan()`
+
+3. **Enhanced Practice Options API**
+   - Returns `phaseId` (unique identifier per phase)
+   - Returns `provenance` ("both" | "company" | "role")
+   - Returns `roleBlueprint` (primary matching blueprint with all fields)
+   - Returns `allBlueprints` (all matching blueprints for the phase)
+
+4. **Smart Exclusion Logic**
+   - PM at tech company: excludes Coding/System Design, includes Case Study
+   - SWE at same company: includes Coding/System Design, excludes Case Study
+   - Uses `ROLE_INTERVIEW_TYPE_TO_COMPONENTS` and `COMPONENT_TO_ROLE_TYPES` mappings
+
+5. **Database Changes**
+   - New table: `role_task_blueprints` with 36 seeded entries
+   - Fields: roleArchetypeId, interviewType, taskType, promptTemplate, expectedSignals, probeTree, difficultyBand
+
+---
+
+### Unified Archetype-Based Interview Structure
 Refactored to use a single coherent interview flow that combines archetype defaults with company-specific context:
 
 1. **Unified Interview Plan Generation**
