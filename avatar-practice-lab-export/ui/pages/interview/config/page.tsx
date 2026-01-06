@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronRight, Settings, Loader2, Briefcase, Play, Building2, Target, Info, Clock, MessageSquare, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -81,6 +81,7 @@ export default function InterviewConfigPage() {
   const [language, setLanguage] = useState<string>("english");
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasInitialized = useRef(false);
 
   const languages = [
     { value: "english", label: "English" },
@@ -97,6 +98,9 @@ export default function InterviewConfigPage() {
   const isSkillOnlyMode = !roleKitId && !jobTargetId && !!roundCategory;
 
   useEffect(() => {
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+    
     const fetchDataAndGeneratePlan = async () => {
       if (isSkillOnlyMode) {
         try {
