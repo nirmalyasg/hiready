@@ -1510,22 +1510,37 @@ PHASE DURATION GUIDELINES (durationMins field, in MINUTES not seconds):
 The input will include a "targetDuration" field (e.g., "30 min", "45 min", "45-60 min"). 
 You MUST ensure all phase durations add up to match this target.
 
-For a 30 min interview:
-- Warmup: 3 min
-- Main content: 20-22 min
+CRITICAL COST OPTIMIZATION RULES:
+1. NO single phase can exceed 10 minutes
+2. Break longer content into multiple smaller phases (e.g., "Technical Part 1", "Technical Part 2")
+3. This keeps each phase focused and manageable
+
+For a 30 min interview (4-5 phases):
+- Warmup/Introduction: 3 min
+- Phase 1: 8-10 min
+- Phase 2: 8-10 min
 - Wrap-up: 3 min
 
-For a 45 min interview:
-- Warmup: 5 min
-- Main content: 35 min  
+For a 45 min interview (5-6 phases):
+- Warmup/Introduction: 5 min
+- Phase 1: 10 min
+- Phase 2: 10 min
+- Phase 3: 10 min
 - Wrap-up: 5 min
 
-For a 60 min interview:
+For a 60 min interview (7-8 phases):
 - Warmup: 5 min
-- Main content: 50 min
+- Phase 1: 10 min
+- Phase 2: 10 min
+- Phase 3: 10 min
+- Phase 4: 10 min
+- Phase 5: 10 min
 - Wrap-up: 5 min
 
-CRITICAL: The sum of all phase durationMins MUST equal the targetDuration (use the lower number if a range is given).
+CRITICAL RULES:
+- The sum of all phase durationMins MUST equal the targetDuration (use the lower number if a range is given)
+- NO phase can have durationMins greater than 10
+- Create more phases if needed to cover content while respecting the 10-min max
 
 Generate a JSON interview plan with this structure:
 {
