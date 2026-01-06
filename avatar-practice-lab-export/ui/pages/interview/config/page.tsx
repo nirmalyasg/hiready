@@ -64,6 +64,7 @@ export default function InterviewConfigPage() {
   const roleKitId = searchParams.get("roleKitId");
   const jobTargetId = searchParams.get("jobTargetId");
   const roundCategory = searchParams.get("roundCategory");
+  const typicalDurationParam = searchParams.get("typicalDuration");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -161,12 +162,44 @@ export default function InterviewConfigPage() {
         }
       } else if (roleKitId) {
         try {
-          const response = await fetch(`/api/interview/role-kits/${roleKitId}`);
-          const data = await response.json();
-          if (data.success) {
-            setRoleKit(data.roleKit);
-            const defaultType = data.roleKit.defaultInterviewTypes?.[0] || "behavioral";
-            setInterviewType(defaultType);
+          const storedContext = sessionStorage.getItem("rolePracticeContext");
+          let rolePracticeContext: any = null;
+          if (storedContext) {
+            try {
+              rolePracticeContext = JSON.parse(storedContext);
+              sessionStorage.removeItem("rolePracticeContext");
+            } catch (e) {
+              console.error("Error parsing role practice context:", e);
+            }
+          }
+          
+          if (rolePracticeContext && rolePracticeContext.roleContext?.roleKitId === parseInt(roleKitId)) {
+            setPracticeContext({
+              roundCategory: rolePracticeContext.roundCategory,
+              taxonomy: rolePracticeContext.taxonomy,
+              companyContext: {
+                jobTargetId: "",
+                companyName: null,
+                roleTitle: rolePracticeContext.roleContext?.roleName || null,
+                archetype: null,
+                hasBlueprint: false,
+                blueprintNotes: null,
+              },
+              promptHints: rolePracticeContext.promptHints,
+            });
+            
+            setRoleKit({
+              id: parseInt(roleKitId),
+              name: rolePracticeContext.roleContext?.roleName || "",
+              level: rolePracticeContext.roleContext?.level || "entry",
+              domain: rolePracticeContext.roleContext?.domain || "",
+              description: null,
+              skillsFocus: rolePracticeContext.roleContext?.skillsFocus || null,
+              defaultInterviewTypes: null,
+            });
+            
+            const selectedType = rolePracticeContext.roundCategory || "behavioral";
+            setInterviewType(selectedType);
             setIsLoading(false);
             
             setIsGeneratingPlan(true);
@@ -174,13 +207,14 @@ export default function InterviewConfigPage() {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                roleKitId: data.roleKit.id,
+                roleKitId: parseInt(roleKitId),
                 resumeDocId: null,
                 jdDocId: null,
-                interviewType: defaultType,
+                interviewType: selectedType,
                 style: "neutral",
-                seniority: data.roleKit.level,
+                seniority: rolePracticeContext.roleContext?.level || "entry",
                 mode: "role_based",
+                roundCategory: rolePracticeContext.roundCategory,
               }),
             });
             const configData = await configResponse.json();
@@ -189,6 +223,11 @@ export default function InterviewConfigPage() {
               
               const planResponse = await fetch(`/api/interview/config/${configData.config.id}/plan`, {
                 method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  roundCategory: rolePracticeContext.roundCategory,
+                  typicalDuration: rolePracticeContext.taxonomy?.typicalDuration || "10-15 min",
+                }),
               });
               const planData = await planResponse.json();
               if (planData.success) {
@@ -198,7 +237,51 @@ export default function InterviewConfigPage() {
             }
             setIsGeneratingPlan(false);
           } else {
-            navigate("/interview");
+            const response = await fetch(`/api/interview/role-kits/${roleKitId}`);
+            const data = await response.json();
+            if (data.success) {
+              setRoleKit(data.roleKit);
+              const selectedType = roundCategory || data.roleKit.defaultInterviewTypes?.[0] || "behavioral";
+              setInterviewType(selectedType);
+              setIsLoading(false);
+              
+              setIsGeneratingPlan(true);
+              const configResponse = await fetch("/api/interview/config", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  roleKitId: data.roleKit.id,
+                  resumeDocId: null,
+                  jdDocId: null,
+                  interviewType: selectedType,
+                  style: "neutral",
+                  seniority: data.roleKit.level,
+                  mode: "role_based",
+                  roundCategory: roundCategory || null,
+                }),
+              });
+              const configData = await configResponse.json();
+              if (configData.success) {
+                setConfig(configData.config);
+                
+                const planResponse = await fetch(`/api/interview/config/${configData.config.id}/plan`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    roundCategory: roundCategory || selectedType,
+                    typicalDuration: "10-15 min",
+                  }),
+                });
+                const planData = await planResponse.json();
+                if (planData.success) {
+                  setPlan(planData.plan.planJson);
+                  setPlanId(planData.plan.id);
+                }
+              }
+              setIsGeneratingPlan(false);
+            } else {
+              navigate("/interview");
+            }
           }
         } catch (error) {
           console.error("Error:", error);
@@ -209,7 +292,7 @@ export default function InterviewConfigPage() {
       }
     };
     fetchDataAndGeneratePlan();
-  }, [roleKitId, jobTargetId, roundCategory, navigate, isJobTargetMode]);
+  }, [roleKitId, jobTargetId, roundCategory, typicalDurationParam, navigate, isJobTargetMode]);
 
   const getTotalDuration = () => {
     if (!plan?.phases) return 0;

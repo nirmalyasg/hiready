@@ -114,7 +114,7 @@ export default function InterviewPracticePage() {
   const domains = [...new Set(roleKits.map((kit) => kit.domain))];
 
   const handleSelectRole = (kit: RoleKit) => {
-    navigate(`/interview/config?roleKitId=${kit.id}`);
+    navigate(`/interview/role/${kit.id}`);
   };
 
   const formatDomain = (domain: string) => {

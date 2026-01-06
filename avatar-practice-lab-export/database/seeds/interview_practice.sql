@@ -61,105 +61,141 @@ INSERT INTO interview_rubrics (name, description, dimensions, scoring_guide, is_
     true
 ) ON CONFLICT DO NOTHING;
 
--- Insert starter role kits
-INSERT INTO role_kits (name, level, domain, description, default_interview_types, skills_focus, estimated_duration, track_tags, is_active) VALUES
+-- Insert starter role kits with role_archetype_id links
+INSERT INTO role_kits (name, level, domain, description, default_interview_types, skills_focus, estimated_duration, track_tags, role_archetype_id, is_active) VALUES
 -- Software Engineering
 ('Software Engineer - Entry Level', 'entry', 'software', 
  'Entry-level software engineering role focusing on coding fundamentals, problem-solving, and learning ability',
  '["technical", "hr"]'::jsonb,
  '["Data Structures", "Algorithms", "Coding", "Problem Solving", "Collaboration"]'::jsonb,
- 360, '["Technical", "Engineering"]'::jsonb, true),
+ 30, '["Technical", "Engineering"]'::jsonb, 'core_software_engineer', true),
 
 ('Software Engineer - Mid Level', 'mid', 'software', 
  'Mid-level software engineering role emphasizing system design, code quality, and team contribution',
  '["technical", "hiring_manager"]'::jsonb,
  '["System Design", "Code Review", "Architecture", "Mentoring", "Technical Leadership"]'::jsonb,
- 420, '["Technical", "Engineering"]'::jsonb, true),
+ 30, '["Technical", "Engineering"]'::jsonb, 'core_software_engineer', true),
+
+('Infrastructure Engineer - Entry Level', 'entry', 'software', 
+ 'DevOps/SRE/platform engineering: reliability, automation, and systems',
+ '["technical", "hiring_manager", "behavioral"]'::jsonb,
+ '["Linux", "Networking", "Reliability", "Automation", "Cloud"]'::jsonb,
+ 30, '["Technical", "Infrastructure"]'::jsonb, 'infra_platform', true),
+
+('QA Engineer - Entry Level', 'entry', 'software', 
+ 'Quality engineering: test strategy, automation, and defect triage',
+ '["technical", "hiring_manager", "behavioral"]'::jsonb,
+ '["Test Strategy", "Automation", "Debugging", "Risk Analysis"]'::jsonb,
+ 30, '["Technical", "QA"]'::jsonb, 'qa_test_engineer', true),
+
+('Security Engineer - Mid Level', 'mid', 'software', 
+ 'Security engineering across appsec, cloud security, and security operations',
+ '["technical", "hiring_manager", "behavioral"]'::jsonb,
+ '["Security Fundamentals", "Threat Modeling", "Risk Assessment", "Incident Response"]'::jsonb,
+ 30, '["Technical", "Security"]'::jsonb, 'security_engineer', true),
 
 -- Data & Analytics
 ('Data Analyst - Entry Level', 'entry', 'data', 
  'Entry-level data analyst focusing on SQL, data visualization, and analytical thinking',
  '["technical", "hr"]'::jsonb,
  '["SQL", "Data Visualization", "Excel", "Statistical Analysis", "Business Acumen"]'::jsonb,
- 360, '["Technical", "Analytics"]'::jsonb, true),
+ 30, '["Technical", "Analytics"]'::jsonb, 'data_analyst', true),
 
 ('Data Scientist - Mid Level', 'mid', 'data', 
  'Mid-level data science role covering machine learning, statistical modeling, and stakeholder communication',
  '["technical", "hiring_manager"]'::jsonb,
  '["Machine Learning", "Statistical Modeling", "Python", "Communication", "Business Impact"]'::jsonb,
- 420, '["Technical", "Analytics", "AI/ML"]'::jsonb, true),
+ 30, '["Technical", "Analytics", "AI/ML"]'::jsonb, 'data_scientist', true),
+
+('Data Engineer - Entry Level', 'entry', 'data', 
+ 'Build and maintain data pipelines, ETL processes, and data infrastructure',
+ '["technical", "hiring_manager", "behavioral"]'::jsonb,
+ '["SQL", "ETL/ELT", "Data Modeling", "Python", "Debugging"]'::jsonb,
+ 30, '["Technical", "Data Engineering"]'::jsonb, 'data_engineer', true),
+
+('ML Engineer - Mid Level', 'mid', 'data', 
+ 'Build and deploy machine learning models in production systems',
+ '["technical", "hiring_manager", "behavioral"]'::jsonb,
+ '["ML Fundamentals", "Model Evaluation", "MLOps", "Python", "System Design"]'::jsonb,
+ 30, '["Technical", "AI/ML"]'::jsonb, 'ml_engineer', true),
 
 -- Product & Design
 ('Product Manager - Entry Level', 'entry', 'product', 
  'Associate/entry-level PM role focusing on user research, prioritization, and cross-functional collaboration',
  '["hiring_manager", "hr"]'::jsonb,
  '["User Research", "Prioritization", "Stakeholder Management", "Communication", "Metrics"]'::jsonb,
- 360, '["Product", "Strategy"]'::jsonb, true),
+ 30, '["Product", "Strategy"]'::jsonb, 'product_manager', true),
 
 ('UX Designer - Entry Level', 'entry', 'design', 
  'Entry-level UX design role covering user research, wireframing, and design thinking',
  '["hiring_manager", "hr"]'::jsonb,
  '["User Research", "Wireframing", "Prototyping", "Design Thinking", "Usability Testing"]'::jsonb,
- 360, '["Design", "UX"]'::jsonb, true),
+ 30, '["Design", "UX"]'::jsonb, 'product_designer', true),
 
 -- Sales & Marketing
 ('Sales Development Rep', 'entry', 'sales', 
  'Entry-level sales role focusing on prospecting, communication, and handling objections',
  '["hiring_manager", "hr"]'::jsonb,
  '["Prospecting", "Communication", "Objection Handling", "CRM", "Persistence"]'::jsonb,
- 300, '["Sales", "Business Development"]'::jsonb, true),
+ 30, '["Sales", "Business Development"]'::jsonb, 'sales_account', true),
 
 ('Marketing Associate', 'entry', 'marketing', 
  'Entry-level marketing role covering campaign management, content creation, and analytics',
  '["hiring_manager", "hr"]'::jsonb,
  '["Content Creation", "Social Media", "Analytics", "Campaign Management", "Creativity"]'::jsonb,
- 360, '["Marketing", "Growth"]'::jsonb, true),
+ 30, '["Marketing", "Growth"]'::jsonb, 'marketing_growth', true),
 
 -- Operations & Support
 ('Customer Success Associate', 'entry', 'customer_success', 
  'Entry-level customer success role focusing on client relationships, problem-solving, and communication',
  '["hiring_manager", "hr"]'::jsonb,
  '["Customer Communication", "Problem Solving", "Product Knowledge", "Empathy", "Retention"]'::jsonb,
- 300, '["Customer Success", "Support"]'::jsonb, true),
+ 30, '["Customer Success", "Support"]'::jsonb, 'customer_success', true),
 
 ('Operations Analyst', 'entry', 'operations', 
  'Entry-level operations role covering process improvement, data analysis, and project coordination',
  '["hiring_manager", "hr"]'::jsonb,
  '["Process Improvement", "Data Analysis", "Project Management", "Communication", "Attention to Detail"]'::jsonb,
- 360, '["Operations", "Strategy"]'::jsonb, true),
+ 30, '["Operations", "Strategy"]'::jsonb, 'operations_general', true),
+
+('BizOps Analyst - Entry Level', 'entry', 'operations', 
+ 'Business operations and strategy: structured problem solving and stakeholder alignment',
+ '["case", "hiring_manager", "behavioral"]'::jsonb,
+ '["Analysis", "Strategy", "Stakeholder Management", "Prioritization"]'::jsonb,
+ 30, '["Operations", "Strategy"]'::jsonb, 'bizops_strategy', true),
 
 -- Consulting & Finance
 ('Business Analyst', 'entry', 'consulting', 
  'Entry-level BA role focusing on requirements gathering, problem structuring, and stakeholder communication',
  '["hiring_manager", "technical"]'::jsonb,
  '["Requirements Analysis", "Problem Structuring", "Stakeholder Communication", "Documentation", "SQL"]'::jsonb,
- 360, '["Consulting", "Business"]'::jsonb, true),
+ 30, '["Consulting", "Business"]'::jsonb, 'consulting_general', true),
 
 ('Financial Analyst', 'entry', 'finance', 
  'Entry-level finance role covering financial modeling, analysis, and presentation skills',
  '["hiring_manager", "technical"]'::jsonb,
  '["Financial Modeling", "Excel", "Valuation", "Presentation", "Attention to Detail"]'::jsonb,
- 360, '["Finance", "Analytics"]'::jsonb, true),
+ 30, '["Finance", "Analytics"]'::jsonb, 'finance_strategy', true),
 
 -- HR & People
 ('HR Coordinator', 'entry', 'hr', 
  'Entry-level HR role focusing on employee relations, recruitment support, and HR operations',
  '["hr", "hiring_manager"]'::jsonb,
  '["Employee Relations", "Recruitment", "HR Operations", "Communication", "Confidentiality"]'::jsonb,
- 300, '["HR", "People Operations"]'::jsonb, true),
+ 30, '["HR", "People Operations"]'::jsonb, 'operations_general', true),
 
 ('Recruiter - Entry Level', 'entry', 'recruiting', 
  'Entry-level recruiter role covering sourcing, candidate experience, and pipeline management',
  '["hr", "hiring_manager"]'::jsonb,
  '["Sourcing", "Candidate Experience", "Pipeline Management", "Communication", "Negotiation"]'::jsonb,
- 300, '["HR", "Talent Acquisition"]'::jsonb, true),
+ 30, '["HR", "Talent Acquisition"]'::jsonb, 'operations_general', true),
 
 -- Management
 ('Team Lead - Software', 'mid', 'engineering_management', 
  'First-time engineering manager role focusing on team leadership, project delivery, and technical mentorship',
  '["panel", "hiring_manager"]'::jsonb,
  '["Team Leadership", "Project Management", "Technical Mentorship", "Hiring", "Performance Management"]'::jsonb,
- 480, '["Management", "Engineering"]'::jsonb, true)
+ 30, '["Management", "Engineering"]'::jsonb, 'technical_program_manager', true)
 
 ON CONFLICT DO NOTHING;
 

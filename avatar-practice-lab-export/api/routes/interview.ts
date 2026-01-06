@@ -200,6 +200,167 @@ interviewRouter.get("/role-kits/:id", async (req: Request, res: Response) => {
   }
 });
 
+import { getEnrichedInterviewPlan } from "../lib/archetype-resolver.js";
+
+const ROLE_ROUND_TAXONOMY: Record<string, { typicalDuration: string; icon: string }> = {
+  hr_screening: { typicalDuration: "10-15 min", icon: "phone" },
+  hiring_manager: { typicalDuration: "10-15 min", icon: "user" },
+  technical_interview: { typicalDuration: "10-15 min", icon: "code" },
+  coding_assessment: { typicalDuration: "10-15 min", icon: "terminal" },
+  system_design: { typicalDuration: "10-15 min", icon: "boxes" },
+  case_study: { typicalDuration: "10-15 min", icon: "briefcase" },
+  behavioral: { typicalDuration: "10-15 min", icon: "message-circle" },
+  culture_values: { typicalDuration: "10-15 min", icon: "heart" },
+  bar_raiser: { typicalDuration: "10-15 min", icon: "trending-up" },
+  group_discussion: { typicalDuration: "10-15 min", icon: "users" },
+  aptitude_assessment: { typicalDuration: "10-15 min", icon: "brain" },
+};
+
+interviewRouter.get("/role-kits/:id/practice-options", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ success: false, error: "Invalid role kit ID" });
+    }
+    
+    const [kit] = await db.select().from(roleKits).where(eq(roleKits.id, id));
+    
+    if (!kit) {
+      return res.status(404).json({ success: false, error: "Role kit not found" });
+    }
+    
+    const roleArchetypeId = kit.roleArchetypeId || kit.domain;
+    const experienceLevel = kit.level;
+    
+    let roleFamily: string | null = kit.roleCategory || null;
+    if (!roleFamily && roleArchetypeId) {
+      const [archetype] = await db.select().from(roleArchetypes).where(eq(roleArchetypes.id, roleArchetypeId));
+      if (archetype) {
+        roleFamily = archetype.roleCategory || null;
+      }
+    }
+    
+    let interviewPlan;
+    try {
+      interviewPlan = await getEnrichedInterviewPlan(
+        roleArchetypeId,
+        roleFamily,
+        null,
+        null,
+        experienceLevel,
+        null,
+        null
+      );
+    } catch (planError) {
+      console.error("Error generating interview plan:", planError);
+      return res.status(500).json({ success: false, error: "Failed to generate interview plan" });
+    }
+    
+    if (!interviewPlan || !interviewPlan.phases || interviewPlan.phases.length === 0) {
+      return res.status(500).json({ success: false, error: "No interview phases generated" });
+    }
+    
+    const technicalCategories = ["technical_interview", "coding_assessment", "system_design", "coding"];
+    const seenCategories = new Set<string>();
+    
+    const options = interviewPlan.phases
+      .filter((phase) => {
+        const normalizedCategory = technicalCategories.includes(phase.category) 
+          ? "technical_interview" 
+          : phase.category;
+        
+        if (seenCategories.has(normalizedCategory)) {
+          return false;
+        }
+        seenCategories.add(normalizedCategory);
+        return true;
+      })
+      .map((phase, index) => {
+        const blueprints = phase.blueprints || [];
+        const primaryBlueprint = blueprints[0];
+        
+        const isTechnical = technicalCategories.includes(phase.category);
+        const normalizedCategory = isTechnical ? "technical_interview" : phase.category;
+        const taxonomyData = ROLE_ROUND_TAXONOMY[normalizedCategory] || { typicalDuration: "10-15 min", icon: "file-text" };
+        
+        const labelMap: Record<string, string> = {
+          hr_screening: "HR Screening",
+          hiring_manager: "Hiring Manager Round",
+          technical_interview: "Technical Interview",
+          behavioral: "Behavioral Interview",
+          case_study: "Case Study",
+          culture_values: "Culture & Values",
+          bar_raiser: "Bar Raiser",
+          group_discussion: "Group Discussion",
+          aptitude_assessment: "Aptitude Assessment",
+        };
+        
+        const descriptionMap: Record<string, string> = {
+          hr_screening: "Initial screening to assess fit, communication, and background",
+          hiring_manager: "Deep-dive conversation with the hiring manager on role expectations",
+          technical_interview: "Technical problem solving including coding, algorithms, and domain expertise",
+          behavioral: "Behavioral questions using STAR methodology to assess past experiences",
+          case_study: "Business case analysis and problem-solving exercise",
+          culture_values: "Assessment of alignment with company culture and values",
+          bar_raiser: "Cross-functional evaluation of leadership and impact potential",
+          group_discussion: "Collaborative discussion to assess teamwork and communication",
+          aptitude_assessment: "Logical reasoning and analytical aptitude evaluation",
+        };
+        
+        return {
+          id: `rolekit-${kit.id}-${phase.phaseId || index}`,
+          phaseId: phase.phaseId || `phase-${index}`,
+          roundCategory: normalizedCategory,
+          label: isTechnical ? "Technical Interview" : (labelMap[normalizedCategory] || phase.name),
+          description: descriptionMap[normalizedCategory] || phase.description || "Interview round",
+          practiceMode: "live_interview",
+          typicalDuration: taxonomyData.typicalDuration,
+          icon: taxonomyData.icon,
+          taxonomy: {
+            label: labelMap[normalizedCategory] || phase.name,
+            description: descriptionMap[normalizedCategory] || phase.description || "Interview round",
+            typicalDuration: taxonomyData.typicalDuration,
+          },
+          roleContext: {
+            roleKitId: kit.id,
+            roleName: kit.name,
+            level: kit.level,
+            domain: kit.domain,
+            skillsFocus: kit.skillsFocus || [],
+            roleArchetypeId,
+          },
+          focusHint: phase.subphases?.length ? `Focus: ${phase.subphases.join(", ")}` : null,
+          roleBlueprint: primaryBlueprint ? {
+            taskType: primaryBlueprint.taskType,
+            promptTemplate: primaryBlueprint.promptTemplate,
+            expectedSignals: primaryBlueprint.expectedSignals,
+            probeQuestions: primaryBlueprint.probeTree,
+            difficultyBand: primaryBlueprint.difficultyBand,
+          } : null,
+        };
+      });
+    
+    res.json({ 
+      success: true, 
+      roleKit: {
+        id: kit.id,
+        name: kit.name,
+        level: kit.level,
+        domain: kit.domain,
+        description: kit.description,
+        skillsFocus: kit.skillsFocus,
+        estimatedDuration: kit.estimatedDuration,
+        coreCompetencies: kit.coreCompetencies,
+        defaultInterviewTypes: kit.defaultInterviewTypes,
+      },
+      options,
+    });
+  } catch (error: any) {
+    console.error("Error fetching role kit practice options:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ===================================================================
 // Document Upload & Parsing Endpoints
 // ===================================================================
