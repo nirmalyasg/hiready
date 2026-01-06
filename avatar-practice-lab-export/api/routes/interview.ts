@@ -1502,12 +1502,20 @@ CRITICAL CUSTOMIZATION RULES:
    - Identify potential gaps between resume and job requirements
    - Probe claimed achievements and skills
 
+PHASE DURATION GUIDELINES (durationMins field, in MINUTES not seconds):
+- Warmup/Introduction: 3-5 minutes
+- Behavioral questions: 10-15 minutes  
+- Technical/Case Study deep-dive: 15-20 minutes
+- Situational questions: 8-12 minutes
+- Wrap-up/Questions: 3-5 minutes
+Total interview should be 30-45 minutes.
+
 Generate a JSON interview plan with this structure:
 {
   "phases": [
     {
       "name": "Phase name (e.g., Warmup, Technical Deep-Dive, Behavioral, Case Study, Wrap-up)",
-      "duration": 60,
+      "durationMins": 10,
       "objectives": ["What to assess in this phase"],
       "questionPatterns": ["Specific question templates tailored to the context"]
     }

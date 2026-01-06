@@ -211,6 +211,11 @@ export default function InterviewConfigPage() {
     return plan.phases.reduce((sum, phase) => sum + (phase.duration || 0), 0);
   };
 
+  const formatDuration = (mins: number) => {
+    if (mins < 1) return "< 1 min";
+    return `${mins} min`;
+  };
+
   const handleStartInterview = async () => {
     if (!config?.id || !planId) {
       toast({
@@ -328,7 +333,7 @@ export default function InterviewConfigPage() {
                 <div className="flex flex-wrap gap-2">
                   <Badge className="bg-[#042c4c] text-white px-3 py-1">
                     <Clock className="w-3.5 h-3.5 mr-1.5" />
-                    ~{Math.round(getTotalDuration() / 60)} min
+                    ~{getTotalDuration()} min
                   </Badge>
                   <Badge variant="outline" className="px-3 py-1 capitalize">
                     {interviewType.replace(/_/g, " ")}
@@ -373,7 +378,7 @@ export default function InterviewConfigPage() {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
                                 <p className="font-medium text-sm text-[#042c4c]">{phase.name}</p>
-                                <span className="text-xs text-slate-400">{Math.round(phase.duration / 60)} min</span>
+                                <span className="text-xs text-slate-400">{formatDuration(phase.duration)}</span>
                               </div>
                               {phase.objectives && phase.objectives.length > 0 && (
                                 <p className="text-xs text-slate-500 mt-1 line-clamp-2">
