@@ -476,13 +476,59 @@ const DEFAULT_PHASES_BY_ROLE_FAMILY: Record<string, { name: string; mins: number
   ],
 };
 
+interface CompanyInterviewComponents {
+  aptitude?: boolean;
+  codingChallenge?: boolean;
+  technicalDsaSql?: boolean;
+  systemDesign?: boolean;
+  caseStudy?: boolean;
+  hrScreen?: boolean;
+  behavioral?: boolean;
+  hiringManager?: boolean;
+  groupDiscussion?: boolean;
+  panel?: boolean;
+  presentation?: boolean;
+}
+
+async function getCompanyInterviewComponents(companyName: string): Promise<CompanyInterviewComponents | null> {
+  if (!companyName) return null;
+  
+  const normalizedName = companyName.toLowerCase().trim();
+  
+  const [company] = await db
+    .select({ interviewComponents: companies.interviewComponents })
+    .from(companies)
+    .where(sql`LOWER(${companies.name}) LIKE ${'%' + normalizedName + '%'}`);
+  
+  if (company?.interviewComponents) {
+    return company.interviewComponents as CompanyInterviewComponents;
+  }
+  
+  return null;
+}
+
+const COMPONENT_TO_ROUND: Record<keyof CompanyInterviewComponents, { name: string; mins: number; priority: number }> = {
+  aptitude: { name: "Aptitude Assessment", mins: 60, priority: 1 },
+  hrScreen: { name: "HR Screening", mins: 30, priority: 2 },
+  codingChallenge: { name: "Coding Round", mins: 60, priority: 3 },
+  technicalDsaSql: { name: "Technical Interview", mins: 45, priority: 4 },
+  systemDesign: { name: "System Design", mins: 45, priority: 5 },
+  caseStudy: { name: "Case Study", mins: 45, priority: 6 },
+  behavioral: { name: "Behavioral", mins: 45, priority: 7 },
+  hiringManager: { name: "Hiring Manager", mins: 45, priority: 8 },
+  groupDiscussion: { name: "Group Discussion", mins: 60, priority: 9 },
+  panel: { name: "Panel Interview", mins: 60, priority: 10 },
+  presentation: { name: "Presentation", mins: 45, priority: 11 },
+};
+
 export async function getUnifiedInterviewPlan(
   roleArchetypeId: string | null,
   roleFamily: string | null,
   companyArchetype: string | null,
   archetypeConfidence: "high" | "medium" | "low" | null,
   experienceLevel: string | null,
-  companyNotes: string | null = null
+  companyNotes: string | null = null,
+  companyName: string | null = null
 ): Promise<UnifiedInterviewPlan> {
   const seniority: "entry" | "mid" | "senior" = 
     experienceLevel === "senior" || experienceLevel === "lead" || experienceLevel === "executive" ? "senior" :
@@ -502,7 +548,36 @@ export async function getUnifiedInterviewPlan(
   let phases: UnifiedInterviewPlan["phases"] = [];
   let emphasisWeights: Record<string, number> = {};
   
-  if (structureDefaults && structureDefaults.phases.length > 0) {
+  const companyComponents = companyName ? await getCompanyInterviewComponents(companyName) : null;
+  
+  if (companyComponents) {
+    const activeRounds: { name: string; mins: number; priority: number }[] = [];
+    
+    for (const [key, value] of Object.entries(companyComponents)) {
+      if (value === true && COMPONENT_TO_ROUND[key as keyof CompanyInterviewComponents]) {
+        activeRounds.push(COMPONENT_TO_ROUND[key as keyof CompanyInterviewComponents]);
+      }
+    }
+    
+    activeRounds.sort((a, b) => a.priority - b.priority);
+    
+    phases = activeRounds.map(round => {
+      const mapping = PHASE_TO_CATEGORY_MAP[round.name] || { 
+        category: "technical_interview", 
+        practiceMode: "live_interview" as const, 
+        description: "Interview round" 
+      };
+      
+      return {
+        name: round.name,
+        category: mapping.category,
+        mins: round.mins,
+        practiceMode: mapping.practiceMode,
+        description: mapping.description,
+        emphasisWeight: 1,
+      };
+    });
+  } else if (structureDefaults && structureDefaults.phases.length > 0) {
     phases = structureDefaults.phases.map(phase => {
       const mapping = PHASE_TO_CATEGORY_MAP[phase.name] || { 
         category: "technical_interview", 
