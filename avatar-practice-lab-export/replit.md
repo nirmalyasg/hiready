@@ -28,7 +28,32 @@ avatar-practice-lab-export/
 
 ## Recent Changes (January 6, 2026)
 
-### Simplified Interview Round Taxonomy (Latest)
+### Interview Mode Customization Options (Latest)
+Added customization options for interview practice sessions:
+
+1. **Exercise Count Selection** (for Coding & Case Study modes)
+   - Users can choose 1-3 exercises per session
+   - Quick (1), Standard (2), or Deep Dive (3) options
+   - Affects plan generation to include multiple distinct problems
+
+2. **Brain Teaser/Puzzle Toggle** (for problem-solving modes)
+   - Optional inclusion of logical puzzles, estimation questions, brain teasers
+   - Role-relevant puzzles (Fermi estimation for PM, logic puzzles for SWE)
+   - Adds a dedicated "Puzzle" phase to interview structure
+
+3. **Session Overview Card** (config page)
+   - Prominent display of selected role name
+   - Difficulty level (seniority) clearly shown
+   - Skills being tested from role archetype
+   - Badges for exercise count and puzzle inclusion
+
+4. **State Persistence**
+   - Exercise count and puzzle settings persist across navigation
+   - Restored when returning to mode-setup from config page
+
+---
+
+### Simplified Interview Round Taxonomy
 Removed panel_interview and merged presentation into case_study for cleaner round structure:
 
 1. **Removed Panel Interview** - Eliminated duplicate/confusing round category
