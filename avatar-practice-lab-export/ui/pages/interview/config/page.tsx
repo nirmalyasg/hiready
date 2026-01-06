@@ -436,16 +436,36 @@ export default function InterviewConfigPage() {
     );
   }
 
-  if (!roleKit && !practiceContext) {
+  if (!roleKit && !practiceContext && !isSkillOnlyMode) {
     return null;
   }
 
   const backLink = isJobTargetMode ? `/jobs/${jobTargetId}` : "/interview";
-  const title = isJobTargetMode 
-    ? practiceContext?.taxonomy.label || "Interview Practice"
-    : isSkillOnlyMode
-      ? practiceContext?.taxonomy?.label || "Skill Practice"
-      : roleKit?.name || "Interview Practice";
+  
+  const getTitle = () => {
+    if (isJobTargetMode) {
+      return practiceContext?.taxonomy?.label || "Interview Practice";
+    }
+    if (isSkillOnlyMode) {
+      if (practiceContext?.taxonomy?.label) {
+        return practiceContext.taxonomy.label;
+      }
+      const categoryLabels: Record<string, string> = {
+        coding: "Coding Interview",
+        sql: "SQL Assessment",
+        behavioral: "Behavioral Interview",
+        case: "Case Study",
+        technical: "Technical Deep Dive",
+        analytics: "Analytics Round",
+        ml: "ML/AI Interview",
+        hiring_manager: "Hiring Manager Round",
+      };
+      return categoryLabels[roundCategory || ""] || "Skill Practice";
+    }
+    return roleKit?.name || "Interview Practice";
+  };
+  
+  const title = getTitle();
   const companyName = practiceContext?.companyContext.companyName;
   const roleTitle = practiceContext?.companyContext.roleTitle;
 
