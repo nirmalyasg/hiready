@@ -522,44 +522,146 @@ export default function InterviewPracticePage() {
             </div>
 
             {customStep === "details" && (
-              <div className="bg-white rounded-2xl border border-slate-200 p-5">
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-[#042c4c] mb-2">Job Title *</label>
-                    <Input
-                      placeholder="e.g., Product Manager, Software Engineer"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      className="rounded-xl"
-                    />
+              <div className="space-y-4">
+                {/* Import from URL option */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                      <Link2 className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-[#042c4c]">Import from URL</p>
+                      <p className="text-xs text-slate-500">Paste a job link from LinkedIn, Indeed, Naukri, etc.</p>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#042c4c] mb-2">Company</label>
-                    <Input
-                      placeholder="e.g., Google, Amazon, Microsoft"
-                      value={company}
-                      onChange={(e) => setCompany(e.target.value)}
-                      className="rounded-xl"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#042c4c] mb-2">Job Description (Optional)</label>
-                    <Textarea
-                      placeholder="Paste the job description here for more tailored questions..."
-                      value={pasteText}
-                      onChange={(e) => setPasteText(e.target.value)}
-                      className="rounded-xl min-h-[80px]"
-                    />
-                  </div>
-                  <Button
-                    onClick={handleProceedToRoundSelection}
-                    disabled={!title.trim()}
-                    className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-base font-medium"
-                  >
-                    Continue to Interview Round
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
+                  {addMode === "url" ? (
+                    <div className="space-y-3">
+                      <Input
+                        placeholder="https://linkedin.com/jobs/... or https://indeed.com/..."
+                        value={url}
+                        onChange={(e) => { setUrl(e.target.value); setError(null); }}
+                        className="rounded-xl"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => { setAddMode(null); setUrl(""); setError(null); }}
+                          className="rounded-xl"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={handleAddViaUrl}
+                          disabled={adding || !url.trim()}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700 rounded-xl"
+                        >
+                          {adding ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Importing...
+                            </>
+                          ) : (
+                            <>
+                              <Link2 className="w-4 h-4 mr-2" />
+                              Import Job
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      onClick={() => setAddMode("url")}
+                      className="w-full rounded-xl border-dashed border-2 h-11 text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
+                    >
+                      <Link2 className="w-4 h-4 mr-2" />
+                      Paste job URL to import
+                    </Button>
+                  )}
                 </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex-1 h-px bg-slate-200" />
+                  <span className="text-xs font-medium text-slate-400 uppercase">or enter manually</span>
+                  <div className="flex-1 h-px bg-slate-200" />
+                </div>
+
+                {/* Manual entry form */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-[#042c4c] mb-2">Job Title *</label>
+                      <Input
+                        placeholder="e.g., Product Manager, Software Engineer"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="rounded-xl"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#042c4c] mb-2">Company</label>
+                      <Input
+                        placeholder="e.g., Google, Amazon, Microsoft"
+                        value={company}
+                        onChange={(e) => setCompany(e.target.value)}
+                        className="rounded-xl"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#042c4c] mb-2">Job Description (Optional)</label>
+                      <Textarea
+                        placeholder="Paste the job description here for more tailored questions..."
+                        value={pasteText}
+                        onChange={(e) => setPasteText(e.target.value)}
+                        className="rounded-xl min-h-[80px]"
+                      />
+                    </div>
+                    <Button
+                      onClick={handleProceedToRoundSelection}
+                      disabled={!title.trim()}
+                      className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-base font-medium"
+                    >
+                      Continue to Interview Round
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Saved Jobs section */}
+                {savedJobs.length > 0 && (
+                  <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-sm font-medium text-[#042c4c]">YOUR SAVED JOBS ({savedJobs.length})</p>
+                      <button
+                        onClick={() => navigate("/jobs")}
+                        className="text-sm text-[#ee7e65] hover:underline font-medium"
+                      >
+                        Manage all jobs →
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {savedJobs.slice(0, 4).map((job) => (
+                        <button
+                          key={job.id}
+                          onClick={() => handleSelectJob(job)}
+                          className="text-left p-3 rounded-xl border border-slate-200 hover:border-[#ee7e65] hover:shadow-sm transition-all group flex items-center gap-3"
+                        >
+                          <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-[#ee7e65]/10 transition-colors">
+                            <Briefcase className="w-4 h-4 text-slate-500 group-hover:text-[#ee7e65]" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-[#042c4c] truncate text-sm">{job.roleTitle}</p>
+                            {job.companyName && (
+                              <p className="text-xs text-slate-400 truncate">{job.companyName}</p>
+                            )}
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#ee7e65] flex-shrink-0" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
