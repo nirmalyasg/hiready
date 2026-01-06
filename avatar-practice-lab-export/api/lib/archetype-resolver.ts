@@ -441,9 +441,8 @@ const PHASE_TO_CATEGORY_MAP: Record<string, { category: string; practiceMode: "l
   "ML Round": { category: "technical_interview", practiceMode: "live_interview", description: "Machine learning concepts, algorithms, and implementation" },
   "Culture Fit": { category: "culture_values", practiceMode: "live_interview", description: "Assessment of values alignment and collaboration style" },
   "Bar Raiser": { category: "bar_raiser", practiceMode: "live_interview", description: "Cross-functional interview focused on raising the hiring bar" },
-  "Panel Interview": { category: "panel_interview", practiceMode: "live_interview", description: "Interview with multiple interviewers covering various aspects" },
   "Group Discussion": { category: "group_discussion", practiceMode: "live_interview", description: "Group discussion evaluating communication and teamwork" },
-  "Presentation": { category: "presentation", practiceMode: "presentation", description: "Present analysis, recommendations, or technical work to interviewers" },
+  "Presentation": { category: "case_study", practiceMode: "case_study", description: "Present analysis, recommendations, or technical work to interviewers" },
 };
 
 const DEFAULT_PHASES_BY_ROLE_FAMILY: Record<string, { name: string; mins: number }[]> = {
@@ -492,7 +491,6 @@ interface CompanyInterviewComponents {
   behavioral?: boolean;
   hiringManager?: boolean;
   groupDiscussion?: boolean;
-  panel?: boolean;
   presentation?: boolean;
 }
 
@@ -523,8 +521,7 @@ const COMPONENT_TO_ROUND: Record<keyof CompanyInterviewComponents, { name: strin
   behavioral: { name: "Behavioral", mins: 45, priority: 7 },
   hiringManager: { name: "Hiring Manager", mins: 45, priority: 8 },
   groupDiscussion: { name: "Group Discussion", mins: 60, priority: 9 },
-  panel: { name: "Panel Interview", mins: 60, priority: 10 },
-  presentation: { name: "Presentation", mins: 45, priority: 11 },
+  presentation: { name: "Case Study", mins: 45, priority: 6 },
 };
 
 // Maps role archetype common_interview_types to company component keys
@@ -535,10 +532,9 @@ const ROLE_INTERVIEW_TYPE_TO_COMPONENTS: Record<string, (keyof CompanyInterviewC
   "hiring_manager": ["hiringManager"],
   "behavioral": ["behavioral"],
   "hr": ["hrScreen"],
-  "case": ["caseStudy"],
+  "case": ["caseStudy", "presentation"],
   "product": ["caseStudy", "presentation"],
-  "portfolio": ["presentation"],
-  "panel": ["panel"],
+  "portfolio": ["caseStudy", "presentation"],
   "sales_roleplay": ["behavioral", "hiringManager"],
   "aptitude": ["aptitude"],
   "group": ["groupDiscussion"],
@@ -552,12 +548,11 @@ const COMPONENT_TO_ROLE_TYPES: Record<keyof CompanyInterviewComponents, string[]
   codingChallenge: ["technical", "coding"],
   technicalDsaSql: ["technical", "coding"],
   systemDesign: ["technical"],
-  caseStudy: ["case", "product"],
+  caseStudy: ["case", "product", "portfolio"],
   behavioral: ["behavioral", "sales_roleplay"],
   hiringManager: ["hiring_manager", "sales_roleplay"],
   groupDiscussion: ["group"],
-  panel: ["panel"],
-  presentation: ["portfolio", "product"],
+  presentation: ["case", "product", "portfolio"],
 };
 
 export async function getUnifiedInterviewPlan(

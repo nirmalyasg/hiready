@@ -1242,9 +1242,7 @@ jobsRouter.get("/job-targets/:id/practice-context/:roundCategory", requireAuth, 
       if (roundCategory === "behavioral" && roundLower.includes("behavioral")) return true;
       if (roundCategory === "culture_values" && (roundLower.includes("culture") || roundLower.includes("values"))) return true;
       if (roundCategory === "bar_raiser" && roundLower.includes("bar_raiser")) return true;
-      if (roundCategory === "panel_interview" && roundLower.includes("panel")) return true;
       if (roundCategory === "group_discussion" && roundLower.includes("group")) return true;
-      if (roundCategory === "presentation" && roundLower.includes("presentation")) return true;
       return false;
     });
 
@@ -1287,9 +1285,7 @@ function generatePromptHints(
     behavioral: `You are conducting a behavioral interview at ${companyName}. Ask STAR-format questions about past experiences. Look for specific examples demonstrating key competencies.`,
     culture_values: `You are assessing culture fit at ${companyName}. Ask about values alignment, collaboration style, and how they handle ambiguity and conflict.`,
     bar_raiser: `You are a bar raiser at ${companyName} (cross-functional interviewer ensuring hiring standards). Ask probing questions across domains and evaluate if this candidate raises the bar for the team.`,
-    panel_interview: `You are leading a panel interview at ${companyName}. Cover multiple aspects of the role including technical skills, leadership, and culture fit.`,
     group_discussion: `You are facilitating a group discussion at ${companyName}. Observe communication skills, teamwork, leadership potential, and ability to articulate and defend positions.`,
-    presentation: `You are evaluating a presentation at ${companyName}. Assess the candidate's ability to structure information, communicate clearly, handle questions, and demonstrate expertise.`,
   };
 
   const evaluationFocus: Record<RoundCategory, string[]> = {
@@ -1303,9 +1299,7 @@ function generatePromptHints(
     behavioral: ["STAR format usage", "specific examples", "self-awareness", "growth mindset"],
     culture_values: ["values alignment", "collaboration style", "adaptability", "ethical reasoning"],
     bar_raiser: ["overall bar-raising", "cross-functional impact", "long-term potential", "culture contribution"],
-    panel_interview: ["consistency across interviewers", "depth and breadth", "composure", "engagement"],
     group_discussion: ["communication clarity", "teamwork", "leadership emergence", "listening skills"],
-    presentation: ["structure and clarity", "visual communication", "handling Q&A", "time management"],
   };
 
   const sampleQuestions: Record<RoundCategory, string[]> = {
@@ -1359,20 +1353,10 @@ function generatePromptHints(
       "How have you raised the bar in your previous teams?",
       "Tell me about your biggest career accomplishment and why it matters.",
     ],
-    panel_interview: [
-      "Give us an overview of your most impactful project.",
-      "How do you prioritize competing demands?",
-      "What questions do you have for us about the team and role?",
-    ],
     group_discussion: [
       "What are your views on this topic?",
       "How do you respond to the previous speaker's point?",
       "Can you summarize the key points made by the group?",
-    ],
-    presentation: [
-      "Please walk us through your presentation.",
-      "How did you arrive at these recommendations?",
-      "What are the risks and how would you mitigate them?",
     ],
   };
 

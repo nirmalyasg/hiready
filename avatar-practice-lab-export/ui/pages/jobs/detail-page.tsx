@@ -112,11 +112,9 @@ type RoundCategory =
   | "behavioral"
   | "culture_values"
   | "bar_raiser"
-  | "panel_interview"
-  | "group_discussion"
-  | "presentation";
+  | "group_discussion";
 
-type PracticeMode = "live_interview" | "coding_lab" | "case_study" | "presentation";
+type PracticeMode = "live_interview" | "coding_lab" | "case_study";
 
 interface CompanyPracticeContext {
   jobTargetId: string;
@@ -493,8 +491,6 @@ export default function JobDetailPage() {
                           return <Heart className="w-5 h-5 text-pink-500" />;
                         case "bar_raiser":
                           return <TrendingUp className="w-5 h-5 text-red-500" />;
-                        case "panel_interview":
-                          return <Users className="w-5 h-5 text-teal-500" />;
                         default:
                           return <FileText className="w-5 h-5 text-brand-accent" />;
                       }

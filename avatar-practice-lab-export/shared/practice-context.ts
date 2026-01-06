@@ -9,15 +9,12 @@ export type RoundCategory =
   | "behavioral"
   | "culture_values"
   | "bar_raiser"
-  | "panel_interview"
-  | "group_discussion"
-  | "presentation";
+  | "group_discussion";
 
 export type PracticeMode = 
   | "live_interview"
   | "coding_lab"
-  | "case_study"
-  | "presentation";
+  | "case_study";
 
 export interface RoundTaxonomy {
   category: RoundCategory;
@@ -101,14 +98,6 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
     typicalDuration: "45-60 min",
     icon: "trending-up",
   },
-  panel_interview: {
-    category: "panel_interview",
-    label: "Panel Interview",
-    description: "Interview with multiple interviewers covering various aspects of the role",
-    practiceMode: "live_interview",
-    typicalDuration: "60 min",
-    icon: "users",
-  },
   aptitude_assessment: {
     category: "aptitude_assessment",
     label: "Aptitude Assessment",
@@ -125,14 +114,6 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
     typicalDuration: "30-45 min",
     icon: "users",
   },
-  presentation: {
-    category: "presentation",
-    label: "Presentation",
-    description: "Present analysis, recommendations, or technical work to interviewers",
-    practiceMode: "presentation",
-    typicalDuration: "45 min",
-    icon: "presentation",
-  },
 };
 
 export const BLUEPRINT_ROUND_MAPPING: Record<string, RoundCategory[]> = {
@@ -145,7 +126,7 @@ export const BLUEPRINT_ROUND_MAPPING: Record<string, RoundCategory[]> = {
   bar_raiser: ["bar_raiser"],
   culture_fit: ["culture_values"],
   case: ["case_study"],
-  panel: ["panel_interview"],
+  presentation: ["case_study"],
   hiring_manager: ["hiring_manager"],
   hr: ["hr_screening"],
 };
