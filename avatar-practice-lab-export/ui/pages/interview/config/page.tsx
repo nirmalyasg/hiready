@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { ChevronRight, Settings, Loader2, Briefcase, Play, Building2, Target, Info } from "lucide-react";
+import { ChevronRight, Settings, Loader2, Briefcase, Play, Building2, Target, Info, Clock, MessageSquare, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useToast } from "@/hooks/use-toast";
 
 interface RoleKit {
   id: number;
@@ -40,20 +42,43 @@ interface PracticeContext {
   };
 }
 
+interface InterviewPlan {
+  phases: {
+    name: string;
+    duration: number;
+    objectives: string[];
+    questionPatterns: string[];
+  }[];
+  focusAreas: string[];
+}
+
+interface InterviewConfig {
+  id: number;
+  interviewType: string;
+  style: string;
+  seniority: string;
+}
+
 export default function InterviewConfigPage() {
   const [searchParams] = useSearchParams();
   const roleKitId = searchParams.get("roleKitId");
   const jobTargetId = searchParams.get("jobTargetId");
   const roundCategory = searchParams.get("roundCategory");
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [roleKit, setRoleKit] = useState<RoleKit | null>(null);
   const [practiceContext, setPracticeContext] = useState<PracticeContext | null>(null);
+  const [plan, setPlan] = useState<InterviewPlan | null>(null);
+  const [config, setConfig] = useState<InterviewConfig | null>(null);
+  const [planId, setPlanId] = useState<number | null>(null);
+  
   const [isLoading, setIsLoading] = useState(true);
+  const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
   const [interviewType, setInterviewType] = useState<string>("behavioral");
   const [style, setStyle] = useState<string>("neutral");
   const [language, setLanguage] = useState<string>("english");
-  const [creating, setCreating] = useState(false);
+  const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const languages = [
@@ -70,7 +95,7 @@ export default function InterviewConfigPage() {
   const isJobTargetMode = !!jobTargetId && !!roundCategory;
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDataAndGeneratePlan = async () => {
       if (isJobTargetMode) {
         try {
           const response = await fetch(`/api/jobs/job-targets/${jobTargetId}/practice-context/${roundCategory}`);
@@ -78,27 +103,56 @@ export default function InterviewConfigPage() {
           if (data.success) {
             setPracticeContext(data);
             const roundCat = data.roundCategory;
+            let detectedType = "hiring_manager";
             if (roundCat === "behavioral" || roundCat === "culture_values" || roundCat === "bar_raiser") {
-              setInterviewType("behavioral");
+              detectedType = "behavioral";
             } else if (roundCat === "technical_interview" || roundCat === "coding_assessment" || roundCat === "coding") {
-              setInterviewType("technical");
+              detectedType = "technical";
             } else if (roundCat === "case_study" || roundCat === "business_case") {
-              setInterviewType("case_study");
+              detectedType = "case_study";
             } else if (roundCat === "hr_screening" || roundCat === "phone_screen") {
-              setInterviewType("hr");
+              detectedType = "hr";
             } else if (roundCat === "hiring_manager") {
-              setInterviewType("hiring_manager");
-            } else {
-              setInterviewType("hiring_manager");
+              detectedType = "hiring_manager";
             }
+            setInterviewType(detectedType);
+            setIsLoading(false);
+            
+            setIsGeneratingPlan(true);
+            const configResponse = await fetch("/api/interview/config", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                jobTargetId: data.companyContext.jobTargetId,
+                interviewType: detectedType,
+                style: "neutral",
+                language: "english",
+                mode: "job_target",
+                roundCategory: data.roundCategory,
+                companyContext: data.companyContext,
+                promptHints: data.promptHints,
+              }),
+            });
+            const configData = await configResponse.json();
+            if (configData.success) {
+              setConfig(configData.config);
+              
+              const planResponse = await fetch(`/api/interview/config/${configData.config.id}/plan`, {
+                method: "POST",
+              });
+              const planData = await planResponse.json();
+              if (planData.success) {
+                setPlan(planData.plan.planJson);
+                setPlanId(planData.plan.id);
+              }
+            }
+            setIsGeneratingPlan(false);
           } else {
             navigate(`/jobs/${jobTargetId}`);
           }
         } catch (error) {
-          console.error("Error fetching practice context:", error);
+          console.error("Error:", error);
           navigate(`/jobs/${jobTargetId}`);
-        } finally {
-          setIsLoading(false);
         }
       } else if (roleKitId) {
         try {
@@ -106,88 +160,100 @@ export default function InterviewConfigPage() {
           const data = await response.json();
           if (data.success) {
             setRoleKit(data.roleKit);
-            if (data.roleKit.defaultInterviewTypes?.[0]) {
-              setInterviewType(data.roleKit.defaultInterviewTypes[0]);
+            const defaultType = data.roleKit.defaultInterviewTypes?.[0] || "behavioral";
+            setInterviewType(defaultType);
+            setIsLoading(false);
+            
+            setIsGeneratingPlan(true);
+            const configResponse = await fetch("/api/interview/config", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                roleKitId: data.roleKit.id,
+                resumeDocId: null,
+                jdDocId: null,
+                interviewType: defaultType,
+                style: "neutral",
+                seniority: data.roleKit.level,
+                mode: "role_based",
+              }),
+            });
+            const configData = await configResponse.json();
+            if (configData.success) {
+              setConfig(configData.config);
+              
+              const planResponse = await fetch(`/api/interview/config/${configData.config.id}/plan`, {
+                method: "POST",
+              });
+              const planData = await planResponse.json();
+              if (planData.success) {
+                setPlan(planData.plan.planJson);
+                setPlanId(planData.plan.id);
+              }
             }
+            setIsGeneratingPlan(false);
           } else {
             navigate("/interview");
           }
         } catch (error) {
-          console.error("Error fetching role kit:", error);
+          console.error("Error:", error);
           navigate("/interview");
-        } finally {
-          setIsLoading(false);
         }
       } else {
         navigate("/interview");
       }
     };
-    fetchData();
+    fetchDataAndGeneratePlan();
   }, [roleKitId, jobTargetId, roundCategory, navigate, isJobTargetMode]);
 
-  const handleStartPractice = async () => {
-    setCreating(true);
+  const getTotalDuration = () => {
+    if (!plan?.phases) return 0;
+    return plan.phases.reduce((sum, phase) => sum + (phase.duration || 0), 0);
+  };
+
+  const handleStartInterview = async () => {
+    if (!config?.id || !planId) {
+      toast({
+        title: "Not ready",
+        description: "Please wait for the interview plan to generate.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setStarting(true);
     setError(null);
 
     try {
-      if (isJobTargetMode && practiceContext) {
-        const configResponse = await fetch("/api/interview/config", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            jobTargetId: practiceContext.companyContext.jobTargetId,
-            interviewType,
-            style,
-            language,
-            mode: "job_target",
-            roundCategory: practiceContext.roundCategory,
-            companyContext: practiceContext.companyContext,
-            promptHints: practiceContext.promptHints,
-          }),
+      const response = await fetch("/api/interview/session/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          interviewConfigId: config.id,
+          interviewPlanId: planId,
+        }),
+      });
+
+      if (response.status === 401) {
+        toast({
+          title: "Please sign in",
+          description: "You need to be signed in to start an interview session.",
+          variant: "destructive",
         });
+        navigate("/login");
+        return;
+      }
 
-        const configData = await configResponse.json();
-        if (!configData.success) throw new Error(configData.error);
-
-        const planResponse = await fetch(`/api/interview/config/${configData.config.id}/plan`, {
-          method: "POST",
-        });
-
-        const planData = await planResponse.json();
-        if (!planData.success) throw new Error(planData.error);
-
-        navigate(`/interview/pre-session?configId=${configData.config.id}&planId=${planData.plan.id}`);
-      } else if (roleKit) {
-        const configResponse = await fetch("/api/interview/config", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            roleKitId: roleKit.id,
-            resumeDocId: null,
-            jdDocId: null,
-            interviewType,
-            style,
-            seniority: roleKit.level,
-            mode: "role_based",
-          }),
-        });
-
-        const configData = await configResponse.json();
-        if (!configData.success) throw new Error(configData.error);
-
-        const planResponse = await fetch(`/api/interview/config/${configData.config.id}/plan`, {
-          method: "POST",
-        });
-
-        const planData = await planResponse.json();
-        if (!planData.success) throw new Error(planData.error);
-
-        navigate(`/interview/pre-session?configId=${configData.config.id}&planId=${planData.plan.id}`);
+      const data = await response.json();
+      if (data.success) {
+        navigate(`/interview/session?interviewSessionId=${data.session.id}&configId=${config.id}`);
+      } else {
+        throw new Error(data.error);
       }
     } catch (error: any) {
-      setError(error.message || "Failed to create interview plan");
+      setError(error.message || "Failed to start interview");
     } finally {
-      setCreating(false);
+      setStarting(false);
     }
   };
 
@@ -206,252 +272,213 @@ export default function InterviewConfigPage() {
   }
 
   const backLink = isJobTargetMode ? `/jobs/${jobTargetId}` : "/interview";
-  const backLabel = isJobTargetMode ? "Back to Job" : "Back to Role Selection";
   const title = isJobTargetMode 
-    ? `${practiceContext?.companyContext.companyName || ""} ${practiceContext?.taxonomy.label}`
+    ? practiceContext?.taxonomy.label || "Interview Practice"
     : roleKit?.name || "";
-  const description = isJobTargetMode
-    ? practiceContext?.taxonomy.description || ""
-    : roleKit?.description || "Configure your interview settings and start practicing.";
+  const companyName = practiceContext?.companyContext.companyName;
+  const roleTitle = practiceContext?.companyContext.roleTitle;
 
   return (
     <SidebarLayout>
-      <div className="min-h-screen bg-gradient-to-b from-slate-50/80 to-white pb-24 sm:pb-8">
-        <div className="bg-gradient-to-br from-indigo-500/5 via-white to-purple-50/30 border-b border-slate-100">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-3xl">
-            <Link
-              to={backLink}
-              className="inline-flex items-center text-slate-500 hover:text-indigo-600 mb-4 text-sm font-medium transition-colors group"
+      <div className="min-h-screen bg-[#f8f9fb]">
+        <div className="bg-[#042c4c] text-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-3xl">
+            <button
+              onClick={() => navigate(backLink)}
+              className="inline-flex items-center text-white/70 hover:text-white mb-4 text-sm transition-colors"
             >
-              <ChevronRight className="w-4 h-4 rotate-180 mr-1 group-hover:-translate-x-0.5 transition-transform" />
-              {backLabel}
-            </Link>
+              <ChevronRight className="w-4 h-4 rotate-180 mr-1" />
+              Back
+            </button>
             
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-                {isJobTargetMode ? <Building2 className="w-4 h-4 text-indigo-600" /> : <Settings className="w-4 h-4 text-indigo-600" />}
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                {isJobTargetMode ? <Building2 className="w-5 h-5 text-[#ee7e65]" /> : <Briefcase className="w-5 h-5 text-[#ee7e65]" />}
               </div>
-              <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">
-                {isJobTargetMode ? "Company-Specific Practice" : "Configure Interview"}
-              </span>
-              {isJobTargetMode && practiceContext?.companyContext.hasBlueprint && (
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
-                  Blueprint Available
-                </span>
-              )}
+              <div>
+                <h1 className="text-xl font-bold">{title}</h1>
+                {isJobTargetMode && (companyName || roleTitle) && (
+                  <p className="text-white/70 text-sm mt-0.5">
+                    {companyName}{companyName && roleTitle && " • "}{roleTitle}
+                  </p>
+                )}
+              </div>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-              {title}
-            </h1>
-            <p className="text-sm sm:text-base text-slate-600">
-              {description}
-            </p>
-            {isJobTargetMode && practiceContext?.companyContext.roleTitle && (
-              <p className="text-sm text-indigo-600 mt-1 flex items-center gap-1">
-                <Briefcase className="w-3.5 h-3.5" />
-                {practiceContext.companyContext.roleTitle}
-              </p>
-            )}
           </div>
         </div>
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-3xl">
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-              <p className="text-sm font-medium text-red-800">{error}</p>
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+              {error}
             </div>
           )}
 
-          <div className="grid gap-6">
-            {isJobTargetMode && practiceContext && (
+          <div className="space-y-4">
+            {isGeneratingPlan ? (
+              <Card className="border-slate-200 rounded-xl">
+                <CardContent className="p-8 text-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#ee7e65] mx-auto mb-3" />
+                  <p className="text-slate-600 font-medium">Generating your interview plan...</p>
+                  <p className="text-sm text-slate-400 mt-1">This takes a few seconds</p>
+                </CardContent>
+              </Card>
+            ) : plan ? (
               <>
-                {practiceContext.promptHints.companySpecificGuidance && (
-                  <Card className="border-amber-200 bg-amber-50/50 rounded-2xl overflow-hidden">
+                <div className="flex flex-wrap gap-2">
+                  <Badge className="bg-[#042c4c] text-white px-3 py-1">
+                    <Clock className="w-3.5 h-3.5 mr-1.5" />
+                    ~{Math.round(getTotalDuration() / 60)} min
+                  </Badge>
+                  <Badge variant="outline" className="px-3 py-1 capitalize">
+                    {interviewType.replace(/_/g, " ")}
+                  </Badge>
+                </div>
+
+                {plan.focusAreas && plan.focusAreas.length > 0 && (
+                  <Card className="border-slate-200 rounded-xl">
+                    <CardHeader className="py-3 px-4 border-b border-slate-100">
+                      <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <Target className="w-4 h-4 text-[#ee7e65]" />
+                        Focus Areas
+                      </CardTitle>
+                    </CardHeader>
                     <CardContent className="p-4">
-                      <div className="flex gap-3">
-                        <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                        <div>
-                          <h4 className="font-medium text-amber-900 mb-1">Interview Insight</h4>
-                          <p className="text-sm text-amber-800">{practiceContext.promptHints.companySpecificGuidance}</p>
-                        </div>
+                      <div className="flex flex-wrap gap-2">
+                        {plan.focusAreas.map((area, idx) => (
+                          <span key={idx} className="text-xs px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full">
+                            {area}
+                          </span>
+                        ))}
                       </div>
                     </CardContent>
                   </Card>
                 )}
-                
-                <Card className="border-slate-200 rounded-2xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-slate-100">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Target className="w-5 h-5 text-indigo-600" />
-                      What You'll Be Evaluated On
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="flex flex-wrap gap-2">
-                      {practiceContext.promptHints.evaluationFocus.map((focus, idx) => (
-                        <span key={idx} className="text-sm px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full capitalize">
-                          {focus}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-slate-100">
-                      <h4 className="text-xs text-slate-500 uppercase tracking-wide mb-2">Sample Questions</h4>
-                      <ul className="space-y-2">
-                        {practiceContext.promptHints.sampleQuestions.slice(0, 2).map((q, idx) => (
-                          <li key={idx} className="text-sm text-slate-700 flex items-start gap-2">
-                            <span className="text-indigo-500 mt-1">•</span>
-                            {q}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
-            )}
-            
-            {!isJobTargetMode && roleKit && (
-              <Card className="border-slate-200 rounded-2xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Briefcase className="w-5 h-5 text-indigo-600" />
-                    Role Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-xs text-slate-500 uppercase tracking-wide">Domain</Label>
-                      <p className="font-medium text-slate-900 capitalize">{roleKit.domain.replace(/_/g, " ")}</p>
-                    </div>
-                    <div>
-                      <Label className="text-xs text-slate-500 uppercase tracking-wide">Level</Label>
-                      <p className="font-medium text-slate-900 capitalize">{roleKit.level}</p>
-                    </div>
-                  </div>
-                  {roleKit.skillsFocus && roleKit.skillsFocus.length > 0 && (
-                    <div className="mt-4">
-                      <Label className="text-xs text-slate-500 uppercase tracking-wide mb-2 block">Focus Areas</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {roleKit.skillsFocus.map((skill, idx) => (
-                          <span key={idx} className="text-sm px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full">
-                            {skill}
-                          </span>
+
+                {plan.phases && plan.phases.length > 0 && (
+                  <Card className="border-slate-200 rounded-xl">
+                    <CardHeader className="py-3 px-4 border-b border-slate-100">
+                      <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4 text-[#ee7e65]" />
+                        Interview Phases
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <div className="divide-y divide-slate-100">
+                        {plan.phases.map((phase, idx) => (
+                          <div key={idx} className="p-4 flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-[#ee7e65]/10 flex items-center justify-center flex-shrink-0 text-xs font-medium text-[#ee7e65]">
+                              {idx + 1}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <p className="font-medium text-sm text-[#042c4c]">{phase.name}</p>
+                                <span className="text-xs text-slate-400">{Math.round(phase.duration / 60)} min</span>
+                              </div>
+                              {phase.objectives && phase.objectives.length > 0 && (
+                                <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                                  {phase.objectives[0]}
+                                </p>
+                              )}
+                            </div>
+                          </div>
                         ))}
                       </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            ) : null}
+
+            {isJobTargetMode && practiceContext?.promptHints.companySpecificGuidance && (
+              <Card className="border-amber-200 bg-amber-50/50 rounded-xl">
+                <CardContent className="p-4">
+                  <div className="flex gap-3">
+                    <Info className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-medium text-amber-800 mb-1">Company Insight</p>
+                      <p className="text-xs text-amber-700">{practiceContext.promptHints.companySpecificGuidance}</p>
                     </div>
-                  )}
+                  </div>
                 </CardContent>
               </Card>
             )}
 
-            <Card className="border-slate-200 rounded-2xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-slate-100">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Settings className="w-5 h-5 text-purple-600" />
+            <Card className="border-slate-200 rounded-xl">
+              <CardHeader className="py-3 px-4 border-b border-slate-100">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Settings className="w-4 h-4 text-[#ee7e65]" />
                   Session Settings
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 space-y-6">
+              <CardContent className="p-4 space-y-4">
                 <div>
-                  <Label className="text-sm font-medium text-slate-700 mb-3 block">Conversation Language</Label>
-                  <div className="grid grid-cols-4 gap-2">
+                  <Label className="text-xs font-medium text-slate-600 mb-2 block">Language</Label>
+                  <div className="flex flex-wrap gap-1.5">
                     {languages.map((lang) => (
                       <button
                         key={lang.value}
                         onClick={() => setLanguage(lang.value)}
-                        className={`p-2.5 rounded-lg border-2 text-center transition-all ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                           language === lang.value
-                            ? "border-[#ee7e65] bg-[#ee7e65]/5"
-                            : "border-slate-200 hover:border-slate-300"
+                            ? "bg-[#ee7e65] text-white"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                         }`}
                       >
-                        <p className={`font-medium text-sm ${language === lang.value ? "text-[#ee7e65]" : "text-slate-700"}`}>
-                          {lang.label}
-                        </p>
+                        {lang.label}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-slate-700 mb-2 block">Interviewer Style</Label>
-                  <p className="text-xs text-slate-500 mb-3">This affects how the AI interviewer behaves - their tone, pace, and level of follow-up questions.</p>
+                  <Label className="text-xs font-medium text-slate-600 mb-2 block">Interviewer Style</Label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { value: "friendly", label: "Supportive", desc: "Encouraging, helpful hints", emoji: "😊" },
-                      { value: "neutral", label: "Professional", desc: "Balanced, realistic", emoji: "👔" },
-                      { value: "challenging", label: "Rigorous", desc: "Probing, tough follow-ups", emoji: "🎯" },
+                      { value: "friendly", label: "Supportive", emoji: "😊" },
+                      { value: "neutral", label: "Professional", emoji: "👔" },
+                      { value: "challenging", label: "Rigorous", emoji: "🎯" },
                     ].map((s) => (
                       <button
                         key={s.value}
                         onClick={() => setStyle(s.value)}
-                        className={`p-3 rounded-xl border-2 text-left transition-all ${
+                        className={`p-2.5 rounded-lg border-2 text-center transition-all ${
                           style === s.value
                             ? "border-[#042c4c] bg-[#042c4c]/5"
                             : "border-slate-200 hover:border-slate-300"
                         }`}
                       >
-                        <div className="flex items-center gap-2 mb-1">
-                          <span>{s.emoji}</span>
-                          <p className={`font-medium text-sm ${style === s.value ? "text-[#042c4c]" : "text-slate-900"}`}>
-                            {s.label}
-                          </p>
-                        </div>
-                        <p className="text-xs text-slate-500">{s.desc}</p>
+                        <span className="text-lg">{s.emoji}</span>
+                        <p className={`text-xs font-medium mt-1 ${style === s.value ? "text-[#042c4c]" : "text-slate-600"}`}>
+                          {s.label}
+                        </p>
                       </button>
                     ))}
                   </div>
                 </div>
-
-                {!isJobTargetMode && (
-                  <div>
-                    <Label className="text-sm font-medium text-slate-700 mb-3 block">Interview Type</Label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {[
-                        { value: "behavioral", label: "Behavioral", desc: "Tell me about a time..." },
-                        { value: "technical", label: "Technical", desc: "Role-specific skills" },
-                        { value: "situational", label: "Situational", desc: "What would you do if..." },
-                        { value: "mixed", label: "Mixed", desc: "All question types" },
-                      ].map((type) => (
-                        <button
-                          key={type.value}
-                          onClick={() => setInterviewType(type.value)}
-                          className={`p-3 rounded-xl border-2 text-left transition-all ${
-                            interviewType === type.value
-                              ? "border-indigo-500 bg-indigo-50"
-                              : "border-slate-200 hover:border-slate-300"
-                          }`}
-                        >
-                          <p className={`font-medium text-sm ${interviewType === type.value ? "text-indigo-700" : "text-slate-900"}`}>
-                            {type.label}
-                          </p>
-                          <p className="text-xs text-slate-500 mt-0.5">{type.desc}</p>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
-          </div>
 
-          <div className="mt-8 flex justify-end">
             <Button
               size="lg"
-              onClick={handleStartPractice}
-              disabled={creating}
-              className="rounded-xl px-8 bg-indigo-600 hover:bg-indigo-700"
+              onClick={handleStartInterview}
+              disabled={starting || isGeneratingPlan || !config || !planId}
+              className="w-full rounded-xl bg-[#ee7e65] hover:bg-[#e06a50] h-12 text-base"
             >
-              {creating ? (
+              {starting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  Preparing Interview...
+                  Starting Interview...
+                </>
+              ) : isGeneratingPlan ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Preparing...
                 </>
               ) : (
                 <>
                   <Play className="w-4 h-4 mr-2" />
-                  Start Interview Practice
+                  Start Interview
                 </>
               )}
             </Button>
