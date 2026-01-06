@@ -833,6 +833,8 @@ export const interviewConfigs = pgTable("interview_configs", {
     .$type<"entry" | "mid" | "senior">()
     .notNull()
     .default("entry"),
+  exerciseCount: integer("exercise_count").default(1),
+  includePuzzles: boolean("include_puzzles").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

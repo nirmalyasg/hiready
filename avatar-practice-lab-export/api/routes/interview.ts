@@ -631,6 +631,8 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
       seniority,
       mode,
       jobTargetId,
+      exerciseCount,
+      includePuzzles,
     } = req.body;
     
     const interviewModeTypes = ["coding_technical", "case_problem_solving", "behavioral", "hiring_manager", "system_deep_dive"];
@@ -712,6 +714,8 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
         style: style || "neutral",
         seniority: seniority || "entry",
         jobTargetId: jobTargetId || null,
+        exerciseCount: exerciseCount || 1,
+        includePuzzles: includePuzzles || false,
         createdAt: new Date(),
       })
       .returning();
@@ -837,6 +841,8 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
       interviewMode: config.interviewMode,
       style: config.style,
       seniority: config.seniority,
+      exerciseCount: config.exerciseCount || 1,
+      includePuzzles: config.includePuzzles || false,
       roleKit: roleKitData ? { name: roleKitData.name, domain: roleKitData.domain, skillsFocus: roleKitData.skillsFocus } : null,
       roleArchetype: roleArchetypeData ? { id: roleArchetypeData.id, name: roleArchetypeData.name, domain: roleArchetypeData.domain } : null,
       candidateProfile: resumeParsed,
@@ -1706,6 +1712,8 @@ INPUTS:
 - interviewMode: "coding_technical" | "case_problem_solving" | "behavioral" | "hiring_manager" | "system_deep_dive" (optional - focused practice modes)
 - style: "friendly" | "neutral" | "stress"
 - seniority: "entry" | "mid" | "senior"
+- exerciseCount: 1 | 2 | 3 (number of coding/case exercises to include - default 1)
+- includePuzzles: true | false (whether to include brain teasers/puzzles - default false)
 - roleKit: role information and skills focus (may be null)
 - roleArchetype: role category like "core_software_engineer", "data_analyst", "product_manager" (may be null)
 - candidateProfile: parsed resume data (may be null)
@@ -1755,6 +1763,25 @@ CRITICAL CUSTOMIZATION RULES:
    - If candidateProfile (resume) is provided, create specific questions about their experience
    - Identify potential gaps between resume and job requirements
    - Probe claimed achievements and skills
+
+8. EXERCISE COUNT (for coding_technical and case_problem_solving modes):
+   - exerciseCount determines how many distinct problems/cases to include
+   - If exerciseCount=1: Include 1 focused exercise (default)
+   - If exerciseCount=2: Include 2 different exercises covering different skills
+   - If exerciseCount=3: Include 3 exercises for comprehensive assessment
+   - Each exercise should test different aspects of the role
+   - Adjust phase durations proportionally (more exercises = slightly longer)
+
+9. PUZZLES AND BRAIN TEASERS (when includePuzzles=true):
+   - Include 1-2 logical puzzles, estimation questions, or brain teasers
+   - Puzzles should be relevant to the role (e.g., Fermi estimation for PM, logic puzzles for SWE)
+   - Add a "Puzzle" phase of 3-5 minutes to the interview structure
+   - Example puzzle types:
+     * Estimation: "How many golf balls fit in a school bus?"
+     * Logic: "You have 8 balls, one is heavier. Find it in 2 weighings."
+     * Market sizing: "Estimate the market size for electric scooters in NYC."
+     * Pattern recognition: "What comes next in this sequence?"
+   - Tailor puzzle difficulty to seniority level
 
 PHASE DURATION GUIDELINES (durationMins field, in MINUTES):
 IMPORTANT: All practice interviews are LIMITED TO 10-15 MINUTES TOTAL for cost optimization.

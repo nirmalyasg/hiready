@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ChevronRight, Code, Briefcase, MessageSquare, Users, Clock, ArrowRight, Loader2, Check, Building2, Plus, FileText, ChevronDown, Search, Target } from "lucide-react";
+import { ChevronRight, Code, Briefcase, MessageSquare, Users, Clock, ArrowRight, Loader2, Check, Building2, Plus, FileText, ChevronDown, Search, Target, Lightbulb, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,6 +58,10 @@ export default function InterviewModeSetupPage() {
   const [companyName, setCompanyName] = useState<string>("");
   const [roleSearchQuery, setRoleSearchQuery] = useState<string>("");
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const [exerciseCount, setExerciseCount] = useState<number>(1);
+  const [includePuzzles, setIncludePuzzles] = useState<boolean>(false);
+
+  const isProblemSolvingMode = mode === "coding_technical" || mode === "case_problem_solving";
 
   useEffect(() => {
     const storedContext = sessionStorage.getItem("interviewModeContext");
@@ -68,6 +72,20 @@ export default function InterviewModeSetupPage() {
 
     const context = JSON.parse(storedContext) as ModeContext;
     setModeContext(context);
+
+    const storedSetup = sessionStorage.getItem("interviewModeSetup");
+    if (storedSetup) {
+      try {
+        const setup = JSON.parse(storedSetup);
+        if (setup.exerciseCount) setExerciseCount(setup.exerciseCount);
+        if (setup.includePuzzles !== undefined) setIncludePuzzles(setup.includePuzzles);
+        if (setup.roleArchetypeId) setSelectedArchetype(setup.roleArchetypeId);
+        if (setup.seniority) setSelectedSeniority(setup.seniority);
+        if (setup.companyName) setCompanyName(setup.companyName);
+      } catch (e) {
+        console.error("Error parsing stored setup:", e);
+      }
+    }
 
     const fetchArchetypes = async () => {
       try {
@@ -82,7 +100,10 @@ export default function InterviewModeSetupPage() {
           });
           setFilteredArchetypes(filtered);
           
-          if (filtered.length > 0) {
+          const storedSetup = sessionStorage.getItem("interviewModeSetup");
+          const hasStoredArchetype = storedSetup && JSON.parse(storedSetup).roleArchetypeId;
+          
+          if (!hasStoredArchetype && filtered.length > 0) {
             setSelectedArchetype(filtered[0].id);
           }
         }
@@ -113,6 +134,8 @@ export default function InterviewModeSetupPage() {
           seniority: selectedSeniority,
           style: "neutral",
           mode: "interview_mode",
+          exerciseCount: isProblemSolvingMode ? exerciseCount : 1,
+          includePuzzles: isProblemSolvingMode ? includePuzzles : false,
         }),
       });
 
@@ -128,6 +151,8 @@ export default function InterviewModeSetupPage() {
         seniority: selectedSeniority,
         companyName: companyName || null,
         configId: data.config.id,
+        exerciseCount: isProblemSolvingMode ? exerciseCount : 1,
+        includePuzzles: isProblemSolvingMode ? includePuzzles : false,
       }));
 
       navigate(`/interview/config?configId=${data.config.id}&interviewMode=${modeContext.interviewMode}`);
@@ -330,6 +355,71 @@ export default function InterviewModeSetupPage() {
                 ))}
               </div>
             </div>
+
+            {isProblemSolvingMode && (
+              <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-4">
+                <div>
+                  <Label className="text-sm font-semibold text-[#042c4c] mb-3 block">
+                    Number of Exercises
+                  </Label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3].map((count) => (
+                      <button
+                        key={count}
+                        onClick={() => setExerciseCount(count)}
+                        className={`flex-1 p-3 rounded-lg border-2 transition-all text-center ${
+                          exerciseCount === count
+                            ? `border-current ${config.color} ${config.bgLight}`
+                            : "border-slate-200 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="flex items-center justify-center gap-1.5">
+                          <Hash className={`w-4 h-4 ${exerciseCount === count ? config.color : "text-slate-400"}`} />
+                          <span className={`font-semibold text-sm ${exerciseCount === count ? config.color : "text-[#042c4c]"}`}>
+                            {count}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1">
+                          {count === 1 ? "Quick" : count === 2 ? "Standard" : "Deep dive"}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-100 pt-4">
+                  <button
+                    onClick={() => setIncludePuzzles(!includePuzzles)}
+                    className={`w-full flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
+                      includePuzzles
+                        ? `border-current ${config.color} ${config.bgLight}`
+                        : "border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${includePuzzles ? config.bgLight : "bg-slate-100"}`}>
+                        <Lightbulb className={`w-4 h-4 ${includePuzzles ? config.color : "text-slate-400"}`} />
+                      </div>
+                      <div className="text-left">
+                        <p className={`font-semibold text-sm ${includePuzzles ? config.color : "text-[#042c4c]"}`}>
+                          Include Brain Teasers / Puzzles
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          Logical puzzles & estimation questions
+                        </p>
+                      </div>
+                    </div>
+                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                      includePuzzles
+                        ? `border-current ${config.color} bg-current`
+                        : "border-slate-300"
+                    }`}>
+                      {includePuzzles && <Check className="w-3 h-3 text-white" />}
+                    </div>
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="bg-white rounded-xl border border-slate-200 p-4">
               <Label className="text-sm font-semibold text-[#042c4c] mb-1 block">
