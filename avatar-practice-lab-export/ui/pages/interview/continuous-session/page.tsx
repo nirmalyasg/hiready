@@ -255,7 +255,7 @@ After they work on it, discuss their approach and solution.
 `;
     }
 
-    if ((interviewType === 'hiring_manager' || interviewType === 'panel') && plan.caseStudy) {
+    if ((interviewType === 'hiring_manager' || interviewType === 'panel' || interviewType === 'case_study') && plan.caseStudy) {
       const caseStudy = plan.caseStudy;
       prompt += `
 CASE STUDY (introduce when appropriate):
@@ -346,7 +346,7 @@ IMPORTANT BEHAVIOR:
         });
       }
 
-      if (interviewSession?.plan?.caseStudy && (config?.interviewType === 'hiring_manager' || config?.interviewType === 'panel')) {
+      if (interviewSession?.plan?.caseStudy && (config?.interviewType === 'hiring_manager' || config?.interviewType === 'panel' || config?.interviewType === 'case_study')) {
         const caseStudy = interviewSession.plan.caseStudy;
         startCaseStudyChallenge({
           id: caseStudy.id || 'interview-case',

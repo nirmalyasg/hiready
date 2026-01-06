@@ -68,10 +68,16 @@ export default function InterviewConfigPage() {
             const roundCat = data.roundCategory;
             if (roundCat === "behavioral" || roundCat === "culture_values" || roundCat === "bar_raiser") {
               setInterviewType("behavioral");
-            } else if (roundCat === "technical_interview" || roundCat === "coding_assessment") {
+            } else if (roundCat === "technical_interview" || roundCat === "coding_assessment" || roundCat === "coding") {
               setInterviewType("technical");
-            } else {
+            } else if (roundCat === "case_study" || roundCat === "business_case") {
+              setInterviewType("case_study");
+            } else if (roundCat === "hr_screening" || roundCat === "phone_screen") {
               setInterviewType("hr");
+            } else if (roundCat === "hiring_manager") {
+              setInterviewType("hiring_manager");
+            } else {
+              setInterviewType("hiring_manager");
             }
           } else {
             navigate(`/jobs/${jobTargetId}`);
