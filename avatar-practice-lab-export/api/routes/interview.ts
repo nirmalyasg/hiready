@@ -577,6 +577,7 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
   try {
     const userId = req.user!.id;
     const configId = parseInt(req.params.id);
+    const { roundCategory, typicalDuration } = req.body || {};
     
     const [config] = await db
       .select()
@@ -630,6 +631,8 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
       candidateProfile: resumeParsed,
       jobDescription: jdParsed,
       jobTarget: jobTargetData,
+      roundCategory: roundCategory || null,
+      targetDuration: typicalDuration || "30-45 min",
     };
     
     const openaiClient = getOpenAI();
@@ -1503,12 +1506,25 @@ CRITICAL CUSTOMIZATION RULES:
    - Probe claimed achievements and skills
 
 PHASE DURATION GUIDELINES (durationMins field, in MINUTES not seconds):
-- Warmup/Introduction: 3-5 minutes
-- Behavioral questions: 10-15 minutes  
-- Technical/Case Study deep-dive: 15-20 minutes
-- Situational questions: 8-12 minutes
-- Wrap-up/Questions: 3-5 minutes
-Total interview should be 30-45 minutes.
+The input will include a "targetDuration" field (e.g., "30 min", "45 min", "45-60 min"). 
+You MUST ensure all phase durations add up to match this target.
+
+For a 30 min interview:
+- Warmup: 3 min
+- Main content: 20-22 min
+- Wrap-up: 3 min
+
+For a 45 min interview:
+- Warmup: 5 min
+- Main content: 35 min  
+- Wrap-up: 5 min
+
+For a 60 min interview:
+- Warmup: 5 min
+- Main content: 50 min
+- Wrap-up: 5 min
+
+CRITICAL: The sum of all phase durationMins MUST equal the targetDuration (use the lower number if a range is given).
 
 Generate a JSON interview plan with this structure:
 {

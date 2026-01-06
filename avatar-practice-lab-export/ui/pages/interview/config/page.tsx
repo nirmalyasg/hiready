@@ -139,6 +139,11 @@ export default function InterviewConfigPage() {
               
               const planResponse = await fetch(`/api/interview/config/${configData.config.id}/plan`, {
                 method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  roundCategory: data.roundCategory,
+                  typicalDuration: data.taxonomy?.typicalDuration,
+                }),
               });
               const planData = await planResponse.json();
               if (planData.success) {
