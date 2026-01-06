@@ -588,7 +588,7 @@ export default function JobsPage() {
                               size="sm"
                               onClick={(e: React.MouseEvent) => {
                                 e.stopPropagation();
-                                navigate(`/interview/custom?jobTargetId=${job.id}`);
+                                navigate(`/jobs/${job.id}`);
                               }}
                               className="gap-1.5 bg-brand-accent hover:bg-brand-accent/90 text-white rounded-lg hidden sm:flex"
                             >
@@ -604,7 +604,7 @@ export default function JobsPage() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                                 <DropdownMenuItem 
-                                  onClick={() => navigate(`/interview/custom?jobTargetId=${job.id}`)}
+                                  onClick={() => navigate(`/jobs/${job.id}`)}
                                   className="sm:hidden"
                                 >
                                   <Play className="w-4 h-4 mr-2" />
