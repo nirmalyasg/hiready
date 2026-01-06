@@ -244,6 +244,22 @@ export default function JobDetailPage() {
       const data = await response.json();
       if (data.success) {
         setJob(data.job);
+        
+        const optionsRes = await fetch(`/api/jobs/job-targets/${job.id}/practice-options`);
+        const optionsData = await optionsRes.json();
+        if (optionsData.success) {
+          setPracticeOptions(optionsData.options || []);
+          if (optionsData.companyContext) {
+            setCompanyData({
+              companyName: optionsData.companyContext.companyName,
+              archetype: optionsData.companyContext.archetype,
+              tier: optionsData.companyContext.tier,
+              hasBlueprint: optionsData.companyContext.hasBlueprint,
+              blueprintNotes: optionsData.companyContext.blueprintNotes,
+              hasContext: optionsData.companyContext.hasContext,
+            });
+          }
+        }
       }
     } catch (error) {
       console.error("Error updating archetype:", error);
@@ -433,13 +449,24 @@ export default function JobDetailPage() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-brand-dark flex items-center gap-2">
                     <Target className="w-5 h-5 text-brand-accent" />
-                    {companyData?.hasBlueprint && companyData.companyName ? `${companyData.companyName} Interview Rounds` : "Practice Interview Rounds"}
+                    Interview Preparation
                   </h2>
-                  {companyData?.hasBlueprint && companyData.hasContext && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
-                      {companyData.tier === "tier1" ? "Top Company" : "Known Blueprint"}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {job.roleFamily && (
+                      <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium capitalize">
+                        {job.roleFamily}
+                      </span>
+                    )}
+                    {job.companyArchetype && (
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        job.archetypeConfidence === "high" ? "bg-green-100 text-green-700" :
+                        job.archetypeConfidence === "medium" ? "bg-amber-100 text-amber-700" :
+                        "bg-gray-100 text-gray-600"
+                      }`}>
+                        {archetypeLabels[job.companyArchetype] || job.companyArchetype}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="space-y-3">
                   {practiceOptions.map((option, index) => {
@@ -482,16 +509,9 @@ export default function JobDetailPage() {
                             {getIcon()}
                           </div>
                           <div>
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-medium text-brand-dark">{option.label}</h4>
-                              {option.companySpecific && (
-                                <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
-                                  Company-Specific
-                                </span>
-                              )}
-                            </div>
+                            <h4 className="font-medium text-brand-dark">{option.label}</h4>
                             <p className="text-sm text-brand-muted">
-                              {option.typicalDuration} | {option.description.substring(0, 60)}...
+                              {option.typicalDuration} | {option.description.length > 70 ? option.description.substring(0, 70) + "..." : option.description}
                             </p>
                             {option.focusHint && (
                               <p className="text-xs text-brand-accent mt-0.5">{option.focusHint}</p>
@@ -737,68 +757,33 @@ export default function JobDetailPage() {
             )}
 
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-medium text-brand-muted">
-                  {companyData?.hasBlueprint && companyData.companyName ? `${companyData.companyName} Interview Prep` : "Quick Actions"}
-                </h3>
-                {companyData?.hasBlueprint && companyData.hasContext && (
-                  <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                    Company-Specific
-                  </span>
-                )}
-              </div>
+              <h3 className="text-sm font-medium text-brand-muted mb-4">Quick Start</h3>
               <div className="space-y-2">
-                {practiceOptions.slice(0, 4).map((option, idx) => {
-                  const getIcon = () => {
-                    switch (option.roundCategory) {
-                      case "coding_assessment":
-                        return <Terminal className="w-4 h-4" />;
-                      case "case_study":
-                      case "system_design":
-                        return <Boxes className="w-4 h-4" />;
-                      case "behavioral":
-                        return <MessageCircle className="w-4 h-4" />;
-                      case "hr_screening":
-                        return <Phone className="w-4 h-4" />;
-                      case "hiring_manager":
-                        return <User className="w-4 h-4" />;
-                      default:
-                        return <FileText className="w-4 h-4" />;
-                    }
-                  };
-                  
-                  return (
-                    <Button
-                      key={option.id}
-                      onClick={() => handleStartPracticeOption(option)}
-                      variant={idx === 0 ? "default" : "outline"}
-                      className={`w-full justify-start gap-2 ${idx === 0 ? "bg-brand-dark hover:bg-brand-dark/90" : ""}`}
-                    >
-                      {getIcon()}
-                      <span className="truncate text-left flex-1">{option.label}</span>
-                      <span className="text-xs opacity-60">{option.typicalDuration}</span>
-                    </Button>
-                  );
-                })}
-                {practiceOptions.length === 0 && (
-                  <>
-                    <Button
-                      onClick={() => navigate(`/interview/config?jobTargetId=${job.id}`)}
-                      className="w-full justify-start gap-2 bg-brand-dark hover:bg-brand-dark/90"
-                    >
-                      <FileText className="w-4 h-4" />
-                      Practice Interview
-                    </Button>
-                    <Button
-                      onClick={() => navigate(`/exercise-mode/coding-lab?jobTargetId=${job.id}`)}
-                      variant="outline"
-                      className="w-full justify-start gap-2"
-                    >
-                      <Code className="w-4 h-4" />
-                      Coding Lab
-                    </Button>
-                  </>
+                {practiceOptions.length > 0 ? (
+                  <Button
+                    onClick={() => handleStartPracticeOption(practiceOptions[0])}
+                    className="w-full justify-start gap-2 bg-brand-dark hover:bg-brand-dark/90"
+                  >
+                    <Play className="w-4 h-4" />
+                    Start First Round
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => navigate(`/interview/config?jobTargetId=${job.id}`)}
+                    className="w-full justify-start gap-2 bg-brand-dark hover:bg-brand-dark/90"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Practice Interview
+                  </Button>
                 )}
+                <Button
+                  onClick={() => navigate(`/exercise-mode/coding-lab?jobTargetId=${job.id}`)}
+                  variant="outline"
+                  className="w-full justify-start gap-2"
+                >
+                  <Code className="w-4 h-4" />
+                  Coding Lab
+                </Button>
               </div>
             </div>
 

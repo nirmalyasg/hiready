@@ -397,6 +397,169 @@ export async function updateJobArchetypes(
     .where(eq(jobTargets.id, jobTargetId));
 }
 
+export interface UnifiedInterviewPlan {
+  roleArchetype: {
+    id: string;
+    name: string;
+    family: string | null;
+  } | null;
+  companyArchetype: {
+    type: string;
+    confidence: "high" | "medium" | "low";
+  } | null;
+  phases: {
+    name: string;
+    category: string;
+    mins: number;
+    practiceMode: "live_interview" | "coding_lab" | "case_study" | "presentation";
+    description: string;
+    subphases?: string[];
+    emphasisWeight?: number;
+  }[];
+  emphasisWeights: Record<string, number>;
+  companyNotes: string | null;
+  seniority: "entry" | "mid" | "senior";
+}
+
+const PHASE_TO_CATEGORY_MAP: Record<string, { category: string; practiceMode: "live_interview" | "coding_lab" | "case_study" | "presentation"; description: string }> = {
+  "HR Screening": { category: "hr_screening", practiceMode: "live_interview", description: "Behavioral assessment, motivation, background, and cultural fit" },
+  "Phone Screen": { category: "hr_screening", practiceMode: "live_interview", description: "Initial screening call covering background and basic fit" },
+  "Technical Interview": { category: "technical_interview", practiceMode: "live_interview", description: "Technical discussion covering domain expertise and problem-solving" },
+  "Coding Round": { category: "coding_assessment", practiceMode: "coding_lab", description: "Hands-on coding problems to demonstrate programming skills" },
+  "DSA Round": { category: "coding_assessment", practiceMode: "coding_lab", description: "Data structures and algorithms problem solving" },
+  "System Design": { category: "system_design", practiceMode: "case_study", description: "Design scalable systems and discuss architectural tradeoffs" },
+  "Hiring Manager": { category: "hiring_manager", practiceMode: "live_interview", description: "Deep-dive into role requirements, domain expertise, and team fit" },
+  "Behavioral": { category: "behavioral", practiceMode: "live_interview", description: "STAR-format questions about past experiences and competencies" },
+  "Case Study": { category: "case_study", practiceMode: "case_study", description: "Analyze business problems, structure approach, present recommendations" },
+  "Product Sense": { category: "case_study", practiceMode: "case_study", description: "Product thinking, prioritization, and user-focused problem solving" },
+  "Analytics Case": { category: "case_study", practiceMode: "case_study", description: "Data-driven problem solving and metric analysis" },
+  "SQL Round": { category: "coding_assessment", practiceMode: "coding_lab", description: "SQL query writing and database problem solving" },
+  "ML Round": { category: "technical_interview", practiceMode: "live_interview", description: "Machine learning concepts, algorithms, and implementation" },
+  "Culture Fit": { category: "culture_values", practiceMode: "live_interview", description: "Assessment of values alignment and collaboration style" },
+  "Bar Raiser": { category: "bar_raiser", practiceMode: "live_interview", description: "Cross-functional interview focused on raising the hiring bar" },
+  "Panel Interview": { category: "panel_interview", practiceMode: "live_interview", description: "Interview with multiple interviewers covering various aspects" },
+};
+
+const DEFAULT_PHASES_BY_ROLE_FAMILY: Record<string, { name: string; mins: number }[]> = {
+  tech: [
+    { name: "HR Screening", mins: 30 },
+    { name: "Technical Interview", mins: 45 },
+    { name: "Coding Round", mins: 60 },
+    { name: "System Design", mins: 45 },
+    { name: "Hiring Manager", mins: 45 },
+  ],
+  data: [
+    { name: "HR Screening", mins: 30 },
+    { name: "Technical Interview", mins: 45 },
+    { name: "SQL Round", mins: 45 },
+    { name: "Analytics Case", mins: 45 },
+    { name: "Hiring Manager", mins: 45 },
+  ],
+  product: [
+    { name: "HR Screening", mins: 30 },
+    { name: "Product Sense", mins: 45 },
+    { name: "Case Study", mins: 45 },
+    { name: "Behavioral", mins: 45 },
+    { name: "Hiring Manager", mins: 45 },
+  ],
+  sales: [
+    { name: "HR Screening", mins: 30 },
+    { name: "Behavioral", mins: 45 },
+    { name: "Case Study", mins: 30 },
+    { name: "Hiring Manager", mins: 45 },
+  ],
+  business: [
+    { name: "HR Screening", mins: 30 },
+    { name: "Case Study", mins: 45 },
+    { name: "Behavioral", mins: 45 },
+    { name: "Hiring Manager", mins: 45 },
+  ],
+};
+
+export async function getUnifiedInterviewPlan(
+  roleArchetypeId: string | null,
+  roleFamily: string | null,
+  companyArchetype: string | null,
+  archetypeConfidence: "high" | "medium" | "low" | null,
+  experienceLevel: string | null,
+  companyNotes: string | null = null
+): Promise<UnifiedInterviewPlan> {
+  const seniority: "entry" | "mid" | "senior" = 
+    experienceLevel === "senior" || experienceLevel === "lead" || experienceLevel === "executive" ? "senior" :
+    experienceLevel === "entry" ? "entry" : "mid";
+
+  let roleArchetypeDetails: { id: string; name: string; roleFamily: string | null } | null = null;
+  let structureDefaults: InterviewStructure | null = null;
+  
+  if (roleArchetypeId) {
+    const details = await getRoleArchetypeDetails(roleArchetypeId);
+    if (details) {
+      roleArchetypeDetails = { id: details.id, name: details.name, roleFamily: details.roleCategory || null };
+    }
+    structureDefaults = await getRoleInterviewStructure(roleArchetypeId, seniority);
+  }
+  
+  let phases: UnifiedInterviewPlan["phases"] = [];
+  let emphasisWeights: Record<string, number> = {};
+  
+  if (structureDefaults && structureDefaults.phases.length > 0) {
+    phases = structureDefaults.phases.map(phase => {
+      const mapping = PHASE_TO_CATEGORY_MAP[phase.name] || { 
+        category: "technical_interview", 
+        practiceMode: "live_interview" as const, 
+        description: "Interview round" 
+      };
+      
+      return {
+        name: phase.name,
+        category: mapping.category,
+        mins: phase.mins,
+        practiceMode: mapping.practiceMode,
+        description: mapping.description,
+        subphases: phase.subphases,
+        emphasisWeight: structureDefaults.emphasisWeights[phase.name] || 1,
+      };
+    });
+    emphasisWeights = structureDefaults.emphasisWeights;
+  } else {
+    const family = roleFamily || "tech";
+    const defaultPhases = DEFAULT_PHASES_BY_ROLE_FAMILY[family] || DEFAULT_PHASES_BY_ROLE_FAMILY.tech;
+    
+    phases = defaultPhases.map(phase => {
+      const mapping = PHASE_TO_CATEGORY_MAP[phase.name] || { 
+        category: "technical_interview", 
+        practiceMode: "live_interview" as const, 
+        description: "Interview round" 
+      };
+      
+      return {
+        name: phase.name,
+        category: mapping.category,
+        mins: phase.mins,
+        practiceMode: mapping.practiceMode,
+        description: mapping.description,
+        emphasisWeight: 1,
+      };
+    });
+  }
+  
+  return {
+    roleArchetype: roleArchetypeDetails ? {
+      id: roleArchetypeDetails.id,
+      name: roleArchetypeDetails.name,
+      family: roleArchetypeDetails.roleFamily,
+    } : null,
+    companyArchetype: companyArchetype ? {
+      type: companyArchetype,
+      confidence: archetypeConfidence || "low",
+    } : null,
+    phases,
+    emphasisWeights,
+    companyNotes,
+    seniority,
+  };
+}
+
 export async function resolveAndSaveJobArchetypes(
   jobTargetId: string,
   companyName: string,

@@ -28,7 +28,35 @@ avatar-practice-lab-export/
 
 ## Recent Changes (January 6, 2026)
 
-### Company & Role Archetype Integration (Latest)
+### Unified Archetype-Based Interview Structure (Latest)
+Refactored to use a single coherent interview flow that combines archetype defaults with company-specific context:
+
+1. **Unified Interview Plan Generation**
+   - Role archetype structure defaults are now the PRIMARY source for interview phases/timing
+   - Company notes/blueprints layer on top as optional overrides
+   - `getUnifiedInterviewPlan()` function in archetype-resolver.ts combines both sources
+   - Generates phases with category, name, duration, description, subphases, and practiceMode
+
+2. **Simplified Practice Options API**
+   - `/api/jobs/job-targets/:id/practice-options` now uses unified interview plan
+   - Returns both `options` (practice buttons) and `interviewPlan` (full structure)
+   - Includes `companyContext` for blueprint notes and badges
+   - Interview phases generated directly from role archetype + seniority
+
+3. **Streamlined Job Detail Page UI**
+   - Removed duplicate practice option sections (was showing both main list AND sidebar list)
+   - Single "Interview Preparation" section with archetype badges
+   - Sidebar simplified to "Quick Start" with just first-round button + Coding Lab
+   - Archetype dropdown changes now regenerate interview structure in real-time
+
+4. **Connected Archetype Overrides**
+   - Changing company type or role type dropdown refetches practice options
+   - Also refreshes companyData for blueprint notes display
+   - Confidence badges update based on detection vs manual selection
+
+---
+
+### Company & Role Archetype Integration
 Enhanced interview preparation with intelligent company and role classification:
 
 1. **Company Archetypes (18 types)**

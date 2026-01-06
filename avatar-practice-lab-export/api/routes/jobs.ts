@@ -19,10 +19,11 @@ import {
   ROUND_TAXONOMY,
   RoundCategory,
   CompanyPracticeContext,
-  PracticeOption
+  PracticeOption,
+  PracticeMode
 } from "../../shared/practice-context.js";
 import { execSync } from "child_process";
-import { resolveAndSaveJobArchetypes, resolveCompanyArchetype, resolveRoleArchetype, listAllRoleArchetypes, listAllCompanyArchetypes, getRoleInterviewStructure } from "../lib/archetype-resolver.js";
+import { resolveAndSaveJobArchetypes, resolveCompanyArchetype, resolveRoleArchetype, listAllRoleArchetypes, listAllCompanyArchetypes, getRoleInterviewStructure, getUnifiedInterviewPlan } from "../lib/archetype-resolver.js";
 
 let cachedChromiumPath: string | null = null;
 
@@ -1070,7 +1071,7 @@ jobsRouter.get("/job-targets/:id/practice-suggestions", requireAuth, async (req:
   }
 });
 
-// V2 Practice suggestions using structured round taxonomy
+// V2 Practice suggestions using unified archetype-based interview structure
 jobsRouter.get("/job-targets/:id/practice-options", requireAuth, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
@@ -1086,52 +1087,74 @@ jobsRouter.get("/job-targets/:id/practice-options", requireAuth, async (req: Req
     }
 
     const parsed = job.jdParsed as JDParsedType | null;
+    
     const blueprintData = await findCompanyBlueprint(
       job.companyName,
       job.roleTitle,
       parsed?.experienceLevel
     );
-
-    const blueprintRounds = blueprintData?.blueprint?.interviewRounds?.map(r => r.type) || null;
-    const leadershipPrinciples = blueprintData?.blueprint?.skillFocus?.filter(s => 
-      s.includes("ownership") || s.includes("leadership") || s.includes("customer")
-    ) || null;
+    const companyNotes = blueprintData?.blueprint?.notes || null;
     
-    const blueprintFocusAreas = blueprintData?.blueprint?.interviewRounds?.flatMap(r => r.focus || []) || null;
-
-    const options = generateTaxonomyPracticeOptions(
-      jobId,
-      blueprintData?.companyName || job.companyName,
-      blueprintData?.companyId || null,
-      job.roleTitle,
-      blueprintData?.archetype || null,
-      blueprintData?.tier || null,
-      blueprintRounds,
-      blueprintData?.blueprint?.notes || null,
-      parsed?.focusAreas || [],
-      leadershipPrinciples,
-      blueprintFocusAreas
+    const interviewPlan = await getUnifiedInterviewPlan(
+      job.roleArchetypeId || null,
+      job.roleFamily || null,
+      job.companyArchetype || null,
+      job.archetypeConfidence as "high" | "medium" | "low" | null,
+      parsed?.experienceLevel || null,
+      companyNotes
     );
+    
+    const options: PracticeOption[] = interviewPlan.phases.map((phase, index) => ({
+      id: `${jobId}-${phase.category}-${index}`,
+      roundCategory: phase.category as RoundCategory,
+      label: job.companyName ? `${job.companyName} ${phase.name}` : phase.name,
+      description: phase.description,
+      practiceMode: phase.practiceMode as PracticeMode,
+      typicalDuration: `${phase.mins} min`,
+      icon: ROUND_TAXONOMY[phase.category as RoundCategory]?.icon || "file-text",
+      companySpecific: !!job.companyArchetype,
+      companyContext: {
+        jobTargetId: jobId,
+        companyName: job.companyName,
+        companyId: null,
+        roleTitle: job.roleTitle,
+        archetype: job.companyArchetype || null,
+        tier: null,
+        hasBlueprint: !!companyNotes,
+        blueprintNotes: companyNotes,
+        focusAreas: parsed?.focusAreas || [],
+        leadershipPrinciples: null,
+        interviewStyle: job.companyArchetype === "big_tech" ? "structured" : 
+                        job.companyArchetype === "startup" ? "conversational" : "mixed",
+      },
+      focusHint: phase.subphases?.length ? `Focus areas: ${phase.subphases.join(", ")}` : null,
+    }));
 
     res.json({
       success: true,
       options,
+      interviewPlan,
       job: {
         id: job.id,
         roleTitle: job.roleTitle,
         companyName: job.companyName,
         location: job.location,
+        roleArchetypeId: job.roleArchetypeId,
+        roleFamily: job.roleFamily,
+        companyArchetype: job.companyArchetype,
+        archetypeConfidence: job.archetypeConfidence,
       },
-      companyContext: blueprintData ? {
-        companyId: blueprintData.companyId,
-        companyName: blueprintData.companyName,
-        archetype: blueprintData.archetype,
-        tier: blueprintData.tier,
-        hasBlueprint: !!blueprintData.blueprint,
-        blueprintNotes: blueprintData.blueprint?.notes || null,
-        interviewRounds: blueprintData.blueprint?.interviewRounds || null,
-        skillFocus: blueprintData.blueprint?.skillFocus || null,
-      } : null,
+      companyContext: {
+        companyId: blueprintData?.companyId || null,
+        companyName: blueprintData?.companyName || job.companyName,
+        archetype: job.companyArchetype || blueprintData?.archetype || null,
+        tier: blueprintData?.tier || null,
+        hasBlueprint: !!companyNotes,
+        hasContext: !!job.companyArchetype || !!companyNotes,
+        blueprintNotes: companyNotes,
+        interviewRounds: blueprintData?.blueprint?.interviewRounds || null,
+        skillFocus: blueprintData?.blueprint?.skillFocus || null,
+      },
       taxonomy: ROUND_TAXONOMY,
     });
   } catch (error: any) {
