@@ -1101,7 +1101,8 @@ jobsRouter.get("/job-targets/:id/practice-options", requireAuth, async (req: Req
       job.companyArchetype || null,
       job.archetypeConfidence as "high" | "medium" | "low" | null,
       parsed?.experienceLevel || null,
-      companyNotes
+      companyNotes,
+      job.companyName || null
     );
     
     const options: PracticeOption[] = interviewPlan.phases.map((phase, index) => ({
@@ -1210,7 +1211,8 @@ jobsRouter.get("/job-targets/:id/practice-context/:roundCategory", requireAuth, 
 
     const matchingRound = blueprintData?.blueprint?.interviewRounds?.find(r => {
       const roundLower = r.type.toLowerCase();
-      if (roundCategory === "hr_screening" && roundLower.includes("phone")) return true;
+      if (roundCategory === "aptitude_assessment" && roundLower.includes("aptitude")) return true;
+      if (roundCategory === "hr_screening" && (roundLower.includes("phone") || roundLower.includes("hr"))) return true;
       if (roundCategory === "hiring_manager" && roundLower.includes("hiring")) return true;
       if (roundCategory === "technical_interview" && roundLower.includes("technical")) return true;
       if (roundCategory === "coding_assessment" && (roundLower.includes("coding") || roundLower.includes("dsa"))) return true;
@@ -1219,6 +1221,9 @@ jobsRouter.get("/job-targets/:id/practice-context/:roundCategory", requireAuth, 
       if (roundCategory === "behavioral" && roundLower.includes("behavioral")) return true;
       if (roundCategory === "culture_values" && (roundLower.includes("culture") || roundLower.includes("values"))) return true;
       if (roundCategory === "bar_raiser" && roundLower.includes("bar_raiser")) return true;
+      if (roundCategory === "panel_interview" && roundLower.includes("panel")) return true;
+      if (roundCategory === "group_discussion" && roundLower.includes("group")) return true;
+      if (roundCategory === "presentation" && roundLower.includes("presentation")) return true;
       return false;
     });
 
@@ -1251,6 +1256,7 @@ function generatePromptHints(
   const archetype = context.archetype || "enterprise";
   
   const basePersonas: Record<RoundCategory, string> = {
+    aptitude_assessment: `You are conducting an aptitude assessment at ${companyName}. Present quantitative, logical, and verbal reasoning problems. Evaluate analytical thinking and problem-solving speed.`,
     hr_screening: `You are a friendly but professional HR recruiter at ${companyName}. Your goal is to assess basic qualifications, communication skills, and culture fit. Ask about background, motivation for the role, and salary expectations.`,
     hiring_manager: `You are the hiring manager for this ${context.roleTitle} position at ${companyName}. You're looking for someone who can hit the ground running. Ask about relevant experience, leadership style, and how they'd approach key challenges.`,
     technical_interview: `You are a senior engineer at ${companyName} conducting a technical interview. Ask about technical concepts, past projects, and problem-solving approach. Probe for depth of understanding.`,
@@ -1261,9 +1267,12 @@ function generatePromptHints(
     culture_values: `You are assessing culture fit at ${companyName}. Ask about values alignment, collaboration style, and how they handle ambiguity and conflict.`,
     bar_raiser: `You are a bar raiser at ${companyName} (cross-functional interviewer ensuring hiring standards). Ask probing questions across domains and evaluate if this candidate raises the bar for the team.`,
     panel_interview: `You are leading a panel interview at ${companyName}. Cover multiple aspects of the role including technical skills, leadership, and culture fit.`,
+    group_discussion: `You are facilitating a group discussion at ${companyName}. Observe communication skills, teamwork, leadership potential, and ability to articulate and defend positions.`,
+    presentation: `You are evaluating a presentation at ${companyName}. Assess the candidate's ability to structure information, communicate clearly, handle questions, and demonstrate expertise.`,
   };
 
   const evaluationFocus: Record<RoundCategory, string[]> = {
+    aptitude_assessment: ["quantitative reasoning", "logical thinking", "verbal ability", "problem-solving speed"],
     hr_screening: ["communication clarity", "motivation", "cultural fit basics", "salary alignment"],
     hiring_manager: ["relevant experience", "leadership potential", "problem-solving", "role fit"],
     technical_interview: ["technical depth", "problem decomposition", "communication", "learning ability"],
@@ -1274,9 +1283,16 @@ function generatePromptHints(
     culture_values: ["values alignment", "collaboration style", "adaptability", "ethical reasoning"],
     bar_raiser: ["overall bar-raising", "cross-functional impact", "long-term potential", "culture contribution"],
     panel_interview: ["consistency across interviewers", "depth and breadth", "composure", "engagement"],
+    group_discussion: ["communication clarity", "teamwork", "leadership emergence", "listening skills"],
+    presentation: ["structure and clarity", "visual communication", "handling Q&A", "time management"],
   };
 
   const sampleQuestions: Record<RoundCategory, string[]> = {
+    aptitude_assessment: [
+      "If a train travels 120 km in 2 hours, what is its average speed?",
+      "Complete the pattern: 2, 6, 12, 20, ?",
+      "Which word is the odd one out: Apple, Mango, Carrot, Banana?",
+    ],
     hr_screening: [
       "Walk me through your background and what attracted you to this role.",
       "What do you know about our company and why do you want to work here?",
@@ -1326,6 +1342,16 @@ function generatePromptHints(
       "Give us an overview of your most impactful project.",
       "How do you prioritize competing demands?",
       "What questions do you have for us about the team and role?",
+    ],
+    group_discussion: [
+      "What are your views on this topic?",
+      "How do you respond to the previous speaker's point?",
+      "Can you summarize the key points made by the group?",
+    ],
+    presentation: [
+      "Please walk us through your presentation.",
+      "How did you arrive at these recommendations?",
+      "What are the risks and how would you mitigate them?",
     ],
   };
 

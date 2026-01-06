@@ -1,4 +1,5 @@
 export type RoundCategory = 
+  | "aptitude_assessment"
   | "hr_screening"
   | "hiring_manager" 
   | "technical_interview"
@@ -8,7 +9,9 @@ export type RoundCategory =
   | "behavioral"
   | "culture_values"
   | "bar_raiser"
-  | "panel_interview";
+  | "panel_interview"
+  | "group_discussion"
+  | "presentation";
 
 export type PracticeMode = 
   | "live_interview"
@@ -105,6 +108,30 @@ export const ROUND_TAXONOMY: Record<RoundCategory, RoundTaxonomy> = {
     practiceMode: "live_interview",
     typicalDuration: "60 min",
     icon: "users",
+  },
+  aptitude_assessment: {
+    category: "aptitude_assessment",
+    label: "Aptitude Assessment",
+    description: "Quantitative, logical, and verbal reasoning assessment",
+    practiceMode: "coding_lab",
+    typicalDuration: "60 min",
+    icon: "calculator",
+  },
+  group_discussion: {
+    category: "group_discussion",
+    label: "Group Discussion",
+    description: "Group discussion evaluating communication and teamwork skills",
+    practiceMode: "live_interview",
+    typicalDuration: "30-45 min",
+    icon: "users",
+  },
+  presentation: {
+    category: "presentation",
+    label: "Presentation",
+    description: "Present analysis, recommendations, or technical work to interviewers",
+    practiceMode: "presentation",
+    typicalDuration: "45 min",
+    icon: "presentation",
   },
 };
 

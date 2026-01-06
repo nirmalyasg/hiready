@@ -102,6 +102,7 @@ const companyArchetypeOptions = [
 ];
 
 type RoundCategory = 
+  | "aptitude_assessment"
   | "hr_screening"
   | "hiring_manager" 
   | "technical_interview"
@@ -111,7 +112,9 @@ type RoundCategory =
   | "behavioral"
   | "culture_values"
   | "bar_raiser"
-  | "panel_interview";
+  | "panel_interview"
+  | "group_discussion"
+  | "presentation";
 
 type PracticeMode = "live_interview" | "coding_lab" | "case_study" | "presentation";
 

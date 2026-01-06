@@ -422,6 +422,7 @@ export interface UnifiedInterviewPlan {
 }
 
 const PHASE_TO_CATEGORY_MAP: Record<string, { category: string; practiceMode: "live_interview" | "coding_lab" | "case_study" | "presentation"; description: string }> = {
+  "Aptitude Assessment": { category: "aptitude_assessment", practiceMode: "coding_lab", description: "Quantitative, logical, and verbal reasoning assessment" },
   "HR Screening": { category: "hr_screening", practiceMode: "live_interview", description: "Behavioral assessment, motivation, background, and cultural fit" },
   "Phone Screen": { category: "hr_screening", practiceMode: "live_interview", description: "Initial screening call covering background and basic fit" },
   "Technical Interview": { category: "technical_interview", practiceMode: "live_interview", description: "Technical discussion covering domain expertise and problem-solving" },
@@ -438,6 +439,8 @@ const PHASE_TO_CATEGORY_MAP: Record<string, { category: string; practiceMode: "l
   "Culture Fit": { category: "culture_values", practiceMode: "live_interview", description: "Assessment of values alignment and collaboration style" },
   "Bar Raiser": { category: "bar_raiser", practiceMode: "live_interview", description: "Cross-functional interview focused on raising the hiring bar" },
   "Panel Interview": { category: "panel_interview", practiceMode: "live_interview", description: "Interview with multiple interviewers covering various aspects" },
+  "Group Discussion": { category: "group_discussion", practiceMode: "live_interview", description: "Group discussion evaluating communication and teamwork" },
+  "Presentation": { category: "presentation", practiceMode: "presentation", description: "Present analysis, recommendations, or technical work to interviewers" },
 };
 
 const DEFAULT_PHASES_BY_ROLE_FAMILY: Record<string, { name: string; mins: number }[]> = {
