@@ -501,7 +501,7 @@ export default function InterviewConfigPage() {
     );
   }
 
-  if (!roleKit && !practiceContext && !isSkillOnlyMode) {
+  if (!roleKit && !practiceContext && !isSkillOnlyMode && !isInterviewModeType) {
     return null;
   }
 
