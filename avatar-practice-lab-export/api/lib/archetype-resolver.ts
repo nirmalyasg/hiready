@@ -861,6 +861,191 @@ export interface EnrichedInterviewPlan extends Omit<UnifiedInterviewPlan, 'phase
   phases: EnrichedInterviewPhase[];
 }
 
+// ==============================================================================
+// ROLE-ONLY PRACTICE OPTIONS - Used for built-in roles without company context
+// ==============================================================================
+
+export interface RolePracticeOption {
+  id: string;
+  roundCategory: string;
+  label: string;
+  description: string;
+  typicalDuration: string;
+  icon: string;
+  practiceMode: "live_interview" | "coding_lab" | "case_study" | "presentation";
+  focusAreas: string[];
+  blueprints: TaskBlueprint[];
+}
+
+const INTERVIEW_TYPE_METADATA: Record<string, { 
+  label: string; 
+  description: string; 
+  typicalDuration: string; 
+  icon: string;
+  practiceMode: "live_interview" | "coding_lab" | "case_study" | "presentation";
+  taskTypes: string[];
+}> = {
+  technical: { 
+    label: "Technical Interview", 
+    description: "Technical problem solving including coding, algorithms, system design, and domain expertise", 
+    typicalDuration: "10-15 min", 
+    icon: "code",
+    practiceMode: "live_interview",
+    taskTypes: ["coding_explain", "debugging", "code_modification", "code_review"],
+  },
+  coding: { 
+    label: "Coding Assessment", 
+    description: "Hands-on coding challenges with data structures, algorithms, and problem solving", 
+    typicalDuration: "10-15 min", 
+    icon: "terminal",
+    practiceMode: "coding_lab",
+    taskTypes: ["coding_explain", "debugging", "code_modification"],
+  },
+  hiring_manager: { 
+    label: "Hiring Manager Round", 
+    description: "Deep-dive conversation on role expectations, team fit, and leadership assessment", 
+    typicalDuration: "10-15 min", 
+    icon: "user",
+    practiceMode: "live_interview",
+    taskTypes: ["behavioral_star", "execution_scenario"],
+  },
+  behavioral: { 
+    label: "Behavioral Interview", 
+    description: "STAR-format questions about past experiences, teamwork, and competencies", 
+    typicalDuration: "10-15 min", 
+    icon: "message-circle",
+    practiceMode: "live_interview",
+    taskTypes: ["behavioral_star"],
+  },
+  hr: { 
+    label: "HR Screening", 
+    description: "Initial screening covering background, motivation, and cultural fit", 
+    typicalDuration: "10-15 min", 
+    icon: "phone",
+    practiceMode: "live_interview",
+    taskTypes: ["behavioral_star"],
+  },
+  case: { 
+    label: "Case Study", 
+    description: "Business case analysis with structured problem-solving and recommendations", 
+    typicalDuration: "10-15 min", 
+    icon: "briefcase",
+    practiceMode: "case_study",
+    taskTypes: ["case_interview", "metrics_case", "execution_scenario"],
+  },
+  product: { 
+    label: "Product Sense", 
+    description: "Product thinking, prioritization, and user-focused problem solving", 
+    typicalDuration: "10-15 min", 
+    icon: "layout",
+    practiceMode: "case_study",
+    taskTypes: ["case_interview", "metrics_case", "execution_scenario"],
+  },
+  portfolio: { 
+    label: "Portfolio Review", 
+    description: "Walk through your design portfolio and explain your design process", 
+    typicalDuration: "10-15 min", 
+    icon: "image",
+    practiceMode: "presentation",
+    taskTypes: ["portfolio_walkthrough", "insight_storytelling"],
+  },
+  sales_roleplay: { 
+    label: "Sales Roleplay", 
+    description: "Sales pitch and objection handling in simulated customer scenarios", 
+    typicalDuration: "10-15 min", 
+    icon: "dollar-sign",
+    practiceMode: "live_interview",
+    taskTypes: ["behavioral_star"],
+  },
+  aptitude: { 
+    label: "Aptitude Assessment", 
+    description: "Quantitative, logical, and verbal reasoning evaluation", 
+    typicalDuration: "10-15 min", 
+    icon: "brain",
+    practiceMode: "live_interview",
+    taskTypes: [],
+  },
+  group: { 
+    label: "Group Discussion", 
+    description: "Collaborative discussion evaluating communication and teamwork", 
+    typicalDuration: "10-15 min", 
+    icon: "users",
+    practiceMode: "live_interview",
+    taskTypes: [],
+  },
+  sql: { 
+    label: "SQL Assessment", 
+    description: "SQL query writing and database problem solving", 
+    typicalDuration: "10-15 min", 
+    icon: "database",
+    practiceMode: "coding_lab",
+    taskTypes: ["sql_case"],
+  },
+  analytics: { 
+    label: "Analytics Case", 
+    description: "Data-driven problem solving, metric analysis, and insights presentation", 
+    typicalDuration: "10-15 min", 
+    icon: "bar-chart",
+    practiceMode: "case_study",
+    taskTypes: ["metrics_investigation", "insight_storytelling"],
+  },
+  ml: { 
+    label: "ML/AI Round", 
+    description: "Machine learning concepts, model design, and implementation discussion", 
+    typicalDuration: "10-15 min", 
+    icon: "cpu",
+    practiceMode: "live_interview",
+    taskTypes: ["coding_explain", "code_review"],
+  },
+};
+
+export async function getRolePracticeOptions(
+  roleArchetypeId: string,
+  experienceLevel: string | null
+): Promise<RolePracticeOption[]> {
+  // Get role archetype details
+  const archetype = await getRoleArchetypeDetails(roleArchetypeId);
+  if (!archetype) {
+    return [];
+  }
+  
+  // Get common interview types from role archetype
+  const interviewTypes = (archetype.commonInterviewTypes as string[]) || ["technical", "hiring_manager", "behavioral"];
+  
+  // Get all task blueprints for this role
+  const allBlueprints = await getRoleTaskBlueprints(roleArchetypeId);
+  
+  // Build practice options from interview types
+  const options: RolePracticeOption[] = [];
+  
+  for (const interviewType of interviewTypes) {
+    const metadata = INTERVIEW_TYPE_METADATA[interviewType];
+    if (!metadata) continue;
+    
+    // Match blueprints to this interview type
+    const matchingBlueprints = allBlueprints.filter(b => 
+      metadata.taskTypes.includes(b.taskType)
+    );
+    
+    // Get focus areas from primary skill dimensions
+    const focusAreas = (archetype.primarySkillDimensions as string[]) || [];
+    
+    options.push({
+      id: `${roleArchetypeId}-${interviewType}`,
+      roundCategory: interviewType,
+      label: metadata.label,
+      description: metadata.description,
+      typicalDuration: metadata.typicalDuration,
+      icon: metadata.icon,
+      practiceMode: metadata.practiceMode,
+      focusAreas: focusAreas.slice(0, 3),
+      blueprints: matchingBlueprints,
+    });
+  }
+  
+  return options;
+}
+
 export async function getEnrichedInterviewPlan(
   roleArchetypeId: string | null,
   roleFamily: string | null,

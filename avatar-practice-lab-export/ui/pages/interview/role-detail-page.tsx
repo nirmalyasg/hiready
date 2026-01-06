@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Play, FileText, Code, Phone, User, Briefcase, MessageCircle, Heart, TrendingUp, ChevronDown, ChevronUp, Sparkles, Clock, Target } from "lucide-react";
+import { ArrowLeft, Play, FileText, Code, Phone, User, Briefcase, MessageCircle, Heart, TrendingUp, ChevronDown, ChevronUp, Sparkles, Clock, Target, LineChart, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SidebarLayout from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -40,6 +40,7 @@ interface PracticeOption {
     roleArchetypeId: string;
   };
   focusHint: string | null;
+  focusAreas?: string[];
 }
 
 const domainLabels: Record<string, string> = {
@@ -66,14 +67,26 @@ const levelConfig: Record<string, { label: string; bg: string; text: string }> =
 
 const categoryConfig: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
   hr_screening: { icon: <Phone className="w-4 h-4" />, color: "text-emerald-600", bg: "bg-emerald-50" },
+  hr: { icon: <Phone className="w-4 h-4" />, color: "text-emerald-600", bg: "bg-emerald-50" },
   hiring_manager: { icon: <User className="w-4 h-4" />, color: "text-blue-600", bg: "bg-blue-50" },
   technical_interview: { icon: <Code className="w-4 h-4" />, color: "text-violet-600", bg: "bg-violet-50" },
-  coding_assessment: { icon: <Code className="w-4 h-4" />, color: "text-violet-600", bg: "bg-violet-50" },
-  system_design: { icon: <Code className="w-4 h-4" />, color: "text-violet-600", bg: "bg-violet-50" },
+  technical: { icon: <Code className="w-4 h-4" />, color: "text-violet-600", bg: "bg-violet-50" },
+  coding: { icon: <Code className="w-4 h-4" />, color: "text-indigo-600", bg: "bg-indigo-50" },
+  coding_assessment: { icon: <Code className="w-4 h-4" />, color: "text-indigo-600", bg: "bg-indigo-50" },
+  system_design: { icon: <Code className="w-4 h-4" />, color: "text-purple-600", bg: "bg-purple-50" },
+  sql: { icon: <LineChart className="w-4 h-4" />, color: "text-cyan-600", bg: "bg-cyan-50" },
+  analytics: { icon: <LineChart className="w-4 h-4" />, color: "text-teal-600", bg: "bg-teal-50" },
+  ml: { icon: <Briefcase className="w-4 h-4" />, color: "text-fuchsia-600", bg: "bg-fuchsia-50" },
   case_study: { icon: <Briefcase className="w-4 h-4" />, color: "text-orange-600", bg: "bg-orange-50" },
+  case: { icon: <Briefcase className="w-4 h-4" />, color: "text-orange-600", bg: "bg-orange-50" },
+  product: { icon: <Briefcase className="w-4 h-4" />, color: "text-emerald-600", bg: "bg-emerald-50" },
+  portfolio: { icon: <Briefcase className="w-4 h-4" />, color: "text-pink-600", bg: "bg-pink-50" },
+  sales_roleplay: { icon: <User className="w-4 h-4" />, color: "text-amber-600", bg: "bg-amber-50" },
   behavioral: { icon: <MessageCircle className="w-4 h-4" />, color: "text-amber-600", bg: "bg-amber-50" },
   culture_values: { icon: <Heart className="w-4 h-4" />, color: "text-pink-600", bg: "bg-pink-50" },
   bar_raiser: { icon: <TrendingUp className="w-4 h-4" />, color: "text-red-600", bg: "bg-red-50" },
+  aptitude: { icon: <TrendingUp className="w-4 h-4" />, color: "text-slate-600", bg: "bg-slate-50" },
+  group: { icon: <Users className="w-4 h-4" />, color: "text-sky-600", bg: "bg-sky-50" },
 };
 
 export default function RoleDetailPage() {
@@ -216,29 +229,49 @@ export default function RoleDetailPage() {
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">Practice each stage to prepare</p>
               </div>
-              <div className="p-2">
+              <div className="p-3 space-y-2">
                 {practiceOptions.map((option, idx) => {
                   const config = categoryConfig[option.roundCategory] || { icon: <FileText className="w-4 h-4" />, color: "text-slate-600", bg: "bg-slate-50" };
+                  const focusAreas = option.focusAreas || [];
                   return (
                     <div
                       key={option.id}
-                      className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${idx !== practiceOptions.length - 1 ? "mb-1" : ""} hover:bg-slate-50 active:bg-slate-100`}
+                      className="group bg-white border border-slate-200 rounded-xl p-4 transition-all hover:border-[#ee7e65]/40 hover:shadow-md"
                     >
-                      <div className={`w-9 h-9 rounded-lg ${config.bg} ${config.color} flex items-center justify-center flex-shrink-0`}>
-                        {config.icon}
+                      <div className="flex items-start gap-3">
+                        <div className={`w-10 h-10 rounded-xl ${config.bg} ${config.color} flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105`}>
+                          {config.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="font-semibold text-[#042c4c] text-sm">{option.label}</p>
+                              <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{option.description}</p>
+                            </div>
+                            <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-xs font-medium flex-shrink-0">
+                              {option.typicalDuration}
+                            </span>
+                          </div>
+                          {focusAreas.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {focusAreas.slice(0, 3).map((area: string, areaIdx: number) => (
+                                <span key={areaIdx} className="px-1.5 py-0.5 bg-[#ee7e65]/10 text-[#ee7e65] rounded text-[10px] font-medium">
+                                  {area}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-[#042c4c] text-sm truncate">{option.label}</p>
-                        <p className="text-xs text-slate-500">{option.typicalDuration}</p>
+                      <div className="mt-3 pt-3 border-t border-slate-100">
+                        <Button
+                          onClick={() => handleStartPractice(option)}
+                          className="w-full bg-[#042c4c] hover:bg-[#0a3d5c] text-white h-9 text-sm font-medium shadow-sm"
+                        >
+                          <Play className="w-3.5 h-3.5 mr-2" />
+                          Start Practice
+                        </Button>
                       </div>
-                      <Button
-                        onClick={() => handleStartPractice(option)}
-                        size="sm"
-                        className="bg-[#042c4c] hover:bg-[#0a3d5c] text-white h-8 px-3 text-xs shadow-sm"
-                      >
-                        <Play className="w-3 h-3 mr-1" />
-                        Start
-                      </Button>
                     </div>
                   );
                 })}

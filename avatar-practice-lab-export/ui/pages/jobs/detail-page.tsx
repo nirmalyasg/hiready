@@ -124,14 +124,28 @@ const statusConfig: Record<string, { label: string; bg: string; text: string }> 
 
 const categoryConfig: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
   hr_screening: { icon: <Phone className="w-4 h-4" />, color: "text-emerald-600", bg: "bg-emerald-50" },
+  hr: { icon: <Phone className="w-4 h-4" />, color: "text-emerald-600", bg: "bg-emerald-50" },
   hiring_manager: { icon: <User className="w-4 h-4" />, color: "text-blue-600", bg: "bg-blue-50" },
   technical_interview: { icon: <Code className="w-4 h-4" />, color: "text-violet-600", bg: "bg-violet-50" },
-  coding_assessment: { icon: <Code className="w-4 h-4" />, color: "text-violet-600", bg: "bg-violet-50" },
-  system_design: { icon: <Code className="w-4 h-4" />, color: "text-violet-600", bg: "bg-violet-50" },
+  technical: { icon: <Code className="w-4 h-4" />, color: "text-violet-600", bg: "bg-violet-50" },
+  coding: { icon: <Code className="w-4 h-4" />, color: "text-indigo-600", bg: "bg-indigo-50" },
+  coding_assessment: { icon: <Code className="w-4 h-4" />, color: "text-indigo-600", bg: "bg-indigo-50" },
+  system_design: { icon: <Code className="w-4 h-4" />, color: "text-purple-600", bg: "bg-purple-50" },
+  sql: { icon: <Code className="w-4 h-4" />, color: "text-cyan-600", bg: "bg-cyan-50" },
+  analytics: { icon: <Briefcase className="w-4 h-4" />, color: "text-teal-600", bg: "bg-teal-50" },
+  ml: { icon: <Briefcase className="w-4 h-4" />, color: "text-fuchsia-600", bg: "bg-fuchsia-50" },
   case_study: { icon: <Briefcase className="w-4 h-4" />, color: "text-orange-600", bg: "bg-orange-50" },
+  case: { icon: <Briefcase className="w-4 h-4" />, color: "text-orange-600", bg: "bg-orange-50" },
+  product: { icon: <Briefcase className="w-4 h-4" />, color: "text-emerald-600", bg: "bg-emerald-50" },
+  portfolio: { icon: <Briefcase className="w-4 h-4" />, color: "text-pink-600", bg: "bg-pink-50" },
+  sales_roleplay: { icon: <User className="w-4 h-4" />, color: "text-amber-600", bg: "bg-amber-50" },
   behavioral: { icon: <MessageCircle className="w-4 h-4" />, color: "text-amber-600", bg: "bg-amber-50" },
   culture_values: { icon: <Heart className="w-4 h-4" />, color: "text-pink-600", bg: "bg-pink-50" },
   bar_raiser: { icon: <TrendingUp className="w-4 h-4" />, color: "text-red-600", bg: "bg-red-50" },
+  aptitude_assessment: { icon: <TrendingUp className="w-4 h-4" />, color: "text-slate-600", bg: "bg-slate-50" },
+  aptitude: { icon: <TrendingUp className="w-4 h-4" />, color: "text-slate-600", bg: "bg-slate-50" },
+  group_discussion: { icon: <MessageCircle className="w-4 h-4" />, color: "text-sky-600", bg: "bg-sky-50" },
+  group: { icon: <MessageCircle className="w-4 h-4" />, color: "text-sky-600", bg: "bg-sky-50" },
 };
 
 export default function JobDetailPage() {
