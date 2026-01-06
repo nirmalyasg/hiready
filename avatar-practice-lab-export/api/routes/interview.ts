@@ -719,12 +719,38 @@ interviewRouter.post("/session/start", requireAuth, async (req: Request, res: Re
       })
       .returning();
     
-    let planData = null;
+    let planData: any = null;
     if (interviewPlanId) {
       const [plan] = await db.select().from(interviewPlans).where(eq(interviewPlans.id, interviewPlanId));
       if (plan) {
         planData = plan.planJson;
       }
+    }
+    
+    // Add case study data if interview type is case_study
+    if (config.interviewType === 'case_study') {
+      if (!planData) {
+        planData = { phases: [], focusAreas: [] };
+      }
+      
+      // Generate case study context from plan phases or create default
+      const caseStudyPhase = planData.phases?.find((p: any) => 
+        p.name?.toLowerCase().includes('case') || 
+        p.practiceMode === 'case_study' ||
+        p.category === 'case_study'
+      );
+      
+      planData.caseStudy = {
+        id: `case-${config.id}`,
+        title: caseStudyPhase?.name || 'Business Case Study',
+        prompt: caseStudyPhase?.objectives?.join('. ') || 
+          'You will be presented with a business problem to analyze. Structure your approach, identify key factors, and present your recommendations.',
+        context: planData.focusAreas?.join(', ') || 'Business strategy and problem-solving',
+        caseType: 'strategy',
+        difficulty: config.seniority === 'senior' ? 'Hard' : config.seniority === 'entry' ? 'Easy' : 'Medium',
+        evaluationFocus: ['Problem structuring', 'Analytical thinking', 'Communication', 'Recommendations'],
+        expectedDurationMinutes: caseStudyPhase?.duration || 30,
+      };
     }
     
     res.json({ success: true, session: { ...session, plan: planData } });
