@@ -77,9 +77,8 @@ interface ModeSetupData {
 const modeLabels: Record<string, string> = {
   coding_technical: "Coding & Technical",
   case_problem_solving: "Case & Problem Solving",
-  behavioral: "Behavioral & Experience",
-  hiring_manager: "Hiring Manager / Role Fit",
-  system_deep_dive: "System / Deep Dive",
+  behavioral: "Behavioral and Leadership",
+  hiring_manager: "HR Interview",
 };
 
 export default function InterviewConfigPage() {

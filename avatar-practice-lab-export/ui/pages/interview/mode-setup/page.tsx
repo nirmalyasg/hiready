@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ChevronRight, Code, Briefcase, MessageSquare, Users, Brain, Clock, ArrowRight, Loader2, Check } from "lucide-react";
+import { ChevronRight, Code, Briefcase, MessageSquare, Users, Clock, ArrowRight, Loader2, Check, Building2, Plus, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -31,7 +32,6 @@ const modeConfig: Record<string, { icon: any; color: string; gradient: string }>
   case_problem_solving: { icon: Briefcase, color: "text-orange-600", gradient: "from-orange-500 to-orange-600" },
   behavioral: { icon: MessageSquare, color: "text-amber-600", gradient: "from-amber-500 to-amber-600" },
   hiring_manager: { icon: Users, color: "text-blue-600", gradient: "from-blue-500 to-blue-600" },
-  system_deep_dive: { icon: Brain, color: "text-violet-600", gradient: "from-violet-500 to-violet-600" },
 };
 
 const seniorityOptions = [
@@ -54,6 +54,8 @@ export default function InterviewModeSetupPage() {
 
   const [selectedArchetype, setSelectedArchetype] = useState<string | null>(null);
   const [selectedSeniority, setSelectedSeniority] = useState<string>("mid");
+  const [companyName, setCompanyName] = useState<string>("");
+  const [showAddJD, setShowAddJD] = useState(false);
 
   useEffect(() => {
     const storedContext = sessionStorage.getItem("interviewModeContext");
@@ -122,6 +124,7 @@ export default function InterviewModeSetupPage() {
         taxonomy: modeContext.taxonomy,
         roleArchetypeId: selectedArchetype,
         seniority: selectedSeniority,
+        companyName: companyName || null,
         configId: data.config.id,
       }));
 
@@ -200,20 +203,20 @@ export default function InterviewModeSetupPage() {
                 {filteredArchetypes.map((archetype) => (
                   <button
                     key={archetype.id}
-                    onClick={() => setSelectedArchetype(archetype.id)}
+                    onClick={() => { setSelectedArchetype(archetype.id); setShowAddJD(false); }}
                     className={`text-left p-4 rounded-xl border-2 transition-all ${
-                      selectedArchetype === archetype.id
+                      selectedArchetype === archetype.id && !showAddJD
                         ? `border-current ${config.color} bg-slate-50`
                         : "border-slate-200 hover:border-slate-300"
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                        selectedArchetype === archetype.id
+                        selectedArchetype === archetype.id && !showAddJD
                           ? `border-current ${config.color} bg-current`
                           : "border-slate-300"
                       }`}>
-                        {selectedArchetype === archetype.id && (
+                        {selectedArchetype === archetype.id && !showAddJD && (
                           <Check className="w-3 h-3 text-white" />
                         )}
                       </div>
@@ -224,6 +227,63 @@ export default function InterviewModeSetupPage() {
                     </div>
                   </button>
                 ))}
+                <button
+                  onClick={() => { setShowAddJD(true); setSelectedArchetype(null); }}
+                  className={`text-left p-4 rounded-xl border-2 border-dashed transition-all ${
+                    showAddJD
+                      ? `border-current ${config.color} bg-slate-50`
+                      : "border-slate-300 hover:border-slate-400"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                      showAddJD
+                        ? `border-current ${config.color} bg-current`
+                        : "border-slate-300"
+                    }`}>
+                      {showAddJD ? (
+                        <Check className="w-3 h-3 text-white" />
+                      ) : (
+                        <Plus className="w-3 h-3 text-slate-400" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-medium text-[#042c4c] text-sm">Add Job Description</p>
+                      <p className="text-xs text-slate-500 mt-0.5">Upload or paste your target job</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+              {showAddJD && (
+                <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                  <p className="text-sm text-slate-600 mb-2">
+                    To use a specific job description, go to Custom Interview from the main page.
+                  </p>
+                  <button
+                    onClick={() => navigate("/interview")}
+                    className={`text-sm font-medium ${config.color} hover:underline`}
+                  >
+                    Go to Custom Interview →
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200 p-6">
+              <Label className="text-base font-semibold text-[#042c4c] mb-2 block">
+                Target Company (Optional)
+              </Label>
+              <p className="text-sm text-slate-500 mb-4">
+                Questions will be tailored to this company's interview style
+              </p>
+              <div className="relative">
+                <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  placeholder="e.g., Google, Amazon, Microsoft..."
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  className="pl-10 rounded-xl"
+                />
               </div>
             </div>
 
@@ -272,6 +332,12 @@ export default function InterviewModeSetupPage() {
                     <span className="text-slate-500">Level</span>
                     <span className="font-medium text-[#042c4c] capitalize">{selectedSeniority}</span>
                   </div>
+                  {companyName && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Company</span>
+                      <span className="font-medium text-[#042c4c]">{companyName}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-slate-500">Duration</span>
                     <span className="font-medium text-[#042c4c]">{modeContext.taxonomy.typicalDuration}</span>
