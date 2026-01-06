@@ -118,9 +118,8 @@ export default function InterviewCustomPage() {
   };
 
   const handleSelectJob = (job: JobTarget) => {
-    setSelectedJob(job);
-    setSelectedJobTargetId(job.id);
-    setAddJobMode(null);
+    // Navigate to job detail page to use archetype-based interview rounds
+    navigate(`/jobs/${job.id}`);
   };
 
   const handleAddJobViaUrl = async () => {
