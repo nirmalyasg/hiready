@@ -1,0 +1,288 @@
+Here’s a clean way to wire this into your app so it works every time a user adds a custom job, even if the company isn’t in your seed list.
+
+1) What you store (minimal but complete)
+A) companies (seeded from your sheet)
+
+name
+
+country
+
+archetype (e.g., big_tech_product, india_consumer_tech, it_services_mass_hiring, consulting_mbb, bfsI_regulated, fmcg, manufacturing, etc.)
+
+sector
+
+aliases[] (optional: “HCLTech” vs “HCL Technologies”)
+
+confidence (High/Medium)
+
+B) company_archetype_rules (fallback when company not found)
+
+rule patterns like:
+
+if domain contains "bank" or "insurance" → bfsi_regulated
+
+if company_size=enterprise AND industry=software AND has "SaaS" → enterprise_saas
+
+if job_title contains "SDE" AND company_size=big → big_tech_product
+
+also allow manual override by user/admin
+
+C) archetype_interview_structure_defaults
+
+This is your “round mix” template per archetype + role family:
+
+archetype
+
+role_family (tech / data / business / sales / ops)
+
+round_mix (ordered list)
+
+emphasis_weights (JSON)
+
+default_style (neutral/probing)
+
+D) question_patterns (your core pattern library)
+
+role_family
+
+interview_type
+
+pattern_type
+
+template
+
+probe_tree
+
+tags
+
+difficulty_band
+
+E) rubrics
+
+role_family + interview_type + seniority
+
+dimensions + anchors
+
+2) The runtime flow when user adds a custom job
+Step 1 — Save Job
+
+User adds:
+
+company name
+
+job title
+
+JD text (paste or upload)
+
+optional: company size/type (startup/mid/enterprise)
+
+Create saved_jobs row.
+
+Step 2 — Company → archetype mapping (3-stage)
+
+Stage A: direct match
+
+normalize company name (lower, strip punctuation)
+
+lookup in companies table
+
+if found → archetype = company.archetype
+
+Stage B: alias match
+
+check aliases[]
+
+Stage C: inference fallback
+If not found:
+
+infer from JD + company signals:
+
+industry keywords (fintech, bank, retail, SaaS, pharma)
+
+role family (tech/data/business)
+
+seniority hints (intern/entry/lead)
+
+company type/size (if user selects; else infer from JD tone)
+
+run company_archetype_rules (deterministic)
+
+if still low confidence → ask user 1-click:
+
+“Which company type is this?” (Startup / Enterprise / Bank / Consulting / IT Services)
+
+Store:
+
+saved_jobs.archetype
+
+saved_jobs.archetype_confidence
+
+✅ This makes it robust for unknown companies.
+
+3) Map job → role family (so you pick the right interview plan)
+
+You should not rely only on user-selected role label.
+
+Do:
+
+role_family = classify(job_title + jd_text)
+
+use a simple ruleset first (fast), then optional LLM classification
+
+Examples:
+
+“Software Engineer”, “Backend”, “SDE” → tech
+
+“Data Analyst”, “BI Analyst” → data
+
+“Business Analyst”, “Ops Analyst” → business
+
+“Account Executive”, “Sales” → sales
+
+“Operations”, “Program Ops” → ops
+
+Store in saved_jobs.role_family.
+
+4) Generate interview structure (plan) from archetype + role family
+
+When user clicks Practice:
+
+Read:
+
+saved_jobs.archetype
+
+saved_jobs.role_family
+
+saved_jobs.seniority
+
+interview_type chosen by user
+
+Fetch structure defaults:
+From archetype_interview_structure_defaults:
+
+round_mix
+
+phase timings
+
+emphasis_weights
+
+Create interview_plan JSON
+Example for big_tech_product + tech + entry:
+
+intro (2–3 mins)
+
+resume deep dive (8 mins)
+
+coding round (30 mins)
+
+behavioral (10 mins)
+
+close (2 mins)
+
+Store interview_plans.
+
+5) Generate the “right blueprint” per interview round
+
+For each phase in the plan:
+
+pick question patterns by:
+
+role_family
+
+interview_type
+
+phase intent
+
+emphasis_weights
+
+JD must-haves
+
+resume triggers
+
+Example (coding phase)
+
+You don’t pick “random leetcode questions”.
+You pick:
+
+patterns tagged arrays, hashmap, etc.
+
+difficulty based on seniority
+
+probing depth based on archetype
+
+The output blueprint for the interviewer:
+
+10–12 “guiding questions” + follow-up probe trees
+
+allowed topics
+
+strictness level
+
+scoring rubric key
+
+This is what you pass into the interviewer system prompt.
+
+6) Implementation detail: keep it deterministic
+
+Your dev should implement this as a controller:
+
+buildInterviewContext(saved_job_id, user_id)
+
+returns:
+
+archetype pack (structure + weights)
+
+role family pack (skills + patterns list)
+
+rubric pack (per interview type)
+
+resume + JD extracts
+
+generated plan
+
+This object becomes the single input to:
+
+realtime interviewer
+
+evaluator
+
+coach
+
+7) What your dev needs to do next (very specific)
+Backend tasks
+
+Create tables:
+
+companies
+
+archetype_interview_structure_defaults
+
+company_archetype_rules (optional)
+
+Write mapping functions:
+
+normalizeCompanyName()
+
+resolveArchetype(companyName, jdText, optionalCompanyMeta)
+
+resolveRoleFamily(jobTitle, jdText)
+
+Write plan builder:
+
+generatePlan(archetype, roleFamily, seniority, interviewType)
+
+Write blueprint selector:
+
+selectPatterns(planPhase, emphasisWeights, jdExtract, resumeExtract)
+
+Frontend tasks
+
+During “Add Job”, show:
+
+inferred archetype + confidence
+
+allow user override dropdown (1 click)
+
+On “Practice”, show:
+
+detected round mix (editable)
