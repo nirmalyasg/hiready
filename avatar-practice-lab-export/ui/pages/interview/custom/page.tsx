@@ -8,9 +8,8 @@ import {
   Link2, 
   FileText, 
   ChevronRight,
-  Sparkles,
-  Target,
-  ArrowRight
+  ArrowRight,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +23,6 @@ interface JobTarget {
   companyName: string | null;
   location: string | null;
   status: string;
-  jdText: string | null;
 }
 
 type AddMode = "url" | "paste" | "manual" | null;
@@ -33,7 +31,6 @@ export default function InterviewCustomPage() {
   const navigate = useNavigate();
   const [savedJobs, setSavedJobs] = useState<JobTarget[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
   const [addMode, setAddMode] = useState<AddMode>(null);
   
   const [url, setUrl] = useState("");
@@ -147,7 +144,6 @@ export default function InterviewCustomPage() {
   };
 
   const resetForm = () => {
-    setShowAddForm(false);
     setAddMode(null);
     setUrl("");
     setPasteText("");
@@ -160,259 +156,191 @@ export default function InterviewCustomPage() {
   return (
     <SidebarLayout>
       <div className="min-h-screen bg-[#f8f9fb]">
-        <div className="bg-[#042c4c] text-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-4xl">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-                <Target className="w-5 h-5 text-[#ee7e65]" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">Interview Practice</h1>
-                <p className="text-white/70 text-sm">Select a job to start practicing</p>
-              </div>
-            </div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-2xl">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-[#042c4c] mb-2">Interview Practice</h1>
+            <p className="text-slate-500">Add a job or select one to start practicing</p>
           </div>
-        </div>
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-4xl">
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-              {error}
+            <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center justify-between">
+              <span>{error}</span>
+              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600">
+                <X className="w-4 h-4" />
+              </button>
             </div>
           )}
 
           {loadingJobs ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 className="w-8 h-8 animate-spin text-[#ee7e65]" />
+              <Loader2 className="w-6 h-6 animate-spin text-[#ee7e65]" />
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4">
+              {!addMode ? (
+                <div className="bg-white rounded-xl border border-slate-200 p-4">
+                  <p className="text-sm font-medium text-slate-700 mb-3">Add a new job</p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setAddMode("url")}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-[#042c4c] text-white rounded-lg hover:bg-[#0a3d66] transition-colors text-sm font-medium"
+                    >
+                      <Link2 className="w-4 h-4" />
+                      Import from URL
+                    </button>
+                    <button
+                      onClick={() => setAddMode("paste")}
+                      className="flex items-center gap-2 px-4 py-2.5 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium text-slate-700"
+                    >
+                      <FileText className="w-4 h-4" />
+                      Paste JD
+                    </button>
+                    <button
+                      onClick={() => setAddMode("manual")}
+                      className="flex items-center gap-2 px-4 py-2.5 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium text-slate-700"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Enter Manually
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white rounded-xl border border-slate-200 p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-sm font-medium text-slate-700">
+                      {addMode === "url" && "Import from URL"}
+                      {addMode === "paste" && "Paste Job Description"}
+                      {addMode === "manual" && "Enter Job Details"}
+                    </p>
+                    <button
+                      onClick={resetForm}
+                      className="text-slate-400 hover:text-slate-600 text-sm flex items-center gap-1"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {addMode === "url" && (
+                    <div className="space-y-3">
+                      <Input
+                        placeholder="Paste job URL (LinkedIn, Indeed, Naukri...)"
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        className="rounded-lg text-sm"
+                      />
+                      <Button
+                        onClick={handleAddViaUrl}
+                        disabled={adding}
+                        size="sm"
+                        className="bg-[#ee7e65] hover:bg-[#e06a50] rounded-lg"
+                      >
+                        {adding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                        Import
+                      </Button>
+                    </div>
+                  )}
+
+                  {addMode === "paste" && (
+                    <div className="space-y-3">
+                      <Textarea
+                        placeholder="Paste the complete job description here..."
+                        value={pasteText}
+                        onChange={(e) => setPasteText(e.target.value)}
+                        className="rounded-lg text-sm min-h-[120px]"
+                      />
+                      <Button
+                        onClick={handleAddViaPaste}
+                        disabled={adding || !pasteText.trim()}
+                        size="sm"
+                        className="bg-[#ee7e65] hover:bg-[#e06a50] rounded-lg"
+                      >
+                        {adding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                        Create Job
+                      </Button>
+                    </div>
+                  )}
+
+                  {addMode === "manual" && (
+                    <div className="space-y-3">
+                      <Input
+                        placeholder="Job title (e.g., Product Manager)"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="rounded-lg text-sm"
+                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <Input
+                          placeholder="Company (optional)"
+                          value={company}
+                          onChange={(e) => setCompany(e.target.value)}
+                          className="rounded-lg text-sm"
+                        />
+                        <Input
+                          placeholder="Location (optional)"
+                          value={location}
+                          onChange={(e) => setLocation(e.target.value)}
+                          className="rounded-lg text-sm"
+                        />
+                      </div>
+                      <Button
+                        onClick={handleAddManual}
+                        disabled={adding || !title.trim()}
+                        size="sm"
+                        className="bg-[#ee7e65] hover:bg-[#e06a50] rounded-lg"
+                      >
+                        {adding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                        Create Job
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {savedJobs.length > 0 && (
                 <div>
-                  <h2 className="text-lg font-semibold text-[#042c4c] mb-4 flex items-center gap-2">
-                    <Briefcase className="w-5 h-5 text-[#ee7e65]" />
-                    Your Jobs
-                  </h2>
-                  <div className="grid gap-3">
+                  <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-3 px-1">
+                    Your Jobs ({savedJobs.length})
+                  </p>
+                  <div className="space-y-2">
                     {savedJobs.map((job) => (
                       <button
                         key={job.id}
                         onClick={() => handleSelectJob(job)}
-                        className="w-full bg-white rounded-xl border border-slate-200 p-4 text-left hover:border-[#ee7e65] hover:shadow-md transition-all group"
+                        className="w-full bg-white rounded-xl border border-slate-200 px-4 py-3 text-left hover:border-[#ee7e65] hover:shadow-sm transition-all group flex items-center justify-between"
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-[#042c4c] truncate">{job.roleTitle}</p>
-                            <div className="flex items-center gap-4 mt-1 text-sm text-slate-500">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-[#ee7e65]/10 transition-colors">
+                            <Briefcase className="w-4 h-4 text-slate-500 group-hover:text-[#ee7e65]" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-[#042c4c] truncate text-sm">{job.roleTitle}</p>
+                            <div className="flex items-center gap-2 text-xs text-slate-400">
                               {job.companyName && (
-                                <span className="flex items-center gap-1">
-                                  <Building2 className="w-3.5 h-3.5" />
+                                <span className="flex items-center gap-1 truncate">
+                                  <Building2 className="w-3 h-3 flex-shrink-0" />
                                   {job.companyName}
                                 </span>
                               )}
                               {job.location && (
-                                <span className="flex items-center gap-1">
-                                  <MapPin className="w-3.5 h-3.5" />
+                                <span className="flex items-center gap-1 truncate">
+                                  <MapPin className="w-3 h-3 flex-shrink-0" />
                                   {job.location}
                                 </span>
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 text-[#ee7e65] opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="text-sm font-medium">Practice</span>
-                            <ArrowRight className="w-4 h-4" />
-                          </div>
                         </div>
+                        <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#ee7e65] flex-shrink-0" />
                       </button>
                     ))}
                   </div>
                 </div>
               )}
 
-              {!showAddForm ? (
-                <button
-                  onClick={() => setShowAddForm(true)}
-                  className="w-full bg-white rounded-xl border-2 border-dashed border-slate-300 p-6 text-center hover:border-[#ee7e65] hover:bg-[#ee7e65]/5 transition-all group"
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-12 h-12 rounded-full bg-[#ee7e65]/10 flex items-center justify-center group-hover:bg-[#ee7e65]/20 transition-colors">
-                      <Plus className="w-6 h-6 text-[#ee7e65]" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-[#042c4c]">Add New Job</p>
-                      <p className="text-sm text-slate-500">Import from URL, paste JD, or enter manually</p>
-                    </div>
-                  </div>
-                </button>
-              ) : (
-                <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                  <div className="bg-gradient-to-r from-[#042c4c] to-[#0a3d66] p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-white">
-                      <Sparkles className="w-5 h-5 text-[#ee7e65]" />
-                      <span className="font-semibold">Add New Job</span>
-                    </div>
-                    <button
-                      onClick={resetForm}
-                      className="text-white/70 hover:text-white text-sm"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-
-                  <div className="p-5">
-                    {!addMode ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <button
-                          onClick={() => setAddMode("url")}
-                          className="p-4 rounded-xl border-2 border-slate-200 hover:border-[#ee7e65] hover:bg-[#ee7e65]/5 transition-all text-left"
-                        >
-                          <Link2 className="w-6 h-6 text-[#ee7e65] mb-2" />
-                          <p className="font-semibold text-[#042c4c]">Import from URL</p>
-                          <p className="text-xs text-slate-500 mt-1">LinkedIn, Indeed, Naukri...</p>
-                        </button>
-                        <button
-                          onClick={() => setAddMode("paste")}
-                          className="p-4 rounded-xl border-2 border-slate-200 hover:border-[#ee7e65] hover:bg-[#ee7e65]/5 transition-all text-left"
-                        >
-                          <FileText className="w-6 h-6 text-[#ee7e65] mb-2" />
-                          <p className="font-semibold text-[#042c4c]">Paste Job Description</p>
-                          <p className="text-xs text-slate-500 mt-1">Copy & paste the full JD</p>
-                        </button>
-                        <button
-                          onClick={() => setAddMode("manual")}
-                          className="p-4 rounded-xl border-2 border-slate-200 hover:border-[#ee7e65] hover:bg-[#ee7e65]/5 transition-all text-left"
-                        >
-                          <Briefcase className="w-6 h-6 text-[#ee7e65] mb-2" />
-                          <p className="font-semibold text-[#042c4c]">Enter Manually</p>
-                          <p className="text-xs text-slate-500 mt-1">Type job details yourself</p>
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <button
-                          onClick={() => setAddMode(null)}
-                          className="text-sm text-slate-500 hover:text-[#ee7e65] flex items-center gap-1"
-                        >
-                          <ChevronRight className="w-4 h-4 rotate-180" />
-                          Back to options
-                        </button>
-
-                        {addMode === "url" && (
-                          <div className="space-y-4">
-                            <div>
-                              <label className="block text-sm font-medium text-slate-700 mb-2">Job URL</label>
-                              <Input
-                                placeholder="https://linkedin.com/jobs/... or https://indeed.com/..."
-                                value={url}
-                                onChange={(e) => setUrl(e.target.value)}
-                                className="rounded-lg"
-                              />
-                              <p className="text-xs text-slate-500 mt-1">We'll extract job details automatically</p>
-                            </div>
-                            <Button
-                              onClick={handleAddViaUrl}
-                              disabled={adding}
-                              className="bg-[#ee7e65] hover:bg-[#e06a50] rounded-lg"
-                            >
-                              {adding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Link2 className="w-4 h-4 mr-2" />}
-                              Import Job
-                            </Button>
-                          </div>
-                        )}
-
-                        {addMode === "paste" && (
-                          <div className="space-y-4">
-                            <div>
-                              <label className="block text-sm font-medium text-slate-700 mb-2">Job Description</label>
-                              <Textarea
-                                placeholder="Paste the complete job description here..."
-                                value={pasteText}
-                                onChange={(e) => setPasteText(e.target.value)}
-                                className="rounded-lg min-h-[160px]"
-                              />
-                              <p className="text-xs text-slate-500 mt-1">Tip: Copy all text from the job posting page</p>
-                            </div>
-                            <Button
-                              onClick={handleAddViaPaste}
-                              disabled={adding || !pasteText.trim()}
-                              className="bg-[#ee7e65] hover:bg-[#e06a50] rounded-lg"
-                            >
-                              {adding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileText className="w-4 h-4 mr-2" />}
-                              Create Job
-                            </Button>
-                          </div>
-                        )}
-
-                        {addMode === "manual" && (
-                          <div className="space-y-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div className="sm:col-span-2">
-                                <label className="block text-sm font-medium text-slate-700 mb-2">Job Title *</label>
-                                <Input
-                                  placeholder="e.g., Senior Product Manager"
-                                  value={title}
-                                  onChange={(e) => setTitle(e.target.value)}
-                                  className="rounded-lg"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">Company</label>
-                                <Input
-                                  placeholder="e.g., Google"
-                                  value={company}
-                                  onChange={(e) => setCompany(e.target.value)}
-                                  className="rounded-lg"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">Location</label>
-                                <Input
-                                  placeholder="e.g., Bangalore, India"
-                                  value={location}
-                                  onChange={(e) => setLocation(e.target.value)}
-                                  className="rounded-lg"
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-slate-700 mb-2">Job Description (optional)</label>
-                              <Textarea
-                                placeholder="Paste additional job details here..."
-                                value={pasteText}
-                                onChange={(e) => setPasteText(e.target.value)}
-                                className="rounded-lg min-h-[100px]"
-                              />
-                            </div>
-                            <Button
-                              onClick={handleAddManual}
-                              disabled={adding || !title.trim()}
-                              className="bg-[#ee7e65] hover:bg-[#e06a50] rounded-lg"
-                            >
-                              {adding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-                              Create Job
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {savedJobs.length === 0 && !showAddForm && (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                    <Briefcase className="w-8 h-8 text-slate-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-[#042c4c] mb-2">No jobs yet</h3>
-                  <p className="text-slate-500 mb-4">Add your first job target to start practicing interviews</p>
-                  <Button
-                    onClick={() => setShowAddForm(true)}
-                    className="bg-[#ee7e65] hover:bg-[#e06a50] rounded-lg"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Your First Job
-                  </Button>
+              {savedJobs.length === 0 && !addMode && (
+                <div className="text-center py-12 text-slate-400">
+                  <Briefcase className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                  <p className="text-sm">No jobs added yet</p>
                 </div>
               )}
             </div>
