@@ -28,6 +28,7 @@ interface InterviewConfig {
   interviewType: string;
   style: string;
   seniority: string;
+  jobTargetId?: string;
 }
 
 interface RoleKit {
@@ -160,13 +161,21 @@ export default function InterviewPreSessionPage() {
       <div className="min-h-screen bg-gradient-to-b from-slate-50/80 to-white pb-24 sm:pb-8">
         <div className="bg-gradient-to-br from-indigo-500/5 via-white to-purple-50/30 border-b border-slate-100">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-4xl">
-            <Link
-              to={`/interview/context?roleKitId=${roleKit?.id || ""}`}
+            <button
+              onClick={() => {
+                if (config?.jobTargetId) {
+                  navigate(`/jobs/${config.jobTargetId}`);
+                } else if (roleKit?.id) {
+                  navigate(`/interview/context?roleKitId=${roleKit.id}`);
+                } else {
+                  navigate("/interview/custom");
+                }
+              }}
               className="inline-flex items-center text-slate-500 hover:text-indigo-600 mb-4 text-sm font-medium transition-colors group"
             >
               <ChevronRight className="w-4 h-4 rotate-180 mr-1 group-hover:-translate-x-0.5 transition-transform" />
-              Back to Context
-            </Link>
+              Back
+            </button>
             
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
