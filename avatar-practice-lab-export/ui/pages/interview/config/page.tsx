@@ -443,7 +443,9 @@ export default function InterviewConfigPage() {
   const backLink = isJobTargetMode ? `/jobs/${jobTargetId}` : "/interview";
   const title = isJobTargetMode 
     ? practiceContext?.taxonomy.label || "Interview Practice"
-    : roleKit?.name || "";
+    : isSkillOnlyMode
+      ? practiceContext?.taxonomy?.label || "Skill Practice"
+      : roleKit?.name || "Interview Practice";
   const companyName = practiceContext?.companyContext.companyName;
   const roleTitle = practiceContext?.companyContext.roleTitle;
 
