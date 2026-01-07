@@ -6509,6 +6509,271 @@ avatarSimulator.post("/admin/full-data-migration", async (req, res) => {
         summary TEXT,
         created_at TIMESTAMP DEFAULT NOW() NOT NULL
       );
+      
+      -- Admin settings table
+      CREATE TABLE IF NOT EXISTS admin_settings (
+        id SERIAL PRIMARY KEY,
+        setting_key TEXT NOT NULL UNIQUE,
+        setting_value TEXT,
+        setting_type TEXT DEFAULT 'string',
+        description TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Budget guards table
+      CREATE TABLE IF NOT EXISTS budget_guards (
+        id SERIAL PRIMARY KEY,
+        guard_name TEXT NOT NULL,
+        description TEXT,
+        daily_limit NUMERIC,
+        monthly_limit NUMERIC,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Role kits table
+      CREATE TABLE IF NOT EXISTS role_kits (
+        id SERIAL PRIMARY KEY,
+        role_name TEXT NOT NULL,
+        role_category TEXT,
+        description TEXT,
+        key_skills JSONB,
+        typical_questions JSONB,
+        evaluation_criteria JSONB,
+        difficulty_level TEXT,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Interview rubrics table
+      CREATE TABLE IF NOT EXISTS interview_rubrics (
+        id SERIAL PRIMARY KEY,
+        dimension_name TEXT NOT NULL,
+        dimension_key TEXT NOT NULL UNIQUE,
+        description TEXT,
+        scoring_criteria JSONB,
+        weight REAL DEFAULT 1.0,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Role archetypes table
+      CREATE TABLE IF NOT EXISTS role_archetypes (
+        id SERIAL PRIMARY KEY,
+        archetype_key TEXT NOT NULL UNIQUE,
+        display_name TEXT NOT NULL,
+        description TEXT,
+        category TEXT,
+        key_traits JSONB,
+        interview_focus JSONB,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Coding exercises table
+      CREATE TABLE IF NOT EXISTS coding_exercises (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT,
+        difficulty TEXT,
+        category TEXT,
+        language TEXT,
+        starter_code TEXT,
+        solution TEXT,
+        test_cases JSONB,
+        hints JSONB,
+        time_limit INTEGER,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Case templates table
+      CREATE TABLE IF NOT EXISTS case_templates (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT,
+        category TEXT,
+        difficulty TEXT,
+        scenario TEXT,
+        expected_approach JSONB,
+        evaluation_criteria JSONB,
+        hints JSONB,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Exercise rubrics table
+      CREATE TABLE IF NOT EXISTS exercise_rubrics (
+        id SERIAL PRIMARY KEY,
+        exercise_type TEXT NOT NULL,
+        dimension_name TEXT NOT NULL,
+        description TEXT,
+        scoring_criteria JSONB,
+        weight REAL DEFAULT 1.0,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Companies table
+      CREATE TABLE IF NOT EXISTS companies (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        industry TEXT,
+        size TEXT,
+        description TEXT,
+        culture JSONB,
+        interview_style JSONB,
+        typical_questions JSONB,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Job targets table
+      CREATE TABLE IF NOT EXISTS job_targets (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR REFERENCES auth_users(id) ON DELETE CASCADE,
+        company_id INTEGER REFERENCES companies(id) ON DELETE SET NULL,
+        role_title TEXT,
+        job_description TEXT,
+        requirements JSONB,
+        status TEXT DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Question patterns table
+      CREATE TABLE IF NOT EXISTS question_patterns (
+        id SERIAL PRIMARY KEY,
+        pattern_type TEXT NOT NULL,
+        category TEXT,
+        question_template TEXT NOT NULL,
+        follow_up_templates JSONB,
+        evaluation_focus JSONB,
+        difficulty TEXT,
+        role_relevance JSONB,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Role interview structure defaults table
+      CREATE TABLE IF NOT EXISTS role_interview_structure_defaults (
+        id SERIAL PRIMARY KEY,
+        role_archetype_id INTEGER REFERENCES role_archetypes(id) ON DELETE CASCADE,
+        round_number INTEGER NOT NULL,
+        round_type TEXT NOT NULL,
+        duration_minutes INTEGER,
+        focus_areas JSONB,
+        typical_questions JSONB,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Role task blueprints table
+      CREATE TABLE IF NOT EXISTS role_task_blueprints (
+        id SERIAL PRIMARY KEY,
+        role_archetype_id INTEGER REFERENCES role_archetypes(id) ON DELETE CASCADE,
+        task_type TEXT NOT NULL,
+        description TEXT,
+        evaluation_criteria JSONB,
+        time_allocation INTEGER,
+        priority INTEGER DEFAULT 1,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Company role blueprints table
+      CREATE TABLE IF NOT EXISTS company_role_blueprints (
+        id SERIAL PRIMARY KEY,
+        company_id INTEGER REFERENCES companies(id) ON DELETE CASCADE,
+        role_archetype_id INTEGER REFERENCES role_archetypes(id) ON DELETE CASCADE,
+        custom_requirements JSONB,
+        interview_format JSONB,
+        evaluation_weights JSONB,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- User documents table
+      CREATE TABLE IF NOT EXISTS user_documents (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR NOT NULL REFERENCES auth_users(id) ON DELETE CASCADE,
+        document_type TEXT NOT NULL,
+        file_name TEXT,
+        file_url TEXT,
+        extracted_text TEXT,
+        parsed_data JSONB,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- User profile extracted table
+      CREATE TABLE IF NOT EXISTS user_profile_extracted (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR NOT NULL REFERENCES auth_users(id) ON DELETE CASCADE,
+        profile_data JSONB,
+        skills JSONB,
+        experience JSONB,
+        education JSONB,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Interview configs table
+      CREATE TABLE IF NOT EXISTS interview_configs (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR NOT NULL REFERENCES auth_users(id) ON DELETE CASCADE,
+        role_kit_id INTEGER REFERENCES role_kits(id) ON DELETE SET NULL,
+        company_id INTEGER REFERENCES companies(id) ON DELETE SET NULL,
+        config_data JSONB,
+        status TEXT DEFAULT 'draft',
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Interview plans table
+      CREATE TABLE IF NOT EXISTS interview_plans (
+        id SERIAL PRIMARY KEY,
+        interview_config_id INTEGER REFERENCES interview_configs(id) ON DELETE CASCADE,
+        plan_data JSONB NOT NULL,
+        questions JSONB,
+        focus_areas JSONB,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Interview sessions table
+      CREATE TABLE IF NOT EXISTS interview_sessions (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR NOT NULL REFERENCES auth_users(id) ON DELETE CASCADE,
+        interview_plan_id INTEGER REFERENCES interview_plans(id) ON DELETE SET NULL,
+        session_uid TEXT UNIQUE,
+        duration INTEGER,
+        transcript TEXT,
+        status TEXT DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Interview analysis table
+      CREATE TABLE IF NOT EXISTS interview_analysis (
+        id SERIAL PRIMARY KEY,
+        interview_session_id INTEGER NOT NULL REFERENCES interview_sessions(id) ON DELETE CASCADE,
+        overall_score REAL,
+        dimension_scores JSONB,
+        feedback JSONB,
+        strengths JSONB,
+        improvements JSONB,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Interview artifacts table
+      CREATE TABLE IF NOT EXISTS interview_artifacts (
+        id SERIAL PRIMARY KEY,
+        interview_session_id INTEGER NOT NULL REFERENCES interview_sessions(id) ON DELETE CASCADE,
+        artifact_type TEXT NOT NULL,
+        artifact_data JSONB,
+        file_url TEXT,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
     `;
     
     try {
@@ -6546,6 +6811,27 @@ avatarSimulator.post("/admin/full-data-migration", async (req, res) => {
       { table: "presentation_scenarios", pk: "id", isSerial: true },
       { table: "presentation_sessions", pk: "id", isSerial: true },
       { table: "presentation_feedback", pk: "id", isSerial: true },
+      { table: "admin_settings", pk: "id", isSerial: true },
+      { table: "budget_guards", pk: "id", isSerial: true },
+      { table: "role_kits", pk: "id", isSerial: true },
+      { table: "interview_rubrics", pk: "id", isSerial: true },
+      { table: "role_archetypes", pk: "id", isSerial: true },
+      { table: "coding_exercises", pk: "id", isSerial: true },
+      { table: "case_templates", pk: "id", isSerial: true },
+      { table: "exercise_rubrics", pk: "id", isSerial: true },
+      { table: "companies", pk: "id", isSerial: true },
+      { table: "job_targets", pk: "id", isSerial: true },
+      { table: "question_patterns", pk: "id", isSerial: true },
+      { table: "role_interview_structure_defaults", pk: "id", isSerial: true },
+      { table: "role_task_blueprints", pk: "id", isSerial: true },
+      { table: "company_role_blueprints", pk: "id", isSerial: true },
+      { table: "user_documents", pk: "id", isSerial: true },
+      { table: "user_profile_extracted", pk: "id", isSerial: true },
+      { table: "interview_configs", pk: "id", isSerial: true },
+      { table: "interview_plans", pk: "id", isSerial: true },
+      { table: "interview_sessions", pk: "id", isSerial: true },
+      { table: "interview_analysis", pk: "id", isSerial: true },
+      { table: "interview_artifacts", pk: "id", isSerial: true },
     ];
     
     for (const { table, pk, isSerial } of migrationOrder) {
