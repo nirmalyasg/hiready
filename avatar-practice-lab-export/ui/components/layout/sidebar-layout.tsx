@@ -35,7 +35,14 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   ];
 
   const isActive = (href: string) => {
-    return location.pathname === href || location.pathname.startsWith(href + '/');
+    const path = location.pathname;
+    
+    // Special case: /interview/results should highlight Results, not Practice
+    if (path.startsWith('/interview/results')) {
+      return href === '/avatar/results';
+    }
+    
+    return path === href || path.startsWith(href + '/');
   };
 
   return (

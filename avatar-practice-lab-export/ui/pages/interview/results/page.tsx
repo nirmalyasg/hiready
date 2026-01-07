@@ -221,11 +221,11 @@ export default function InterviewResultsPage() {
         <div className="bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] text-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-5xl">
             <Link
-              to="/interview"
+              to="/avatar/results"
               className="inline-flex items-center text-white/70 hover:text-white mb-4 text-sm font-medium transition-colors group"
             >
               <ChevronRight className="w-4 h-4 rotate-180 mr-1 group-hover:-translate-x-0.5 transition-transform" />
-              Back to Interview Practice
+              Back to Results
             </Link>
             
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
