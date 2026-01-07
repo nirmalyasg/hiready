@@ -23,9 +23,6 @@ import {
   Star
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import practiceSelectionScreenshot from '@/assets/screenshots/interview-page.png';
-import resultsScreenshot from '@/assets/screenshots/results-page.png';
-import jobsScreenshot from '@/assets/screenshots/jobs-page.png';
 
 export default function HomePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -236,24 +233,73 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Hero Screenshot */}
+            {/* Hero Visual - Feature Preview Cards */}
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/30 to-brand-light/20 rounded-3xl blur-2xl transform rotate-3" />
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-                <img 
-                  src={practiceSelectionScreenshot} 
-                  alt="Interview Practice Selection" 
-                  className="w-full h-auto"
-                />
-              </div>
-              <div className="hidden sm:block absolute -bottom-4 -right-4 bg-white rounded-xl p-3 shadow-xl border border-gray-100">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+              <div className="relative space-y-4">
+                {/* Practice Mode Cards */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <div className="w-10 h-10 bg-[#ee7e65] rounded-lg flex items-center justify-center mb-3">
+                      <Briefcase className="w-5 h-5 text-white" />
+                    </div>
+                    <h4 className="text-white font-semibold text-sm mb-1">Practice by Role</h4>
+                    <p className="text-white/60 text-xs">15+ role kits including PM, SWE, Data, Design</p>
                   </div>
-                  <div>
-                    <div className="text-xs text-gray-500">Session Complete</div>
-                    <div className="text-sm font-semibold text-gray-900">8.5/10 Score</div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <div className="w-10 h-10 bg-[#042c4c] rounded-lg flex items-center justify-center mb-3">
+                      <Code className="w-5 h-5 text-white" />
+                    </div>
+                    <h4 className="text-white font-semibold text-sm mb-1">Interview Types</h4>
+                    <p className="text-white/60 text-xs">Coding, Case Study, Behavioral, HR rounds</p>
+                  </div>
+                </div>
+                
+                {/* Score Preview */}
+                <div className="bg-white rounded-2xl p-5 shadow-xl">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <CheckCircle2 className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">Session Complete</p>
+                        <p className="text-sm text-gray-500">Product Manager Mock Interview</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-green-600">4.2/5</p>
+                      <p className="text-xs text-gray-500">Overall Score</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Clarity & Structure</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div className="w-4/5 h-full bg-green-500 rounded-full" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">4.0</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Problem Solving</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div className="w-[90%] h-full bg-green-500 rounded-full" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">4.5</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Communication</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div className="w-[85%] h-full bg-green-500 rounded-full" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">4.2</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -299,19 +345,51 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Results Dashboard Screenshot Section */}
+      {/* Results & Feedback Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="order-2 lg:order-1">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-brand-dark/10 to-brand-accent/10 rounded-3xl blur-2xl transform -rotate-3" />
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
-                  <img 
-                    src={resultsScreenshot} 
-                    alt="Interview Results Dashboard" 
-                    className="w-full h-auto"
-                  />
+                {/* Visual Analytics Preview */}
+                <div className="relative bg-white rounded-2xl shadow-xl border border-gray-200 p-6 space-y-5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-semibold text-gray-900">Your Interview Performance</h4>
+                    <span className="text-sm text-gray-500">Last 5 sessions</span>
+                  </div>
+                  
+                  {/* Dimension Scores */}
+                  <div className="space-y-3">
+                    {[
+                      { name: 'Clarity & Structure', score: 4.2, color: 'bg-green-500' },
+                      { name: 'Problem Solving', score: 4.5, color: 'bg-green-500' },
+                      { name: 'Communication', score: 3.8, color: 'bg-[#ee7e65]' },
+                      { name: 'Role Fit Evidence', score: 4.0, color: 'bg-green-500' },
+                      { name: 'Confidence', score: 3.5, color: 'bg-[#ee7e65]' },
+                    ].map((dim, idx) => (
+                      <div key={idx}>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-gray-600">{dim.name}</span>
+                          <span className="font-medium text-gray-900">{dim.score}/5</span>
+                        </div>
+                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div className={`h-full ${dim.color} rounded-full`} style={{ width: `${(dim.score/5)*100}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Improvement Tip */}
+                  <div className="bg-[#ee7e65]/10 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <Sparkles className="w-5 h-5 text-[#ee7e65] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-gray-900 text-sm">Focus Area: Communication</p>
+                        <p className="text-sm text-gray-600 mt-1">Try using the STAR method more consistently. Practice pausing before answering to collect your thoughts.</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -322,30 +400,28 @@ export default function HomePage() {
                 Detailed Analytics
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-brand-dark mb-6">
-                8-Dimension Scoring & Actionable Feedback
+                Know Exactly Where to Improve
               </h2>
               <p className="text-lg text-brand-muted mb-8">
-                Get comprehensive analysis of your performance across 8 key dimensions, 
-                with specific examples and improvement suggestions for each area.
+                Every session gives you a detailed breakdown across 8 dimensions, 
+                with specific examples from your answers and actionable improvement tips.
               </p>
               
-              <div className="space-y-4 mb-8">
+              <div className="grid grid-cols-2 gap-4 mb-8">
                 {[
-                  { label: 'Clarity & Structure', desc: 'How well you organize and present your thoughts' },
-                  { label: 'Problem Solving', desc: 'Your approach to breaking down complex problems' },
-                  { label: 'Communication Style', desc: 'Tone, pace, and confidence in delivery' },
-                  { label: 'Role Fit Evidence', desc: 'How well you demonstrate relevant experience' },
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-brand-accent/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <CheckCircle2 className="w-4 h-4 text-brand-accent" />
+                  { label: 'Clarity & Structure', icon: MessageSquare },
+                  { label: 'Problem Solving', icon: Brain },
+                  { label: 'Role Fit Evidence', icon: Target },
+                  { label: 'Confidence & Composure', icon: Shield },
+                ].map((item, idx) => {
+                  const IconComponent = item.icon;
+                  return (
+                    <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                      <IconComponent className="w-5 h-5 text-[#ee7e65]" />
+                      <span className="text-sm font-medium text-gray-700">{item.label}</span>
                     </div>
-                    <div>
-                      <span className="font-medium text-brand-dark">{item.label}</span>
-                      <span className="text-brand-muted"> - {item.desc}</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <Link
@@ -370,18 +446,18 @@ export default function HomePage() {
                 Job-Specific Prep
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-                Practice for Your Target Jobs
+                Practice for Your Dream Job
               </h2>
               <p className="text-lg text-white/60 mb-8">
-                Import job postings from LinkedIn, Indeed, or paste descriptions. 
-                Get tailored interview questions based on actual job requirements.
+                Paste any job description and get tailored interview questions 
+                based on the actual requirements, company culture, and role expectations.
               </p>
               
               <div className="grid grid-cols-2 gap-4 mb-8">
                 {[
                   { icon: Target, label: 'Job-Specific Questions' },
                   { icon: Brain, label: 'AI-Parsed Requirements' },
-                  { icon: Clock, label: 'Track All Applications' },
+                  { icon: Clock, label: 'Track Readiness' },
                   { icon: Star, label: 'Company Insights' },
                 ].map((item, idx) => {
                   const IconComponent = item.icon;
@@ -399,19 +475,50 @@ export default function HomePage() {
                 className="inline-flex items-center gap-2 px-6 py-3 bg-[#ee7e65] text-white rounded-xl font-semibold hover:bg-[#e06a50] transition-colors"
               >
                 <Briefcase className="w-5 h-5" />
-                Import a Job
+                Add Your Job Target
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
 
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-[#ee7e65]/30 to-[#768c9c]/20 rounded-3xl blur-2xl transform rotate-3" />
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-                <img 
-                  src={jobsScreenshot} 
-                  alt="Job Tracking Dashboard" 
-                  className="w-full h-auto"
-                />
+              {/* Job Cards Preview */}
+              <div className="relative space-y-4">
+                {[
+                  { company: 'Google', role: 'Product Manager', readiness: 78, status: 'Interviewing' },
+                  { company: 'Meta', role: 'Software Engineer', readiness: 65, status: 'Applied' },
+                  { company: 'Stripe', role: 'Data Scientist', readiness: 45, status: 'Saved' },
+                ].map((job, idx) => (
+                  <div key={idx} className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-white">{job.role}</p>
+                        <p className="text-sm text-white/60">{job.company}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-2xl font-bold ${job.readiness >= 70 ? 'text-green-400' : job.readiness >= 50 ? 'text-yellow-400' : 'text-[#ee7e65]'}`}>
+                          {job.readiness}%
+                        </p>
+                        <p className="text-xs text-white/50">ready</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        job.status === 'Interviewing' ? 'bg-green-500/20 text-green-300' :
+                        job.status === 'Applied' ? 'bg-blue-500/20 text-blue-300' :
+                        'bg-white/10 text-white/60'
+                      }`}>
+                        {job.status}
+                      </span>
+                      <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full rounded-full ${job.readiness >= 70 ? 'bg-green-400' : job.readiness >= 50 ? 'bg-yellow-400' : 'bg-[#ee7e65]'}`} 
+                          style={{ width: `${job.readiness}%` }} 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
