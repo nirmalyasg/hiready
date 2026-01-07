@@ -71,3 +71,6 @@ AWS_SECRET_ACCESS_KEY = "SyvU7AKvJn463sjp21cBHZDw+n2XV8FLJ1j2vOGZ"
 AWS_REGION = "eu-north-1"
 S3_BUCKET_NAME = "a3cendkb/Courses/"
 NODE_ENV = "production"
+
+[userenv.shared]
+ADMIN_SEED_KEY = "seed-production-2024"

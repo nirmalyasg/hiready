@@ -1443,3 +1443,55 @@ adminRouter.post("/budget-alerts/:id/acknowledge", requireAdmin, async (req, res
     res.status(500).json({ success: false, error: "Failed to acknowledge alert" });
   }
 });
+
+adminRouter.post("/execute-sql", requireAdmin, async (req, res) => {
+  try {
+    const { sqlStatements, adminKey } = req.body;
+
+    const expectedKey = process.env.ADMIN_SEED_KEY;
+    if (!expectedKey || adminKey !== expectedKey) {
+      return res.status(403).json({ success: false, error: "Invalid admin key" });
+    }
+
+    if (!sqlStatements || typeof sqlStatements !== "string") {
+      return res.status(400).json({ success: false, error: "SQL statements required" });
+    }
+
+    const statements = sqlStatements
+      .split(";")
+      .map((s: string) => s.trim())
+      .filter((s: string) => s.length > 0 && !s.startsWith("--"));
+
+    const results: { statement: number; success: boolean; error?: string }[] = [];
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (let i = 0; i < statements.length; i++) {
+      const statement = statements[i];
+      try {
+        await db.execute(sql.raw(statement));
+        results.push({ statement: i + 1, success: true });
+        successCount++;
+      } catch (error: any) {
+        results.push({ 
+          statement: i + 1, 
+          success: false, 
+          error: error.message || "Unknown error" 
+        });
+        errorCount++;
+      }
+    }
+
+    res.json({
+      success: errorCount === 0,
+      message: `Executed ${successCount} statements successfully, ${errorCount} failed`,
+      totalStatements: statements.length,
+      successCount,
+      errorCount,
+      results: results.slice(0, 50)
+    });
+  } catch (error: any) {
+    console.error("Error executing SQL:", error);
+    res.status(500).json({ success: false, error: error.message || "Failed to execute SQL" });
+  }
+});

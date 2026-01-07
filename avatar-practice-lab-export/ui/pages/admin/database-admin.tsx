@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Database, Play, CheckCircle, XCircle, Loader2, ArrowLeft, AlertTriangle, Rocket, Wrench, Zap } from 'lucide-react';
+import { Database, Play, CheckCircle, XCircle, Loader2, ArrowLeft, AlertTriangle, Rocket, Wrench, Zap, Code, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,6 +10,10 @@ interface ScriptResult {
   message: string;
   details?: string[];
   errors?: string[];
+  totalStatements?: number;
+  successCount?: number;
+  errorCount?: number;
+  results?: { statement: number; success: boolean; error?: string }[];
 }
 
 export default function DatabaseAdminPage() {
@@ -18,6 +22,7 @@ export default function DatabaseAdminPage() {
   const [result, setResult] = useState<ScriptResult | null>(null);
   const [adminKey, setAdminKey] = useState('');
   const [includeTransactionalData, setIncludeTransactionalData] = useState(true);
+  const [customSql, setCustomSql] = useState('');
 
   const runDevMigrations = async () => {
     if (!adminKey) {
@@ -205,6 +210,60 @@ export default function DatabaseAdminPage() {
     }
   };
 
+  const runCustomSql = async () => {
+    if (!adminKey) {
+      setResult({ success: false, message: 'Admin key is required' });
+      return;
+    }
+
+    if (!customSql.trim()) {
+      setResult({ success: false, message: 'Please paste SQL statements to execute' });
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `You are about to execute ${customSql.split(';').filter(s => s.trim()).length} SQL statement(s).\n\n` +
+      'This will directly modify the database. Are you sure you want to proceed?'
+    );
+
+    if (!confirmed) return;
+
+    setIsRunning(true);
+    setCurrentAction('custom-sql');
+    setResult(null);
+
+    try {
+      const response = await fetch('/api/admin/execute-sql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ sqlStatements: customSql, adminKey }),
+      });
+
+      const data = await response.json();
+      setResult(data);
+    } catch (error) {
+      setResult({
+        success: false,
+        message: 'Failed to execute SQL',
+        details: [error instanceof Error ? error.message : 'Unknown error'],
+      });
+    } finally {
+      setIsRunning(false);
+      setCurrentAction('');
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const text = await file.text();
+    setCustomSql(text);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 p-8">
       <div className="max-w-2xl mx-auto">
@@ -243,8 +302,12 @@ export default function DatabaseAdminPage() {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="development" className="mb-6">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="sql-runner" className="mb-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="sql-runner" className="flex items-center gap-2">
+              <Code className="w-4 h-4" />
+              SQL Runner
+            </TabsTrigger>
             <TabsTrigger value="development" className="flex items-center gap-2">
               <Wrench className="w-4 h-4" />
               Development
@@ -254,6 +317,85 @@ export default function DatabaseAdminPage() {
               Production
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="sql-runner" className="mt-4 space-y-4">
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 flex gap-3 mb-4">
+              <Code className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-purple-800">
+                <strong>SQL Runner:</strong> Paste SQL statements from your database export file to seed the database. Each statement will be executed in order.
+              </div>
+            </div>
+
+            <Card className="border-2 border-purple-300 bg-purple-50">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                    <Database className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg text-purple-800">Execute Custom SQL</CardTitle>
+                    <CardDescription className="text-purple-700">
+                      Paste SQL INSERT statements to seed the database
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-purple-800">
+                      SQL Statements
+                    </label>
+                    <label className="inline-flex items-center gap-2 text-sm text-purple-600 hover:text-purple-800 cursor-pointer">
+                      <Upload className="w-4 h-4" />
+                      <span>Upload .sql file</span>
+                      <input
+                        type="file"
+                        accept=".sql,.txt"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                  <textarea
+                    value={customSql}
+                    onChange={(e) => setCustomSql(e.target.value)}
+                    placeholder="Paste your SQL statements here...
+
+Example:
+INSERT INTO public.avatars VALUES ('avatar_id', 'Wayne', NULL, NULL, 'male', NULL, 'https://example.com/avatar.webp', '2025-12-14', '2025-12-14');
+INSERT INTO public.skills VALUES (1, 'Communication', 'Effective communication skills');"
+                    className="w-full h-64 px-4 py-3 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono text-sm resize-y"
+                  />
+                  <div className="mt-2 text-xs text-purple-600">
+                    {customSql.trim() ? (
+                      <>Detected {customSql.split(';').filter(s => s.trim() && !s.trim().startsWith('--')).length} SQL statement(s)</>
+                    ) : (
+                      <>Paste SQL statements separated by semicolons</>
+                    )}
+                  </div>
+                </div>
+                <Button
+                  onClick={runCustomSql}
+                  disabled={isRunning || !customSql.trim()}
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  size="lg"
+                >
+                  {isRunning && currentAction === 'custom-sql' ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Executing SQL...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-5 h-5 mr-2" />
+                      Execute SQL Statements
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="development" className="mt-4 space-y-4">
             <Card className="border-2 border-blue-300 bg-blue-50">
@@ -507,6 +649,29 @@ export default function DatabaseAdminPage() {
                   <p className={`font-medium ${result.success ? 'text-green-800' : 'text-red-800'}`}>
                     {result.message}
                   </p>
+                  {result.successCount !== undefined && (
+                    <div className="mt-2 text-sm">
+                      <span className="text-green-700">{result.successCount} succeeded</span>
+                      {result.errorCount && result.errorCount > 0 && (
+                        <span className="text-red-700 ml-3">{result.errorCount} failed</span>
+                      )}
+                      <span className="text-slate-500 ml-3">of {result.totalStatements} total</span>
+                    </div>
+                  )}
+                  {result.results && result.results.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-sm font-medium text-slate-600 mb-2">Execution Results (first 50):</p>
+                      <div className="bg-white/50 rounded-lg p-3 max-h-64 overflow-y-auto">
+                        <ul className="text-xs space-y-1 font-mono">
+                          {result.results.map((r, i) => (
+                            <li key={i} className={r.success ? 'text-green-700' : 'text-red-700'}>
+                              Statement {r.statement}: {r.success ? 'OK' : `FAILED - ${r.error}`}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
                   {result.details && result.details.length > 0 && (
                     <div className="mt-3">
                       <p className="text-sm font-medium text-slate-600 mb-2">Migration Details:</p>
