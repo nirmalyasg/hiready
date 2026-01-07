@@ -74,4 +74,4 @@ NODE_ENV = "production"
 
 [userenv.shared]
 ADMIN_SEED_KEY = "abc@123@abc"
-ADMIN_KEY = "seed-production-2024"
+ADMIN_KEY = "abc@123@abc"
