@@ -35,12 +35,6 @@ export default function HomePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const stats = [
-    { value: '15+', label: 'Role Kits' },
-    { value: '4', label: 'Interview Types' },
-    { value: '8', label: 'Scoring Dimensions' },
-    { value: '10-15', label: 'Min Sessions' },
-  ];
 
   const interviewTypes = [
     { 
@@ -229,15 +223,6 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              {/* Stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {stats.map((stat, idx) => (
-                  <div key={idx} className="text-center">
-                    <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
-                    <div className="text-xs sm:text-sm text-white/50">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
             </div>
 
             {/* Hero Screenshot */}
