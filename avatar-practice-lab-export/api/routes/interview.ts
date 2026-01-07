@@ -1301,11 +1301,26 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
       rubric = r;
     }
     
+    // Extract JD skills for the evaluator
+    let jdSkills: string[] = [];
+    if (jdParsed) {
+      jdSkills = jdParsed.requiredSkills || jdParsed.skills || jdParsed.technicalSkills || [];
+      if (jdParsed.softSkills) {
+        jdSkills = [...jdSkills, ...jdParsed.softSkills];
+      }
+    }
+
     const evaluatorContext = {
       rubric: rubric?.dimensions,
       scoringGuide: rubric?.scoringGuide,
-      roleKit: roleKitData ? { name: roleKitData.name, domain: roleKitData.domain } : null,
-      interviewType: config?.interviewType,
+      roleKit: roleKitData ? { 
+        name: roleKitData.name, 
+        domain: roleKitData.domain,
+        description: roleKitData.description || null 
+      } : null,
+      interviewType: config?.interviewType || session.interviewMode || 'general',
+      interviewMode: config?.interviewMode || null,
+      jdSkills,
       candidateProfile: resumeParsed,
       jobDescription: jdParsed,
       transcript,
@@ -2012,44 +2027,75 @@ Generate a JSON interview plan with this structure:
 IMPORTANT: Do NOT use generic placeholder questions. Every question should be specific to the job target, candidate profile, and interview type provided. If company/role info is available, mention them by name.`;
 
 
-const EVALUATOR_PROMPT = `You are an interview evaluator.
+const EVALUATOR_PROMPT = `You are an interview evaluator who provides ROLE-SPECIFIC assessments.
 
 GOAL
-Score the candidate's interview performance using the provided rubric. Be specific and evidence-based, quoting short transcript snippets as proof.
+Evaluate the candidate's interview based on the SPECIFIC ROLE, INTERVIEW TYPE, and JOB REQUIREMENTS. Your assessment dimensions MUST be relevant to what was being tested.
 
 INPUTS
-- rubric: dimensions + scoring guide
-- roleKit + interviewType
-- candidateProfile + jobDescription (for fit context)
-- transcript (full)
+- rubric: if provided, use EXACTLY these dimensions for scoring
+- roleKit: the specific job role (e.g., Software Engineer, Product Manager, Business Analyst)
+- interviewType: the type of interview (coding, case_study, behavioral, hr, technical)
+- jdSkills: key skills extracted from the job description
+- candidateProfile: their resume/background
+- transcript: what actually happened in the interview
+- codingChallenge/caseStudyChallenge: any exercises given
+- codeSubmission/caseStudyNotes: what the candidate produced
+
+DIMENSION SELECTION RULES (in priority order):
+
+1. IF rubric is provided (non-null): Use EXACTLY those dimensions. Do not add or remove any.
+
+2. ELSE IF jdSkills is provided: Create dimensions from the JD skills. For example, if jdSkills includes ["Python", "SQL", "Data Analysis"], create dimensions like "Python Proficiency", "SQL Skills", "Data Analysis Capability".
+
+3. ELSE generate dimensions based on interviewType and roleKit:
+
+   For CODING/TECHNICAL interviews:
+   - Problem Solving Approach, Technical Implementation, Algorithm & Data Structure Choice
+   - Debugging & Edge Cases, Communication During Coding, System Design Awareness
+
+   For CASE STUDY/PROBLEM SOLVING interviews:
+   - Framework Application, Quantitative Analysis, Business Acumen
+   - Logical Structure, Synthesis & Recommendations, Communication
+
+   For BEHAVIORAL/LEADERSHIP interviews:
+   - STAR Story Quality, Ownership & Impact, Collaboration & Influence
+   - Conflict Resolution, Leadership & Initiative, Self-Awareness
+
+   For HR/FIT interviews:
+   - Role Motivation, Career Trajectory, Culture Fit
+   - Work Style, Self-Awareness, Questions & Curiosity
+
+   Add role-specific dimensions based on roleKit:
+   - Software Engineer: Technical Depth, Code Quality
+   - Product Manager: Product Sense, Prioritization
+   - Data Analyst/Scientist: Data Interpretation, Statistical Reasoning
+   - Business Analyst: Requirements Analysis, Process Thinking
+   - Consultant/Strategy: Client Communication, Strategic Thinking
 
 SCORING RULES
 - Score each dimension 1-5.
+- ONLY score dimensions relevant to what was ACTUALLY tested in this interview
 - Every score MUST include:
-  - evidence: 1-3 short excerpts (max ~20 words each)
-  - rationale: why this score
-  - improvement: one concrete suggestion
-- Also provide:
-  - top strengths (max 5)
-  - top risks (max 5)
-  - hire recommendation: Strong Yes / Yes / Lean Yes / Lean No / No
-  - confidence level: High/Med/Low (based on transcript coverage)
+  - evidence: 1-3 short excerpts from the transcript (max ~20 words each)
+  - rationale: why this score, be specific to what happened
+  - improvement: one concrete, actionable suggestion
 
 OUTPUT FORMAT (STRICT JSON)
 {
-  "overall": { "recommendation": "...", "confidence": "...", "summary": "..." },
+  "overall": { "recommendation": "Strong Yes/Yes/Lean Yes/Lean No/No", "confidence": "High/Med/Low", "summary": "2-3 sentences on overall performance" },
   "dimension_scores": [
     {
-      "dimension": "string",
+      "dimension": "Dimension Name",
       "score": 1-5,
-      "evidence": ["...", "..."],
-      "rationale": "...",
-      "improvement": "..."
+      "evidence": ["quote from transcript..."],
+      "rationale": "Why this score",
+      "improvement": "Specific suggestion"
     }
   ],
-  "strengths": ["...", "..."],
-  "risks": ["...", "..."],
-  "role_fit_notes": ["...", "..."]
+  "strengths": ["Specific strength..."],
+  "risks": ["Specific concern..."],
+  "role_fit_notes": ["Match/gap to this role..."]
 }`;
 
 const FEEDBACK_WRITER_PROMPT = `You are a career coach writing actionable feedback after an interview practice.
