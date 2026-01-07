@@ -42,7 +42,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
     <div className="min-h-screen bg-[#f8f9fb]">
       {/* Desktop Sidebar - Hidden on mobile */}
       <aside className={cn(
-        "hidden lg:block fixed top-0 left-0 h-full bg-brand-dark z-50 transition-all duration-300 ease-out",
+        "hidden lg:block fixed top-0 left-0 h-full bg-[#042c4c] z-50 transition-all duration-300 ease-out",
         collapsed ? "w-20" : "w-64"
       )}>
         <div className="flex flex-col h-full">
@@ -52,14 +52,14 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             collapsed && "justify-center px-0"
           )}>
             <Link to="/" className={cn("flex items-center gap-3", collapsed && "hidden")}>
-              <div className="w-9 h-9 bg-brand-accent rounded-xl flex items-center justify-center">
+              <div className="w-9 h-9 bg-[#ee7e65] rounded-xl flex items-center justify-center">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <span className="text-white font-bold text-lg">Practice Lab</span>
             </Link>
             {collapsed && (
               <Link to="/">
-                <div className="w-10 h-10 bg-brand-accent rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#ee7e65] rounded-xl flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
               </Link>
@@ -79,12 +79,12 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200",
                     active 
-                      ? "bg-white text-brand-dark shadow-lg" 
+                      ? "bg-white text-[#042c4c] shadow-lg" 
                       : "text-white/70 hover:text-white hover:bg-white/10",
                     collapsed && "justify-center px-0"
                   )}
                 >
-                  <Icon className={cn("w-5 h-5 flex-shrink-0", active && "text-brand-accent")} />
+                  <Icon className={cn("w-5 h-5 flex-shrink-0", active && "text-[#ee7e65]")} />
                   <span className={cn(collapsed && "hidden")}>{item.label}</span>
                 </Link>
               );
@@ -108,8 +108,8 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                       className="w-9 h-9 rounded-full object-cover ring-2 ring-white/20"
                     />
                   ) : (
-                    <div className="w-9 h-9 rounded-full bg-brand-accent/20 flex items-center justify-center">
-                      <User className="w-4 h-4 text-brand-accent" />
+                    <div className="w-9 h-9 rounded-full bg-[#ee7e65]/20 flex items-center justify-center">
+                      <User className="w-4 h-4 text-[#ee7e65]" />
                     </div>
                   )}
                   <div className={cn("flex-1 min-w-0", collapsed && "hidden")}>
@@ -125,7 +125,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                     window.location.href = '/';
                   }}
                   className={cn(
-                    "w-full flex items-center gap-3 px-4 py-2.5 text-white/60 hover:text-brand-accent hover:bg-white/5 rounded-xl transition-colors text-sm",
+                    "w-full flex items-center gap-3 px-4 py-2.5 text-white/60 hover:text-[#ee7e65] hover:bg-white/5 rounded-xl transition-colors text-sm",
                     collapsed && "justify-center px-0"
                   )}
                 >
@@ -137,7 +137,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
               <Link
                 to="/login"
                 className={cn(
-                  "flex items-center justify-center gap-2 px-4 py-3 bg-brand-accent text-white rounded-xl font-semibold hover:bg-brand-accent/90 transition-colors",
+                  "flex items-center justify-center gap-2 px-4 py-3 bg-[#ee7e65] text-white rounded-xl font-semibold hover:bg-[#e06a50] transition-colors",
                   collapsed && "px-3"
                 )}
               >

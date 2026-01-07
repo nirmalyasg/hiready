@@ -35,7 +35,7 @@ export default function MobileBottomNav() {
   };
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-200/80 z-50 pb-safe">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-200 z-50 pb-safe">
       <div className="flex items-stretch justify-around h-16">
         {navItems.map(({ path, icon: Icon, label }) => {
           const active = isActive(path);
@@ -46,19 +46,19 @@ export default function MobileBottomNav() {
               className={cn(
                 "flex flex-col items-center justify-center flex-1 gap-0.5 transition-all duration-200 active:scale-95",
                 active 
-                  ? "text-brand-accent" 
-                  : "text-gray-400"
+                  ? "text-[#ee7e65]" 
+                  : "text-slate-400"
               )}
             >
               <div className={cn(
                 "p-1.5 rounded-xl transition-colors",
-                active && "bg-brand-accent/10"
+                active && "bg-[#ee7e65]/10"
               )}>
                 <Icon className="w-5 h-5" />
               </div>
               <span className={cn(
                 "text-[10px] font-semibold",
-                active ? "text-brand-accent" : "text-gray-500"
+                active ? "text-[#ee7e65]" : "text-slate-500"
               )}>
                 {label}
               </span>
