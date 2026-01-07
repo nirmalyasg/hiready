@@ -23,9 +23,9 @@ import {
   Star
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import practiceSelectionScreenshot from '@/assets/screenshots/interview_practice_selection_page.png';
-import resultsScreenshot from '@/assets/screenshots/interview_performance_analytics_dashboard.png';
-import jobsScreenshot from '@/assets/screenshots/job_tracking_dashboard_page.png';
+import practiceSelectionScreenshot from '@/assets/screenshots/interview-page.png';
+import resultsScreenshot from '@/assets/screenshots/results-page.png';
+import jobsScreenshot from '@/assets/screenshots/jobs-page.png';
 
 export default function HomePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
