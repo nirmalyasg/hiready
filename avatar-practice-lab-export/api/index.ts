@@ -19,8 +19,8 @@ const app = express();
 const isProduction = process.env.NODE_ENV === "production";
 const PORT = isProduction ? 5000 : Number(process.env.API_PORT || 3001);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Cache control for development
 app.use((req, res, next) => {
