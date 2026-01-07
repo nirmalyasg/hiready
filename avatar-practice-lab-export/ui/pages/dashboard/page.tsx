@@ -3,23 +3,17 @@ import {
   Clock,
   Trophy,
   Briefcase,
-  Users,
-  MessageSquare,
-  UserPlus,
-  Video,
-  BarChart3,
   Target,
   TrendingUp,
   ChevronRight,
   Sparkles,
   Play,
-  Zap,
   ArrowUpRight,
-  MapPin,
   Building2,
   AlertTriangle,
   CheckCircle2,
-  Calendar
+  ChevronDown,
+  Plus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -73,6 +67,7 @@ interface JobTarget {
 export default function AvatarSimulatorDashboard() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [skillProgress, setSkillProgress] = useState<SkillProgressData[]>([]);
+  const [showInsights, setShowInsights] = useState(false);
   const [stats, setStats] = useState<DashboardStats>({
     totalTime: "0h 0m",
     completedScenarios: 0,
@@ -223,25 +218,40 @@ export default function AvatarSimulatorDashboard() {
         skillMap.set(sp.skillId, true);
       });
 
+      const totalSkills = skillsQuery.data?.length || 1;
+      const uniqueSkillsCount = skillMap.size;
+
       const hours = Math.floor(totalDuration / 3600);
       const minutes = Math.floor((totalDuration % 3600) / 60);
-      const avgDurationSeconds = transcripts.length
-        ? Math.round(totalDuration / transcripts.length)
-        : 0;
-      const avgDurationMinutes = Math.round(avgDurationSeconds / 60);
-      const lastSession = transcripts[0]?.created_at
-        ? new Date(transcripts[0].created_at).toLocaleDateString()
-        : "-";
+
+      const avgDuration =
+        completedSessionsCount > 0
+          ? Math.round(totalDuration / completedSessionsCount / 60)
+          : 0;
+
+      let lastSession = "-";
+      if (transcripts.length > 0) {
+        const sorted = [...transcripts].sort(
+          (a: any, b: any) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+        const lastDate = new Date(sorted[0].created_at);
+        const now = new Date();
+        const diffDays = Math.floor(
+          (now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        if (diffDays === 0) lastSession = "Today";
+        else if (diffDays === 1) lastSession = "Yesterday";
+        else if (diffDays < 7) lastSession = `${diffDays} days ago`;
+        else lastSession = lastDate.toLocaleDateString();
+      }
 
       setStats({
         totalTime: `${hours}h ${minutes}m`,
         completedScenarios: uniqueScenarios.size,
-        skillProgress:
-          skillsQuery.data.length > 0
-            ? Math.min(Math.round((skillMap.size / skillsQuery.data.length) * 100), 100)
-            : 0,
-        averageSessionDuration: `${avgDurationMinutes}m`,
-        uniqueSkillsPracticed: skillMap.size,
+        skillProgress: Math.round((uniqueSkillsCount / totalSkills) * 100),
+        averageSessionDuration: `${avgDuration}m`,
+        uniqueSkillsPracticed: uniqueSkillsCount,
         totalSessions: completedSessionsCount,
         lastSessionDate: lastSession,
         skillBreakdown: skillOccurrences,
@@ -251,511 +261,294 @@ export default function AvatarSimulatorDashboard() {
     }
   }, [skillsQuery.data, transcriptsQuery.data, skillProgressQuery.data]);
 
-  if (isLoading) {
+  const practicedSkills = skillProgress.filter((sp) => sp.sessionCount > 0);
+  const topSkill = practicedSkills.length > 0
+    ? practicedSkills.reduce((best, current) =>
+        (current.avgScore || 0) > (best.avgScore || 0) ? current : best
+      )
+    : null;
+  const lowestSkill = practicedSkills.length > 0
+    ? practicedSkills.reduce((worst, current) =>
+        (current.avgScore || 5) < (worst.avgScore || 5) ? current : worst
+      )
+    : null;
+
+  const avgOverallScore = practicedSkills.length > 0
+    ? practicedSkills.reduce((sum, sp) => sum + (sp.avgScore || 0), 0) / practicedSkills.length
+    : 0;
+
+  const getReadinessColor = (score: number | null) => {
+    if (score === null) return "text-slate-400";
+    if (score >= 80) return "text-emerald-600";
+    if (score >= 60) return "text-[#ee7e65]";
+    return "text-slate-500";
+  };
+
+  if (isLoading || skillsQuery.isLoading) {
     return (
       <SidebarLayout>
-        <div className="flex justify-center items-center h-[60vh]">
-          <Spinner size="lg" />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Spinner className="w-8 h-8" />
         </div>
       </SidebarLayout>
     );
   }
 
-  const practicedSkills = skillProgress.filter(sp => sp.sessionCount > 0);
-  const avgOverallScore = practicedSkills.length > 0
-    ? practicedSkills.reduce((sum, sp) => sum + (sp.avgScore || 0), 0) / practicedSkills.length
-    : 0;
-  const topSkill = practicedSkills.length > 0
-    ? practicedSkills.reduce((best, sp) => (sp.avgScore || 0) > (best.avgScore || 0) ? sp : best)
-    : null;
-  const lowestSkill = practicedSkills.length > 1
-    ? practicedSkills.reduce((worst, sp) => (sp.avgScore || 5) < (worst.avgScore || 5) ? sp : worst)
-    : null;
-
-  const getRecommendedSkills = () => {
-    const unpracticed = skillProgress.filter(sp => sp.sessionCount === 0);
-    if (lowestSkill && lowestSkill.frameworkMapping) {
-      const relatedSkills = unpracticed.filter(sp =>
-        sp.frameworkMapping === lowestSkill.frameworkMapping
-      ).slice(0, 3);
-      if (relatedSkills.length > 0) return relatedSkills;
-    }
-    return unpracticed.slice(0, 3);
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'interview':
-        return { label: 'Interview Scheduled', color: 'bg-[#ee7e65]/10 text-[#ee7e65]' };
-      case 'applied':
-        return { label: 'Applied', color: 'bg-[#042c4c]/10 text-[#042c4c]' };
-      case 'offer':
-        return { label: 'Offer Received', color: 'bg-emerald-100 text-emerald-700' };
-      default:
-        return { label: 'Saved', color: 'bg-slate-100 text-slate-600' };
-    }
-  };
-
-  const getReadinessColor = (score: number | null) => {
-    if (score === null) return 'text-gray-400';
-    if (score >= 70) return 'text-green-600';
-    if (score >= 40) return 'text-amber-600';
-    return 'text-red-600';
-  };
+  const hasActivity = practicedSkills.length > 0 || activeJobs.length > 0;
+  const primaryJob = activeJobs[0];
+  const readinessPercent = avgOverallScore > 0 ? Math.round(avgOverallScore * 20) : null;
 
   return (
     <SidebarLayout>
-      <div className="max-w-6xl mx-auto space-y-5 sm:space-y-8">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 space-y-6 pb-24 sm:pb-8">
+        
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-brand-dark">Interview Readiness</h1>
-            <p className="text-sm sm:text-base text-brand-muted mt-1">
-              {activeJobs.length > 0
-                ? `Tracking ${activeJobs.length} job target${activeJobs.length !== 1 ? 's' : ''}`
-                : 'Add your target jobs to start preparing'}
-            </p>
-          </div>
-          <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
-            <Link to="/jobs" className="flex-1 sm:flex-none">
-              <Button variant="outline" className="gap-2 w-full sm:w-auto text-sm">
-                <Briefcase className="w-4 h-4" />
-                <span className="hidden sm:inline">Manage </span>Jobs
-              </Button>
-            </Link>
-            <Link to="/interview/custom" className="flex-1 sm:flex-none">
-              <Button className="gap-2 w-full sm:w-auto text-sm" data-testid="button-start-voice-practice">
-                <Play className="w-4 h-4" />
-                Practice<span className="hidden sm:inline"> Interview</span>
-              </Button>
-            </Link>
-          </div>
+        <div className="pt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#042c4c]">Dashboard</h1>
+          <p className="text-slate-500 mt-1">
+            {hasActivity ? "Here's your interview readiness at a glance." : "Start practicing to build your readiness."}
+          </p>
         </div>
 
-        {/* Active Job Targets Section */}
-        {activeJobs.length > 0 && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-brand-dark flex items-center gap-2">
-                <Target className="w-5 h-5 text-brand-accent" />
-                Your Job Targets
-              </h2>
-              <Link to="/jobs" className="text-sm text-brand-accent font-medium hover:underline flex items-center gap-1">
+        {/* Hero KPI Strip */}
+        {hasActivity && (
+          <div className="bg-[#042c4c] rounded-2xl p-5 sm:p-6">
+            <div className="grid grid-cols-3 gap-4 sm:gap-8">
+              <div className="text-center">
+                <p className="text-3xl sm:text-4xl font-bold text-white">
+                  {readinessPercent !== null ? `${readinessPercent}%` : '—'}
+                </p>
+                <p className="text-xs sm:text-sm text-white/60 mt-1">Readiness</p>
+              </div>
+              <div className="text-center border-x border-white/10">
+                <p className="text-3xl sm:text-4xl font-bold text-white">{stats.totalTime}</p>
+                <p className="text-xs sm:text-sm text-white/60 mt-1">Practice Time</p>
+              </div>
+              <div className="text-center">
+                <p className="text-3xl sm:text-4xl font-bold text-white">{activeJobs.length}</p>
+                <p className="text-xs sm:text-sm text-white/60 mt-1">Active Jobs</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Quick Action Bar */}
+        <div className="flex gap-3">
+          <Link to="/interview/custom" className="flex-1">
+            <Button className="w-full gap-2 h-12 bg-[#ee7e65] hover:bg-[#e06a50]">
+              <Play className="w-4 h-4" />
+              Practice Interview
+            </Button>
+          </Link>
+          <Link to="/jobs" className="flex-1">
+            <Button variant="outline" className="w-full gap-2 h-12 border-slate-200">
+              <Plus className="w-4 h-4" />
+              Add Job Target
+            </Button>
+          </Link>
+        </div>
+
+        {/* Today's Focus - Primary CTA */}
+        {primaryJob && (
+          <Link to={`/jobs/${primaryJob.id}`} className="block">
+            <div className="bg-white rounded-2xl p-5 border border-slate-100 hover:border-[#ee7e65]/30 transition-colors shadow-sm">
+              <div className="flex items-center gap-1 text-xs font-medium text-[#ee7e65] mb-3">
+                <Target className="w-3.5 h-3.5" />
+                TODAY'S FOCUS
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-[#042c4c] truncate">{primaryJob.roleTitle}</h3>
+                  {primaryJob.companyName && (
+                    <p className="text-sm text-slate-500 flex items-center gap-1.5 mt-0.5">
+                      <Building2 className="w-3.5 h-3.5" />
+                      {primaryJob.companyName}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className={`text-2xl font-bold ${getReadinessColor(primaryJob.readinessScore)}`}>
+                      {primaryJob.readinessScore !== null ? `${primaryJob.readinessScore}%` : '—'}
+                    </p>
+                    <p className="text-xs text-slate-400">ready</p>
+                  </div>
+                  <ArrowUpRight className="w-5 h-5 text-[#ee7e65]" />
+                </div>
+              </div>
+            </div>
+          </Link>
+        )}
+
+        {/* Skills Summary - Compact */}
+        {practicedSkills.length > 0 && (
+          <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-[#042c4c]">Your Skills</h3>
+              <Link to="/avatar/results" className="text-sm text-[#ee7e65] hover:underline flex items-center gap-1">
                 View all
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {activeJobs.slice(0, 3).map((job) => {
-                const statusBadge = getStatusBadge(job.status);
-                const weakestArea = job.jdParsed?.focusAreas?.[0] || null;
-                return (
-                  <div key={job.id} className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-sm hover:border-brand-accent/30 transition-colors">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-brand-dark truncate">{job.roleTitle}</h3>
-                        {job.companyName && (
-                          <p className="text-sm text-brand-muted flex items-center gap-1 mt-0.5">
-                            <Building2 className="w-3.5 h-3.5" />
-                            {job.companyName}
-                          </p>
-                        )}
-                      </div>
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${statusBadge.color}`}>
-                        {statusBadge.label}
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <p className="text-xs text-brand-muted uppercase tracking-wide">Readiness</p>
-                        <p className={`text-2xl font-bold ${getReadinessColor(job.readinessScore)}`}>
-                          {job.readinessScore !== null ? `${job.readinessScore}%` : '—'}
-                        </p>
-                      </div>
-                      {weakestArea && (
-                        <div className="text-right">
-                          <p className="text-xs text-brand-muted uppercase tracking-wide">Focus Area</p>
-                          <p className="text-sm font-medium text-amber-600 flex items-center gap-1">
-                            <AlertTriangle className="w-3.5 h-3.5" />
-                            {weakestArea}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    <Link to={`/jobs/${job.id}`}>
-                      <Button size="sm" className="w-full gap-2">
-                        <Play className="w-3.5 h-3.5" />
-                        Practice Now
-                      </Button>
-                    </Link>
+            
+            <div className="grid grid-cols-2 gap-4">
+              {/* Strongest */}
+              {topSkill && topSkill.avgScore !== null && (
+                <div className="bg-emerald-50 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Trophy className="w-4 h-4 text-emerald-600" />
+                    <span className="text-xs font-medium text-emerald-700">Strongest</span>
                   </div>
-                );
-              })}
+                  <p className="font-medium text-[#042c4c] text-sm truncate">{topSkill.skillName}</p>
+                  <p className="text-lg font-bold text-emerald-600 mt-1">{topSkill.avgScore.toFixed(1)}/5</p>
+                </div>
+              )}
+              
+              {/* Needs Work */}
+              {lowestSkill && lowestSkill.avgScore !== null && (
+                <div className="bg-[#ee7e65]/10 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle className="w-4 h-4 text-[#ee7e65]" />
+                    <span className="text-xs font-medium text-[#ee7e65]">Focus Area</span>
+                  </div>
+                  <p className="font-medium text-[#042c4c] text-sm truncate">{lowestSkill.skillName}</p>
+                  <p className="text-lg font-bold text-[#ee7e65] mt-1">{lowestSkill.avgScore.toFixed(1)}/5</p>
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Empty state for no jobs */}
-        {activeJobs.length === 0 && (
-          <div className="bg-gradient-to-br from-brand-dark to-brand-dark/90 rounded-3xl p-8 text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-accent/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            <div className="relative">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-accent/20 rounded-full text-brand-accent text-sm font-medium mb-4">
-                <Briefcase className="w-3.5 h-3.5" />
-                Get Started
-              </div>
-              <h2 className="text-2xl font-bold mb-2">Add Your First Job Target</h2>
-              <p className="text-white/60 mb-6 max-w-md">
-                Import a job from LinkedIn, Indeed, or any job board. We'll help you prepare with personalized practice.
-              </p>
-              <Link to="/jobs">
-                <Button className="bg-white text-brand-dark hover:bg-white/90">
-                  Add Job Target
-                  <ArrowUpRight className="w-4 h-4 ml-2" />
-                </Button>
+        {/* More Job Targets */}
+        {activeJobs.length > 1 && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-[#042c4c]">Other Job Targets</h3>
+              <Link to="/jobs" className="text-sm text-[#ee7e65] hover:underline flex items-center gap-1">
+                View all
+                <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
+            <div className="space-y-2">
+              {activeJobs.slice(1, 3).map((job) => (
+                <Link key={job.id} to={`/jobs/${job.id}`} className="block">
+                  <div className="bg-white rounded-xl p-4 border border-slate-100 hover:border-slate-200 transition-colors flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-[#042c4c] truncate">{job.roleTitle}</p>
+                      {job.companyName && (
+                        <p className="text-sm text-slate-500 truncate">{job.companyName}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-lg font-bold ${getReadinessColor(job.readinessScore)}`}>
+                        {job.readinessScore !== null ? `${job.readinessScore}%` : '—'}
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-slate-400" />
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 bg-[#042c4c]/10 rounded-xl flex items-center justify-center">
-                <Clock className="w-5 h-5 text-[#042c4c]" />
-              </div>
-              <TrendingUp className="w-4 h-4 text-emerald-500" />
-            </div>
-            <p className="text-xl sm:text-2xl font-bold text-[#042c4c]">{stats.totalTime}</p>
-            <p className="text-xs sm:text-sm text-slate-500">Total practice</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 bg-[#ee7e65]/10 rounded-xl flex items-center justify-center">
-                <Target className="w-5 h-5 text-[#ee7e65]" />
-              </div>
-            </div>
-            <p className="text-xl sm:text-2xl font-bold text-[#042c4c]">{stats.completedScenarios}</p>
-            <p className="text-xs sm:text-sm text-slate-500">Scenarios done</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-                <Zap className="w-5 h-5 text-emerald-600" />
-              </div>
-            </div>
-            <p className="text-xl sm:text-2xl font-bold text-[#042c4c]">{stats.uniqueSkillsPracticed}</p>
-            <p className="text-xs sm:text-sm text-slate-500">Skills practiced</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 bg-[#768c9c]/20 rounded-xl flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-[#768c9c]" />
-              </div>
-            </div>
-            <p className="text-xl sm:text-2xl font-bold text-[#042c4c]">{avgOverallScore > 0 ? avgOverallScore.toFixed(1) : '-'}</p>
-            <p className="text-xs sm:text-sm text-slate-500">Avg score</p>
-          </div>
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Main Column */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            {/* Readiness Snapshot */}
-            {practicedSkills.length > 0 && (
-              <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <h3 className="text-base sm:text-lg font-bold text-brand-dark flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-brand-accent" />
-                    Your Readiness Snapshot
-                  </h3>
-                  <Link to="/avatar/results" className="text-sm text-brand-accent font-medium hover:underline flex items-center gap-1">
-                    View details
-                    <ChevronRight className="w-4 h-4" />
-                  </Link>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                  {/* Strongest Areas */}
-                  <div>
-                    <p className="text-sm font-medium text-green-700 mb-3 flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4" />
-                      Strongest Areas
-                    </p>
-                    <div className="space-y-2">
-                      {practicedSkills
-                        .filter(sp => sp.avgScore !== null)
-                        .sort((a, b) => (b.avgScore || 0) - (a.avgScore || 0))
-                        .slice(0, 3)
-                        .map((sp) => (
-                          <div key={sp.skillId} className="flex items-center justify-between p-2 rounded-lg bg-green-50">
-                            <span className="text-sm text-brand-dark">{sp.skillName}</span>
-                            <span className="text-sm font-bold text-green-600">{sp.avgScore?.toFixed(1)}</span>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                  
-                  {/* Needs Work */}
-                  <div>
-                    <p className="text-sm font-medium text-amber-700 mb-3 flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4" />
-                      Needs Work
-                    </p>
-                    <div className="space-y-2">
-                      {practicedSkills
-                        .filter(sp => sp.avgScore !== null)
-                        .sort((a, b) => (a.avgScore || 5) - (b.avgScore || 5))
-                        .slice(0, 3)
-                        .map((sp) => (
-                          <div key={sp.skillId} className="flex items-center justify-between p-2 rounded-lg bg-amber-50">
-                            <span className="text-sm text-brand-dark">{sp.skillName}</span>
-                            <span className="text-sm font-bold text-amber-600">{sp.avgScore?.toFixed(1)}</span>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Recommended Next Actions */}
-            {(lowestSkill || activeJobs.length > 0) && (
-              <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
-                <h3 className="text-base sm:text-lg font-bold text-brand-dark mb-4 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-brand-accent" />
-                  Recommended Next Actions
-                </h3>
-                <div className="space-y-3">
-                  {activeJobs.length > 0 && activeJobs[0] && (
-                    <Link 
-                      to={`/jobs/${activeJobs[0].id}`}
-                      className="flex items-center gap-4 p-4 rounded-xl bg-brand-dark/5 hover:bg-brand-dark/10 transition-colors"
-                    >
-                      <div className="w-10 h-10 bg-brand-accent rounded-xl flex items-center justify-center">
-                        <Briefcase className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-brand-dark">Practice for {activeJobs[0].roleTitle}</p>
-                        <p className="text-sm text-brand-muted">
-                          {activeJobs[0].companyName ? `at ${activeJobs[0].companyName}` : 'Interview simulation'}
-                        </p>
-                      </div>
-                      <ArrowUpRight className="w-5 h-5 text-brand-accent" />
-                    </Link>
-                  )}
-                  {lowestSkill && lowestSkill.avgScore !== null && (
-                    <Link 
-                      to="/avatar/start"
-                      className="flex items-center gap-4 p-4 rounded-xl bg-amber-50 hover:bg-amber-100 transition-colors"
-                    >
-                      <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center">
-                        <Target className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-brand-dark">Improve {lowestSkill.skillName}</p>
-                        <p className="text-sm text-brand-muted">
-                          Current score: {lowestSkill.avgScore.toFixed(1)}/5
-                        </p>
-                      </div>
-                      <ArrowUpRight className="w-5 h-5 text-amber-600" />
-                    </Link>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* AI Insights - Career Memory */}
-            {aiInsights?.hasData && (
-              <div className="bg-gradient-to-br from-[#ee7e65]/5 to-[#042c4c]/5 rounded-2xl p-4 sm:p-6 border border-[#ee7e65]/20 shadow-sm">
-                <h3 className="text-base sm:text-lg font-bold text-[#042c4c] mb-2 flex items-center gap-2">
+        {/* AI Insights - Collapsible */}
+        {aiInsights?.hasData && aiInsights.insights?.length > 0 && (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <button
+              onClick={() => setShowInsights(!showInsights)}
+              className="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#ee7e65]/10 rounded-xl flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-[#ee7e65]" />
-                  AI Career Insights
-                </h3>
-                <p className="text-sm text-slate-500 mb-4">{aiInsights.summary}</p>
-                {aiInsights.insights?.length === 0 && (
-                  <div className="p-4 rounded-xl bg-white border border-slate-200">
-                    <p className="text-sm text-slate-500 text-center">
-                      Keep practicing to unlock personalized insights about your strengths and areas for improvement.
-                    </p>
-                  </div>
-                )}
-                <div className="space-y-3">
-                  {aiInsights.insights?.slice(0, 4).map((insight: any, idx: number) => (
-                    <div 
-                      key={idx}
-                      className={`p-4 rounded-xl ${
-                        insight.type === "strength" ? "bg-emerald-50 border border-emerald-100" :
-                        insight.type === "weakness" ? "bg-[#ee7e65]/10 border border-[#ee7e65]/20" :
-                        "bg-[#042c4c]/5 border border-[#042c4c]/10"
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                          insight.type === "strength" ? "bg-emerald-500" :
-                          insight.type === "weakness" ? "bg-[#ee7e65]" :
-                          "bg-[#042c4c]"
+                </div>
+                <div className="text-left">
+                  <h3 className="font-semibold text-[#042c4c]">AI Career Insights</h3>
+                  <p className="text-sm text-slate-500">{aiInsights.insights.length} personalized insights</p>
+                </div>
+              </div>
+              <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${showInsights ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {showInsights && (
+              <div className="px-5 pb-5 space-y-3">
+                {aiInsights.insights.slice(0, 3).map((insight: any, idx: number) => (
+                  <div 
+                    key={idx}
+                    className={`p-4 rounded-xl ${
+                      insight.type === "strength" ? "bg-emerald-50" :
+                      insight.type === "weakness" ? "bg-[#ee7e65]/10" :
+                      "bg-slate-50"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        insight.type === "strength" ? "bg-emerald-500" :
+                        insight.type === "weakness" ? "bg-[#ee7e65]" :
+                        "bg-[#042c4c]"
+                      }`}>
+                        {insight.type === "strength" ? (
+                          <CheckCircle2 className="w-4 h-4 text-white" />
+                        ) : insight.type === "weakness" ? (
+                          <AlertTriangle className="w-4 h-4 text-white" />
+                        ) : (
+                          <TrendingUp className="w-4 h-4 text-white" />
+                        )}
+                      </div>
+                      <div>
+                        <p className={`text-sm font-medium ${
+                          insight.type === "strength" ? "text-emerald-800" :
+                          insight.type === "weakness" ? "text-[#ee7e65]" :
+                          "text-[#042c4c]"
                         }`}>
-                          {insight.type === "strength" ? (
-                            <CheckCircle2 className="w-4 h-4 text-white" />
-                          ) : insight.type === "weakness" ? (
-                            <AlertTriangle className="w-4 h-4 text-white" />
-                          ) : (
-                            <TrendingUp className="w-4 h-4 text-white" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <p className={`text-sm font-medium ${
-                            insight.type === "strength" ? "text-emerald-800" :
-                            insight.type === "weakness" ? "text-[#ee7e65]" :
-                            "text-[#042c4c]"
-                          }`}>
-                            {insight.title}
-                          </p>
-                          <p className="text-xs text-slate-500 mt-1">{insight.description}</p>
-                        </div>
+                          {insight.title}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-1">{insight.description}</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-                {aiInsights.stats && (
-                  <div className="flex flex-wrap gap-4 sm:gap-6 mt-4 pt-4 border-t border-slate-200">
-                    <div className="text-center">
-                      <p className="text-base sm:text-lg font-bold text-[#042c4c]">{aiInsights.stats.dimensionsTracked}</p>
-                      <p className="text-xs text-slate-500">Skills Tracked</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-base sm:text-lg font-bold text-emerald-600">{aiInsights.stats.improvingCount}</p>
-                      <p className="text-xs text-slate-500">Improving</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-base sm:text-lg font-bold text-[#ee7e65]">{aiInsights.stats.decliningCount}</p>
-                      <p className="text-xs text-slate-500">Need Focus</p>
-                    </div>
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* Empty state for new users */}
-            {practicedSkills.length === 0 && activeJobs.length === 0 && (
-              <div className="bg-gradient-to-br from-brand-dark to-brand-dark/90 rounded-3xl p-8 text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-brand-accent/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                <div className="relative">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-white/80 text-sm font-medium mb-4">
-                    <Play className="w-3.5 h-3.5" />
-                    Get started
-                  </div>
-                  <h2 className="text-2xl font-bold mb-2">Begin Your Interview Journey</h2>
-                  <p className="text-white/60 mb-6">
-                    Start by adding a job target or complete your first practice session.
-                  </p>
-                  <div className="flex gap-3">
-                    <Link to="/jobs">
-                      <Button className="bg-white text-brand-dark hover:bg-white/90">
-                        Add Job Target
-                      </Button>
-                    </Link>
-                    <Link to="/interview/custom">
-                      <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
-                        Quick Practice
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
+                ))}
               </div>
             )}
           </div>
+        )}
 
-          {/* Sidebar Column */}
-          <div className="space-y-4 sm:space-y-6">
-            {/* Overall Score */}
-            {avgOverallScore > 0 && (
-              <div className="bg-gradient-to-br from-brand-dark to-brand-dark/90 rounded-2xl p-4 sm:p-6 text-white">
-                <p className="text-xs sm:text-sm text-white/60 mb-1">Overall Readiness</p>
-                <p className="text-3xl sm:text-4xl font-bold">{Math.round(avgOverallScore * 20)}%</p>
-                <p className="text-xs sm:text-sm text-white/60 mt-2">Based on {practicedSkills.length} skill areas</p>
+        {/* Empty State */}
+        {!hasActivity && (
+          <div className="bg-[#042c4c] rounded-2xl p-8 text-center relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#ee7e65]/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            <div className="relative">
+              <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Play className="w-8 h-8 text-white" />
               </div>
-            )}
-
-            {/* Top Skill */}
-            {topSkill && topSkill.avgScore !== null && (
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-4 sm:p-6 border border-green-100">
-                <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center mb-3 sm:mb-4">
-                  <Trophy className="w-5 h-5 text-white" />
-                </div>
-                <p className="text-xs sm:text-sm text-green-700 font-medium mb-1">Your strongest skill</p>
-                <p className="text-lg sm:text-xl font-bold text-brand-dark">{topSkill.skillName}</p>
-                <p className="text-xs sm:text-sm text-green-600 font-medium mt-1">{topSkill.avgScore.toFixed(1)}/5</p>
-              </div>
-            )}
-
-            {/* Quick Actions */}
-            <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
-              <h3 className="text-base sm:text-lg font-bold text-brand-dark mb-4">Quick Actions</h3>
-              <div className="space-y-2">
-                <Link to="/interview/custom" className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
-                  <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                    <Briefcase className="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-brand-dark">Interview practice</p>
-                    <p className="text-xs text-brand-muted">Simulate real interviews</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-brand-muted" />
+              <h2 className="text-xl font-bold text-white mb-2">Start Your Interview Journey</h2>
+              <p className="text-white/60 mb-6 max-w-sm mx-auto">
+                Complete your first practice session or add a job target to get personalized recommendations.
+              </p>
+              <div className="flex justify-center gap-3">
+                <Link to="/interview/custom">
+                  <Button className="bg-white text-[#042c4c] hover:bg-white/90">
+                    Start Practice
+                  </Button>
                 </Link>
-
-                <Link to="/jobs" className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
-                  <div className="w-10 h-10 bg-brand-accent/10 rounded-xl flex items-center justify-center group-hover:bg-brand-accent/20 transition-colors">
-                    <Target className="w-5 h-5 text-brand-accent" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-brand-dark">Add job target</p>
-                    <p className="text-xs text-brand-muted">Import from any job board</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-brand-muted" />
+                <Link to="/jobs">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                    Add Job
+                  </Button>
                 </Link>
-
-                <Link to="/avatar/results" className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
-                  <div className="w-10 h-10 bg-brand-dark/5 rounded-xl flex items-center justify-center group-hover:bg-brand-dark/10 transition-colors">
-                    <BarChart3 className="w-5 h-5 text-brand-dark" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-brand-dark">View results</p>
-                    <p className="text-xs text-brand-muted">Track your progress</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-brand-muted" />
-                </Link>
-              </div>
-            </div>
-
-            {/* Activity */}
-            <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
-              <h3 className="text-base sm:text-lg font-bold text-brand-dark mb-4">Recent Activity</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-brand-muted">Last session</span>
-                  <span className="text-sm font-medium text-brand-dark">{stats.lastSessionDate}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-brand-muted">Avg duration</span>
-                  <span className="text-sm font-medium text-brand-dark">{stats.averageSessionDuration}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-brand-muted">Skills explored</span>
-                  <span className="text-sm font-medium text-brand-dark">{stats.skillProgress}%</span>
-                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Activity Footer */}
+        {hasActivity && (
+          <div className="flex items-center justify-between text-sm text-slate-400 pt-2">
+            <span>Last session: {stats.lastSessionDate}</span>
+            <span>{stats.totalSessions} total sessions</span>
+          </div>
+        )}
       </div>
     </SidebarLayout>
   );
