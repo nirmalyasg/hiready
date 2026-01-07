@@ -1,6 +1,6 @@
 import OpenAI from "openai";
-import { db } from "../db";
-import { jobTargets, roleKits, caseTemplates, codingExercises, exerciseSessions } from "../../shared/schema";
+import { db } from "../db.js";
+import { jobTargets, roleKits, caseTemplates, codingExercises, exerciseSessions } from "../../shared/schema.js";
 import { eq, desc, and, isNotNull } from "drizzle-orm";
 
 type JobTarget = typeof jobTargets.$inferSelect;

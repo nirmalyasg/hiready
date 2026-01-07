@@ -1,5 +1,5 @@
-import { db } from "../db";
-import { companies, companyRoleBlueprints } from "../../shared/schema";
+import { db } from "../db.js";
+import { companies, companyRoleBlueprints } from "../../shared/schema.js";
 import { eq, ilike, sql } from "drizzle-orm";
 
 interface InterviewRound {

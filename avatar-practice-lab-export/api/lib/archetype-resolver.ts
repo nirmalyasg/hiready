@@ -1,5 +1,5 @@
-import { db } from "../db";
-import { companies, roleArchetypes, roleInterviewStructureDefaults, jobTargets, roleTaskBlueprints } from "../../shared/schema";
+import { db } from "../db.js";
+import { companies, roleArchetypes, roleInterviewStructureDefaults, jobTargets, roleTaskBlueprints } from "../../shared/schema.js";
 import { eq, sql, ilike, and } from "drizzle-orm";
 
 export type CompanyArchetype = 

@@ -1,7 +1,7 @@
-import { db } from "../db";
-import { questionPatterns, companies, companyRoleBlueprints, userSkillMemory } from "../../shared/schema";
+import { db } from "../db.js";
+import { questionPatterns, companies, companyRoleBlueprints, userSkillMemory } from "../../shared/schema.js";
 import { eq, and, inArray, sql } from "drizzle-orm";
-import { getOpenAI } from "../utils/openai-client";
+import { getOpenAI } from "../utils/openai-client.js";
 
 export interface InterviewContext {
   roleCategory: string;
