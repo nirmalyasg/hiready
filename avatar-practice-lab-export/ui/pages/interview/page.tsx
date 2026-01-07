@@ -393,10 +393,10 @@ export default function InterviewPracticePage() {
 
   return (
     <SidebarLayout>
-      <div className="max-w-5xl mx-auto space-y-8 pb-12">
+      <div className="max-w-5xl mx-auto px-4 sm:px-0 space-y-6 sm:space-y-8 pb-20 sm:pb-12">
         <div>
-          <h1 className="text-2xl font-bold text-[#042c4c] mb-1">Interview Practice</h1>
-          <p className="text-slate-500">Prepare for interviews with AI-powered practice sessions</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#042c4c] mb-1">Interview Practice</h1>
+          <p className="text-sm sm:text-base text-slate-500">AI-powered practice sessions to ace your interviews</p>
         </div>
 
         {fetchError && (
@@ -423,70 +423,90 @@ export default function InterviewPracticePage() {
 
         {/* Three-card choice when no path is selected */}
         {!selectedPath && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-3 sm:gap-4">
             {/* Practice by Role */}
             <button
               onClick={() => setSelectedPath("role")}
-              className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 hover:border-[#ee7e65] hover:shadow-xl transition-all"
+              className="w-full group text-left bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:border-[#ee7e65] hover:shadow-lg transition-all"
             >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                <Briefcase className="w-6 h-6 text-white" />
-              </div>
-              <h2 className="text-lg font-bold text-[#042c4c] mb-2 group-hover:text-[#ee7e65] transition-colors">
-                Practice by Role
-              </h2>
-              <p className="text-slate-500 text-sm mb-4">
-                Choose from {roleKits.length}+ role kits like Software Engineer, Product Manager, Data Analyst.
-              </p>
-              <div className="flex items-center gap-2 text-[#ee7e65] font-medium text-sm">
-                <span>Browse roles</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <div className="flex sm:flex-col items-center sm:items-start gap-4 sm:gap-0">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center sm:mb-4 flex-shrink-0">
+                  <Briefcase className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-base sm:text-lg font-bold text-[#042c4c] mb-0.5 sm:mb-2 group-hover:text-[#ee7e65] transition-colors">
+                    Practice by Role
+                  </h2>
+                  <p className="text-slate-500 text-sm line-clamp-2 sm:line-clamp-none sm:mb-4">
+                    {roleKits.length}+ role kits: Engineer, PM, Analyst...
+                  </p>
+                  <div className="hidden sm:flex items-center gap-2 text-[#ee7e65] font-medium text-sm">
+                    <span>Browse roles</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#ee7e65] sm:hidden" />
               </div>
             </button>
 
             {/* Practice by Interview Type */}
             <button
               onClick={() => setSelectedPath("skill")}
-              className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 hover:border-purple-400 hover:shadow-xl transition-all"
+              className="w-full group text-left bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:border-purple-400 hover:shadow-lg transition-all"
             >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                <Target className="w-6 h-6 text-white" />
-              </div>
-              <h2 className="text-lg font-bold text-[#042c4c] mb-2 group-hover:text-purple-600 transition-colors">
-                Practice by Interview Type
-              </h2>
-              <p className="text-slate-500 text-sm mb-4">
-                Coding, Case Study, Behavioral, Hiring Manager, or System Design.
-              </p>
-              <div className="flex items-center gap-2 text-purple-600 font-medium text-sm">
-                <span>Choose type</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <div className="flex sm:flex-col items-center sm:items-start gap-4 sm:gap-0">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center sm:mb-4 flex-shrink-0">
+                  <Target className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-base sm:text-lg font-bold text-[#042c4c] mb-0.5 sm:mb-2 group-hover:text-purple-600 transition-colors">
+                    Practice by Type
+                  </h2>
+                  <p className="text-slate-500 text-sm line-clamp-2 sm:line-clamp-none sm:mb-4">
+                    Coding, Case Study, Behavioral, HR...
+                  </p>
+                  <div className="hidden sm:flex items-center gap-2 text-purple-600 font-medium text-sm">
+                    <span>Choose type</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-purple-500 sm:hidden" />
               </div>
             </button>
 
             {/* Custom Interview */}
             <button
               onClick={() => setSelectedPath("custom")}
-              className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 hover:border-emerald-400 hover:shadow-xl transition-all"
+              className="w-full group text-left bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:border-emerald-400 hover:shadow-lg transition-all"
             >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                <Target className="w-6 h-6 text-white" />
-              </div>
-              <h2 className="text-lg font-bold text-[#042c4c] mb-2 group-hover:text-emerald-600 transition-colors">
-                Custom Interview
-              </h2>
-              <p className="text-slate-500 text-sm mb-4">
-                Upload your resume and job description for tailored questions.
-              </p>
-              <div className="flex items-center gap-2 text-emerald-600 font-medium text-sm">
-                <span>Get started</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </div>
-              {savedJobs.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-slate-100">
-                  <p className="text-xs text-slate-400">{savedJobs.length} saved job{savedJobs.length !== 1 ? 's' : ''}</p>
+              <div className="flex sm:flex-col items-center sm:items-start gap-4 sm:gap-0">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center sm:mb-4 flex-shrink-0">
+                  <Target className="w-6 h-6 text-white" />
                 </div>
-              )}
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-base sm:text-lg font-bold text-[#042c4c] mb-0.5 sm:mb-2 group-hover:text-emerald-600 transition-colors">
+                    Custom Interview
+                  </h2>
+                  <p className="text-slate-500 text-sm line-clamp-2 sm:line-clamp-none sm:mb-4">
+                    Tailored questions for your specific job
+                  </p>
+                  <div className="hidden sm:flex items-center gap-2 text-emerald-600 font-medium text-sm">
+                    <span>Get started</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                  {savedJobs.length > 0 && (
+                    <div className="hidden sm:block mt-3 pt-3 border-t border-slate-100">
+                      <p className="text-xs text-slate-400">{savedJobs.length} saved job{savedJobs.length !== 1 ? 's' : ''}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 sm:hidden">
+                  {savedJobs.length > 0 && (
+                    <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{savedJobs.length} jobs</span>
+                  )}
+                  <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-emerald-500" />
+                </div>
+              </div>
             </button>
           </div>
         )}
@@ -775,91 +795,91 @@ export default function InterviewPracticePage() {
               className="flex items-center gap-2 text-sm text-slate-500 hover:text-[#042c4c] mb-4 transition-colors"
             >
               <ChevronRight className="w-4 h-4 rotate-180" />
-              Back to options
+              Back
             </button>
 
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center">
-                <Briefcase className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-3 mb-5 sm:mb-6">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center flex-shrink-0">
+                <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-[#042c4c]">Practice by Role</h2>
-                <p className="text-sm text-slate-500">Choose a role kit tailored to your target position</p>
+                <h2 className="text-lg sm:text-xl font-bold text-[#042c4c]">Practice by Role</h2>
+                <p className="text-xs sm:text-sm text-slate-500">Choose a role kit for your target position</p>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 mb-4">
-              <div className="relative flex-1 max-w-xs">
+            {/* Search and Filter */}
+            <div className="space-y-3 mb-4">
+              <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
                   type="text"
                   placeholder="Search roles..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-10 bg-white rounded-xl text-sm"
+                  className="pl-10 h-11 bg-white rounded-xl"
                 />
               </div>
-
-              <div className="relative">
-                <button
-                  onClick={() => setFilterOpen(!filterOpen)}
-                  className={`inline-flex items-center gap-2 px-3 py-2 bg-white border rounded-xl text-sm font-medium transition-all ${
-                    selectedDomain 
-                      ? "border-[#ee7e65] text-[#ee7e65]" 
-                      : "border-slate-200 text-slate-600 hover:border-slate-300"
-                  }`}
-                >
-                  <Filter className="w-4 h-4" />
-                  <span className="max-w-[120px] truncate">
-                    {selectedDomain ? formatDomain(selectedDomain) : "All Domains"}
-                  </span>
-                  <ChevronDown className={`w-4 h-4 transition-transform ${filterOpen ? "rotate-180" : ""}`} />
-                </button>
-
-                {filterOpen && (
-                  <div className="absolute left-0 top-full mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-50 max-h-64 overflow-y-auto">
-                    <button
-                      onClick={() => { setSelectedDomain(null); setFilterOpen(false); }}
-                      className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left hover:bg-slate-50 ${
-                        !selectedDomain ? "bg-[#ee7e65]/10 text-[#ee7e65] font-medium" : "text-slate-700"
-                      }`}
-                    >
-                      All Domains
-                      {!selectedDomain && <Check className="w-4 h-4 text-[#ee7e65]" />}
-                    </button>
-                    {domains.map((domain) => (
-                      <button
-                        key={domain}
-                        onClick={() => { setSelectedDomain(domain); setFilterOpen(false); }}
-                        className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left hover:bg-slate-50 border-t border-slate-100 ${
-                          selectedDomain === domain ? "bg-[#ee7e65]/10 text-[#ee7e65] font-medium" : "text-slate-700"
-                        }`}
-                      >
-                        <span className="truncate pr-2">{formatDomain(domain)}</span>
-                        {selectedDomain === domain && <Check className="w-4 h-4 text-[#ee7e65] flex-shrink-0" />}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {selectedDomain && (
+              
+              {/* Horizontal scroll filter chips on mobile */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
                 <button
                   onClick={() => setSelectedDomain(null)}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#ee7e65]/10 text-[#ee7e65] text-xs font-medium rounded-full hover:bg-[#ee7e65]/20 transition-colors"
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                    !selectedDomain
+                      ? "bg-[#042c4c] text-white"
+                      : "bg-white border border-slate-200 text-slate-600"
+                  }`}
                 >
-                  <X className="w-3 h-3" />
-                  Clear
+                  All
                 </button>
-              )}
-
-              <span className="text-xs text-slate-400 ml-auto">
-                <span className="font-medium text-slate-600">{filteredKits.length}</span> roles
-              </span>
+                {domains.slice(0, 6).map((domain) => (
+                  <button
+                    key={domain}
+                    onClick={() => setSelectedDomain(selectedDomain === domain ? null : domain)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                      selectedDomain === domain
+                        ? "bg-[#ee7e65] text-white"
+                        : "bg-white border border-slate-200 text-slate-600"
+                    }`}
+                  >
+                    {formatDomain(domain)}
+                  </button>
+                ))}
+                {domains.length > 6 && (
+                  <div className="relative">
+                    <button
+                      onClick={() => setFilterOpen(!filterOpen)}
+                      className="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap bg-white border border-slate-200 text-slate-600"
+                    >
+                      More...
+                    </button>
+                    {filterOpen && (
+                      <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-50 max-h-64 overflow-y-auto">
+                        {domains.slice(6).map((domain) => (
+                          <button
+                            key={domain}
+                            onClick={() => { setSelectedDomain(domain); setFilterOpen(false); }}
+                            className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left hover:bg-slate-50 ${
+                              selectedDomain === domain ? "bg-[#ee7e65]/10 text-[#ee7e65] font-medium" : "text-slate-700"
+                            }`}
+                          >
+                            <span>{formatDomain(domain)}</span>
+                            {selectedDomain === domain && <Check className="w-4 h-4 text-[#ee7e65]" />}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                <span className="text-xs text-slate-400 ml-auto whitespace-nowrap pl-2">
+                  {filteredKits.length} roles
+                </span>
+              </div>
             </div>
 
             {filteredKits.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-2xl border border-slate-200">
+              <div className="text-center py-12 bg-white rounded-xl sm:rounded-2xl border border-slate-200">
                 <div className="w-12 h-12 mx-auto mb-3 bg-slate-100 rounded-xl flex items-center justify-center">
                   <Briefcase className="w-6 h-6 text-slate-400" />
                 </div>
@@ -872,7 +892,7 @@ export default function InterviewPracticePage() {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
                 {filteredKits.map((kit) => {
                   const IconComponent = domainIcons[kit.domain] || Briefcase;
                   const bgColor = domainColors[kit.domain] || "bg-slate-500";
@@ -882,39 +902,61 @@ export default function InterviewPracticePage() {
                     <button
                       key={kit.id}
                       onClick={() => handleSelectRole(kit)}
-                      className="group text-left bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-lg hover:border-[#ee7e65] transition-all"
+                      className="w-full group text-left bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:shadow-lg hover:border-[#ee7e65] transition-all"
                     >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className={`w-10 h-10 ${bgColor} rounded-xl flex items-center justify-center`}>
+                      {/* Mobile: horizontal layout */}
+                      <div className="flex sm:hidden items-center gap-3">
+                        <div className={`w-10 h-10 ${bgColor} rounded-xl flex items-center justify-center flex-shrink-0`}>
                           <IconComponent className="w-5 h-5 text-white" />
                         </div>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${levelConfig.color}`}>
-                          {levelConfig.label}
-                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-[#042c4c] truncate group-hover:text-[#ee7e65]">
+                              {kit.name}
+                            </h3>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${levelConfig.color} flex-shrink-0`}>
+                              {levelConfig.label}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500">{formatDomain(kit.domain)}</p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#ee7e65] flex-shrink-0" />
                       </div>
 
-                      <h3 className="font-semibold text-[#042c4c] mb-0.5 group-hover:text-[#ee7e65] transition-colors">
-                        {kit.name}
-                      </h3>
-                      <p className="text-xs text-slate-500 mb-3">
-                        {formatDomain(kit.domain)}
-                      </p>
-
-                      {kit.description && (
-                        <p className="text-xs text-slate-500 line-clamp-2 mb-4">
-                          {kit.description}
-                        </p>
-                      )}
-
-                      <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                        <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                          <Clock className="w-3.5 h-3.5" />
-                          <span>{kit.estimatedDuration || 30} min</span>
+                      {/* Desktop: vertical card layout */}
+                      <div className="hidden sm:block">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className={`w-10 h-10 ${bgColor} rounded-xl flex items-center justify-center`}>
+                            <IconComponent className="w-5 h-5 text-white" />
+                          </div>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${levelConfig.color}`}>
+                            {levelConfig.label}
+                          </span>
                         </div>
-                        <span className="inline-flex items-center gap-1 text-sm font-medium text-[#ee7e65] group-hover:gap-2 transition-all">
-                          Start
-                          <ArrowRight className="w-4 h-4" />
-                        </span>
+
+                        <h3 className="font-semibold text-[#042c4c] mb-0.5 group-hover:text-[#ee7e65] transition-colors">
+                          {kit.name}
+                        </h3>
+                        <p className="text-xs text-slate-500 mb-3">
+                          {formatDomain(kit.domain)}
+                        </p>
+
+                        {kit.description && (
+                          <p className="text-xs text-slate-500 line-clamp-2 mb-4">
+                            {kit.description}
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                          <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>{kit.estimatedDuration || 30} min</span>
+                          </div>
+                          <span className="inline-flex items-center gap-1 text-sm font-medium text-[#ee7e65] group-hover:gap-2 transition-all">
+                            Start
+                            <ArrowRight className="w-4 h-4" />
+                          </span>
+                        </div>
                       </div>
                     </button>
                   );
@@ -932,56 +974,75 @@ export default function InterviewPracticePage() {
               className="flex items-center gap-2 text-sm text-slate-500 hover:text-[#042c4c] mb-4 transition-colors"
             >
               <ChevronRight className="w-4 h-4 rotate-180" />
-              Back to options
+              Back
             </button>
 
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                <Target className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-3 mb-5 sm:mb-6">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                <Target className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-[#042c4c]">Practice by Interview Type</h2>
-                <p className="text-sm text-slate-500">Choose the type of interview to practice</p>
+                <h2 className="text-lg sm:text-xl font-bold text-[#042c4c]">Practice by Type</h2>
+                <p className="text-xs sm:text-sm text-slate-500">Choose the interview type to focus on</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
               {interviewModeOptions.map((mode) => {
                 const IconComponent = mode.icon;
                 return (
                   <button
                     key={mode.id}
                     onClick={() => handleInterviewMode(mode)}
-                    className="group text-left bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-lg hover:border-purple-200 transition-all"
+                    className="w-full group text-left bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:shadow-lg hover:border-purple-200 transition-all"
                   >
-                    <div className={`w-12 h-12 ${mode.color} rounded-xl flex items-center justify-center mb-4`}>
-                      <IconComponent className="w-6 h-6 text-white" />
+                    {/* Mobile: horizontal compact layout */}
+                    <div className="flex sm:hidden items-center gap-3">
+                      <div className={`w-10 h-10 ${mode.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                        <IconComponent className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-[#042c4c] mb-0.5 group-hover:text-purple-700">
+                          {mode.label}
+                        </h3>
+                        <p className="text-xs text-slate-500 line-clamp-1">
+                          {mode.description}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-purple-500 flex-shrink-0" />
                     </div>
-                    <h3 className="font-semibold text-[#042c4c] text-base mb-1 group-hover:text-purple-700 transition-colors">
-                      {mode.label}
-                    </h3>
-                    <p className="text-sm text-slate-500 mb-3">
-                      {mode.description}
-                    </p>
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {mode.includes.slice(0, 3).map((item, idx) => (
-                        <span key={idx} className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
-                          {item}
+
+                    {/* Desktop: full card layout */}
+                    <div className="hidden sm:block">
+                      <div className={`w-12 h-12 ${mode.color} rounded-xl flex items-center justify-center mb-4`}>
+                        <IconComponent className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="font-semibold text-[#042c4c] text-base mb-1 group-hover:text-purple-700 transition-colors">
+                        {mode.label}
+                      </h3>
+                      <p className="text-sm text-slate-500 mb-3">
+                        {mode.description}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {mode.includes.slice(0, 3).map((item, idx) => (
+                          <span key={idx} className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
+                            {item}
+                          </span>
+                        ))}
+                        {mode.includes.length > 3 && (
+                          <span className="text-xs text-slate-400">+{mode.includes.length - 3}</span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                        <span className="text-xs text-slate-400 flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {mode.duration}
                         </span>
-                      ))}
-                      {mode.includes.length > 3 && (
-                        <span className="text-xs text-slate-400">+{mode.includes.length - 3} more</span>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                      <span className="text-xs text-slate-400 flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {mode.duration}
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-sm font-medium text-purple-600 group-hover:gap-2 transition-all">
-                        Start
-                        <ArrowRight className="w-4 h-4" />
-                      </span>
+                        <span className="inline-flex items-center gap-1 text-sm font-medium text-purple-600 group-hover:gap-2 transition-all">
+                          Start
+                          <ArrowRight className="w-4 h-4" />
+                        </span>
+                      </div>
                     </div>
                   </button>
                 );

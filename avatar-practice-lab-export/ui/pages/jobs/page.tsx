@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Search, Plus, Briefcase, Building2, MapPin, Clock, ChevronRight, MoreVertical, Target, CheckCircle2, XCircle, Archive, Filter, ClipboardPaste, Sparkles, Link2, Play } from "lucide-react";
+import { Search, Plus, Briefcase, Building2, MapPin, Clock, ChevronRight, MoreVertical, Target, CheckCircle2, XCircle, Archive, ClipboardPaste, Sparkles, Link2, Play, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import SidebarLayout from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import {
@@ -52,41 +52,22 @@ interface JobTarget {
   };
 }
 
-const confidenceBadgeColors: Record<string, { bg: string; text: string; border: string }> = {
-  high: { bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
-  medium: { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200" },
-  low: { bg: "bg-gray-50", text: "text-gray-600", border: "border-gray-200" },
+const statusConfig: Record<string, { label: string; color: string; bgColor: string; borderColor: string }> = {
+  saved: { label: "Saved", color: "text-slate-600", bgColor: "bg-slate-50", borderColor: "border-slate-200" },
+  applied: { label: "Applied", color: "text-blue-600", bgColor: "bg-blue-50", borderColor: "border-blue-200" },
+  interview: { label: "Interviewing", color: "text-purple-600", bgColor: "bg-purple-50", borderColor: "border-purple-200" },
+  offer: { label: "Offer", color: "text-green-600", bgColor: "bg-green-50", borderColor: "border-green-200" },
+  rejected: { label: "Rejected", color: "text-red-600", bgColor: "bg-red-50", borderColor: "border-red-200" },
+  archived: { label: "Archived", color: "text-gray-400", bgColor: "bg-gray-50", borderColor: "border-gray-200" },
 };
 
-const archetypeLabels: Record<string, string> = {
-  it_services: "IT Services",
-  big_tech: "Big Tech",
-  bfsi: "BFSI",
-  fmcg: "FMCG",
-  manufacturing: "Manufacturing",
-  consulting: "Consulting",
-  bpm: "BPM",
-  telecom: "Telecom",
-  conglomerate: "Conglomerate",
-  startup: "Startup",
-  enterprise: "Enterprise",
-  regulated: "Regulated",
-  consumer: "Consumer Tech",
-  saas: "SaaS",
-  fintech: "Fintech",
-  edtech: "EdTech",
-  services: "Services",
-  industrial: "Industrial",
-};
-
-const statusConfig: Record<string, { label: string; color: string; icon: any; bgColor: string }> = {
-  saved: { label: "Saved", color: "text-gray-600", icon: Target, bgColor: "bg-gray-100" },
-  applied: { label: "Applied", color: "text-blue-600", icon: Clock, bgColor: "bg-blue-100" },
-  interview: { label: "Interviewing", color: "text-purple-600", icon: Briefcase, bgColor: "bg-purple-100" },
-  offer: { label: "Offer", color: "text-green-600", icon: CheckCircle2, bgColor: "bg-green-100" },
-  rejected: { label: "Rejected", color: "text-red-600", icon: XCircle, bgColor: "bg-red-100" },
-  archived: { label: "Archived", color: "text-gray-400", icon: Archive, bgColor: "bg-gray-50" },
-};
+const statusFilters = [
+  { value: "all", label: "All Jobs" },
+  { value: "saved", label: "Saved" },
+  { value: "applied", label: "Applied" },
+  { value: "interview", label: "Interviewing" },
+  { value: "offer", label: "Offers" },
+];
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState<JobTarget[]>([]);
@@ -163,30 +144,6 @@ export default function JobsPage() {
     }
   };
 
-  const handlePasteJD = async () => {
-    if (!pastedJD.trim() || pastedJD.length < 50) return;
-    
-    try {
-      setIsParsing(true);
-      const response = await fetch("/api/jobs/job-targets/parse-paste", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pastedText: pastedJD }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        setJobs([data.job, ...jobs]);
-        setPastedJD("");
-        setAddDialogOpen(false);
-        navigate(`/jobs/${data.job.id}`);
-      }
-    } catch (error) {
-      console.error("Error parsing JD:", error);
-    } finally {
-      setIsParsing(false);
-    }
-  };
-
   const handleParseUrl = async () => {
     if (!pastedUrl.trim()) return;
     
@@ -248,429 +205,500 @@ export default function JobsPage() {
     
     if (diffDays === 0) return "Today";
     if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
+
+  const resetDialog = () => {
+    setAddMode(null);
+    setUrlError("");
+    setPastedUrl("");
+    setPastedJD("");
+    setNewJob({ roleTitle: "", companyName: "", location: "" });
   };
 
   return (
     <SidebarLayout>
-      {isLoading && jobs.length === 0 ? (
-        <div className="flex justify-center items-center h-[60vh]">
-          <LoadingSpinner />
+      <div className="max-w-4xl mx-auto px-4 sm:px-0">
+        {/* Header */}
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#042c4c]">
+            Job Targets
+          </h1>
+          <p className="text-slate-500 mt-1 text-sm sm:text-base">
+            Track and prepare for your dream roles
+          </p>
         </div>
-      ) : (
-        <div className="max-w-6xl mx-auto space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-accent/10 rounded-full text-brand-accent text-sm font-medium mb-3">
-                <Target className="w-4 h-4" />
-                Career Goals
-              </div>
-              <h1 className="text-3xl font-bold text-brand-dark">
-                Your Job Targets
-              </h1>
-              <p className="text-brand-muted mt-2 max-w-xl">
-                Save jobs you're preparing for and track your interview readiness.
-              </p>
-            </div>
 
-            <Dialog open={addDialogOpen} onOpenChange={(open) => { 
-              setAddDialogOpen(open); 
-              if (!open) { 
-                setAddMode(null); 
-                setUrlError(""); 
-                setPastedUrl(""); 
-                setPastedJD("");
-                setNewJob({ roleTitle: "", companyName: "", location: "" });
-              } 
-            }}>
-              <DialogTrigger asChild>
-                <Button className="gap-2 bg-brand-dark hover:bg-brand-dark/90">
-                  <Plus className="w-4 h-4" />
-                  Add Job
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>
-                    {addMode === "url" ? "Import from URL" :
-                     addMode === "manual" ? "Enter Job Details" :
-                     "Add New Job"}
-                  </DialogTitle>
-                </DialogHeader>
-                
-                {!addMode ? (
-                  <div className="space-y-3 pt-4">
-                    <p className="text-sm text-brand-muted mb-4">
-                      Choose how you'd like to add a job:
-                    </p>
-                    <button
-                      onClick={() => setAddMode("url")}
-                      className="w-full p-4 border rounded-xl text-left hover:border-brand-accent hover:bg-brand-accent/5 transition-all group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <Link2 className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <div className="font-medium text-brand-dark group-hover:text-brand-accent">
-                            Import from URL
-                          </div>
-                          <div className="text-sm text-brand-muted">
-                            Paste any job link (LinkedIn, Indeed, Glassdoor, Naukri, etc.)
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => setAddMode("manual")}
-                      className="w-full p-4 border rounded-xl text-left hover:border-brand-accent hover:bg-brand-accent/5 transition-all group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <Plus className="w-5 h-5 text-gray-600" />
-                        </div>
-                        <div>
-                          <div className="font-medium text-brand-dark group-hover:text-brand-accent">
-                            Enter Manually
-                          </div>
-                          <div className="text-sm text-brand-muted">
-                            Type job title, company, location, and description
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  </div>
-                ) : addMode === "url" ? (
-                  <div className="space-y-4 pt-4">
-                    <p className="text-sm text-brand-muted">
-                      Paste a job URL and we'll extract all the details automatically.
-                    </p>
-                    <Input
-                      value={pastedUrl}
-                      onChange={(e) => { setPastedUrl(e.target.value); setUrlError(""); }}
-                      placeholder="https://linkedin.com/jobs/... or https://indeed.com/..."
-                      className={urlError ? "border-red-500" : ""}
-                    />
-                    {urlError && (
-                      <p className="text-sm text-red-500">{urlError}</p>
-                    )}
-                    <div className="text-xs text-brand-muted bg-gray-50 p-3 rounded-lg">
-                      <strong>Supported:</strong> LinkedIn, Indeed, Glassdoor, Naukri, Monster, and more
-                    </div>
-                    <div className="flex justify-between gap-3">
-                      <Button variant="ghost" onClick={() => setAddMode(null)}>
-                        Back
-                      </Button>
-                      <Button 
-                        onClick={handleParseUrl}
-                        disabled={isParsingUrl || !pastedUrl.trim()}
-                        className="gap-2 bg-brand-accent hover:bg-brand-accent/90"
-                      >
-                        {isParsingUrl ? (
-                          <>
-                            <LoadingSpinner className="w-4 h-4" />
-                            Importing...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="w-4 h-4" />
-                            Import Job
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4 pt-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="col-span-2">
-                        <label className="text-sm font-medium text-brand-dark mb-1.5 block">
-                          Role Title *
-                        </label>
-                        <Input
-                          value={newJob.roleTitle}
-                          onChange={(e) => setNewJob({ ...newJob, roleTitle: e.target.value })}
-                          placeholder="e.g. Senior Product Manager"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-brand-dark mb-1.5 block">
-                          Company
-                        </label>
-                        <Input
-                          value={newJob.companyName}
-                          onChange={(e) => setNewJob({ ...newJob, companyName: e.target.value })}
-                          placeholder="e.g. Google"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-brand-dark mb-1.5 block">
-                          Location
-                        </label>
-                        <Input
-                          value={newJob.location}
-                          onChange={(e) => setNewJob({ ...newJob, location: e.target.value })}
-                          placeholder="e.g. Remote, NYC"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-brand-dark mb-1.5 block">
-                        Job Description
-                      </label>
-                      <textarea
-                        value={pastedJD}
-                        onChange={(e) => setPastedJD(e.target.value)}
-                        placeholder="Paste the full job description here (optional, helps with practice focus)..."
-                        className="w-full h-32 p-3 border rounded-xl resize-none focus:ring-2 focus:ring-brand-accent focus:border-brand-accent text-sm"
-                      />
-                    </div>
-                    <div className="flex justify-between gap-3 pt-2">
-                      <Button variant="ghost" onClick={() => setAddMode(null)}>
-                        Back
-                      </Button>
-                      <Button 
-                        onClick={handleAddJob}
-                        disabled={isSubmitting || !newJob.roleTitle.trim()}
-                        className="bg-brand-dark hover:bg-brand-dark/90"
-                      >
-                        {isSubmitting ? "Adding..." : "Add Job"}
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </DialogContent>
-            </Dialog>
+        {/* Search and Filter Row */}
+        <div className="flex flex-col gap-3 mb-6">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              type="text"
+              placeholder="Search by role, company, or location..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-11 bg-white border-slate-200 rounded-xl"
+            />
           </div>
-
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
-              <Input
-                type="text"
-                placeholder="Search jobs..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-11 h-12 bg-white"
-              />
-            </div>
-            
-            <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
-              {["all", "saved", "applied", "interview", "offer"].map((status) => (
-                <button
-                  key={status}
-                  onClick={() => setStatusFilter(status)}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
-                    statusFilter === status
-                      ? "bg-brand-dark text-white"
-                      : "bg-white border border-gray-200 text-brand-dark hover:border-gray-300"
-                  }`}
-                >
-                  {status === "all" ? "All" : statusConfig[status]?.label}
-                </button>
-              ))}
-            </div>
+          
+          {/* Filter chips - horizontal scroll on mobile */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
+            {statusFilters.map((filter) => (
+              <button
+                key={filter.value}
+                onClick={() => setStatusFilter(filter.value)}
+                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                  statusFilter === filter.value
+                    ? "bg-[#042c4c] text-white"
+                    : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300"
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
           </div>
+        </div>
 
-          {filteredJobs.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Briefcase className="w-8 h-8 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-brand-dark mb-2">
-                {searchQuery || statusFilter !== "all" ? "No matching jobs" : "No jobs saved yet"}
-              </h3>
-              <p className="text-brand-muted mb-6 max-w-sm mx-auto">
-                {searchQuery || statusFilter !== "all" 
-                  ? "Try adjusting your search or filters" 
-                  : "Add jobs you're preparing for to track your progress and get personalized practice recommendations."}
-              </p>
-              {!searchQuery && statusFilter === "all" && (
-                <Button 
-                  onClick={() => setAddDialogOpen(true)}
-                  className="gap-2 bg-brand-dark hover:bg-brand-dark/90"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Job
-                </Button>
-              )}
+        {/* Loading State */}
+        {isLoading && jobs.length === 0 ? (
+          <div className="flex justify-center items-center py-20">
+            <LoadingSpinner />
+          </div>
+        ) : filteredJobs.length === 0 ? (
+          /* Empty State */
+          <div className="bg-white rounded-2xl border border-slate-100 p-8 sm:p-12 text-center">
+            <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Briefcase className="w-8 h-8 text-slate-400" />
             </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredJobs.map((job) => {
-                const status = statusConfig[job.status];
-                const StatusIcon = status.icon;
-                
-                return (
-                  <div
-                    key={job.id}
-                    className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-all group cursor-pointer"
-                    onClick={() => navigate(`/jobs/${job.id}`)}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 ${status.bgColor} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                        <StatusIcon className={`w-6 h-6 ${status.color}`} />
-                      </div>
-                      
+            <h3 className="text-lg font-semibold text-[#042c4c] mb-2">
+              {searchQuery || statusFilter !== "all" ? "No matching jobs" : "No jobs saved yet"}
+            </h3>
+            <p className="text-slate-500 text-sm mb-6 max-w-sm mx-auto">
+              {searchQuery || statusFilter !== "all" 
+                ? "Try adjusting your search or filters" 
+                : "Add jobs you're targeting to track your preparation progress"}
+            </p>
+            {!searchQuery && statusFilter === "all" && (
+              <Dialog open={addDialogOpen} onOpenChange={(open) => { 
+                setAddDialogOpen(open); 
+                if (!open) resetDialog();
+              }}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2 bg-[#ee7e65] hover:bg-[#e06a50] text-white rounded-xl">
+                    <Plus className="w-4 h-4" />
+                    Add Your First Job
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="text-[#042c4c]">
+                      {addMode === "url" ? "Import from URL" :
+                       addMode === "manual" ? "Enter Job Details" :
+                       "Add Job Target"}
+                    </DialogTitle>
+                  </DialogHeader>
+                  {renderDialogContent()}
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+        ) : (
+          /* Job Cards */
+          <div className="space-y-3">
+            {filteredJobs.map((job) => {
+              const status = statusConfig[job.status];
+              
+              return (
+                <div
+                  key={job.id}
+                  className="bg-white rounded-xl border border-slate-100 p-4 sm:p-5 hover:shadow-md hover:border-slate-200 transition-all cursor-pointer group"
+                  onClick={() => navigate(`/jobs/${job.id}`)}
+                >
+                  {/* Mobile Layout */}
+                  <div className="sm:hidden">
+                    <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <h3 className="font-semibold text-brand-dark text-lg group-hover:text-brand-accent transition-colors">
-                              {job.roleTitle}
-                            </h3>
-                            <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-brand-muted">
-                              {job.companyName && (
-                                <span className="flex items-center gap-1">
-                                  <Building2 className="w-3.5 h-3.5" />
-                                  {job.companyName}
-                                </span>
-                              )}
-                              {job.location && (
-                                <span className="flex items-center gap-1">
-                                  <MapPin className="w-3.5 h-3.5" />
-                                  {job.location}
-                                </span>
-                              )}
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3.5 h-3.5" />
-                                {formatDate(job.createdAt)}
-                              </span>
-                            </div>
-                            {(job.companyArchetype || job.roleFamily) && (
-                              <div className="flex flex-wrap items-center gap-2 mt-2">
-                                {job.companyArchetype && (
-                                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full border ${
-                                    confidenceBadgeColors[job.archetypeConfidence || "low"]?.bg || "bg-gray-50"
-                                  } ${
-                                    confidenceBadgeColors[job.archetypeConfidence || "low"]?.text || "text-gray-600"
-                                  } ${
-                                    confidenceBadgeColors[job.archetypeConfidence || "low"]?.border || "border-gray-200"
-                                  }`}>
-                                    <Building2 className="w-3 h-3" />
-                                    {archetypeLabels[job.companyArchetype] || job.companyArchetype}
-                                  </span>
-                                )}
-                                {job.roleFamily && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-purple-50 text-purple-700 border border-purple-200">
-                                    <Briefcase className="w-3 h-3" />
-                                    {job.roleFamily.charAt(0).toUpperCase() + job.roleFamily.slice(1)}
-                                  </span>
-                                )}
-                              </div>
-                            )}
+                        <h3 className="font-semibold text-[#042c4c] text-base leading-tight mb-1 line-clamp-2">
+                          {job.roleTitle}
+                        </h3>
+                        {job.companyName && (
+                          <p className="text-slate-500 text-sm flex items-center gap-1">
+                            <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
+                            <span className="truncate">{job.companyName}</span>
+                          </p>
+                        )}
+                      </div>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${status.bgColor} ${status.color} border ${status.borderColor} whitespace-nowrap`}>
+                        {status.label}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 text-xs text-slate-400 mb-3">
+                      {job.location && (
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {job.location}
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {formatDate(job.createdAt)}
+                      </span>
+                    </div>
+
+                    {/* Mobile Readiness + Action */}
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                      {job.readinessScore !== null && job.readinessScore > 0 ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full ${
+                                job.readinessScore >= 70 ? 'bg-green-500' :
+                                job.readinessScore >= 40 ? 'bg-amber-500' : 'bg-[#ee7e65]'
+                              }`}
+                              style={{ width: `${job.readinessScore}%` }}
+                            />
                           </div>
-                          
-                          <div className="flex items-center gap-3">
-                            {job.readinessScore !== null && job.readinessScore > 0 && (
-                              <div className="hidden sm:flex items-center gap-3">
-                                <div className="w-24">
-                                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                                    <div 
-                                      className={`h-full rounded-full transition-all ${
-                                        job.readinessScore >= 70 ? 'bg-green-500' :
-                                        job.readinessScore >= 40 ? 'bg-amber-500' : 'bg-brand-accent'
-                                      }`}
-                                      style={{ width: `${job.readinessScore}%` }}
-                                    />
-                                  </div>
-                                </div>
-                                <div className="text-right">
-                                  <div className="text-lg font-bold text-brand-dark">
-                                    {job.readinessScore}%
-                                  </div>
-                                  <div className="text-xs text-brand-muted">Ready</div>
-                                </div>
-                              </div>
-                            )}
-                            
-                            <Button
-                              size="sm"
-                              onClick={(e: React.MouseEvent) => {
-                                e.stopPropagation();
-                                navigate(`/jobs/${job.id}`);
-                              }}
-                              className="gap-1.5 bg-brand-accent hover:bg-brand-accent/90 text-white rounded-lg hidden sm:flex"
-                            >
-                              <Play className="w-3.5 h-3.5" />
-                              Practice
-                            </Button>
-                            
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <MoreVertical className="w-4 h-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                                <DropdownMenuItem 
-                                  onClick={() => navigate(`/jobs/${job.id}`)}
-                                  className="sm:hidden"
-                                >
-                                  <Play className="w-4 h-4 mr-2" />
-                                  Practice Interview
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(job.id, "applied")}>
-                                  Mark as Applied
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(job.id, "interview")}>
-                                  Mark as Interviewing
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(job.id, "offer")}>
-                                  Mark as Offer
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(job.id, "rejected")}>
-                                  Mark as Rejected
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(job.id, "archived")}>
-                                  Archive
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                            
-                            <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-brand-accent transition-colors" />
-                          </div>
+                          <span className="text-xs font-medium text-slate-600">{job.readinessScore}% ready</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-400">No practice yet</span>
+                      )}
+                      <Button
+                        size="sm"
+                        onClick={(e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          navigate(`/jobs/${job.id}`);
+                        }}
+                        className="h-8 px-3 gap-1.5 bg-[#ee7e65] hover:bg-[#e06a50] text-white rounded-lg text-xs"
+                      >
+                        <Play className="w-3 h-3" />
+                        Practice
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Desktop Layout */}
+                  <div className="hidden sm:block">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-[#042c4c] text-lg group-hover:text-[#ee7e65] transition-colors truncate">
+                            {job.roleTitle}
+                          </h3>
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${status.bgColor} ${status.color} border ${status.borderColor}`}>
+                            {status.label}
+                          </span>
                         </div>
                         
-                        {job.practiceStats && job.practiceStats.totalSessions > 0 && (
-                          <div className="flex gap-4 mt-3 pt-3 border-t border-gray-100">
-                            <span className="text-sm text-brand-muted">
-                              <span className="font-medium text-brand-dark">{job.practiceStats.totalSessions}</span> practice sessions
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
+                          {job.companyName && (
+                            <span className="flex items-center gap-1">
+                              <Building2 className="w-3.5 h-3.5" />
+                              {job.companyName}
                             </span>
-                            {job.lastPracticedAt && (
-                              <span className="text-sm text-brand-muted">
-                                Last practiced {formatDate(job.lastPracticedAt)}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        
+                          )}
+                          {job.location && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3.5 h-3.5" />
+                              {job.location}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1 text-slate-400">
+                            <Clock className="w-3.5 h-3.5" />
+                            Added {formatDate(job.createdAt)}
+                          </span>
+                        </div>
+
+                        {/* Focus areas tags */}
                         {job.jdParsed?.focusAreas && job.jdParsed.focusAreas.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mt-3">
+                          <div className="flex flex-wrap gap-1.5 mt-2">
                             {job.jdParsed.focusAreas.slice(0, 3).map((area, idx) => (
                               <span
                                 key={idx}
-                                className="px-2.5 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium"
+                                className="px-2 py-0.5 bg-purple-50 text-purple-600 rounded-md text-xs font-medium"
                               >
                                 {area}
                               </span>
                             ))}
                             {job.jdParsed.focusAreas.length > 3 && (
-                              <span className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
-                                +{job.jdParsed.focusAreas.length - 3} more
+                              <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-md text-xs">
+                                +{job.jdParsed.focusAreas.length - 3}
                               </span>
                             )}
                           </div>
                         )}
                       </div>
+
+                      {/* Right side: Readiness + Actions */}
+                      <div className="flex items-center gap-4 flex-shrink-0">
+                        {job.readinessScore !== null && job.readinessScore > 0 && (
+                          <div className="text-center">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
+                                <div 
+                                  className={`h-full rounded-full ${
+                                    job.readinessScore >= 70 ? 'bg-green-500' :
+                                    job.readinessScore >= 40 ? 'bg-amber-500' : 'bg-[#ee7e65]'
+                                  }`}
+                                  style={{ width: `${job.readinessScore}%` }}
+                                />
+                              </div>
+                              <span className="text-lg font-bold text-[#042c4c]">{job.readinessScore}%</span>
+                            </div>
+                            <p className="text-xs text-slate-400">Ready</p>
+                          </div>
+                        )}
+                        
+                        <Button
+                          size="sm"
+                          onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation();
+                            navigate(`/jobs/${job.id}`);
+                          }}
+                          className="gap-1.5 bg-[#ee7e65] hover:bg-[#e06a50] text-white rounded-lg"
+                        >
+                          <Play className="w-3.5 h-3.5" />
+                          Practice
+                        </Button>
+                        
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-600">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                            <DropdownMenuItem onClick={() => handleUpdateStatus(job.id, "applied")}>
+                              Mark as Applied
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleUpdateStatus(job.id, "interview")}>
+                              Mark as Interviewing
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleUpdateStatus(job.id, "offer")}>
+                              Mark as Offer
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleUpdateStatus(job.id, "rejected")}>
+                              Mark as Rejected
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleUpdateStatus(job.id, "archived")}>
+                              Archive
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        
+                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#ee7e65] transition-colors" />
+                      </div>
                     </div>
+
+                    {/* Practice stats */}
+                    {job.practiceStats && job.practiceStats.totalSessions > 0 && (
+                      <div className="flex items-center gap-4 mt-3 pt-3 border-t border-slate-100 text-sm text-slate-500">
+                        <span className="flex items-center gap-1">
+                          <TrendingUp className="w-3.5 h-3.5" />
+                          <span className="font-medium text-[#042c4c]">{job.practiceStats.totalSessions}</span> sessions
+                        </span>
+                        {job.lastPracticedAt && (
+                          <span className="text-slate-400">
+                            Last practiced {formatDate(job.lastPracticedAt)}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Floating Add Button */}
+        <Dialog open={addDialogOpen} onOpenChange={(open) => { 
+          setAddDialogOpen(open); 
+          if (!open) resetDialog();
+        }}>
+          <DialogTrigger asChild>
+            <button className="fixed bottom-20 sm:bottom-8 right-4 sm:right-8 w-14 h-14 bg-[#ee7e65] hover:bg-[#e06a50] text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center z-40">
+              <Plus className="w-6 h-6" />
+            </button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md mx-4 rounded-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-[#042c4c]">
+                {addMode === "url" ? "Import from URL" :
+                 addMode === "manual" ? "Enter Job Details" :
+                 "Add Job Target"}
+              </DialogTitle>
+            </DialogHeader>
+            {renderDialogContent()}
+          </DialogContent>
+        </Dialog>
+      </div>
     </SidebarLayout>
   );
+
+  function renderDialogContent() {
+    if (!addMode) {
+      return (
+        <div className="space-y-3 pt-2">
+          <p className="text-sm text-slate-500">
+            How would you like to add a job?
+          </p>
+          <button
+            onClick={() => setAddMode("url")}
+            className="w-full p-4 border border-slate-200 rounded-xl text-left hover:border-[#ee7e65] hover:bg-[#ee7e65]/5 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Link2 className="w-5 h-5 text-blue-600" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-[#042c4c] group-hover:text-[#ee7e65]">
+                  Import from URL
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  LinkedIn, Indeed, Glassdoor, Naukri...
+                </p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#ee7e65]" />
+            </div>
+          </button>
+          <button
+            onClick={() => setAddMode("manual")}
+            className="w-full p-4 border border-slate-200 rounded-xl text-left hover:border-[#ee7e65] hover:bg-[#ee7e65]/5 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
+                <ClipboardPaste className="w-5 h-5 text-slate-600" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-[#042c4c] group-hover:text-[#ee7e65]">
+                  Enter Manually
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Type or paste job details
+                </p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#ee7e65]" />
+            </div>
+          </button>
+        </div>
+      );
+    }
+    
+    if (addMode === "url") {
+      return (
+        <div className="space-y-4 pt-2">
+          <p className="text-sm text-slate-500">
+            Paste a job URL and we'll extract the details
+          </p>
+          <Input
+            value={pastedUrl}
+            onChange={(e) => { setPastedUrl(e.target.value); setUrlError(""); }}
+            placeholder="https://linkedin.com/jobs/..."
+            className={`rounded-xl ${urlError ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+          />
+          {urlError && (
+            <p className="text-sm text-red-500">{urlError}</p>
+          )}
+          <div className="flex gap-2 pt-2">
+            <Button 
+              variant="ghost" 
+              onClick={() => setAddMode(null)}
+              className="flex-1"
+            >
+              Back
+            </Button>
+            <Button 
+              onClick={handleParseUrl}
+              disabled={isParsingUrl || !pastedUrl.trim()}
+              className="flex-1 gap-2 bg-[#ee7e65] hover:bg-[#e06a50]"
+            >
+              {isParsingUrl ? (
+                <>
+                  <LoadingSpinner className="w-4 h-4" />
+                  Importing...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Import
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="space-y-4 pt-2">
+        <div>
+          <label className="text-sm font-medium text-[#042c4c] mb-1.5 block">
+            Role Title <span className="text-red-500">*</span>
+          </label>
+          <Input
+            value={newJob.roleTitle}
+            onChange={(e) => setNewJob({ ...newJob, roleTitle: e.target.value })}
+            placeholder="e.g., Senior Product Manager"
+            className="rounded-xl"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-sm font-medium text-[#042c4c] mb-1.5 block">
+              Company
+            </label>
+            <Input
+              value={newJob.companyName}
+              onChange={(e) => setNewJob({ ...newJob, companyName: e.target.value })}
+              placeholder="e.g., Google"
+              className="rounded-xl"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-[#042c4c] mb-1.5 block">
+              Location
+            </label>
+            <Input
+              value={newJob.location}
+              onChange={(e) => setNewJob({ ...newJob, location: e.target.value })}
+              placeholder="e.g., Remote"
+              className="rounded-xl"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="text-sm font-medium text-[#042c4c] mb-1.5 block">
+            Job Description <span className="text-slate-400 font-normal">(optional)</span>
+          </label>
+          <textarea
+            value={pastedJD}
+            onChange={(e) => setPastedJD(e.target.value)}
+            placeholder="Paste the full job description for better practice questions..."
+            className="w-full h-24 p-3 border border-slate-200 rounded-xl resize-none focus:ring-2 focus:ring-[#ee7e65] focus:border-[#ee7e65] text-sm"
+          />
+        </div>
+        <div className="flex gap-2 pt-2">
+          <Button 
+            variant="ghost" 
+            onClick={() => setAddMode(null)}
+            className="flex-1"
+          >
+            Back
+          </Button>
+          <Button 
+            onClick={handleAddJob}
+            disabled={isSubmitting || !newJob.roleTitle.trim()}
+            className="flex-1 bg-[#042c4c] hover:bg-[#042c4c]/90"
+          >
+            {isSubmitting ? "Adding..." : "Add Job"}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 }

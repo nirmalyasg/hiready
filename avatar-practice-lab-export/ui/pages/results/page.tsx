@@ -399,109 +399,111 @@ export default function ResultsPage() {
 
   return (
     <SidebarLayout>
-      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-0 space-y-4 sm:space-y-6 pb-20 sm:pb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-brand-dark">Performance Review</h1>
-            <p className="text-sm sm:text-base text-brand-dark/60 mt-1">
-              {totalSessions} sessions, {Math.round(totalDuration / 60)} minutes practiced
-              {activeJobs.length > 0 && ` across ${activeJobs.length} job target${activeJobs.length !== 1 ? 's' : ''}`}
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#042c4c]">Your Results</h1>
+            <p className="text-sm sm:text-base text-slate-500 mt-1">
+              {totalSessions} sessions, {Math.round(totalDuration / 60)} min practiced
+              {activeJobs.length > 0 && ` for ${activeJobs.length} job${activeJobs.length !== 1 ? 's' : ''}`}
             </p>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
-            <Link to="/interview/custom" className="flex-1 sm:flex-none">
-              <Button className="gap-2 w-full">
+            <Link to="/interview" className="flex-1 sm:flex-none">
+              <Button className="gap-2 w-full bg-[#ee7e65] hover:bg-[#e06a50]">
                 <Play className="w-4 h-4" />
-                Practice Interview
+                Practice
               </Button>
             </Link>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
-          <Card className="p-3 sm:p-4 border border-brand-light/30 bg-white">
-            <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Total Sessions</p>
-            <p className="text-xl sm:text-2xl font-bold text-brand-dark mt-1">{totalSessions}</p>
-          </Card>
-          <Card className="p-3 sm:p-4 border border-purple-100 bg-purple-50">
-            <p className="text-[10px] sm:text-xs text-purple-600 font-medium uppercase tracking-wide">Interviews</p>
-            <p className="text-xl sm:text-2xl font-bold text-purple-700 mt-1">{totalInterviewSessions}</p>
-          </Card>
-          <Card className="p-3 sm:p-4 border border-brand-light/30 bg-white">
-            <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Exercises</p>
-            <p className="text-xl sm:text-2xl font-bold text-brand-dark mt-1">{totalExerciseSessions}</p>
-          </Card>
-          <Card className="p-3 sm:p-4 border border-brand-light/30 bg-white">
-            <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Practice</p>
-            <p className="text-xl sm:text-2xl font-bold text-brand-dark mt-1">{totalConversationSessions}</p>
-          </Card>
-          <Card className="p-3 sm:p-4 border border-brand-light/30 bg-white">
-            <p className="text-[10px] sm:text-xs text-brand-dark/60 font-medium uppercase tracking-wide">Total Time</p>
-            <p className="text-xl sm:text-2xl font-bold text-brand-dark mt-1">{Math.round(totalDuration / 60)}m</p>
-          </Card>
+        {/* Stats Grid - 4 columns on mobile, 5 on desktop */}
+        <div className="grid grid-cols-4 gap-2 sm:gap-4 lg:grid-cols-5">
+          <div className="bg-white rounded-xl border border-slate-100 p-2.5 sm:p-4">
+            <p className="text-[9px] sm:text-xs text-slate-500 font-medium uppercase">Sessions</p>
+            <p className="text-lg sm:text-2xl font-bold text-[#042c4c] mt-0.5">{totalSessions}</p>
+          </div>
+          <div className="bg-purple-50 rounded-xl border border-purple-100 p-2.5 sm:p-4">
+            <p className="text-[9px] sm:text-xs text-purple-600 font-medium uppercase">Interviews</p>
+            <p className="text-lg sm:text-2xl font-bold text-purple-700 mt-0.5">{totalInterviewSessions}</p>
+          </div>
+          <div className="bg-blue-50 rounded-xl border border-blue-100 p-2.5 sm:p-4">
+            <p className="text-[9px] sm:text-xs text-blue-600 font-medium uppercase">Exercises</p>
+            <p className="text-lg sm:text-2xl font-bold text-blue-700 mt-0.5">{totalExerciseSessions}</p>
+          </div>
+          <div className="bg-white rounded-xl border border-slate-100 p-2.5 sm:p-4">
+            <p className="text-[9px] sm:text-xs text-slate-500 font-medium uppercase">Time</p>
+            <p className="text-lg sm:text-2xl font-bold text-[#042c4c] mt-0.5">{Math.round(totalDuration / 60)}m</p>
+          </div>
+          <div className="hidden lg:block bg-white rounded-xl border border-slate-100 p-2.5 sm:p-4">
+            <p className="text-[9px] sm:text-xs text-slate-500 font-medium uppercase">Practice</p>
+            <p className="text-lg sm:text-2xl font-bold text-[#042c4c] mt-0.5">{totalConversationSessions}</p>
+          </div>
         </div>
 
-        <div className="flex flex-col gap-3 sm:gap-4">
-          <div className="flex bg-brand-light/10 rounded-lg p-1 w-full sm:w-auto overflow-x-auto">
+        {/* View Toggle + Search */}
+        <div className="space-y-3">
+          {/* View mode toggle */}
+          <div className="flex bg-slate-100 rounded-xl p-1">
             <button
               onClick={() => setViewMode("sessions")}
-              className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
+              className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 viewMode === "sessions" 
-                  ? "bg-white text-brand-dark shadow-sm" 
-                  : "text-brand-dark/60 hover:text-brand-dark"
+                  ? "bg-white text-[#042c4c] shadow-sm" 
+                  : "text-slate-500 hover:text-slate-700"
               }`}
             >
-              All Sessions
+              Sessions
             </button>
             <button
               onClick={() => setViewMode("skills")}
-              className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
+              className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 viewMode === "skills" 
-                  ? "bg-white text-brand-dark shadow-sm" 
-                  : "text-brand-dark/60 hover:text-brand-dark"
+                  ? "bg-white text-[#042c4c] shadow-sm" 
+                  : "text-slate-500 hover:text-slate-700"
               }`}
             >
-              Skills Overview
+              Skills
             </button>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
+          {/* Search and filter */}
+          <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
-                placeholder="Search sessions..."
+                placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 h-11 rounded-xl bg-white"
               />
             </div>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2.5 border border-brand-light/30 rounded-lg text-sm bg-white text-brand-dark w-full sm:w-auto"
+              className="px-3 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-[#042c4c] min-w-[100px]"
             >
-              <option value="all">All Types</option>
-              <option value="conversations">Conversations</option>
-              {presentations.length > 0 && (
-                <option value="presentations">Presentations</option>
-              )}
-              {interviews.length > 0 && (
-                <option value="interviews">Interviews</option>
-              )}
+              <option value="all">All</option>
+              <option value="interviews">Interviews</option>
               {exercises.some(e => e.exerciseType === "coding_lab") && (
-                <option value="coding">Coding Lab</option>
+                <option value="coding">Coding</option>
               )}
               {exercises.some(e => e.exerciseType === "case_study") && (
                 <option value="case_study">Case Study</option>
+              )}
+              <option value="conversations">Conversations</option>
+              {presentations.length > 0 && (
+                <option value="presentations">Presentations</option>
               )}
             </select>
           </div>
         </div>
 
         {viewMode === "skills" && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {practicedSkills.length > 0 ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-3">
                 {practicedSkills.map((skill) => {
                   const skillSessions = sessions.filter(s => s.skill_name === skill.skillName);
                   const scoreColor = skill.avgScore !== null 
@@ -511,32 +513,32 @@ export default function ResultsPage() {
                     : 'text-slate-400';
                   
                   return (
-                    <Card key={skill.skillId} className="p-5 border border-slate-200 hover:border-slate-300 transition-colors">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-slate-900">{skill.skillName}</h3>
-                          {skill.frameworkUsed && (
-                            <p className="text-sm text-slate-500 mt-0.5">{skill.frameworkUsed}</p>
-                          )}
+                    <div 
+                      key={skill.skillId} 
+                      className="bg-white rounded-xl border border-slate-200 p-4 hover:border-slate-300 transition-colors"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-[#042c4c] truncate">{skill.skillName}</h3>
+                          <p className="text-xs text-slate-500">
+                            {skill.sessionCount} session{skill.sessionCount !== 1 ? 's' : ''}
+                            {skill.frameworkUsed && ` • ${skill.frameworkUsed}`}
+                          </p>
                         </div>
-                        <div className="text-right">
-                          <span className={`text-xl font-bold ${scoreColor}`}>
+                        <div className="text-right flex-shrink-0 ml-3">
+                          <span className={`text-lg font-bold ${scoreColor}`}>
                             {skill.avgScore?.toFixed(1) || '-'}
                           </span>
-                          <span className="text-slate-400 text-sm">/5</span>
+                          <span className="text-slate-400 text-xs">/5</span>
                         </div>
                       </div>
 
-                      <p className="text-sm text-slate-500 mb-3">
-                        {skill.sessionCount} session{skill.sessionCount !== 1 ? 's' : ''}
-                      </p>
-
                       {skill.dimensions.length > 0 && (
-                        <div className="space-y-2 mb-3">
-                          {skill.dimensions.slice(0, 3).map((dim) => (
+                        <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                          {skill.dimensions.slice(0, 2).map((dim) => (
                             <div key={dim.dimension} className="flex items-center justify-between text-sm">
-                              <span className="text-slate-600 truncate mr-2">{dim.dimension}</span>
-                              <span className={`font-medium ${
+                              <span className="text-slate-500 truncate mr-2 text-xs">{dim.dimension}</span>
+                              <span className={`text-xs font-medium ${
                                 dim.avgScore >= 4 ? 'text-green-600' : 
                                 dim.avgScore >= 2.5 ? 'text-amber-600' : 'text-red-600'
                               }`}>
@@ -550,41 +552,39 @@ export default function ResultsPage() {
                       {skillSessions.length > 0 && (
                         <button 
                           onClick={() => { setSelectedCategory("conversations"); setViewMode("sessions"); }}
-                          className="text-sm text-brand-primary hover:underline"
+                          className="mt-2 text-xs text-[#ee7e65] font-medium hover:underline"
                         >
-                          View sessions
+                          View sessions →
                         </button>
                       )}
-                    </Card>
+                    </div>
                   );
                 })}
               </div>
             ) : (
-              <Card className="p-8 text-center border border-slate-200">
+              <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
                 <Brain className="w-10 h-10 mx-auto text-slate-400 mb-3" />
-                <h3 className="text-lg font-semibold mb-2">No Skill Assessments Yet</h3>
-                <p className="text-gray-500 mb-4">Complete practice sessions to see your skill progression</p>
-                <Link to="/avatar/start">
-                  <Button>Start Practicing</Button>
+                <h3 className="text-lg font-semibold text-[#042c4c] mb-2">No Skill Assessments Yet</h3>
+                <p className="text-slate-500 text-sm mb-4">Complete practice sessions to see your skill progression</p>
+                <Link to="/interview">
+                  <Button className="bg-[#ee7e65] hover:bg-[#e06a50]">Start Practicing</Button>
                 </Link>
-              </Card>
+              </div>
             )}
           </div>
         )}
 
         {viewMode === "sessions" && (
-          <div className="space-y-6">
+          <div className="space-y-5">
             {timeGroupOrder.map((timeGroup) => {
               const groupSessions = groupedSessions[timeGroup];
               if (!groupSessions?.length) return null;
 
               return (
                 <div key={timeGroup}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wide">{timeGroup}</h2>
-                    <span className="text-xs text-slate-400">
-                      ({groupSessions.length})
-                    </span>
+                  <div className="flex items-center gap-2 mb-2">
+                    <h2 className="text-xs font-medium text-slate-400 uppercase tracking-wide">{timeGroup}</h2>
+                    <span className="text-xs text-slate-300">({groupSessions.length})</span>
                   </div>
 
                   <div className="space-y-2">
@@ -597,33 +597,33 @@ export default function ResultsPage() {
                             to={`/avatar/practice/presentation/results?sessionId=${pSession.sessionUid}&presentationId=${pSession.presentation.id}`}
                             className="block"
                           >
-                            <Card className="p-4 border border-slate-200 hover:border-slate-300 transition-colors">
-                              <div className="flex items-center justify-between">
+                            <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 hover:border-orange-200 transition-colors">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                  <Eye className="w-5 h-5 text-orange-600" />
+                                </div>
                                 <div className="min-w-0 flex-1">
-                                  <h3 className="font-medium text-slate-900 truncate">
+                                  <h3 className="font-medium text-[#042c4c] text-sm sm:text-base truncate">
                                     {pSession.presentation.topic || pSession.presentation.fileName}
                                   </h3>
-                                  <div className="flex items-center gap-3 mt-1 text-sm text-slate-500">
-                                    <span className="text-orange-600 flex items-center gap-1">
-                                      <Eye className="w-3 h-3" />
-                                      Presentation
-                                    </span>
+                                  <div className="flex items-center gap-2 text-xs text-slate-500">
                                     <span>{formatDuration(pSession.duration || 0)}</span>
+                                    <span>•</span>
                                     <span>{pSession.slidesCovered || 0}/{pSession.totalSlides || 0} slides</span>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-3 ml-4">
+                                <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
                                   {pSession.feedback && (
-                                    <span className={`font-semibold ${getScoreColor(pSession.feedback.overallScore)}`}>
+                                    <span className={`text-sm font-semibold ${getScoreColor(pSession.feedback.overallScore)}`}>
                                       {pSession.feedback.overallScore.toFixed(1)}/5
                                     </span>
                                   )}
-                                  <span className="text-sm text-slate-400">
+                                  <span className="text-xs text-slate-400">
                                     {format(new Date(pSession.createdAt), 'h:mm a')}
                                   </span>
                                 </div>
                               </div>
-                            </Card>
+                            </div>
                           </Link>
                         );
                       } else if (session.type === 'interview') {
@@ -634,37 +634,39 @@ export default function ResultsPage() {
                             to={`/interview/results?sessionId=${iSession.id}`}
                             className="block"
                           >
-                            <Card className="p-4 border border-slate-200 hover:border-slate-300 transition-colors">
-                              <div className="flex items-center justify-between">
+                            <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 hover:border-purple-200 transition-colors">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                  <UserCheck className="w-5 h-5 text-purple-600" />
+                                </div>
                                 <div className="min-w-0 flex-1">
-                                  <h3 className="font-medium text-slate-900 truncate">
+                                  <h3 className="font-medium text-[#042c4c] text-sm sm:text-base truncate">
                                     {iSession.roleKit?.name || "Interview Practice"}
                                   </h3>
-                                  <div className="flex items-center gap-3 mt-1 text-sm text-slate-500">
-                                    <span className="text-purple-600 flex items-center gap-1">
-                                      <UserCheck className="w-3 h-3" />
-                                      Interview
-                                    </span>
+                                  <div className="flex items-center gap-2 text-xs text-slate-500">
                                     {iSession.roleKit?.domain && (
-                                      <span>{iSession.roleKit.domain}</span>
+                                      <span className="capitalize">{iSession.roleKit.domain.replace('_', ' ')}</span>
                                     )}
                                     {iSession.duration && (
-                                      <span>{formatDuration(iSession.duration)}</span>
+                                      <>
+                                        <span>•</span>
+                                        <span>{formatDuration(iSession.duration)}</span>
+                                      </>
                                     )}
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-3 ml-4">
+                                <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
                                   {iSession.analysis?.overallRecommendation && (
-                                    <Badge variant="outline" className={`${getRecommendationColor(iSession.analysis.overallRecommendation)}`}>
+                                    <Badge variant="outline" className={`text-xs ${getRecommendationColor(iSession.analysis.overallRecommendation)}`}>
                                       {iSession.analysis.overallRecommendation.replace(/_/g, ' ')}
                                     </Badge>
                                   )}
-                                  <span className="text-sm text-slate-400">
+                                  <span className="text-xs text-slate-400">
                                     {format(new Date(iSession.createdAt), 'h:mm a')}
                                   </span>
                                 </div>
                               </div>
-                            </Card>
+                            </div>
                           </Link>
                         );
                       } else if (session.type === 'exercise') {
@@ -674,7 +676,9 @@ export default function ResultsPage() {
                           : `/exercise-mode/case-study/results?sessionId=${eSession.id}`;
                         const typeLabel = eSession.exerciseType === 'coding_lab' ? 'Coding Lab' : 'Case Study';
                         const TypeIcon = eSession.exerciseType === 'coding_lab' ? Code : Briefcase;
-                        const typeColor = eSession.exerciseType === 'coding_lab' ? 'text-blue-600' : 'text-emerald-600';
+                        const typeBgColor = eSession.exerciseType === 'coding_lab' ? 'bg-blue-100' : 'bg-emerald-100';
+                        const typeIconColor = eSession.exerciseType === 'coding_lab' ? 'text-blue-600' : 'text-emerald-600';
+                        const typeBorderColor = eSession.exerciseType === 'coding_lab' ? 'hover:border-blue-200' : 'hover:border-emerald-200';
                         
                         return (
                           <Link
@@ -682,40 +686,46 @@ export default function ResultsPage() {
                             to={resultPath}
                             className="block"
                           >
-                            <Card className="p-4 border border-slate-200 hover:border-slate-300 transition-colors">
-                              <div className="flex items-center justify-between">
+                            <div className={`bg-white rounded-xl border border-slate-200 p-3 sm:p-4 ${typeBorderColor} transition-colors`}>
+                              <div className="flex items-center gap-3">
+                                <div className={`w-10 h-10 ${typeBgColor} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                                  <TypeIcon className={`w-5 h-5 ${typeIconColor}`} />
+                                </div>
                                 <div className="min-w-0 flex-1">
-                                  <h3 className="font-medium text-slate-900 truncate">
+                                  <h3 className="font-medium text-[#042c4c] text-sm sm:text-base truncate">
                                     {eSession.exerciseName || eSession.exerciseData?.name || typeLabel}
                                   </h3>
-                                  <div className="flex items-center gap-3 mt-1 text-sm text-slate-500">
-                                    <span className={`${typeColor} flex items-center gap-1`}>
-                                      <TypeIcon className="w-3 h-3" />
-                                      {typeLabel}
-                                    </span>
+                                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                                    <span>{typeLabel}</span>
                                     {eSession.exerciseData?.difficulty && (
-                                      <span className="capitalize">{eSession.exerciseData.difficulty}</span>
+                                      <>
+                                        <span>•</span>
+                                        <span className="capitalize">{eSession.exerciseData.difficulty}</span>
+                                      </>
                                     )}
                                     {eSession.duration && (
-                                      <span>{formatDuration(eSession.duration)}</span>
+                                      <>
+                                        <span>•</span>
+                                        <span>{formatDuration(eSession.duration)}</span>
+                                      </>
                                     )}
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-3 ml-4">
+                                <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
                                   {eSession.analysis && (
-                                    <span className={`font-semibold ${
+                                    <span className={`text-sm font-semibold ${
                                       eSession.analysis.overallScore >= 70 ? 'text-green-600' :
                                       eSession.analysis.overallScore >= 50 ? 'text-amber-600' : 'text-red-600'
                                     }`}>
                                       {eSession.analysis.overallScore}%
                                     </span>
                                   )}
-                                  <span className="text-sm text-slate-400">
+                                  <span className="text-xs text-slate-400">
                                     {format(new Date(eSession.createdAt), 'h:mm a')}
                                   </span>
                                 </div>
                               </div>
-                            </Card>
+                            </div>
                           </Link>
                         );
                       } else {
@@ -730,28 +740,30 @@ export default function ResultsPage() {
                             }
                             className="block"
                           >
-                            <Card className="p-4 border border-slate-200 hover:border-slate-300 transition-colors">
-                              <div className="flex items-center justify-between">
+                            <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 hover:border-slate-300 transition-colors">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                  <MessageCircle className="w-5 h-5 text-slate-500" />
+                                </div>
                                 <div className="min-w-0 flex-1">
-                                  <h3 className="font-medium text-slate-900 truncate">
+                                  <h3 className="font-medium text-[#042c4c] text-sm sm:text-base truncate">
                                     {cSession.scenario_name || "Practice Session"}
                                   </h3>
-                                  <div className="flex items-center gap-3 mt-1 text-sm text-slate-500">
+                                  <div className="flex items-center gap-2 text-xs text-slate-500">
                                     {cSession.skill_name && (
-                                      <span className="text-brand-primary flex items-center gap-1">
-                                        <MessageCircle className="w-3 h-3" />
-                                        {cSession.skill_name}
-                                      </span>
+                                      <span>{cSession.skill_name}</span>
                                     )}
+                                    <span>•</span>
                                     <span>{formatDuration(cSession.duration || 0)}</span>
-                                    <span>{cSession.message_count || 0} messages</span>
+                                    <span>•</span>
+                                    <span>{cSession.message_count || 0} msgs</span>
                                   </div>
                                 </div>
-                                <span className="text-sm text-slate-400 ml-4">
+                                <span className="text-xs text-slate-400 flex-shrink-0">
                                   {format(new Date(cSession.created_at), 'h:mm a')}
                                 </span>
                               </div>
-                            </Card>
+                            </div>
                           </Link>
                         );
                       }
@@ -762,30 +774,30 @@ export default function ResultsPage() {
             })}
 
             {allSessions.length === 0 && (
-              <Card className="p-8 text-center">
-                <Search className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Sessions Found</h3>
-                <p className="text-gray-500">Try adjusting your search or filter criteria</p>
-              </Card>
+              <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
+                <Search className="w-10 h-10 mx-auto text-slate-400 mb-3" />
+                <h3 className="text-lg font-semibold text-[#042c4c] mb-2">No Sessions Found</h3>
+                <p className="text-slate-500 text-sm">Try adjusting your search or filters</p>
+              </div>
             )}
           </div>
         )}
 
         {/* Next Recommended Exercise CTA */}
         {activeJobs.length > 0 && (
-          <div className="mt-8 bg-gradient-to-r from-brand-dark to-brand-dark/90 rounded-2xl p-6 text-white">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="mt-6 bg-gradient-to-r from-[#042c4c] to-[#0a4a7a] rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
               <div>
-                <h3 className="text-lg font-bold mb-1">Ready to continue practicing?</h3>
-                <p className="text-white/70 text-sm">
+                <h3 className="text-base sm:text-lg font-bold mb-0.5">Continue practicing?</h3>
+                <p className="text-white/70 text-xs sm:text-sm">
                   Keep preparing for {(activeJobs[0] as { roleTitle: string }).roleTitle}
                   {(activeJobs[0] as { companyName: string | null }).companyName && ` at ${(activeJobs[0] as { companyName: string | null }).companyName}`}
                 </p>
               </div>
-              <Link to={`/jobs/${(activeJobs[0] as { id: string }).id}`}>
-                <Button className="bg-white text-brand-dark hover:bg-white/90 gap-2 w-full sm:w-auto">
+              <Link to={`/jobs/${(activeJobs[0] as { id: string }).id}`} className="sm:flex-shrink-0">
+                <Button className="bg-[#ee7e65] hover:bg-[#e06a50] text-white gap-2 w-full sm:w-auto">
                   <Play className="w-4 h-4" />
-                  Practice Now
+                  Practice
                 </Button>
               </Link>
             </div>

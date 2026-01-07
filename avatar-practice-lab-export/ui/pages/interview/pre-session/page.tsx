@@ -158,9 +158,10 @@ export default function InterviewPreSessionPage() {
 
   return (
     <SidebarLayout>
-      <div className="min-h-screen bg-gradient-to-b from-slate-50/80 to-white pb-24 sm:pb-8">
-        <div className="bg-gradient-to-br from-indigo-500/5 via-white to-purple-50/30 border-b border-slate-100">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-4xl">
+      <div className="min-h-screen bg-[#f8f9fb] pb-24 sm:pb-8">
+        {/* Header */}
+        <div className="bg-[#042c4c] text-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 max-w-3xl">
             <button
               onClick={() => {
                 if (config?.jobTargetId) {
@@ -171,136 +172,119 @@ export default function InterviewPreSessionPage() {
                   navigate("/interview/custom");
                 }
               }}
-              className="inline-flex items-center text-slate-500 hover:text-indigo-600 mb-4 text-sm font-medium transition-colors group"
+              className="inline-flex items-center text-white/70 hover:text-white mb-3 text-sm transition-colors"
             >
-              <ChevronRight className="w-4 h-4 rotate-180 mr-1 group-hover:-translate-x-0.5 transition-transform" />
+              <ChevronRight className="w-4 h-4 rotate-180 mr-1" />
               Back
             </button>
             
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-                <Target className="w-4 h-4 text-indigo-600" />
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                <Target className="w-5 h-5 text-[#ee7e65]" />
               </div>
-              <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">Step 3 of 4</span>
+              <div>
+                <h1 className="text-xl font-bold">
+                  {roleKit?.name || "Interview Plan Ready"}
+                </h1>
+                <p className="text-white/70 text-sm mt-0.5">
+                  Review the plan below, then start your practice session.
+                </p>
+              </div>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-              Interview Plan Ready
-            </h1>
-            <p className="text-sm sm:text-base text-slate-600">
-              {roleKit ? (
-                <>Your personalized <span className="font-medium text-indigo-600">{roleKit.name}</span> interview is ready. Review the plan below.</>
-              ) : (
-                <>Your interview plan is ready. Review what to expect before starting.</>
-              )}
-            </p>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-4xl">
-          <div className="grid gap-6">
-            <div className="flex flex-wrap gap-3">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-5 max-w-3xl">
+          <div className="space-y-4">
+            {/* Quick Stats Badges */}
+            <div className="flex flex-wrap gap-2">
               {config && (
                 <>
-                  <Badge variant="outline" className="px-3 py-1.5 text-sm">
-                    <Users className="w-4 h-4 mr-1.5" />
-                    {getInterviewTypeLabel(config.interviewType)}
+                  <Badge className="bg-[#042c4c] text-white px-3 py-1">
+                    <Clock className="w-3.5 h-3.5 mr-1.5" />
+                    ~{Math.round(getTotalDuration() / 60)} min
                   </Badge>
-                  <Badge className={`${getStyleLabel(config.style).color} px-3 py-1.5 text-sm border-0`}>
-                    {getStyleLabel(config.style).label} Style
+                  <Badge variant="outline" className="px-3 py-1 capitalize">
+                    {getInterviewTypeLabel(config.interviewType).replace(/\s+screen/i, '')}
                   </Badge>
-                  <Badge variant="outline" className="px-3 py-1.5 text-sm">
-                    <Clock className="w-4 h-4 mr-1.5" />
-                    ~{Math.round(getTotalDuration() / 60)} minutes
+                  <Badge className={`${getStyleLabel(config.style).color} px-3 py-1 border-0`}>
+                    {getStyleLabel(config.style).label}
                   </Badge>
                 </>
               )}
             </div>
 
+            {/* Focus Areas */}
             {plan?.focusAreas && plan.focusAreas.length > 0 && (
-              <Card className="border-slate-200 rounded-2xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-slate-100 py-4">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Target className="w-5 h-5 text-amber-600" />
-                    Focus Areas
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="flex flex-wrap gap-2">
-                    {plan.focusAreas.map((area, idx) => (
-                      <span key={idx} className="px-3 py-1.5 bg-amber-50 text-amber-800 rounded-full text-sm font-medium">
-                        {area}
-                      </span>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Target className="w-4 h-4 text-[#ee7e65]" />
+                  <h3 className="text-sm font-medium text-[#042c4c]">Focus Areas</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {plan.focusAreas.map((area, idx) => (
+                    <span key={idx} className="text-xs px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full">
+                      {area}
+                    </span>
+                  ))}
+                </div>
+              </div>
             )}
 
-            <Card className="border-slate-200 rounded-2xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-slate-100 py-4">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <MessageSquare className="w-5 h-5 text-indigo-600" />
-                  Interview Phases
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                {plan?.phases.map((phase, idx) => (
-                  <div key={idx} className={`p-4 ${idx !== plan.phases.length - 1 ? "border-b border-slate-100" : ""}`}>
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">
-                          {idx + 1}
-                        </div>
-                        <h4 className="font-semibold text-slate-900">{phase.name}</h4>
-                      </div>
-                      <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
-                        ~{Math.round(phase.duration / 60)} min
-                      </span>
-                    </div>
-                    {phase.objectives && phase.objectives.length > 0 && (
-                      <div className="ml-8 space-y-1">
-                        {phase.objectives.map((obj, objIdx) => (
-                          <div key={objIdx} className="flex items-start gap-2 text-sm text-slate-600">
-                            <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                            <span>{obj}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl overflow-hidden">
-              <CardContent className="p-6 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-indigo-100 rounded-2xl flex items-center justify-center">
-                  <Play className="w-8 h-8 text-indigo-600" />
+            {/* Interview Phases */}
+            {plan?.phases && plan.phases.length > 0 && (
+              <div className="bg-white rounded-xl border border-slate-200">
+                <div className="py-3 px-4 border-b border-slate-100 flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-[#ee7e65]" />
+                  <h3 className="text-sm font-medium text-[#042c4c]">Interview Phases</h3>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Ready to Practice?</h3>
-                <p className="text-sm text-slate-600 mb-6 max-w-md mx-auto">
-                  You'll select an AI interviewer avatar next. The interview will follow the plan above, adapting to your responses.
-                </p>
-                <Button
-                  size="lg"
-                  onClick={handleStartInterview}
-                  disabled={starting}
-                  className="rounded-xl px-8 bg-indigo-600 hover:bg-indigo-700"
-                >
-                  {starting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      Preparing...
-                    </>
-                  ) : (
-                    <>
-                      Select Your Interviewer
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
+                <div className="divide-y divide-slate-100">
+                  {plan.phases.map((phase, idx) => (
+                    <div key={idx} className="p-4 flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-[#ee7e65]/10 flex items-center justify-center flex-shrink-0 text-xs font-medium text-[#ee7e65]">
+                        {idx + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-sm text-[#042c4c]">{phase.name}</h4>
+                          <span className="text-xs text-slate-400">{Math.round(phase.duration / 60)} min</span>
+                        </div>
+                        {phase.objectives && phase.objectives.length > 0 && (
+                          <div className="mt-1.5 space-y-1">
+                            {phase.objectives.map((obj, objIdx) => (
+                              <div key={objIdx} className="flex items-start gap-1.5 text-xs text-slate-500">
+                                <CheckCircle className="w-3 h-3 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                <span>{obj}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Start Button */}
+            <Button
+              size="lg"
+              onClick={handleStartInterview}
+              disabled={starting}
+              className="w-full rounded-xl bg-[#ee7e65] hover:bg-[#e06a50] h-12 text-base"
+            >
+              {starting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Preparing...
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4 mr-2" />
+                  Start Interview
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </div>
