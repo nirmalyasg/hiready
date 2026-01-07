@@ -44,7 +44,7 @@ export default function RegisterPage() {
         return;
       }
 
-      navigate('/avatar/start');
+      navigate('/interview');
     } catch (err) {
       setError('An error occurred. Please try again.');
       setIsLoading(false);

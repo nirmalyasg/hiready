@@ -5,7 +5,7 @@ import { Loader2, Sparkles, MessageSquare, Target, Brain } from 'lucide-react';
 export default function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const returnUrl = searchParams.get('returnUrl') || '/avatar/start';
+  const returnUrl = searchParams.get('returnUrl') || '/interview';
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
