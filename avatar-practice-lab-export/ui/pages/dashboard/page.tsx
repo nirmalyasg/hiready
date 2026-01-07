@@ -305,28 +305,28 @@ export default function AvatarSimulatorDashboard() {
 
   return (
     <SidebarLayout>
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-5 sm:space-y-8">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-brand-dark">Interview Readiness</h1>
-            <p className="text-brand-muted mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-brand-dark">Interview Readiness</h1>
+            <p className="text-sm sm:text-base text-brand-muted mt-1">
               {activeJobs.length > 0
                 ? `Tracking ${activeJobs.length} job target${activeJobs.length !== 1 ? 's' : ''}`
                 : 'Add your target jobs to start preparing'}
             </p>
           </div>
-          <div className="flex gap-3">
-            <Link to="/jobs">
-              <Button variant="outline" className="gap-2">
+          <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+            <Link to="/jobs" className="flex-1 sm:flex-none">
+              <Button variant="outline" className="gap-2 w-full sm:w-auto text-sm">
                 <Briefcase className="w-4 h-4" />
-                Manage Jobs
+                <span className="hidden sm:inline">Manage </span>Jobs
               </Button>
             </Link>
-            <Link to="/interview/custom">
-              <Button className="gap-2" data-testid="button-start-voice-practice">
+            <Link to="/interview/custom" className="flex-1 sm:flex-none">
+              <Button className="gap-2 w-full sm:w-auto text-sm" data-testid="button-start-voice-practice">
                 <Play className="w-4 h-4" />
-                Practice Interview
+                Practice<span className="hidden sm:inline"> Interview</span>
               </Button>
             </Link>
           </div>
@@ -345,12 +345,12 @@ export default function AvatarSimulatorDashboard() {
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {activeJobs.slice(0, 3).map((job) => {
                 const statusBadge = getStatusBadge(job.status);
                 const weakestArea = job.jdParsed?.focusAreas?.[0] || null;
                 return (
-                  <div key={job.id} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:border-brand-accent/30 transition-colors">
+                  <div key={job.id} className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-sm hover:border-brand-accent/30 transition-colors">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-brand-dark truncate">{job.roleTitle}</h3>
@@ -421,58 +421,58 @@ export default function AvatarSimulatorDashboard() {
         )}
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <div className="w-10 h-10 bg-brand-dark/10 rounded-xl flex items-center justify-center">
                 <Clock className="w-5 h-5 text-brand-dark" />
               </div>
               <TrendingUp className="w-4 h-4 text-green-500" />
             </div>
-            <p className="text-2xl font-bold text-brand-dark">{stats.totalTime}</p>
-            <p className="text-sm text-brand-muted">Total practice</p>
+            <p className="text-xl sm:text-2xl font-bold text-brand-dark">{stats.totalTime}</p>
+            <p className="text-xs sm:text-sm text-brand-muted">Total practice</p>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <div className="w-10 h-10 bg-brand-accent/10 rounded-xl flex items-center justify-center">
                 <Target className="w-5 h-5 text-brand-accent" />
               </div>
             </div>
-            <p className="text-2xl font-bold text-brand-dark">{stats.completedScenarios}</p>
-            <p className="text-sm text-brand-muted">Scenarios done</p>
+            <p className="text-xl sm:text-2xl font-bold text-brand-dark">{stats.completedScenarios}</p>
+            <p className="text-xs sm:text-sm text-brand-muted">Scenarios done</p>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
                 <Zap className="w-5 h-5 text-green-600" />
               </div>
             </div>
-            <p className="text-2xl font-bold text-brand-dark">{stats.uniqueSkillsPracticed}</p>
-            <p className="text-sm text-brand-muted">Skills practiced</p>
+            <p className="text-xl sm:text-2xl font-bold text-brand-dark">{stats.uniqueSkillsPracticed}</p>
+            <p className="text-xs sm:text-sm text-brand-muted">Skills practiced</p>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
                 <BarChart3 className="w-5 h-5 text-purple-600" />
               </div>
             </div>
-            <p className="text-2xl font-bold text-brand-dark">{avgOverallScore > 0 ? avgOverallScore.toFixed(1) : '-'}</p>
-            <p className="text-sm text-brand-muted">Avg score</p>
+            <p className="text-xl sm:text-2xl font-bold text-brand-dark">{avgOverallScore > 0 ? avgOverallScore.toFixed(1) : '-'}</p>
+            <p className="text-xs sm:text-sm text-brand-muted">Avg score</p>
           </div>
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Main Column */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Readiness Snapshot */}
             {practicedSkills.length > 0 && (
-              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-bold text-brand-dark flex items-center gap-2">
+              <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <h3 className="text-base sm:text-lg font-bold text-brand-dark flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-brand-accent" />
                     Your Readiness Snapshot
                   </h3>
@@ -482,7 +482,7 @@ export default function AvatarSimulatorDashboard() {
                   </Link>
                 </div>
                 
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   {/* Strongest Areas */}
                   <div>
                     <p className="text-sm font-medium text-green-700 mb-3 flex items-center gap-2">
@@ -528,8 +528,8 @@ export default function AvatarSimulatorDashboard() {
 
             {/* Recommended Next Actions */}
             {(lowestSkill || activeJobs.length > 0) && (
-              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                <h3 className="text-lg font-bold text-brand-dark mb-4 flex items-center gap-2">
+              <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
+                <h3 className="text-base sm:text-lg font-bold text-brand-dark mb-4 flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-brand-accent" />
                   Recommended Next Actions
                 </h3>
@@ -574,8 +574,8 @@ export default function AvatarSimulatorDashboard() {
 
             {/* AI Insights - Career Memory */}
             {aiInsights?.hasData && (
-              <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-100 shadow-sm">
-                <h3 className="text-lg font-bold text-brand-dark mb-2 flex items-center gap-2">
+              <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-4 sm:p-6 border border-purple-100 shadow-sm">
+                <h3 className="text-base sm:text-lg font-bold text-brand-dark mb-2 flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-purple-600" />
                   AI Career Insights
                 </h3>
@@ -626,17 +626,17 @@ export default function AvatarSimulatorDashboard() {
                   ))}
                 </div>
                 {aiInsights.stats && (
-                  <div className="flex gap-4 mt-4 pt-4 border-t border-purple-100">
+                  <div className="flex flex-wrap gap-4 sm:gap-6 mt-4 pt-4 border-t border-purple-100">
                     <div className="text-center">
-                      <p className="text-lg font-bold text-purple-700">{aiInsights.stats.dimensionsTracked}</p>
+                      <p className="text-base sm:text-lg font-bold text-purple-700">{aiInsights.stats.dimensionsTracked}</p>
                       <p className="text-xs text-brand-muted">Skills Tracked</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-lg font-bold text-green-600">{aiInsights.stats.improvingCount}</p>
+                      <p className="text-base sm:text-lg font-bold text-green-600">{aiInsights.stats.improvingCount}</p>
                       <p className="text-xs text-brand-muted">Improving</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-lg font-bold text-amber-600">{aiInsights.stats.decliningCount}</p>
+                      <p className="text-base sm:text-lg font-bold text-amber-600">{aiInsights.stats.decliningCount}</p>
                       <p className="text-xs text-brand-muted">Need Focus</p>
                     </div>
                   </div>
@@ -675,31 +675,31 @@ export default function AvatarSimulatorDashboard() {
           </div>
 
           {/* Sidebar Column */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Overall Score */}
             {avgOverallScore > 0 && (
-              <div className="bg-gradient-to-br from-brand-dark to-brand-dark/90 rounded-2xl p-6 text-white">
-                <p className="text-sm text-white/60 mb-1">Overall Readiness</p>
-                <p className="text-4xl font-bold">{Math.round(avgOverallScore * 20)}%</p>
-                <p className="text-sm text-white/60 mt-2">Based on {practicedSkills.length} skill areas</p>
+              <div className="bg-gradient-to-br from-brand-dark to-brand-dark/90 rounded-2xl p-4 sm:p-6 text-white">
+                <p className="text-xs sm:text-sm text-white/60 mb-1">Overall Readiness</p>
+                <p className="text-3xl sm:text-4xl font-bold">{Math.round(avgOverallScore * 20)}%</p>
+                <p className="text-xs sm:text-sm text-white/60 mt-2">Based on {practicedSkills.length} skill areas</p>
               </div>
             )}
 
             {/* Top Skill */}
             {topSkill && topSkill.avgScore !== null && (
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
-                <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center mb-4">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-4 sm:p-6 border border-green-100">
+                <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center mb-3 sm:mb-4">
                   <Trophy className="w-5 h-5 text-white" />
                 </div>
-                <p className="text-sm text-green-700 font-medium mb-1">Your strongest skill</p>
-                <p className="text-xl font-bold text-brand-dark">{topSkill.skillName}</p>
-                <p className="text-sm text-green-600 font-medium mt-1">{topSkill.avgScore.toFixed(1)}/5</p>
+                <p className="text-xs sm:text-sm text-green-700 font-medium mb-1">Your strongest skill</p>
+                <p className="text-lg sm:text-xl font-bold text-brand-dark">{topSkill.skillName}</p>
+                <p className="text-xs sm:text-sm text-green-600 font-medium mt-1">{topSkill.avgScore.toFixed(1)}/5</p>
               </div>
             )}
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-              <h3 className="text-lg font-bold text-brand-dark mb-4">Quick Actions</h3>
+            <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
+              <h3 className="text-base sm:text-lg font-bold text-brand-dark mb-4">Quick Actions</h3>
               <div className="space-y-2">
                 <Link to="/interview/custom" className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
                   <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
@@ -737,8 +737,8 @@ export default function AvatarSimulatorDashboard() {
             </div>
 
             {/* Activity */}
-            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-              <h3 className="text-lg font-bold text-brand-dark mb-4">Recent Activity</h3>
+            <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
+              <h3 className="text-base sm:text-lg font-bold text-brand-dark mb-4">Recent Activity</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-brand-muted">Last session</span>
