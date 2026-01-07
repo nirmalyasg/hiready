@@ -1455,6 +1455,10 @@ interviewRouter.get("/analysis/:sessionId", requireAuth, async (req: Request, re
       .where(eq(interviewSessions.id, sessionId));
 
     let jobContext: { id: string; roleTitle: string; companyName: string | null; readinessScore: number | null } | null = null;
+    let interviewType: string | null = null;
+    let interviewMode: string | null = null;
+    let roleKitInfo: { id: number; name: string; domain: string } | null = null;
+    let jdSkills: string[] = [];
 
     if (session) {
       const [config] = await db
@@ -1462,24 +1466,56 @@ interviewRouter.get("/analysis/:sessionId", requireAuth, async (req: Request, re
         .from(interviewConfigs)
         .where(eq(interviewConfigs.id, session.interviewConfigId));
 
-      if (config?.jobTargetId) {
-        const [job] = await db
-          .select({
-            id: jobTargets.id,
-            roleTitle: jobTargets.roleTitle,
-            companyName: jobTargets.companyName,
-            readinessScore: jobTargets.readinessScore,
-          })
-          .from(jobTargets)
-          .where(eq(jobTargets.id, config.jobTargetId));
-        
-        if (job) {
-          jobContext = job;
+      if (config) {
+        interviewType = config.interviewType;
+        interviewMode = config.interviewMode;
+
+        if (config.roleKitId) {
+          const [kit] = await db.select().from(roleKits).where(eq(roleKits.id, config.roleKitId));
+          if (kit) {
+            roleKitInfo = { id: kit.id, name: kit.name, domain: kit.domain };
+          }
+        }
+
+        if (config.jobTargetId) {
+          const [job] = await db
+            .select({
+              id: jobTargets.id,
+              roleTitle: jobTargets.roleTitle,
+              companyName: jobTargets.companyName,
+              readinessScore: jobTargets.readinessScore,
+            })
+            .from(jobTargets)
+            .where(eq(jobTargets.id, config.jobTargetId));
+          
+          if (job) {
+            jobContext = job;
+          }
+        }
+
+        // Extract JD skills from parsed job description document
+        if (config.jdDocId) {
+          const [jdDoc] = await db.select().from(userDocuments).where(eq(userDocuments.id, config.jdDocId));
+          if (jdDoc?.parsedJson) {
+            const parsed = jdDoc.parsedJson as any;
+            jdSkills = parsed.requiredSkills || parsed.skills || parsed.technicalSkills || [];
+            if (parsed.softSkills) {
+              jdSkills = [...jdSkills, ...parsed.softSkills];
+            }
+          }
         }
       }
     }
     
-    res.json({ success: true, analysis, jobContext });
+    res.json({ 
+      success: true, 
+      analysis, 
+      jobContext,
+      interviewType,
+      interviewMode,
+      roleKitInfo,
+      jdSkills,
+    });
   } catch (error: any) {
     console.error("Error fetching analysis:", error);
     res.status(500).json({ success: false, error: error.message });

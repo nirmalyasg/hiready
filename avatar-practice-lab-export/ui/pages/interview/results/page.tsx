@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronRight, TrendingUp, Target, CheckCircle, AlertTriangle, Calendar, ArrowRight, Award, MessageSquare, Lightbulb, Star, BarChart3, Briefcase, Play, ArrowUp } from "lucide-react";
+import { ChevronRight, TrendingUp, Target, CheckCircle, AlertTriangle, Calendar, ArrowRight, Award, MessageSquare, Lightbulb, Star, BarChart3, Briefcase, Play, ArrowUp, Building2, Code, Users, Zap, BookOpen, GraduationCap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +50,12 @@ interface JobContext {
   readinessScore: number | null;
 }
 
+interface RoleKitInfo {
+  id: number;
+  name: string;
+  domain: string;
+}
+
 interface ReadinessData {
   readinessScore: number;
   previousScore: number;
@@ -60,12 +66,12 @@ interface ReadinessData {
 }
 
 const getRecommendationConfig = (rec: string) => {
-  const configs: Record<string, { label: string; color: string; bgColor: string; icon: any }> = {
-    strong_yes: { label: "Strong Yes", color: "text-emerald-700", bgColor: "bg-emerald-50 border-emerald-200", icon: Award },
-    yes: { label: "Yes", color: "text-green-700", bgColor: "bg-green-50 border-green-200", icon: CheckCircle },
-    lean_yes: { label: "Lean Yes", color: "text-lime-700", bgColor: "bg-lime-50 border-lime-200", icon: TrendingUp },
-    lean_no: { label: "Lean No", color: "text-amber-700", bgColor: "bg-amber-50 border-amber-200", icon: AlertTriangle },
-    no: { label: "No", color: "text-red-700", bgColor: "bg-red-50 border-red-200", icon: AlertTriangle },
+  const configs: Record<string, { label: string; color: string; bgColor: string; borderColor: string; icon: any }> = {
+    strong_yes: { label: "Strong Yes", color: "text-emerald-700", bgColor: "bg-emerald-50", borderColor: "border-emerald-200", icon: Award },
+    yes: { label: "Yes", color: "text-green-700", bgColor: "bg-green-50", borderColor: "border-green-200", icon: CheckCircle },
+    lean_yes: { label: "Lean Yes", color: "text-lime-700", bgColor: "bg-lime-50", borderColor: "border-lime-200", icon: TrendingUp },
+    lean_no: { label: "Lean No", color: "text-amber-700", bgColor: "bg-amber-50", borderColor: "border-amber-200", icon: AlertTriangle },
+    no: { label: "No", color: "text-red-700", bgColor: "bg-red-50", borderColor: "border-red-200", icon: AlertTriangle },
   };
   return configs[rec] || configs.lean_yes;
 };
@@ -73,7 +79,13 @@ const getRecommendationConfig = (rec: string) => {
 const getScoreColor = (score: number) => {
   if (score >= 4) return "text-emerald-600";
   if (score >= 3) return "text-amber-600";
-  return "text-red-600";
+  return "text-[#ee7e65]";
+};
+
+const getScoreBg = (score: number) => {
+  if (score >= 4) return "bg-emerald-50 border-emerald-200";
+  if (score >= 3) return "bg-amber-50 border-amber-200";
+  return "bg-red-50 border-red-200";
 };
 
 const getScoreLabel = (score: number) => {
@@ -84,12 +96,30 @@ const getScoreLabel = (score: number) => {
   return "Weak";
 };
 
+const getInterviewTypeIcon = (type: string | null) => {
+  if (!type) return Briefcase;
+  const t = type.toLowerCase();
+  if (t.includes('coding') || t.includes('technical')) return Code;
+  if (t.includes('behavioral') || t.includes('leadership')) return Users;
+  if (t.includes('case') || t.includes('problem')) return Zap;
+  return Briefcase;
+};
+
+const getInterviewTypeLabel = (type: string | null, mode: string | null) => {
+  const value = type || mode || 'general';
+  return value.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+};
+
 export default function InterviewResultsPage() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("sessionId");
 
   const [analysis, setAnalysis] = useState<InterviewAnalysis | null>(null);
   const [jobContext, setJobContext] = useState<JobContext | null>(null);
+  const [roleKitInfo, setRoleKitInfo] = useState<RoleKitInfo | null>(null);
+  const [interviewType, setInterviewType] = useState<string | null>(null);
+  const [interviewMode, setInterviewMode] = useState<string | null>(null);
+  const [jdSkills, setJdSkills] = useState<string[]>([]);
   const [readinessData, setReadinessData] = useState<ReadinessData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -104,9 +134,13 @@ export default function InterviewResultsPage() {
         const data = await response.json();
         if (data.success) {
           setAnalysis(data.analysis);
+          setInterviewType(data.interviewType);
+          setInterviewMode(data.interviewMode);
+          setRoleKitInfo(data.roleKitInfo);
+          setJdSkills(data.jdSkills || []);
+          
           if (data.jobContext) {
             setJobContext(data.jobContext);
-            // Fetch readiness data for the job
             try {
               const readinessRes = await fetch(`/api/jobs/job-targets/${data.jobContext.id}/readiness`, {
                 credentials: 'include'
@@ -140,6 +174,14 @@ export default function InterviewResultsPage() {
     ? analysis.dimensionScores.reduce((sum, d) => sum + d.score, 0) / analysis.dimensionScores.length
     : 0;
 
+  const practiceTitle = jobContext?.roleTitle || roleKitInfo?.name || "Interview Practice";
+  const practiceSubtitle = jobContext?.companyName || (roleKitInfo?.domain ? roleKitInfo.domain.replace(/_/g, ' ') : null);
+  const InterviewIcon = getInterviewTypeIcon(interviewType || interviewMode);
+
+  // Identify skill gaps - dimensions with score < 3.5
+  const skillGaps = analysis?.dimensionScores?.filter(d => d.score < 3.5) || [];
+  const strongSkills = analysis?.dimensionScores?.filter(d => d.score >= 4) || [];
+
   if (isLoading) {
     return (
       <SidebarLayout>
@@ -153,14 +195,14 @@ export default function InterviewResultsPage() {
   if (!analysis) {
     return (
       <SidebarLayout>
-        <div className="min-h-screen bg-gradient-to-b from-slate-50/80 to-white flex items-center justify-center">
-          <Card className="max-w-md mx-4">
+        <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center">
+          <Card className="max-w-md mx-4 border-slate-200">
             <CardContent className="p-8 text-center">
               <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-slate-900 mb-2">Analysis Not Found</h2>
+              <h2 className="text-xl font-bold text-[#042c4c] mb-2">Analysis Not Found</h2>
               <p className="text-slate-600 mb-6">We couldn't find the interview analysis. It may still be processing.</p>
               <Link to="/interview">
-                <Button>Back to Interview Practice</Button>
+                <Button className="bg-[#ee7e65] hover:bg-[#d96a52]">Back to Interview Practice</Button>
               </Link>
             </CardContent>
           </Card>
@@ -174,91 +216,174 @@ export default function InterviewResultsPage() {
 
   return (
     <SidebarLayout>
-      <div className="min-h-screen bg-gradient-to-b from-slate-50/80 to-white pb-24 sm:pb-8">
-        <div className="bg-gradient-to-br from-indigo-500/5 via-white to-purple-50/30 border-b border-slate-100">
+      <div className="min-h-screen bg-[#f8f9fb] pb-24 sm:pb-8">
+        {/* Header with Practice Context */}
+        <div className="bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] text-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-5xl">
             <Link
               to="/interview"
-              className="inline-flex items-center text-slate-500 hover:text-indigo-600 mb-4 text-sm font-medium transition-colors group"
+              className="inline-flex items-center text-white/70 hover:text-white mb-4 text-sm font-medium transition-colors group"
             >
               <ChevronRight className="w-4 h-4 rotate-180 mr-1 group-hover:-translate-x-0.5 transition-transform" />
               Back to Interview Practice
             </Link>
             
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                <BarChart3 className="w-4 h-4 text-purple-600" />
-              </div>
-              <span className="text-xs font-semibold text-purple-600 uppercase tracking-wide">Interview Analysis</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-              Your Interview Results
-            </h1>
-            {jobContext ? (
-              <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="outline" className="bg-white/50 gap-1">
-                  <Briefcase className="w-3 h-3" />
-                  {jobContext.roleTitle}
-                </Badge>
-                {jobContext.companyName && (
-                  <Badge variant="outline" className="bg-white/50">
-                    {jobContext.companyName}
-                  </Badge>
-                )}
-                {(readinessData?.readinessScore ?? jobContext.readinessScore) !== null && (
-                  <Badge className="bg-purple-100 text-purple-700 border-purple-200 gap-1">
-                    {readinessData?.readinessScore ?? jobContext.readinessScore}% Ready
-                    {readinessData?.readinessDelta !== undefined && readinessData.readinessDelta > 0 && (
-                      <ArrowUp className="w-3 h-3" />
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                    <InterviewIcon className="w-5 h-5 text-[#ee7e65]" />
+                  </div>
+                  <div>
+                    <h1 className="text-xl sm:text-2xl font-bold">{practiceTitle}</h1>
+                    {practiceSubtitle && (
+                      <p className="text-white/70 text-sm flex items-center gap-1">
+                        <Building2 className="w-3 h-3" />
+                        <span className="capitalize">{practiceSubtitle}</span>
+                      </p>
                     )}
+                  </div>
+                </div>
+                
+                <div className="flex flex-wrap items-center gap-2 mt-3">
+                  <Badge className="bg-white/10 text-white border-white/20 gap-1">
+                    <InterviewIcon className="w-3 h-3" />
+                    {getInterviewTypeLabel(interviewType, interviewMode)}
                   </Badge>
+                  {(readinessData?.readinessScore ?? jobContext?.readinessScore) !== null && (
+                    <Badge className="bg-[#ee7e65]/20 text-[#ee7e65] border-[#ee7e65]/30 gap-1">
+                      {readinessData?.readinessScore ?? jobContext?.readinessScore}% Ready
+                      {readinessData?.readinessDelta !== undefined && readinessData.readinessDelta > 0 && (
+                        <ArrowUp className="w-3 h-3" />
+                      )}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              
+              {/* Quick Score Summary */}
+              <div className="flex items-center gap-4 bg-white/10 rounded-xl p-4">
+                <div className="text-center">
+                  <div className={`text-3xl font-bold ${averageScore >= 3 ? 'text-emerald-400' : 'text-[#ee7e65]'}`}>
+                    {averageScore.toFixed(1)}
+                  </div>
+                  <div className="text-xs text-white/60">out of 5</div>
+                </div>
+                {recConfig && (
+                  <div className={`px-3 py-1.5 rounded-lg ${recConfig.bgColor} ${recConfig.borderColor} border`}>
+                    <div className={`text-sm font-semibold ${recConfig.color}`}>{recConfig.label}</div>
+                  </div>
                 )}
               </div>
-            ) : (
-              <p className="text-sm sm:text-base text-slate-600">
-                Detailed feedback and actionable recommendations to help you improve.
-              </p>
-            )}
+            </div>
           </div>
         </div>
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-5xl">
-          <div className="grid lg:grid-cols-3 gap-6 mb-6">
-            {recConfig && (
-              <Card className={`${recConfig.bgColor} border rounded-2xl`}>
-                <CardContent className="p-6 text-center">
-                  <RecIcon className={`w-12 h-12 ${recConfig.color} mx-auto mb-3`} />
-                  <h3 className={`text-2xl font-bold ${recConfig.color} mb-1`}>{recConfig.label}</h3>
-                  <p className="text-sm text-slate-600">Overall Recommendation</p>
-                  {analysis.confidenceLevel && (
-                    <Badge variant="outline" className="mt-2 capitalize">
-                      {analysis.confidenceLevel} Confidence
-                    </Badge>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            <Card className="border-slate-200 rounded-2xl">
-              <CardContent className="p-6 text-center">
-                <div className={`text-4xl font-bold ${getScoreColor(averageScore)} mb-1`}>
-                  {averageScore.toFixed(1)}<span className="text-xl text-slate-400">/5</span>
+          {/* Role Fit Assessment */}
+          {(skillGaps.length > 0 || strongSkills.length > 0 || jdSkills.length > 0) && (
+            <Card className="border-[#042c4c]/10 rounded-2xl mb-6 overflow-hidden">
+              <div className="bg-gradient-to-r from-[#042c4c] to-[#0a3d66] p-4 sm:p-6">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <Target className="w-5 h-5 text-[#ee7e65]" />
+                  Role Fit Assessment
+                  {jobContext && <span className="text-white/60 font-normal text-sm ml-2">for {jobContext.roleTitle}</span>}
+                </h3>
+              </div>
+              <CardContent className="p-4 sm:p-6 space-y-6">
+                {/* JD Skills Match */}
+                {jdSkills.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-[#042c4c] mb-3 flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-[#768c9c]" />
+                      Skills from Job Description
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {jdSkills.slice(0, 10).map((skill, idx) => (
+                        <Badge key={idx} variant="outline" className="bg-[#042c4c]/5 border-[#042c4c]/20 text-[#042c4c]">
+                          {skill}
+                        </Badge>
+                      ))}
+                      {jdSkills.length > 10 && (
+                        <Badge variant="outline" className="bg-slate-100 text-slate-600">
+                          +{jdSkills.length - 10} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Strengths */}
+                  <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
+                    <h4 className="text-sm font-medium text-emerald-800 mb-3 flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4" />
+                      Strong Areas ({strongSkills.length})
+                    </h4>
+                    {strongSkills.length > 0 ? (
+                      <ul className="space-y-2">
+                        {strongSkills.slice(0, 3).map((skill, idx) => (
+                          <li key={idx} className="flex items-center justify-between text-sm">
+                            <span className="text-emerald-900">{skill.dimension}</span>
+                            <span className="font-semibold text-emerald-700">{skill.score}/5</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-emerald-700/70">Keep practicing to build your strengths</p>
+                    )}
+                  </div>
+                  
+                  {/* Gaps */}
+                  <div className="bg-amber-50 rounded-xl p-4 border border-amber-100">
+                    <h4 className="text-sm font-medium text-amber-800 mb-3 flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4" />
+                      Areas to Improve ({skillGaps.length})
+                    </h4>
+                    {skillGaps.length > 0 ? (
+                      <ul className="space-y-2">
+                        {skillGaps.slice(0, 3).map((skill, idx) => (
+                          <li key={idx} className="flex items-center justify-between text-sm">
+                            <span className="text-amber-900">{skill.dimension}</span>
+                            <span className="font-semibold text-amber-700">{skill.score}/5</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-amber-700/70">Great job! No major gaps identified</p>
+                    )}
+                  </div>
                 </div>
-                <p className="text-sm text-slate-600 mb-2">Average Score</p>
-                <Progress value={averageScore * 20} className="h-2" />
-                <p className="text-xs text-slate-500 mt-2">{getScoreLabel(averageScore)}</p>
+                
+                {/* Recommendations */}
+                {skillGaps.length > 0 && (
+                  <div className="bg-[#ee7e65]/5 rounded-xl p-4 border border-[#ee7e65]/20">
+                    <h4 className="text-sm font-medium text-[#042c4c] mb-2 flex items-center gap-2">
+                      <GraduationCap className="w-4 h-4 text-[#ee7e65]" />
+                      Priority Focus
+                    </h4>
+                    <p className="text-sm text-slate-700">
+                      Based on your results, focus on <span className="font-medium text-[#ee7e65]">{skillGaps[0]?.dimension}</span>
+                      {skillGaps[1] && <> and <span className="font-medium text-[#ee7e65]">{skillGaps[1]?.dimension}</span></>} 
+                      {' '}to improve your interview performance for this role.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
+          )}
 
-            <Card className="border-slate-200 rounded-2xl">
-              <CardContent className="p-6">
-                <h4 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+          {/* Key Wins */}
+          {analysis.wins && analysis.wins.length > 0 && (
+            <Card className="border-slate-200 rounded-2xl mb-6">
+              <CardContent className="p-4 sm:p-6">
+                <h4 className="font-semibold text-[#042c4c] mb-4 flex items-center gap-2">
                   <Star className="w-5 h-5 text-amber-500" />
                   Key Wins
                 </h4>
-                <ul className="space-y-2">
-                  {analysis.wins?.slice(0, 3).map((win, idx) => (
-                    <li key={idx} className="text-sm text-slate-600 flex items-start gap-2">
+                <ul className="space-y-3">
+                  {analysis.wins.slice(0, 4).map((win, idx) => (
+                    <li key={idx} className="text-sm text-slate-700 flex items-start gap-3 bg-slate-50 p-3 rounded-lg">
                       <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
                       <span>{win}</span>
                     </li>
@@ -266,12 +391,12 @@ export default function InterviewResultsPage() {
                 </ul>
               </CardContent>
             </Card>
-          </div>
+          )}
 
           {analysis.summary && (
             <Card className="border-slate-200 rounded-2xl mb-6">
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Summary</CardTitle>
+                <CardTitle className="text-lg text-[#042c4c]">Summary</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-slate-700 leading-relaxed">{analysis.summary}</p>
@@ -279,106 +404,50 @@ export default function InterviewResultsPage() {
             </Card>
           )}
 
-          {/* Readiness Impact Section */}
-          {readinessData && (
-            <Card className="border-purple-200 bg-purple-50/30 rounded-2xl mb-6">
-              <CardContent className="p-6">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center">
-                      <span className="text-2xl font-bold text-purple-700">{readinessData.readinessScore}%</span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-slate-900">Job Readiness</h3>
-                      <div className="flex items-center gap-2 text-sm">
-                        {readinessData.readinessDelta !== 0 && (
-                          <span className={`flex items-center gap-1 ${readinessData.readinessDelta > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                            {readinessData.readinessDelta > 0 ? <ArrowUp className="w-3 h-3" /> : <TrendingUp className="w-3 h-3 rotate-180" />}
-                            {readinessData.readinessDelta > 0 ? '+' : ''}{readinessData.readinessDelta}% from last
-                          </span>
-                        )}
-                        <Badge variant="outline" className={`capitalize ${
-                          readinessData.overallTrend === 'improving' ? 'bg-emerald-50 text-emerald-700' :
-                          readinessData.overallTrend === 'declining' ? 'bg-red-50 text-red-700' :
-                          'bg-slate-50 text-slate-700'
-                        }`}>
-                          {readinessData.overallTrend}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {(readinessData.strongestDimensions?.length > 0 || readinessData.weakestDimensions?.length > 0) && (
-                    <div className="grid grid-cols-2 gap-4 lg:gap-8">
-                      <div>
-                        <h4 className="text-xs uppercase text-slate-500 font-medium mb-2">Strongest Areas</h4>
-                        {readinessData.strongestDimensions?.length > 0 ? (
-                          <ul className="space-y-1">
-                            {readinessData.strongestDimensions.slice(0, 2).map((dim, i) => (
-                              <li key={i} className="text-sm text-emerald-700 flex items-center gap-1">
-                                <CheckCircle className="w-3 h-3" />
-                                {dim.dimension}
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="text-xs text-slate-400">Complete more sessions</p>
-                        )}
-                      </div>
-                      <div>
-                        <h4 className="text-xs uppercase text-slate-500 font-medium mb-2">Focus Areas</h4>
-                        {readinessData.weakestDimensions?.length > 0 ? (
-                          <ul className="space-y-1">
-                            {readinessData.weakestDimensions.slice(0, 2).map((dim, i) => (
-                              <li key={i} className="text-sm text-amber-700 flex items-center gap-1">
-                                <Target className="w-3 h-3" />
-                                {dim.dimension}
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="text-xs text-slate-400">Complete more sessions</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           <Tabs defaultValue="scores" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-flex">
-              <TabsTrigger value="scores">Scores</TabsTrigger>
-              <TabsTrigger value="feedback">Feedback</TabsTrigger>
-              <TabsTrigger value="answers">Better Answers</TabsTrigger>
-              <TabsTrigger value="plan">7-Day Plan</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-flex bg-white border border-slate-200">
+              <TabsTrigger value="scores" className="data-[state=active]:bg-[#042c4c] data-[state=active]:text-white">Skills</TabsTrigger>
+              <TabsTrigger value="feedback" className="data-[state=active]:bg-[#042c4c] data-[state=active]:text-white">Feedback</TabsTrigger>
+              <TabsTrigger value="answers" className="data-[state=active]:bg-[#042c4c] data-[state=active]:text-white">Better Answers</TabsTrigger>
+              <TabsTrigger value="plan" className="data-[state=active]:bg-[#042c4c] data-[state=active]:text-white">7-Day Plan</TabsTrigger>
             </TabsList>
 
             <TabsContent value="scores">
               <Card className="border-slate-200 rounded-2xl">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-indigo-600" />
-                    Dimension Scores (8 Rubric Dimensions)
+                <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                  <CardTitle className="flex items-center gap-2 text-[#042c4c]">
+                    <BarChart3 className="w-5 h-5 text-[#ee7e65]" />
+                    {jobContext || roleKitInfo ? (
+                      <span>Skills Assessed for {practiceTitle}</span>
+                    ) : (
+                      <span>Interview Skills Assessment</span>
+                    )}
                   </CardTitle>
+                  {(interviewType || interviewMode) && (
+                    <p className="text-sm text-slate-500 mt-1">
+                      {getInterviewTypeLabel(interviewType, interviewMode)} focus areas
+                    </p>
+                  )}
                 </CardHeader>
                 <CardContent className="p-0">
                   {analysis.dimensionScores?.map((dim, idx) => (
-                    <div key={idx} className={`p-4 ${idx !== (analysis.dimensionScores?.length || 0) - 1 ? "border-b border-slate-100" : ""}`}>
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-slate-900">{dim.dimension}</h4>
+                    <div key={idx} className={`p-4 sm:p-5 ${idx !== (analysis.dimensionScores?.length || 0) - 1 ? "border-b border-slate-100" : ""}`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-[#042c4c]">{dim.dimension}</h4>
                         <div className="flex items-center gap-2">
+                          <Badge className={`${getScoreBg(dim.score)} ${getScoreColor(dim.score)} border`}>
+                            {getScoreLabel(dim.score)}
+                          </Badge>
                           <span className={`text-lg font-bold ${getScoreColor(dim.score)}`}>{dim.score}</span>
                           <span className="text-slate-400">/5</span>
                         </div>
                       </div>
-                      <Progress value={dim.score * 20} className="h-2 mb-3" />
-                      <p className="text-sm text-slate-600 mb-2">{dim.rationale}</p>
+                      <Progress value={dim.score * 20} className="h-2 mb-4" />
+                      <p className="text-sm text-slate-600 mb-3">{dim.rationale}</p>
                       {dim.improvement && (
-                        <div className="flex items-start gap-2 p-3 bg-indigo-50 rounded-lg">
-                          <Lightbulb className="w-4 h-4 text-indigo-600 flex-shrink-0 mt-0.5" />
-                          <p className="text-sm text-indigo-800">{dim.improvement}</p>
+                        <div className="flex items-start gap-3 p-3 bg-[#ee7e65]/5 rounded-xl border border-[#ee7e65]/20">
+                          <Lightbulb className="w-4 h-4 text-[#ee7e65] flex-shrink-0 mt-0.5" />
+                          <p className="text-sm text-[#042c4c]">{dim.improvement}</p>
                         </div>
                       )}
                     </div>
@@ -453,8 +522,8 @@ export default function InterviewResultsPage() {
             <TabsContent value="answers">
               <Card className="border-slate-200 rounded-2xl">
                 <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-indigo-600" />
+                  <CardTitle className="flex items-center gap-2 text-[#042c4c]">
+                    <MessageSquare className="w-5 h-5 text-[#ee7e65]" />
                     Improved Answer Examples
                   </CardTitle>
                 </CardHeader>
@@ -462,7 +531,7 @@ export default function InterviewResultsPage() {
                   {analysis.betterAnswers?.map((ba, idx) => (
                     <div key={idx} className={`p-5 ${idx !== (analysis.betterAnswers?.length || 0) - 1 ? "border-b border-slate-100" : ""}`}>
                       <div className="mb-3">
-                        <Badge variant="outline" className="mb-2">Question</Badge>
+                        <Badge variant="outline" className="mb-2 text-[#042c4c]">Question</Badge>
                         <p className="text-slate-900 font-medium">{ba.question}</p>
                       </div>
                       <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
@@ -478,17 +547,22 @@ export default function InterviewResultsPage() {
             <TabsContent value="plan">
               <Card className="border-slate-200 rounded-2xl">
                 <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-indigo-600" />
+                  <CardTitle className="flex items-center gap-2 text-[#042c4c]">
+                    <Calendar className="w-5 h-5 text-[#ee7e65]" />
                     7-Day Practice Plan
+                    {(jobContext || roleKitInfo) && (
+                      <span className="text-sm font-normal text-slate-500 ml-2">
+                        Tailored for {practiceTitle}
+                      </span>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   {analysis.practicePlan?.map((day, idx) => (
                     <div key={idx} className={`p-4 flex items-start gap-4 ${idx !== (analysis.practicePlan?.length || 0) - 1 ? "border-b border-slate-100" : ""}`}>
-                      <div className="w-12 h-12 rounded-xl bg-indigo-100 flex flex-col items-center justify-center flex-shrink-0">
-                        <span className="text-xs text-indigo-600 font-medium">Day</span>
-                        <span className="text-lg font-bold text-indigo-700">{day.day}</span>
+                      <div className="w-12 h-12 rounded-xl bg-[#042c4c] flex flex-col items-center justify-center flex-shrink-0">
+                        <span className="text-xs text-white/60">Day</span>
+                        <span className="text-lg font-bold text-white">{day.day}</span>
                       </div>
                       <div className="flex-1">
                         <p className="text-slate-900 font-medium mb-1">{day.task}</p>
@@ -505,38 +579,23 @@ export default function InterviewResultsPage() {
           </Tabs>
 
           {/* Next Steps CTA */}
-          {jobContext && (
-            <div className="mt-8 bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-6 text-white">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <h3 className="text-lg font-bold mb-1">Keep Building Your Readiness</h3>
-                  <p className="text-white/80 text-sm">
-                    Continue practicing for {jobContext.roleTitle}
-                    {jobContext.companyName && ` at ${jobContext.companyName}`}
-                  </p>
-                </div>
-                <Link to={`/jobs/${jobContext.id}`}>
-                  <Button className="bg-white text-purple-700 hover:bg-white/90 gap-2 w-full sm:w-auto">
-                    <Play className="w-4 h-4" />
-                    Practice Again
-                  </Button>
-                </Link>
+          <div className="mt-8 bg-gradient-to-r from-[#042c4c] to-[#0a3d66] rounded-2xl p-6 text-white">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-1">Ready to Improve?</h3>
+                <p className="text-white/70 text-sm">
+                  {skillGaps.length > 0 
+                    ? `Focus on ${skillGaps[0]?.dimension} in your next session`
+                    : 'Keep practicing to maintain your skills'}
+                </p>
               </div>
+              <Link to="/interview">
+                <Button className="bg-[#ee7e65] hover:bg-[#d96a52] text-white gap-2">
+                  <Play className="w-4 h-4" />
+                  Practice Again
+                </Button>
+              </Link>
             </div>
-          )}
-
-          <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/interview">
-              <Button variant="outline" size="lg" className="rounded-xl w-full sm:w-auto">
-                Practice Another Role
-              </Button>
-            </Link>
-            <Link to="/dashboard">
-              <Button size="lg" className="rounded-xl w-full sm:w-auto">
-                Return to Dashboard
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
           </div>
         </div>
       </div>

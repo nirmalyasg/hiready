@@ -23,13 +23,13 @@ import {
   Star
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import interviewScreenshot from '@/assets/screenshots/interview-page.png';
-import resultsScreenshot from '@/assets/screenshots/results-page.png';
-import dashboardScreenshot from '@/assets/screenshots/dashboard-page.png';
-import customInterviewScreenshot from '@/assets/screenshots/custom-interview-page.png';
-import roleSelectionScreenshot from '@/assets/screenshots/role-selection-page.png';
-import interviewTypesScreenshot from '@/assets/screenshots/interview-types-page.png';
-import practiceScreenshot from '@/assets/screenshots/practice-page.png';
+import interviewScreenshot from '@/assets/screenshots/interview-main.jpg';
+import resultsScreenshot from '@/assets/screenshots/dashboard.jpg';
+import dashboardScreenshot from '@/assets/screenshots/dashboard.jpg';
+import roleSelectionScreenshot from '@/assets/screenshots/role-selection.jpg';
+import interviewTypesScreenshot from '@/assets/screenshots/interview-types.jpg';
+import preSessionScreenshot from '@/assets/screenshots/pre-session.jpg';
+import liveSessionScreenshot from '@/assets/screenshots/live-session.jpg';
 
 export default function HomePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -321,10 +321,10 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-2 gap-8">
             {[
-              { src: roleSelectionScreenshot, title: 'Choose Your Role', desc: 'Select from 15+ role kits tailored to your career path' },
-              { src: interviewTypesScreenshot, title: 'Pick Interview Type', desc: 'Focus on coding, case studies, behavioral, or HR rounds' },
-              { src: customInterviewScreenshot, title: 'Custom Practice', desc: 'Paste any job description for tailored interview prep' },
-              { src: practiceScreenshot, title: 'Skill-Based Practice', desc: 'Build communication skills with scenario-based exercises' },
+              { src: roleSelectionScreenshot, title: 'Browse 21+ Role Kits', desc: 'From Business Analyst to Data Scientist - find your career path' },
+              { src: interviewTypesScreenshot, title: 'Four Interview Types', desc: 'Coding, Case Studies, Behavioral, and HR rounds covered' },
+              { src: preSessionScreenshot, title: 'Personalized Session Plan', desc: 'AI builds your interview phases, skills tested, and language options' },
+              { src: liveSessionScreenshot, title: 'Practice with AI Interviewer', desc: 'Face real scenarios with avatar Wayne guiding you through' },
             ].map((item, idx) => (
               <div key={idx} className="group">
                 <div className="relative rounded-2xl overflow-hidden shadow-lg border border-gray-200 mb-4 group-hover:shadow-xl transition-shadow">
