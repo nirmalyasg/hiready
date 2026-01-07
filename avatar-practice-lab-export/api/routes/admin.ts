@@ -1457,10 +1457,44 @@ adminRouter.post("/execute-sql", async (req, res) => {
       return res.status(400).json({ success: false, error: "SQL statements required" });
     }
 
-    const statements = sqlStatements
-      .split(";")
-      .map((s: string) => s.trim())
-      .filter((s: string) => s.length > 0 && !s.startsWith("--"));
+    const statements: string[] = [];
+    let current = "";
+    let inString = false;
+    let stringChar = "";
+    
+    for (let i = 0; i < sqlStatements.length; i++) {
+      const char = sqlStatements[i];
+      const prevChar = i > 0 ? sqlStatements[i - 1] : "";
+      
+      if (!inString && (char === "'" || char === '"')) {
+        inString = true;
+        stringChar = char;
+        current += char;
+      } else if (inString && char === stringChar && prevChar !== "\\") {
+        if (sqlStatements[i + 1] === stringChar) {
+          current += char;
+          i++;
+          current += sqlStatements[i];
+        } else {
+          inString = false;
+          stringChar = "";
+          current += char;
+        }
+      } else if (!inString && char === ";") {
+        const trimmed = current.trim();
+        if (trimmed.length > 0 && !trimmed.startsWith("--")) {
+          statements.push(trimmed);
+        }
+        current = "";
+      } else {
+        current += char;
+      }
+    }
+    
+    const lastTrimmed = current.trim();
+    if (lastTrimmed.length > 0 && !lastTrimmed.startsWith("--")) {
+      statements.push(lastTrimmed);
+    }
 
     const results: { statement: number; success: boolean; error?: string }[] = [];
     let successCount = 0;
