@@ -75,3 +75,4 @@ NODE_ENV = "production"
 [userenv.shared]
 ADMIN_SEED_KEY = "abc@123@abc"
 ADMIN_KEY = "abc@123@abc"
+PRODUCTION_DATABASE_URL = "postgresql://neondb_owner:npg_ioKBfz47yJrR@ep-billowing-king-afrudami.c-2.us-west-2.aws.neon.tech/neondb?sslmode=require"
