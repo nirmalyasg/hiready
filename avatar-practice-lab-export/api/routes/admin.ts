@@ -1482,13 +1482,16 @@ adminRouter.post("/execute-sql", async (req, res) => {
       }
     }
 
+    const failedResults = results.filter(r => !r.success).slice(0, 20);
+    
     res.json({
       success: errorCount === 0,
       message: `Executed ${successCount} statements successfully, ${errorCount} failed`,
       totalStatements: statements.length,
       successCount,
       errorCount,
-      results: results.slice(0, 50)
+      results: results.slice(0, 50),
+      failedSamples: failedResults
     });
   } catch (error: any) {
     console.error("Error executing SQL:", error);

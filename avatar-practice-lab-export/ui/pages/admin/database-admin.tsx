@@ -14,6 +14,7 @@ interface ScriptResult {
   successCount?: number;
   errorCount?: number;
   results?: { statement: number; success: boolean; error?: string }[];
+  failedSamples?: { statement: number; success: boolean; error?: string }[];
 }
 
 export default function DatabaseAdminPage() {
@@ -658,7 +659,21 @@ INSERT INTO public.skills VALUES (1, 'Communication', 'Effective communication s
                       <span className="text-slate-500 ml-3">of {result.totalStatements} total</span>
                     </div>
                   )}
-                  {result.results && result.results.length > 0 && (
+                  {result.failedSamples && result.failedSamples.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-sm font-medium text-red-600 mb-2">Failed Statement Samples (first 20):</p>
+                      <div className="bg-red-50 rounded-lg p-3 max-h-64 overflow-y-auto">
+                        <ul className="text-xs space-y-1 font-mono">
+                          {result.failedSamples.map((r, i) => (
+                            <li key={i} className="text-red-700">
+                              Statement {r.statement}: {r.error}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                  {result.results && result.results.length > 0 && !result.failedSamples && (
                     <div className="mt-3">
                       <p className="text-sm font-medium text-slate-600 mb-2">Execution Results (first 50):</p>
                       <div className="bg-white/50 rounded-lg p-3 max-h-64 overflow-y-auto">
