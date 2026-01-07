@@ -26,6 +26,10 @@ import { useAuth } from '@/hooks/useAuth';
 import interviewScreenshot from '@/assets/screenshots/interview-page.png';
 import resultsScreenshot from '@/assets/screenshots/results-page.png';
 import dashboardScreenshot from '@/assets/screenshots/dashboard-page.png';
+import customInterviewScreenshot from '@/assets/screenshots/custom-interview-page.png';
+import roleSelectionScreenshot from '@/assets/screenshots/role-selection-page.png';
+import interviewTypesScreenshot from '@/assets/screenshots/interview-types-page.png';
+import practiceScreenshot from '@/assets/screenshots/practice-page.png';
 
 export default function HomePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -299,8 +303,47 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Results & Feedback Section */}
+      {/* Practice Interfaces Gallery */}
       <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#ee7e65]/10 rounded-full text-[#ee7e65] text-sm font-medium mb-4">
+              <Play className="w-4 h-4" />
+              See It In Action
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-brand-dark mb-4">
+              Real Practice Interfaces
+            </h2>
+            <p className="text-lg text-brand-muted max-w-2xl mx-auto">
+              Clean, focused interfaces designed to help you practice effectively and track your progress.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {[
+              { src: roleSelectionScreenshot, title: 'Choose Your Role', desc: 'Select from 15+ role kits tailored to your career path' },
+              { src: interviewTypesScreenshot, title: 'Pick Interview Type', desc: 'Focus on coding, case studies, behavioral, or HR rounds' },
+              { src: customInterviewScreenshot, title: 'Custom Practice', desc: 'Paste any job description for tailored interview prep' },
+              { src: practiceScreenshot, title: 'Skill-Based Practice', desc: 'Build communication skills with scenario-based exercises' },
+            ].map((item, idx) => (
+              <div key={idx} className="group">
+                <div className="relative rounded-2xl overflow-hidden shadow-lg border border-gray-200 mb-4 group-hover:shadow-xl transition-shadow">
+                  <img 
+                    src={item.src} 
+                    alt={item.title}
+                    className="w-full h-auto"
+                  />
+                </div>
+                <h3 className="font-semibold text-brand-dark text-lg mb-1">{item.title}</h3>
+                <p className="text-brand-muted text-sm">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Results & Feedback Section */}
+      <section className="py-20 bg-[#f8f9fb]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="order-2 lg:order-1">
