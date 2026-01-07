@@ -348,36 +348,58 @@ export default function AvatarSimulatorDashboard() {
           </Link>
         </div>
 
-        {/* Today's Focus - Primary CTA */}
-        {primaryJob && (
-          <Link to={`/jobs/${primaryJob.id}`} className="block">
-            <div className="bg-white rounded-2xl p-5 border border-slate-100 hover:border-[#ee7e65]/30 transition-colors shadow-sm">
-              <div className="flex items-center gap-1 text-xs font-medium text-[#ee7e65] mb-3">
-                <Target className="w-3.5 h-3.5" />
-                TODAY'S FOCUS
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-[#042c4c] truncate">{primaryJob.roleTitle}</h3>
-                  {primaryJob.companyName && (
-                    <p className="text-sm text-slate-500 flex items-center gap-1.5 mt-0.5">
-                      <Building2 className="w-3.5 h-3.5" />
-                      {primaryJob.companyName}
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className={`text-2xl font-bold ${getReadinessColor(primaryJob.readinessScore)}`}>
-                      {primaryJob.readinessScore !== null ? `${primaryJob.readinessScore}%` : '—'}
-                    </p>
-                    <p className="text-xs text-slate-400">ready</p>
-                  </div>
-                  <ArrowUpRight className="w-5 h-5 text-[#ee7e65]" />
-                </div>
-              </div>
+        {/* Recommended Practice */}
+        {activeJobs.length > 0 && (
+          <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+            <div className="flex items-center gap-1 text-xs font-medium text-[#ee7e65] mb-3">
+              <Sparkles className="w-3.5 h-3.5" />
+              RECOMMENDED PRACTICE
             </div>
-          </Link>
+            <div className="space-y-3">
+              {activeJobs.slice(0, 3).map((job) => {
+                const readiness = job.readinessScore || 0;
+                const needsBehavioral = readiness < 50;
+                const needsTechnical = readiness < 70;
+                const practiceType = needsBehavioral ? 'Behavioral' : needsTechnical ? 'Technical' : 'Mock Interview';
+                
+                return (
+                  <Link key={job.id} to={`/interview/custom?company=${encodeURIComponent(job.companyName || '')}&role=${encodeURIComponent(job.roleTitle)}`} className="block">
+                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-[#ee7e65]/10 text-[#ee7e65] font-medium">{practiceType}</span>
+                        </div>
+                        <p className="font-medium text-[#042c4c] mt-1 truncate">{job.roleTitle}</p>
+                        {job.companyName && (
+                          <p className="text-xs text-slate-500 truncate">{job.companyName}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className={`text-lg font-bold ${getReadinessColor(job.readinessScore)}`}>
+                            {job.readinessScore !== null ? `${job.readinessScore}%` : '—'}
+                          </p>
+                          <p className="text-xs text-slate-400">ready</p>
+                        </div>
+                        <Play className="w-4 h-4 text-[#ee7e65]" />
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+            {activeJobs.length === 0 && (
+              <div className="text-center py-4">
+                <p className="text-sm text-slate-500 mb-3">Add job targets to get personalized practice recommendations</p>
+                <Link to="/jobs">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Plus className="w-4 h-4" />
+                    Add Job Target
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Skills Summary - Compact */}
