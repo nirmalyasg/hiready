@@ -23,9 +23,9 @@ import {
   Star
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import interviewScreenshot from '@/assets/screenshots/ai_interview_practice_interface.png';
-import resultsScreenshot from '@/assets/screenshots/interview_results_dashboard.png';
-import codingScreenshot from '@/assets/screenshots/coding_interview_practice_screen.png';
+import practiceSelectionScreenshot from '@/assets/screenshots/interview_practice_selection_page.png';
+import resultsScreenshot from '@/assets/screenshots/interview_performance_analytics_dashboard.png';
+import jobsScreenshot from '@/assets/screenshots/job_tracking_dashboard_page.png';
 
 export default function HomePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -241,8 +241,8 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/30 to-brand-light/20 rounded-3xl blur-2xl transform rotate-3" />
               <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10">
                 <img 
-                  src={interviewScreenshot} 
-                  alt="AI Interview Practice Session" 
+                  src={practiceSelectionScreenshot} 
+                  alt="Interview Practice Selection" 
                   className="w-full h-auto"
                 />
               </div>
@@ -360,29 +360,29 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Coding Practice Screenshot Section */}
+      {/* Job Tracking Section */}
       <section className="py-20 bg-brand-dark">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-500/20 rounded-full text-indigo-300 text-sm font-medium mb-4">
-                <Code className="w-4 h-4" />
-                Coding Practice
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-500/20 rounded-full text-emerald-300 text-sm font-medium mb-4">
+                <Briefcase className="w-4 h-4" />
+                Job-Specific Prep
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-                Real Coding Challenges with AI Guidance
+                Practice for Your Target Jobs
               </h2>
               <p className="text-lg text-white/60 mb-8">
-                Practice with role-specific coding problems, get hints when stuck, 
-                and receive detailed feedback on your approach and code quality.
+                Import job postings from LinkedIn, Indeed, or paste descriptions. 
+                Get tailored interview questions based on actual job requirements.
               </p>
               
               <div className="grid grid-cols-2 gap-4 mb-8">
                 {[
-                  { icon: Target, label: 'Role-Tailored Problems' },
-                  { icon: Brain, label: 'Smart Hints System' },
-                  { icon: Clock, label: 'Timed Sessions' },
-                  { icon: Star, label: 'Quality Feedback' },
+                  { icon: Target, label: 'Job-Specific Questions' },
+                  { icon: Brain, label: 'AI-Parsed Requirements' },
+                  { icon: Clock, label: 'Track All Applications' },
+                  { icon: Star, label: 'Company Insights' },
                 ].map((item, idx) => {
                   const IconComponent = item.icon;
                   return (
@@ -395,21 +395,21 @@ export default function HomePage() {
               </div>
 
               <Link
-                to="/interview"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-500 text-white rounded-xl font-semibold hover:bg-indigo-600 transition-colors"
+                to="/jobs"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-xl font-semibold hover:bg-emerald-600 transition-colors"
               >
-                <Code className="w-5 h-5" />
-                Try Coding Practice
+                <Briefcase className="w-5 h-5" />
+                Import a Job
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
 
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/30 to-purple-500/20 rounded-3xl blur-2xl transform rotate-3" />
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/30 to-teal-500/20 rounded-3xl blur-2xl transform rotate-3" />
               <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10">
                 <img 
-                  src={codingScreenshot} 
-                  alt="Coding Interview Practice" 
+                  src={jobsScreenshot} 
+                  alt="Job Tracking Dashboard" 
                   className="w-full h-auto"
                 />
               </div>
