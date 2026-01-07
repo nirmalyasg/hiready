@@ -286,13 +286,13 @@ export default function AvatarSimulatorDashboard() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'interview':
-        return { label: 'Interview Scheduled', color: 'bg-purple-100 text-purple-700' };
+        return { label: 'Interview Scheduled', color: 'bg-[#ee7e65]/10 text-[#ee7e65]' };
       case 'applied':
-        return { label: 'Applied', color: 'bg-blue-100 text-blue-700' };
+        return { label: 'Applied', color: 'bg-[#042c4c]/10 text-[#042c4c]' };
       case 'offer':
-        return { label: 'Offer Received', color: 'bg-green-100 text-green-700' };
+        return { label: 'Offer Received', color: 'bg-emerald-100 text-emerald-700' };
       default:
-        return { label: 'Saved', color: 'bg-gray-100 text-gray-700' };
+        return { label: 'Saved', color: 'bg-slate-100 text-slate-600' };
     }
   };
 
@@ -424,43 +424,43 @@ export default function AvatarSimulatorDashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 bg-brand-dark/10 rounded-xl flex items-center justify-center">
-                <Clock className="w-5 h-5 text-brand-dark" />
+              <div className="w-10 h-10 bg-[#042c4c]/10 rounded-xl flex items-center justify-center">
+                <Clock className="w-5 h-5 text-[#042c4c]" />
               </div>
-              <TrendingUp className="w-4 h-4 text-green-500" />
+              <TrendingUp className="w-4 h-4 text-emerald-500" />
             </div>
-            <p className="text-xl sm:text-2xl font-bold text-brand-dark">{stats.totalTime}</p>
-            <p className="text-xs sm:text-sm text-brand-muted">Total practice</p>
+            <p className="text-xl sm:text-2xl font-bold text-[#042c4c]">{stats.totalTime}</p>
+            <p className="text-xs sm:text-sm text-slate-500">Total practice</p>
           </div>
 
           <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 bg-brand-accent/10 rounded-xl flex items-center justify-center">
-                <Target className="w-5 h-5 text-brand-accent" />
+              <div className="w-10 h-10 bg-[#ee7e65]/10 rounded-xl flex items-center justify-center">
+                <Target className="w-5 h-5 text-[#ee7e65]" />
               </div>
             </div>
-            <p className="text-xl sm:text-2xl font-bold text-brand-dark">{stats.completedScenarios}</p>
-            <p className="text-xs sm:text-sm text-brand-muted">Scenarios done</p>
+            <p className="text-xl sm:text-2xl font-bold text-[#042c4c]">{stats.completedScenarios}</p>
+            <p className="text-xs sm:text-sm text-slate-500">Scenarios done</p>
           </div>
 
           <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                <Zap className="w-5 h-5 text-green-600" />
+              <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                <Zap className="w-5 h-5 text-emerald-600" />
               </div>
             </div>
-            <p className="text-xl sm:text-2xl font-bold text-brand-dark">{stats.uniqueSkillsPracticed}</p>
-            <p className="text-xs sm:text-sm text-brand-muted">Skills practiced</p>
+            <p className="text-xl sm:text-2xl font-bold text-[#042c4c]">{stats.uniqueSkillsPracticed}</p>
+            <p className="text-xs sm:text-sm text-slate-500">Skills practiced</p>
           </div>
 
           <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-purple-600" />
+              <div className="w-10 h-10 bg-[#768c9c]/20 rounded-xl flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-[#768c9c]" />
               </div>
             </div>
-            <p className="text-xl sm:text-2xl font-bold text-brand-dark">{avgOverallScore > 0 ? avgOverallScore.toFixed(1) : '-'}</p>
-            <p className="text-xs sm:text-sm text-brand-muted">Avg score</p>
+            <p className="text-xl sm:text-2xl font-bold text-[#042c4c]">{avgOverallScore > 0 ? avgOverallScore.toFixed(1) : '-'}</p>
+            <p className="text-xs sm:text-sm text-slate-500">Avg score</p>
           </div>
         </div>
 
@@ -574,15 +574,15 @@ export default function AvatarSimulatorDashboard() {
 
             {/* AI Insights - Career Memory */}
             {aiInsights?.hasData && (
-              <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-4 sm:p-6 border border-purple-100 shadow-sm">
-                <h3 className="text-base sm:text-lg font-bold text-brand-dark mb-2 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-purple-600" />
+              <div className="bg-gradient-to-br from-[#ee7e65]/5 to-[#042c4c]/5 rounded-2xl p-4 sm:p-6 border border-[#ee7e65]/20 shadow-sm">
+                <h3 className="text-base sm:text-lg font-bold text-[#042c4c] mb-2 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-[#ee7e65]" />
                   AI Career Insights
                 </h3>
-                <p className="text-sm text-brand-muted mb-4">{aiInsights.summary}</p>
+                <p className="text-sm text-slate-500 mb-4">{aiInsights.summary}</p>
                 {aiInsights.insights?.length === 0 && (
-                  <div className="p-4 rounded-xl bg-white border border-purple-100">
-                    <p className="text-sm text-brand-muted text-center">
+                  <div className="p-4 rounded-xl bg-white border border-slate-200">
+                    <p className="text-sm text-slate-500 text-center">
                       Keep practicing to unlock personalized insights about your strengths and areas for improvement.
                     </p>
                   </div>
@@ -592,16 +592,16 @@ export default function AvatarSimulatorDashboard() {
                     <div 
                       key={idx}
                       className={`p-4 rounded-xl ${
-                        insight.type === "strength" ? "bg-green-50 border border-green-100" :
-                        insight.type === "weakness" ? "bg-amber-50 border border-amber-100" :
-                        "bg-blue-50 border border-blue-100"
+                        insight.type === "strength" ? "bg-emerald-50 border border-emerald-100" :
+                        insight.type === "weakness" ? "bg-[#ee7e65]/10 border border-[#ee7e65]/20" :
+                        "bg-[#042c4c]/5 border border-[#042c4c]/10"
                       }`}
                     >
                       <div className="flex items-start gap-3">
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                          insight.type === "strength" ? "bg-green-500" :
-                          insight.type === "weakness" ? "bg-amber-500" :
-                          "bg-blue-500"
+                          insight.type === "strength" ? "bg-emerald-500" :
+                          insight.type === "weakness" ? "bg-[#ee7e65]" :
+                          "bg-[#042c4c]"
                         }`}>
                           {insight.type === "strength" ? (
                             <CheckCircle2 className="w-4 h-4 text-white" />
@@ -613,31 +613,31 @@ export default function AvatarSimulatorDashboard() {
                         </div>
                         <div className="flex-1">
                           <p className={`text-sm font-medium ${
-                            insight.type === "strength" ? "text-green-800" :
-                            insight.type === "weakness" ? "text-amber-800" :
-                            "text-blue-800"
+                            insight.type === "strength" ? "text-emerald-800" :
+                            insight.type === "weakness" ? "text-[#ee7e65]" :
+                            "text-[#042c4c]"
                           }`}>
                             {insight.title}
                           </p>
-                          <p className="text-xs text-brand-muted mt-1">{insight.description}</p>
+                          <p className="text-xs text-slate-500 mt-1">{insight.description}</p>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
                 {aiInsights.stats && (
-                  <div className="flex flex-wrap gap-4 sm:gap-6 mt-4 pt-4 border-t border-purple-100">
+                  <div className="flex flex-wrap gap-4 sm:gap-6 mt-4 pt-4 border-t border-slate-200">
                     <div className="text-center">
-                      <p className="text-base sm:text-lg font-bold text-purple-700">{aiInsights.stats.dimensionsTracked}</p>
-                      <p className="text-xs text-brand-muted">Skills Tracked</p>
+                      <p className="text-base sm:text-lg font-bold text-[#042c4c]">{aiInsights.stats.dimensionsTracked}</p>
+                      <p className="text-xs text-slate-500">Skills Tracked</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-base sm:text-lg font-bold text-green-600">{aiInsights.stats.improvingCount}</p>
-                      <p className="text-xs text-brand-muted">Improving</p>
+                      <p className="text-base sm:text-lg font-bold text-emerald-600">{aiInsights.stats.improvingCount}</p>
+                      <p className="text-xs text-slate-500">Improving</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-base sm:text-lg font-bold text-amber-600">{aiInsights.stats.decliningCount}</p>
-                      <p className="text-xs text-brand-muted">Need Focus</p>
+                      <p className="text-base sm:text-lg font-bold text-[#ee7e65]">{aiInsights.stats.decliningCount}</p>
+                      <p className="text-xs text-slate-500">Need Focus</p>
                     </div>
                   </div>
                 )}

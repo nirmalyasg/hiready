@@ -424,13 +424,13 @@ export default function ResultsPage() {
             <p className="text-[9px] sm:text-xs text-slate-500 font-medium uppercase">Sessions</p>
             <p className="text-lg sm:text-2xl font-bold text-[#042c4c] mt-0.5">{totalSessions}</p>
           </div>
-          <div className="bg-purple-50 rounded-xl border border-purple-100 p-2.5 sm:p-4">
-            <p className="text-[9px] sm:text-xs text-purple-600 font-medium uppercase">Interviews</p>
-            <p className="text-lg sm:text-2xl font-bold text-purple-700 mt-0.5">{totalInterviewSessions}</p>
+          <div className="bg-[#ee7e65]/10 rounded-xl border border-[#ee7e65]/20 p-2.5 sm:p-4">
+            <p className="text-[9px] sm:text-xs text-[#ee7e65] font-medium uppercase">Interviews</p>
+            <p className="text-lg sm:text-2xl font-bold text-[#ee7e65] mt-0.5">{totalInterviewSessions}</p>
           </div>
-          <div className="bg-blue-50 rounded-xl border border-blue-100 p-2.5 sm:p-4">
-            <p className="text-[9px] sm:text-xs text-blue-600 font-medium uppercase">Exercises</p>
-            <p className="text-lg sm:text-2xl font-bold text-blue-700 mt-0.5">{totalExerciseSessions}</p>
+          <div className="bg-[#042c4c]/10 rounded-xl border border-[#042c4c]/20 p-2.5 sm:p-4">
+            <p className="text-[9px] sm:text-xs text-[#042c4c] font-medium uppercase">Exercises</p>
+            <p className="text-lg sm:text-2xl font-bold text-[#042c4c] mt-0.5">{totalExerciseSessions}</p>
           </div>
           <div className="bg-white rounded-xl border border-slate-100 p-2.5 sm:p-4">
             <p className="text-[9px] sm:text-xs text-slate-500 font-medium uppercase">Time</p>
@@ -597,10 +597,10 @@ export default function ResultsPage() {
                             to={`/avatar/practice/presentation/results?sessionId=${pSession.sessionUid}&presentationId=${pSession.presentation.id}`}
                             className="block"
                           >
-                            <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 hover:border-orange-200 transition-colors">
+                            <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 hover:border-[#768c9c]/40 transition-colors">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                  <Eye className="w-5 h-5 text-orange-600" />
+                                <div className="w-10 h-10 bg-[#768c9c]/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                  <Eye className="w-5 h-5 text-[#768c9c]" />
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <h3 className="font-medium text-[#042c4c] text-sm sm:text-base truncate">
@@ -634,10 +634,10 @@ export default function ResultsPage() {
                             to={`/interview/results?sessionId=${iSession.id}`}
                             className="block"
                           >
-                            <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 hover:border-purple-200 transition-colors">
+                            <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 hover:border-[#ee7e65]/40 transition-colors">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                  <UserCheck className="w-5 h-5 text-purple-600" />
+                                <div className="w-10 h-10 bg-[#ee7e65]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                  <UserCheck className="w-5 h-5 text-[#ee7e65]" />
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <h3 className="font-medium text-[#042c4c] text-sm sm:text-base truncate">
@@ -676,9 +676,9 @@ export default function ResultsPage() {
                           : `/exercise-mode/case-study/results?sessionId=${eSession.id}`;
                         const typeLabel = eSession.exerciseType === 'coding_lab' ? 'Coding Lab' : 'Case Study';
                         const TypeIcon = eSession.exerciseType === 'coding_lab' ? Code : Briefcase;
-                        const typeBgColor = eSession.exerciseType === 'coding_lab' ? 'bg-blue-100' : 'bg-emerald-100';
-                        const typeIconColor = eSession.exerciseType === 'coding_lab' ? 'text-blue-600' : 'text-emerald-600';
-                        const typeBorderColor = eSession.exerciseType === 'coding_lab' ? 'hover:border-blue-200' : 'hover:border-emerald-200';
+                        const typeBgColor = eSession.exerciseType === 'coding_lab' ? 'bg-[#042c4c]/10' : 'bg-emerald-100';
+                        const typeIconColor = eSession.exerciseType === 'coding_lab' ? 'text-[#042c4c]' : 'text-emerald-600';
+                        const typeBorderColor = eSession.exerciseType === 'coding_lab' ? 'hover:border-[#042c4c]/30' : 'hover:border-emerald-200';
                         
                         return (
                           <Link

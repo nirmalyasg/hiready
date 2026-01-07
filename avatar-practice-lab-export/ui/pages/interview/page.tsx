@@ -51,19 +51,19 @@ const domainIcons: Record<string, any> = {
 };
 
 const domainColors: Record<string, string> = {
-  software: "bg-blue-500",
-  data: "bg-purple-500",
-  product: "bg-emerald-500",
-  design: "bg-pink-500",
-  sales: "bg-amber-500",
-  marketing: "bg-rose-500",
-  customer_success: "bg-teal-500",
+  software: "bg-[#042c4c]",
+  data: "bg-[#768c9c]",
+  product: "bg-[#ee7e65]",
+  design: "bg-[#6c8194]",
+  sales: "bg-[#042c4c]",
+  marketing: "bg-[#ee7e65]",
+  customer_success: "bg-[#768c9c]",
   operations: "bg-slate-500",
-  consulting: "bg-indigo-500",
-  finance: "bg-green-500",
-  hr: "bg-orange-500",
-  recruiting: "bg-cyan-500",
-  engineering_management: "bg-violet-500",
+  consulting: "bg-[#042c4c]",
+  finance: "bg-[#6c8194]",
+  hr: "bg-[#ee7e65]",
+  recruiting: "bg-[#768c9c]",
+  engineering_management: "bg-[#042c4c]",
 };
 
 const interviewModeOptions = [
@@ -72,7 +72,7 @@ const interviewModeOptions = [
     label: "Coding & Technical Tasks", 
     description: "Solve, explain, debug, or modify technical problems",
     icon: Code,
-    color: "bg-indigo-500",
+    color: "bg-[#042c4c]",
     interviewMode: "coding_technical",
     duration: "15 min",
     includes: ["Coding", "Debugging", "Code Review", "SQL", "ML Basics"],
@@ -83,7 +83,7 @@ const interviewModeOptions = [
     label: "Case & Problem Solving", 
     description: "Structured thinking for ambiguous problems",
     icon: Briefcase,
-    color: "bg-orange-500",
+    color: "bg-[#ee7e65]",
     interviewMode: "case_problem_solving",
     duration: "15 min",
     includes: ["Business Cases", "Product Cases", "Analytics Cases", "Strategy"],
@@ -94,7 +94,7 @@ const interviewModeOptions = [
     label: "Behavioral and Leadership", 
     description: "Past behavior, judgment, ownership and leadership",
     icon: MessageSquare,
-    color: "bg-amber-500",
+    color: "bg-[#768c9c]",
     interviewMode: "behavioral",
     duration: "15 min",
     includes: ["STAR Stories", "Conflict Handling", "Leadership", "Failure Stories"],
@@ -105,7 +105,7 @@ const interviewModeOptions = [
     label: "HR Interview", 
     description: "Role fit, motivation, culture and career alignment",
     icon: Users,
-    color: "bg-blue-500",
+    color: "bg-[#6c8194]",
     interviewMode: "hiring_manager",
     duration: "15 min",
     includes: ["Why This Role", "Culture Fit", "Career Goals", "Role Expectations"],
@@ -116,13 +116,13 @@ const interviewModeOptions = [
 const getLevelConfig = (level: string) => {
   switch (level) {
     case "entry":
-      return { label: "Entry", color: "bg-green-100 text-green-700" };
+      return { label: "Entry", color: "bg-emerald-100 text-emerald-700" };
     case "mid":
-      return { label: "Mid-Level", color: "bg-amber-100 text-amber-700" };
+      return { label: "Mid-Level", color: "bg-[#ee7e65]/10 text-[#ee7e65]" };
     case "senior":
-      return { label: "Senior", color: "bg-red-100 text-red-700" };
+      return { label: "Senior", color: "bg-[#042c4c]/10 text-[#042c4c]" };
     default:
-      return { label: level, color: "bg-gray-100 text-gray-600" };
+      return { label: level, color: "bg-slate-100 text-slate-600" };
   }
 };
 

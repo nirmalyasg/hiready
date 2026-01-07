@@ -43,25 +43,25 @@ export default function HomePage() {
       icon: Code, 
       title: 'Coding & Technical', 
       description: 'Practice coding problems, debugging, and technical discussions with AI feedback',
-      color: 'bg-indigo-500'
+      color: 'bg-[#042c4c]'
     },
     { 
       icon: Briefcase, 
       title: 'Case & Problem Solving', 
       description: 'Master business cases, product cases, and structured problem-solving',
-      color: 'bg-orange-500'
+      color: 'bg-[#ee7e65]'
     },
     { 
       icon: MessageSquare, 
       title: 'Behavioral & Leadership', 
       description: 'Craft compelling STAR stories and demonstrate leadership qualities',
-      color: 'bg-amber-500'
+      color: 'bg-[#768c9c]'
     },
     { 
       icon: Users, 
       title: 'HR & Culture Fit', 
       description: 'Practice motivation questions, culture fit, and career alignment discussions',
-      color: 'bg-blue-500'
+      color: 'bg-[#6c8194]'
     },
   ];
 
@@ -365,7 +365,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-500/20 rounded-full text-emerald-300 text-sm font-medium mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#ee7e65]/20 rounded-full text-[#ee7e65] text-sm font-medium mb-4">
                 <Briefcase className="w-4 h-4" />
                 Job-Specific Prep
               </div>
@@ -396,7 +396,7 @@ export default function HomePage() {
 
               <Link
                 to="/jobs"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-xl font-semibold hover:bg-emerald-600 transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#ee7e65] text-white rounded-xl font-semibold hover:bg-[#e06a50] transition-colors"
               >
                 <Briefcase className="w-5 h-5" />
                 Import a Job
@@ -405,7 +405,7 @@ export default function HomePage() {
             </div>
 
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/30 to-teal-500/20 rounded-3xl blur-2xl transform rotate-3" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#ee7e65]/30 to-[#768c9c]/20 rounded-3xl blur-2xl transform rotate-3" />
               <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10">
                 <img 
                   src={jobsScreenshot} 
