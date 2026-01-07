@@ -1457,76 +1457,54 @@ adminRouter.post("/execute-sql", async (req, res) => {
       return res.status(400).json({ success: false, error: "SQL statements required" });
     }
 
-    const statements: string[] = [];
-    let current = "";
-    let inString = false;
-    let stringChar = "";
-    
-    for (let i = 0; i < sqlStatements.length; i++) {
-      const char = sqlStatements[i];
-      const prevChar = i > 0 ? sqlStatements[i - 1] : "";
+    const { exec } = await import("child_process");
+    const { promisify } = await import("util");
+    const fs = await import("fs");
+    const path = await import("path");
+    const execAsync = promisify(exec);
+
+    const tempFile = path.join("/tmp", `seed_${Date.now()}.sql`);
+    fs.writeFileSync(tempFile, sqlStatements);
+
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl) {
+      return res.status(500).json({ success: false, error: "DATABASE_URL not configured" });
+    }
+
+    try {
+      const { stdout, stderr } = await execAsync(`psql "${databaseUrl}" -f "${tempFile}" 2>&1`, {
+        timeout: 300000,
+        maxBuffer: 50 * 1024 * 1024
+      });
+
+      fs.unlinkSync(tempFile);
+
+      const lines = (stdout + stderr).split("\n").filter(l => l.trim());
+      const insertCount = lines.filter(l => l.includes("INSERT")).length;
+      const errorLines = lines.filter(l => l.toLowerCase().includes("error"));
+
+      res.json({
+        success: errorLines.length === 0,
+        message: errorLines.length === 0 
+          ? `Successfully executed SQL file. ${insertCount} INSERT operations detected.`
+          : `Executed with ${errorLines.length} errors`,
+        details: lines.slice(0, 100),
+        errors: errorLines.slice(0, 20)
+      });
+    } catch (execError: any) {
+      fs.unlinkSync(tempFile);
       
-      if (!inString && (char === "'" || char === '"')) {
-        inString = true;
-        stringChar = char;
-        current += char;
-      } else if (inString && char === stringChar && prevChar !== "\\") {
-        if (sqlStatements[i + 1] === stringChar) {
-          current += char;
-          i++;
-          current += sqlStatements[i];
-        } else {
-          inString = false;
-          stringChar = "";
-          current += char;
-        }
-      } else if (!inString && char === ";") {
-        const trimmed = current.trim();
-        if (trimmed.length > 0 && !trimmed.startsWith("--")) {
-          statements.push(trimmed);
-        }
-        current = "";
-      } else {
-        current += char;
-      }
+      const output = execError.stdout || execError.stderr || execError.message;
+      const lines = output.split("\n").filter((l: string) => l.trim());
+      const errorLines = lines.filter((l: string) => l.toLowerCase().includes("error"));
+      
+      res.json({
+        success: false,
+        message: `Execution completed with errors`,
+        details: lines.slice(0, 100),
+        errors: errorLines.slice(0, 20)
+      });
     }
-    
-    const lastTrimmed = current.trim();
-    if (lastTrimmed.length > 0 && !lastTrimmed.startsWith("--")) {
-      statements.push(lastTrimmed);
-    }
-
-    const results: { statement: number; success: boolean; error?: string }[] = [];
-    let successCount = 0;
-    let errorCount = 0;
-
-    for (let i = 0; i < statements.length; i++) {
-      const statement = statements[i];
-      try {
-        await db.execute(sql.raw(statement));
-        results.push({ statement: i + 1, success: true });
-        successCount++;
-      } catch (error: any) {
-        results.push({ 
-          statement: i + 1, 
-          success: false, 
-          error: error.message || "Unknown error" 
-        });
-        errorCount++;
-      }
-    }
-
-    const failedResults = results.filter(r => !r.success).slice(0, 20);
-    
-    res.json({
-      success: errorCount === 0,
-      message: `Executed ${successCount} statements successfully, ${errorCount} failed`,
-      totalStatements: statements.length,
-      successCount,
-      errorCount,
-      results: results.slice(0, 50),
-      failedSamples: failedResults
-    });
   } catch (error: any) {
     console.error("Error executing SQL:", error);
     res.status(500).json({ success: false, error: error.message || "Failed to execute SQL" });
