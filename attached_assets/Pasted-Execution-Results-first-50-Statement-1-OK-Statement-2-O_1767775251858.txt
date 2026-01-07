@@ -1,0 +1,52 @@
+Execution Results (first 50):
+
+Statement 1: OK
+Statement 2: OK
+Statement 3: FAILED - unrecognized configuration parameter "transaction_timeout"
+Statement 4: OK
+Statement 5: OK
+Statement 6: OK
+Statement 7: OK
+Statement 8: OK
+Statement 9: OK
+Statement 10: OK
+Statement 11: FAILED - syntax error at or near "Type"
+Statement 12: FAILED - syntax error at or near "Schema"
+Statement 13: FAILED - syntax error at or near "Owner"
+Statement 14: FAILED - duplicate key value violates unique constraint "auth_users_pkey"
+Statement 15: FAILED - duplicate key value violates unique constraint "auth_users_pkey"
+Statement 16: FAILED - duplicate key value violates unique constraint "auth_users_email_key"
+Statement 17: FAILED - syntax error at or near "Type"
+Statement 18: FAILED - syntax error at or near "Schema"
+Statement 19: FAILED - syntax error at or near "Owner"
+Statement 20: FAILED - duplicate key value violates unique constraint "admin_settings_pkey"
+Statement 21: FAILED - duplicate key value violates unique constraint "admin_settings_pkey"
+Statement 22: FAILED - duplicate key value violates unique constraint "admin_settings_pkey"
+Statement 23: FAILED - duplicate key value violates unique constraint "admin_settings_pkey"
+Statement 24: FAILED - duplicate key value violates unique constraint "admin_settings_pkey"
+Statement 25: FAILED - duplicate key value violates unique constraint "admin_settings_pkey"
+Statement 26: FAILED - duplicate key value violates unique constraint "admin_settings_pkey"
+Statement 27: FAILED - duplicate key value violates unique constraint "admin_settings_pkey"
+Statement 28: FAILED - duplicate key value violates unique constraint "admin_settings_pkey"
+Statement 29: FAILED - duplicate key value violates unique constraint "admin_settings_pkey"
+Statement 30: FAILED - duplicate key value violates unique constraint "admin_settings_pkey"
+Statement 31: FAILED - syntax error at or near "Type"
+Statement 32: FAILED - syntax error at or near "Schema"
+Statement 33: FAILED - syntax error at or near "Owner"
+Statement 34: FAILED - duplicate key value violates unique constraint "users_email_key"
+Statement 35: FAILED - syntax error at or near "Type"
+Statement 36: FAILED - syntax error at or near "Schema"
+Statement 37: FAILED - syntax error at or near "Owner"
+Statement 38: FAILED - syntax error at or near "Type"
+Statement 39: FAILED - syntax error at or near "Schema"
+Statement 40: FAILED - syntax error at or near "Owner"
+Statement 41: FAILED - duplicate key value violates unique constraint "avatars_pkey"
+Statement 42: FAILED - duplicate key value violates unique constraint "avatars_pkey"
+Statement 43: FAILED - duplicate key value violates unique constraint "avatars_pkey"
+Statement 44: FAILED - duplicate key value violates unique constraint "avatars_pkey"
+Statement 45: FAILED - duplicate key value violates unique constraint "avatars_pkey"
+Statement 46: FAILED - duplicate key value violates unique constraint "avatars_pkey"
+Statement 47: FAILED - duplicate key value violates unique constraint "avatars_pkey"
+Statement 48: FAILED - duplicate key value violates unique constraint "avatars_pkey"
+Statement 49: FAILED - duplicate key value violates unique constraint "avatars_pkey"
+Statement 50: FAILED - duplicate key value violates unique constraint "avatars_pkey"
