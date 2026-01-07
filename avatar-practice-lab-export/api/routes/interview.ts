@@ -1517,10 +1517,20 @@ interviewRouter.get("/sessions", requireAuth, async (req: Request, res: Response
         const config = configs.find(c => c.id === session.interviewConfigId);
         let roleKit: RoleKit | undefined;
         let analysis: InterviewAnalysisType | undefined;
+        let jobTarget: { id: string; companyName: string | null; roleTitle: string } | null = null;
         
         if (config?.roleKitId) {
           const [kit] = await db.select().from(roleKits).where(eq(roleKits.id, config.roleKitId));
           roleKit = kit;
+        }
+        
+        if (config?.jobTargetId) {
+          const [job] = await db.select({
+            id: jobTargets.id,
+            companyName: jobTargets.companyName,
+            roleTitle: jobTargets.roleTitle,
+          }).from(jobTargets).where(eq(jobTargets.id, config.jobTargetId));
+          jobTarget = job || null;
         }
         
         const [a] = await db.select().from(interviewAnalysis).where(eq(interviewAnalysis.interviewSessionId, session.id));
@@ -1528,12 +1538,20 @@ interviewRouter.get("/sessions", requireAuth, async (req: Request, res: Response
         
         return {
           ...session,
-          config,
+          config: config ? {
+            id: config.id,
+            interviewType: config.interviewType,
+            interviewMode: config.interviewMode,
+            roleKitId: config.roleKitId,
+            jobTargetId: config.jobTargetId,
+          } : null,
           roleKit,
+          jobTarget,
           analysis: analysis ? {
             id: analysis.id,
             overallRecommendation: analysis.overallRecommendation,
             summary: analysis.summary,
+            dimensionScores: analysis.dimensionScores,
           } : null,
         };
       })

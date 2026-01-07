@@ -94,6 +94,14 @@ interface PresentationSessionData {
   } | null;
 }
 
+interface DimensionScore {
+  dimension: string;
+  score: number;
+  evidence: string[];
+  rationale: string;
+  improvement: string;
+}
+
 interface InterviewSessionData {
   id: number;
   sessionUid: string;
@@ -101,16 +109,26 @@ interface InterviewSessionData {
   duration: number | null;
   createdAt: string;
   config?: {
+    id: number;
     interviewType: string;
+    interviewMode: string;
+    roleKitId: number | null;
+    jobTargetId: string | null;
   };
   roleKit?: {
     name: string;
     domain: string;
   };
+  jobTarget?: {
+    id: string;
+    companyName: string | null;
+    roleTitle: string;
+  } | null;
   analysis?: {
     id: number;
     overallRecommendation: string | null;
     summary: string | null;
+    dimensionScores: DimensionScore[] | null;
   } | null;
 }
 
@@ -464,7 +482,7 @@ export default function ResultsPage() {
                   : "text-slate-500 hover:text-slate-700"
               }`}
             >
-              Skills
+              Performance
             </button>
           </div>
 
@@ -501,76 +519,189 @@ export default function ResultsPage() {
         </div>
 
         {viewMode === "skills" && (
-          <div className="space-y-3">
-            {practicedSkills.length > 0 ? (
-              <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-3">
-                {practicedSkills.map((skill) => {
-                  const skillSessions = sessions.filter(s => s.skill_name === skill.skillName);
-                  const scoreColor = skill.avgScore !== null 
-                    ? skill.avgScore >= 4 ? 'text-green-600' 
-                    : skill.avgScore >= 2.5 ? 'text-amber-600' 
-                    : 'text-red-600'
-                    : 'text-slate-400';
+          <div className="space-y-4">
+            {(() => {
+              const interviewsWithAnalysis = interviews.filter(i => i.analysis?.dimensionScores?.length);
+              
+              if (interviewsWithAnalysis.length === 0) {
+                return (
+                  <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
+                    <BarChart3 className="w-10 h-10 mx-auto text-slate-400 mb-3" />
+                    <h3 className="text-lg font-semibold text-[#042c4c] mb-2">No Interview Analysis Yet</h3>
+                    <p className="text-slate-500 text-sm mb-4">Complete interview practice sessions to see your performance across dimensions</p>
+                    <Link to="/interview">
+                      <Button className="bg-[#ee7e65] hover:bg-[#e06a50]">Start Interview Practice</Button>
+                    </Link>
+                  </div>
+                );
+              }
+              
+              const dimensionAggregates: Record<string, { total: number; count: number; sessions: InterviewSessionData[] }> = {};
+              const rolePerformance: Record<string, { total: number; count: number; sessions: number }> = {};
+              const typePerformance: Record<string, { total: number; count: number }> = {};
+              
+              interviewsWithAnalysis.forEach(interview => {
+                const scores = interview.analysis?.dimensionScores;
+                if (!scores || scores.length === 0) return;
+                
+                scores.forEach(ds => {
+                  if (!ds.dimension || typeof ds.score !== 'number') return;
+                  if (!dimensionAggregates[ds.dimension]) {
+                    dimensionAggregates[ds.dimension] = { total: 0, count: 0, sessions: [] };
+                  }
+                  dimensionAggregates[ds.dimension].total += ds.score;
+                  dimensionAggregates[ds.dimension].count += 1;
+                  dimensionAggregates[ds.dimension].sessions.push(interview);
+                });
+                
+                const roleName = interview.jobTarget?.roleTitle || interview.roleKit?.name || 'General';
+                if (!rolePerformance[roleName]) {
+                  rolePerformance[roleName] = { total: 0, count: 0, sessions: 0 };
+                }
+                const validScores = scores.filter(ds => typeof ds.score === 'number');
+                if (validScores.length > 0) {
+                  const avgScore = validScores.reduce((sum, ds) => sum + ds.score, 0) / validScores.length;
+                  rolePerformance[roleName].total += avgScore;
+                  rolePerformance[roleName].count += 1;
+                  rolePerformance[roleName].sessions += 1;
                   
-                  return (
-                    <div 
-                      key={skill.skillId} 
-                      className="bg-white rounded-xl border border-slate-200 p-4 hover:border-slate-300 transition-colors"
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-[#042c4c] truncate">{skill.skillName}</h3>
-                          <p className="text-xs text-slate-500">
-                            {skill.sessionCount} session{skill.sessionCount !== 1 ? 's' : ''}
-                            {skill.frameworkUsed && ` • ${skill.frameworkUsed}`}
-                          </p>
-                        </div>
-                        <div className="text-right flex-shrink-0 ml-3">
-                          <span className={`text-lg font-bold ${scoreColor}`}>
-                            {skill.avgScore?.toFixed(1) || '-'}
-                          </span>
-                          <span className="text-slate-400 text-xs">/5</span>
-                        </div>
+                  const interviewType = interview.config ? (interview.config.interviewType || interview.config.interviewMode || 'general') : 'general';
+                  if (!typePerformance[interviewType]) {
+                    typePerformance[interviewType] = { total: 0, count: 0 };
+                  }
+                  typePerformance[interviewType].total += avgScore;
+                  typePerformance[interviewType].count += 1;
+                }
+              });
+              
+              const dimensionList = Object.entries(dimensionAggregates)
+                .map(([name, data]) => ({
+                  name,
+                  avgScore: data.total / data.count,
+                  sessionCount: data.count,
+                }))
+                .sort((a, b) => b.avgScore - a.avgScore);
+              
+              const roleList = Object.entries(rolePerformance)
+                .map(([name, data]) => ({
+                  name,
+                  avgScore: data.total / data.count,
+                  sessions: data.sessions,
+                }))
+                .sort((a, b) => b.avgScore - a.avgScore);
+              
+              const strongest = dimensionList.slice(0, 3);
+              const needsWork = [...dimensionList].sort((a, b) => a.avgScore - b.avgScore).slice(0, 3);
+              
+              return (
+                <>
+                  <div className="bg-[#042c4c] rounded-2xl p-5">
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div>
+                        <p className="text-2xl sm:text-3xl font-bold text-white">{interviewsWithAnalysis.length}</p>
+                        <p className="text-xs sm:text-sm text-white/60">Analyzed Sessions</p>
                       </div>
-
-                      {skill.dimensions.length > 0 && (
-                        <div className="space-y-1.5 pt-2 border-t border-slate-100">
-                          {skill.dimensions.slice(0, 2).map((dim) => (
-                            <div key={dim.dimension} className="flex items-center justify-between text-sm">
-                              <span className="text-slate-500 truncate mr-2 text-xs">{dim.dimension}</span>
-                              <span className={`text-xs font-medium ${
-                                dim.avgScore >= 4 ? 'text-green-600' : 
-                                dim.avgScore >= 2.5 ? 'text-amber-600' : 'text-red-600'
+                      <div className="border-x border-white/10">
+                        <p className="text-2xl sm:text-3xl font-bold text-white">{dimensionList.length}</p>
+                        <p className="text-xs sm:text-sm text-white/60">Dimensions</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl sm:text-3xl font-bold text-white">
+                          {dimensionList.length > 0 ? (dimensionList.reduce((s, d) => s + d.avgScore, 0) / dimensionList.length).toFixed(1) : '-'}
+                        </p>
+                        <p className="text-xs sm:text-sm text-white/60">Avg Score</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="bg-white rounded-xl border border-slate-200 p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Trophy className="w-4 h-4 text-emerald-600" />
+                        <h3 className="font-semibold text-[#042c4c]">Strongest Areas</h3>
+                      </div>
+                      <div className="space-y-2">
+                        {strongest.map((dim) => (
+                          <div key={dim.name} className="flex items-center justify-between p-2 bg-emerald-50 rounded-lg">
+                            <span className="text-sm text-[#042c4c] truncate">{dim.name}</span>
+                            <span className="text-sm font-bold text-emerald-600">{dim.avgScore.toFixed(1)}/5</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white rounded-xl border border-slate-200 p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <AlertTriangle className="w-4 h-4 text-[#ee7e65]" />
+                        <h3 className="font-semibold text-[#042c4c]">Focus Areas</h3>
+                      </div>
+                      <div className="space-y-2">
+                        {needsWork.map((dim) => (
+                          <div key={dim.name} className="flex items-center justify-between p-2 bg-[#ee7e65]/10 rounded-lg">
+                            <span className="text-sm text-[#042c4c] truncate">{dim.name}</span>
+                            <span className="text-sm font-bold text-[#ee7e65]">{dim.avgScore.toFixed(1)}/5</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white rounded-xl border border-slate-200 p-4">
+                    <h3 className="font-semibold text-[#042c4c] mb-4">All Dimensions</h3>
+                    <div className="space-y-3">
+                      {dimensionList.map((dim) => {
+                        const percentage = (dim.avgScore / 5) * 100;
+                        return (
+                          <div key={dim.name}>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm text-[#042c4c]">{dim.name}</span>
+                              <span className={`text-sm font-semibold ${
+                                dim.avgScore >= 4 ? 'text-emerald-600' : 
+                                dim.avgScore >= 3 ? 'text-[#042c4c]' : 'text-[#ee7e65]'
                               }`}>
-                                {dim.avgScore.toFixed(1)}
+                                {dim.avgScore.toFixed(1)}/5
                               </span>
                             </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {skillSessions.length > 0 && (
-                        <button 
-                          onClick={() => { setSelectedCategory("conversations"); setViewMode("sessions"); }}
-                          className="mt-2 text-xs text-[#ee7e65] font-medium hover:underline"
-                        >
-                          View sessions →
-                        </button>
-                      )}
+                            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full rounded-full transition-all ${
+                                  dim.avgScore >= 4 ? 'bg-emerald-500' : 
+                                  dim.avgScore >= 3 ? 'bg-[#042c4c]' : 'bg-[#ee7e65]'
+                                }`}
+                                style={{ width: `${percentage}%` }}
+                              />
+                            </div>
+                            <p className="text-xs text-slate-400 mt-0.5">{dim.sessionCount} assessment{dim.sessionCount !== 1 ? 's' : ''}</p>
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
-                <Brain className="w-10 h-10 mx-auto text-slate-400 mb-3" />
-                <h3 className="text-lg font-semibold text-[#042c4c] mb-2">No Skill Assessments Yet</h3>
-                <p className="text-slate-500 text-sm mb-4">Complete practice sessions to see your skill progression</p>
-                <Link to="/interview">
-                  <Button className="bg-[#ee7e65] hover:bg-[#e06a50]">Start Practicing</Button>
-                </Link>
-              </div>
-            )}
+                  </div>
+                  
+                  {roleList.length > 1 && (
+                    <div className="bg-white rounded-xl border border-slate-200 p-4">
+                      <h3 className="font-semibold text-[#042c4c] mb-3">Performance by Role</h3>
+                      <div className="space-y-2">
+                        {roleList.map((role) => (
+                          <div key={role.name} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                            <div>
+                              <p className="text-sm font-medium text-[#042c4c]">{role.name}</p>
+                              <p className="text-xs text-slate-500">{role.sessions} session{role.sessions !== 1 ? 's' : ''}</p>
+                            </div>
+                            <span className={`text-lg font-bold ${
+                              role.avgScore >= 4 ? 'text-emerald-600' : 
+                              role.avgScore >= 3 ? 'text-[#042c4c]' : 'text-[#ee7e65]'
+                            }`}>
+                              {role.avgScore.toFixed(1)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
 
@@ -628,6 +759,10 @@ export default function ResultsPage() {
                         );
                       } else if (session.type === 'interview') {
                         const iSession = session.data;
+                        const displayTitle = iSession.jobTarget?.roleTitle || iSession.roleKit?.name || "Interview Practice";
+                        const displaySubtitle = iSession.jobTarget?.companyName || iSession.roleKit?.domain?.replace('_', ' ') || null;
+                        const interviewType = iSession.config ? (iSession.config.interviewType || iSession.config.interviewMode || null) : null;
+                        
                         return (
                           <Link
                             key={`interview-${iSession.id}`}
@@ -641,11 +776,20 @@ export default function ResultsPage() {
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <h3 className="font-medium text-[#042c4c] text-sm sm:text-base truncate">
-                                    {iSession.roleKit?.name || "Interview Practice"}
+                                    {displayTitle}
                                   </h3>
                                   <div className="flex items-center gap-2 text-xs text-slate-500">
-                                    {iSession.roleKit?.domain && (
-                                      <span className="capitalize">{iSession.roleKit.domain.replace('_', ' ')}</span>
+                                    {displaySubtitle && (
+                                      <span className="flex items-center gap-1">
+                                        <Building2 className="w-3 h-3" />
+                                        <span className="capitalize">{displaySubtitle}</span>
+                                      </span>
+                                    )}
+                                    {interviewType && (
+                                      <>
+                                        {displaySubtitle && <span>•</span>}
+                                        <span className="capitalize">{interviewType.replace(/_/g, ' ')}</span>
+                                      </>
                                     )}
                                     {iSession.duration && (
                                       <>
