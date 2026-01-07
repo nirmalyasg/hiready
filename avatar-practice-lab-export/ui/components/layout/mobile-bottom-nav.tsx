@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Target, BarChart3 } from "lucide-react";
+import { Home, Target, BarChart3, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -12,24 +12,30 @@ const navItems: NavItem[] = [
   { path: "/avatar/dashboard", icon: Home, label: "Dashboard" },
   { path: "/interview", icon: Target, label: "Practice" },
   { path: "/avatar/results", icon: BarChart3, label: "Results" },
+  { path: "/jobs", icon: Briefcase, label: "Jobs" },
 ];
 
 export default function MobileBottomNav() {
   const location = useLocation();
   
   const isActive = (path: string) => {
+    const pathname = location.pathname;
+    
     if (path === "/avatar/dashboard") {
-      return location.pathname === "/avatar/dashboard";
+      return pathname === "/avatar/dashboard";
     }
     if (path === "/interview") {
-      return location.pathname.startsWith("/interview") ||
-             location.pathname.startsWith("/jobs") ||
-             location.pathname.startsWith("/exercise-mode");
+      // Practice includes /interview but NOT /interview/results (that's Results)
+      return (pathname.startsWith("/interview") && !pathname.includes("/results")) ||
+             pathname.startsWith("/exercise-mode");
     }
     if (path === "/avatar/results") {
-      return location.pathname.startsWith("/avatar/results") || 
-             location.pathname.includes("/session-analysis") ||
-             location.pathname.includes("/results");
+      return pathname.startsWith("/avatar/results") || 
+             pathname.includes("/session-analysis") ||
+             pathname.includes("/results");
+    }
+    if (path === "/jobs") {
+      return pathname.startsWith("/jobs");
     }
     return false;
   };
