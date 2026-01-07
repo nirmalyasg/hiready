@@ -226,7 +226,7 @@ export default function HomePage() {
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {stats.map((stat, idx) => (
                   <div key={idx} className="text-center">
                     <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
@@ -246,7 +246,7 @@ export default function HomePage() {
                   className="w-full h-auto"
                 />
               </div>
-              <div className="absolute -bottom-4 -right-4 bg-white rounded-xl p-3 shadow-xl border border-gray-100">
+              <div className="hidden sm:block absolute -bottom-4 -right-4 bg-white rounded-xl p-3 shadow-xl border border-gray-100">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                     <CheckCircle2 className="w-4 h-4 text-green-600" />
