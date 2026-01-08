@@ -9,6 +9,7 @@ import { realtimeRouter } from "./routes/realtime.js";
 import { jobsRouter } from "./routes/jobs.js";
 import employerRouter from "./routes/employer.js";
 import paymentsRouter from "./routes/payments.js";
+import employerAuthRouter from "./routes/employer-auth.js";
 import { setupAuth } from "./replitAuth.js";
 import dotenv from "dotenv";
 
@@ -105,6 +106,9 @@ async function startServer() {
     }
     next();
   });
+
+  // Mount employer auth routes (separate from user auth)
+  app.use("/api/employer-auth", employerAuthRouter);
 
   // Mount employer workspace routes
   app.use("/api/employer", employerRouter);

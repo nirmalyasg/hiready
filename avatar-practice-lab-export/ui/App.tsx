@@ -50,6 +50,7 @@ import PublicSharePage from './pages/share/page';
 import ApplyPage from './pages/apply/page';
 import ReadycheckPage from './pages/readycheck/page';
 import CompanyDashboard from './pages/company/page';
+import CompanyLoginPage from './pages/company/login';
 
 export default function App() {
   return (
@@ -102,7 +103,9 @@ export default function App() {
         <Route path="/share/:shareToken" element={<PublicSharePage />} />
         <Route path="/apply/:slug" element={<ApplyPage />} />
         <Route path="/readycheck" element={<ReadycheckPage />} />
-        <Route path="/company" element={<ProtectedRoute><CompanyDashboard /></ProtectedRoute>} />
+        <Route path="/company/login" element={<CompanyLoginPage />} />
+        <Route path="/company/dashboard" element={<CompanyDashboard />} />
+        <Route path="/company" element={<Navigate to="/company/login" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </RealtimeSessionPrewarmProvider>

@@ -32,7 +32,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { SidebarLayout } from "@/components/layout/sidebar-layout";
+import { LogOut } from "lucide-react";
 
 interface Company {
   id: string;
@@ -90,8 +90,26 @@ const getScoreColor = (score: number | null) => {
   return "text-red-600";
 };
 
+interface EmployerUser {
+  id: string;
+  username: string;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  companyId: string | null;
+  role: string | null;
+  company: {
+    id: string;
+    name: string;
+    domain: string | null;
+    logoUrl: string | null;
+  } | null;
+}
+
 export default function CompanyDashboard() {
   const navigate = useNavigate();
+  const [employerUser, setEmployerUser] = useState<EmployerUser | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -106,8 +124,45 @@ export default function CompanyDashboard() {
   const [candidateSearch, setCandidateSearch] = useState("");
 
   useEffect(() => {
-    fetchCompanies();
+    checkEmployerAuth();
   }, []);
+
+  useEffect(() => {
+    if (authChecked && employerUser) {
+      fetchCompanies();
+    }
+  }, [authChecked, employerUser]);
+
+  const checkEmployerAuth = async () => {
+    try {
+      const response = await fetch("/api/employer-auth/session", { credentials: "include" });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.user) {
+          setEmployerUser(data.user);
+        } else {
+          navigate("/company/login");
+        }
+      } else {
+        navigate("/company/login");
+      }
+    } catch (err) {
+      console.error("Auth check failed:", err);
+      navigate("/company/login");
+    } finally {
+      setAuthChecked(true);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/employer-auth/logout", { method: "POST", credentials: "include" });
+      localStorage.removeItem("employerUser");
+      navigate("/company/login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
 
   useEffect(() => {
     if (selectedCompany) {
@@ -254,19 +309,31 @@ export default function CompanyDashboard() {
     return `${baseUrl}/apply/${slug}`;
   };
 
-  if (isLoading) {
+  if (!authChecked || isLoading) {
     return (
-      <SidebarLayout>
-        <div className="flex justify-center items-center h-screen">
-          <LoadingSpinner />
-        </div>
-      </SidebarLayout>
+      <div className="min-h-screen bg-[#f8f9fb] flex justify-center items-center">
+        <LoadingSpinner />
+      </div>
     );
   }
 
   if (companies.length === 0) {
     return (
-      <SidebarLayout>
+      <div className="min-h-screen bg-[#f8f9fb]">
+        <header className="bg-[#042c4c] text-white py-4">
+          <div className="container mx-auto px-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-[#ee7e65] rounded-full flex items-center justify-center">
+                <Building2 className="w-5 h-5" />
+              </div>
+              <span className="font-semibold text-lg">Hiready</span>
+            </div>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white hover:bg-white/10">
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
+        </header>
         <div className="container mx-auto px-4 py-8 max-w-2xl">
           <Card className="text-center p-8">
             <Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -289,26 +356,26 @@ export default function CompanyDashboard() {
             </div>
           </Card>
         </div>
-      </SidebarLayout>
+      </div>
     );
   }
 
   return (
-    <SidebarLayout>
-      <div className="min-h-screen bg-[#f8f9fb]">
-        <div className="bg-gradient-to-r from-[#042c4c] to-[#0a3d66] text-white">
-          <div className="container mx-auto px-4 py-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-                  <Building2 className="w-6 h-6" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold">{selectedCompany?.name}</h1>
-                  <p className="text-white/70 text-sm">Employer Dashboard</p>
-                </div>
+    <div className="min-h-screen bg-[#f8f9fb]">
+      <div className="bg-gradient-to-r from-[#042c4c] to-[#0a3d66] text-white">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+                <Building2 className="w-6 h-6" />
               </div>
-              
+              <div>
+                <h1 className="text-xl font-bold">{selectedCompany?.name}</h1>
+                <p className="text-white/70 text-sm">Employer Dashboard</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
@@ -348,6 +415,10 @@ export default function CompanyDashboard() {
                   </div>
                 </DialogContent>
               </Dialog>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white hover:bg-white/10">
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
             </div>
           </div>
         </div>
@@ -526,6 +597,6 @@ export default function CompanyDashboard() {
           </div>
         </div>
       </div>
-    </SidebarLayout>
+    </div>
   );
 }

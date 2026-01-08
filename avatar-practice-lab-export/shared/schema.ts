@@ -51,6 +51,23 @@ export const authUsers = pgTable("auth_users", {
 export type UpsertAuthUser = typeof authUsers.$inferInsert;
 export type AuthUser = typeof authUsers.$inferSelect;
 
+// Employer users table (separate from regular users)
+export const employerUsers = pgTable("employer_users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: varchar("username").notNull().unique(),
+  email: varchar("email").unique(),
+  passwordHash: varchar("password_hash").notNull(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  companyId: varchar("company_id"), // FK to employer_companies managed at DB level
+  role: varchar("role").default("admin"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type EmployerUser = typeof employerUsers.$inferSelect;
+export type InsertEmployerUser = typeof employerUsers.$inferInsert;
+
 // =====================
 // Core Tables
 // =====================
