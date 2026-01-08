@@ -778,6 +778,288 @@ GET /health → { status: 'ok' }
 
 ---
 
+## Page-by-Page Visual Guide
+
+This section provides detailed descriptions of every page in the application.
+
+### Public Pages
+
+#### Home Page (`/`)
+**Layout**: Full-width hero section with dark navy (#042c4c) background
+- **Header**: Logo "Practice Lab" with coral icon, navigation links (Practice, Jobs), Sign in/Get Started buttons
+- **Hero Section**: 
+  - Badge: "AI-Powered Interview Practice"
+  - Headline: "Ace Your Next Interview" (coral accent on "Interview")
+  - Description: Practice with AI interviewers for coding, case studies, behavioral, and HR rounds
+  - CTAs: "Start Practicing" (coral button), "Import Job" (outline button)
+  - Preview: App interface mockup showing dashboard with session complete badge (4.2/5 Score)
+
+#### Login Page (`/login`)
+**Layout**: 50/50 split screen
+- **Left Panel** (Dark navy): 
+  - Logo with coral icon
+  - Headline: "Practice makes perfect" (coral accent)
+  - Feature list with icons: Voice-first AI, Real workplace scenarios, Personalized coaching
+  - Footer: Copyright notice
+- **Right Panel** (White):
+  - Header: "Welcome back" with subtitle
+  - Form: Username and Password fields
+  - Button: "Sign In" (navy button)
+  - Link: "Don't have an account? Create one"
+
+#### Register Page (`/register`)
+**Layout**: 50/50 split screen (similar to login)
+- **Left Panel**: 
+  - Headline: "Start your journey today" (coral accent)
+  - Same feature list as login
+- **Right Panel**:
+  - Header: "Create an account"
+  - Form: Username, Email (optional), Password, Confirm Password
+  - Button: "Create Account"
+  - Link: "Already have an account? Sign in"
+
+---
+
+### Interview Practice Pages (Protected)
+
+#### Interview Landing (`/interview`)
+**Layout**: SidebarLayout with content grid
+- **Sidebar** (Dark navy, collapsible):
+  - Logo at top
+  - Navigation: Dashboard, Practice, Results
+  - User profile at bottom with Sign Out
+- **Main Content**:
+  - Header: "Interview Practice" with subtitle
+  - **Three Practice Paths** (Card grid):
+    1. **Practice by Role** - Orange icon, 21+ role kits, "Browse Roles" link
+    2. **Practice by Type** - Green icon, Coding/Case/Behavioral/HR modes, "Choose Type" link
+    3. **Custom Interview** - Teal icon, Import job listing, "Get Started" link
+  - Each card shows description and action arrow
+
+#### Role Detail Page (`/interview/role/:roleId`)
+**Layout**: SidebarLayout with role information
+- **Header**: Role name with icon badge
+- **Content Cards**:
+  - Role description and overview
+  - Key skills assessed (badge chips)
+  - Typical interview structure
+  - Sample questions preview
+- **Action**: "Start Practice" button
+
+#### Interview Config Page (`/interview/config`)
+**Layout**: SidebarLayout with configuration form
+- **Header**: Interview setup title
+- **Stats Badges**: Duration (~X min), Interview type, Seniority level
+- **Configuration Card**:
+  - Role archetype selection
+  - Interview phase breakdown
+  - Focus areas with checkmarks
+- **Generated Plan Preview**:
+  - Phase cards with duration
+  - Question types per phase
+- **Action**: "Start Interview" button (coral)
+
+#### Mode Setup Page (`/interview/mode-setup`)
+**Layout**: SidebarLayout with mode selection
+- **Header**: "Configure Your Interview"
+- **Role Selector**: Dropdown with role archetypes
+- **Mode Cards**:
+  - Video Mode (HeyGen avatar)
+  - Voice Mode (OpenAI Realtime)
+- **Settings**:
+  - Seniority level selector
+  - Exercise count (for coding)
+  - Include puzzles toggle
+- **Action**: "Continue" button
+
+#### Custom Interview Page (`/interview/custom`)
+**Layout**: SidebarLayout with job management
+- **Header**: "Interview Practice" with subtitle
+- **Add Job Section** (White card):
+  - Three buttons: "Import from URL", "Paste JD", "Enter Manually"
+  - Expands to show input form based on selection
+- **Saved Jobs List**:
+  - Job cards with company, title, location badges
+  - Practice button on each card
+- **Loading**: Spinner with coral color
+
+#### Pre-Session Page (`/interview/pre-session`)
+**Layout**: SidebarLayout with plan summary
+- **Header**: Role and company info
+- **Quick Stats**: Badges for duration, question count, focus areas
+- **Interview Plan Card**:
+  - Phase breakdown (Introduction, Technical, Behavioral, etc.)
+  - Time allocation per phase
+  - Focus topics highlighted
+- **Avatar Preview**: Selected interviewer avatar
+- **Action**: Large "Start Interview" button
+
+#### Live Session Page (`/interview/session`)
+**Layout**: Full-screen session interface
+- **Top Bar**: 
+  - Timer showing elapsed time
+  - Status indicator (Connecting/Connected)
+  - Volume indicator when AI speaking
+- **Main Area**:
+  - Avatar display (if video mode)
+  - Waveform visualization (if voice mode)
+- **Side Panel** (Collapsible):
+  - Coding challenge editor (if active)
+  - Case study notes area (if active)
+- **Control Bar** (Bottom):
+  - Mute/Unmute button
+  - End Interview button (red)
+  - Panel toggle button
+
+#### Results Page (`/interview/results`)
+**Layout**: SidebarLayout with comprehensive results
+- **Header**: Session completion with overall score (circular progress)
+- **Dimension Scores** (8-card grid):
+  - Clarity & Structure (score bar)
+  - Depth & Evidence
+  - Problem Solving
+  - Role Fit
+  - Confidence & Composure
+  - Communication Hygiene
+  - Ownership & Impact
+  - Consistency & Honesty
+- **Feedback Sections**:
+  - Strengths (green highlights)
+  - Areas for Improvement (amber highlights)
+  - Detailed feedback per dimension
+- **Practice Plan**: 7-day improvement suggestions
+- **Actions**: "Practice Again", "View Transcript"
+
+---
+
+### Exercise Mode Pages (Protected)
+
+#### Exercise Hub (`/exercise-mode`)
+**Layout**: SidebarLayout with exercise cards
+- **Header**: "Interview Exercises"
+- **Exercise Cards**:
+  1. **Coding Lab** - Code icon, technical challenges
+  2. **Case Study** - Briefcase icon, business cases
+- Each card shows difficulty levels and topic count
+
+#### Coding Lab (`/exercise-mode/coding-lab`)
+**Layout**: SidebarLayout with exercise grid
+- **Header**: "Coding Challenges"
+- **Filter Bar**: Language, Difficulty, Category dropdowns
+- **Exercise Cards**: Title, difficulty badge, language tag, description preview
+- **Action**: Select to start
+
+#### Coding Session (`/exercise-mode/coding-lab/session`)
+**Layout**: Split panel interface
+- **Left Panel**: 
+  - Problem description
+  - Example inputs/outputs
+  - Constraints
+- **Right Panel**:
+  - Code editor (CodeMirror)
+  - Language selector
+  - Run/Submit buttons
+- **Top Bar**: Timer, problem title
+- **AI Interviewer**: Voice guidance during session
+
+#### Case Study (`/exercise-mode/case-study`)
+**Layout**: SidebarLayout with case cards
+- **Header**: "Case Studies"
+- **Filter**: Industry, Difficulty, Type
+- **Case Cards**: Title, industry badge, scenario preview
+- **Difficulty indicators**: Easy/Medium/Hard
+
+#### Case Session (`/exercise-mode/case-study/session`)
+**Layout**: Session interface with notes
+- **Problem Panel**: Case description, data points
+- **Notes Panel**: User's working area
+- **AI Interviewer**: Guiding questions, follow-ups
+- **Controls**: Timer, end session button
+
+---
+
+### Jobs Pages (Protected)
+
+#### Jobs List (`/jobs`)
+**Layout**: SidebarLayout with job management
+- **Header**: "Your Jobs" with count
+- **Add Job Button**: Opens modal/form
+- **Job Cards**:
+  - Company logo/name
+  - Role title
+  - Location, salary range
+  - Status badge (Active, Applied, Practicing)
+  - Practice button
+- **Empty State**: Illustration with "Add your first job" CTA
+
+#### Job Detail (`/jobs/:jobId`)
+**Layout**: SidebarLayout with full job info
+- **Header**: Company and role with badges
+- **Sections**:
+  - Job Description (parsed text)
+  - Requirements (skill chips)
+  - Company Info (culture, size)
+  - Interview Intelligence (AI insights)
+- **Actions**: "Start Practice", "Edit", "Delete"
+
+---
+
+### Admin Pages
+
+#### Admin Dashboard (`/admin`)
+**Layout**: Full-width admin interface
+- **Header**: "Admin Console" with logo
+- **Login Form** (if not authenticated): Username/Password
+- **Dashboard Tabs**:
+  1. Overview - Key metrics summary
+  2. Users - User management table
+  3. Sessions - Session analytics
+  4. Content - Scenarios and skills
+  5. Avatars - Avatar management
+  6. Costs - API usage and budget
+- **Metrics Cards**: Total users, sessions, avg duration, costs
+
+#### User Detail (`/admin/users/:userId`)
+**Layout**: User profile with activity
+- **Header**: User info with avatar
+- **Stats**: Total sessions, avg score, last active
+- **Session History**: Table with date, scenario, score
+- **Actions**: Edit role, view sessions
+
+#### Database Admin (`/admin/database`)
+**Layout**: Three-tab interface
+- **SQL Runner Tab**: 
+  - Code editor for SQL
+  - Execute button
+  - Results table
+- **Development Tab**: Dev database controls
+- **Production Tab**: 
+  - Migration controls
+  - Admin key input
+  - Seed buttons
+
+---
+
+### Other Protected Pages
+
+#### Dashboard (`/avatar/dashboard`)
+**Layout**: Bento-grid dashboard
+- **Welcome Section**: User greeting
+- **Stats Cards**: Sessions, avg score, time practiced
+- **Recommended Actions**: AI suggestions
+- **Recent Activity**: Session history
+
+#### Profile (`/profile`)
+**Layout**: SidebarLayout with settings
+- **Profile Card**: Avatar, name, email
+- **Settings Sections**:
+  - Account info
+  - Password change
+  - Preferences
+- **Danger Zone**: Delete account
+
+---
+
 ## Appendix
 
 ### Glossary
