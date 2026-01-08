@@ -1714,6 +1714,223 @@ export const userSkillMemoryRelations = relations(userSkillMemory, ({ one }) => 
 }));
 
 // =====================
+// Hiready Platform Tables
+// =====================
+
+// Employer companies (for assessment links)
+export const employerCompanies = pgTable("employer_companies", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  domain: text("domain"),
+  logoUrl: text("logo_url"),
+  plan: text("plan").$type<"free" | "starter" | "pro" | "enterprise">().default("free"),
+  ownerUserId: varchar("owner_user_id").references(() => authUsers.id, { onDelete: "set null" }),
+  settings: jsonb("settings").$type<{
+    branding?: { primaryColor?: string; logoUrl?: string };
+    defaultAssessmentConfig?: any;
+  }>().default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Company team members
+export const employerCompanyUsers = pgTable("employer_company_users", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  companyId: uuid("company_id").notNull().references(() => employerCompanies.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => authUsers.id, { onDelete: "cascade" }),
+  role: text("role").$type<"owner" | "admin" | "member" | "viewer">().default("member"),
+  invitedAt: timestamp("invited_at").defaultNow(),
+  joinedAt: timestamp("joined_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Employer job postings with assessment configuration
+export const employerJobs = pgTable("employer_jobs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  companyId: uuid("company_id").notNull().references(() => employerCompanies.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  jdText: text("jd_text"),
+  jdUrl: text("jd_url"),
+  roleKitId: integer("role_kit_id").references(() => roleKits.id, { onDelete: "set null" }),
+  roleArchetypeId: varchar("role_archetype_id"),
+  assessmentConfig: jsonb("assessment_config").$type<{
+    interviewTypes: string[];
+    totalDuration?: number;
+    dimensions?: string[];
+  }>().default({ interviewTypes: ["hr", "technical"], totalDuration: 45 }),
+  status: text("status").$type<"draft" | "active" | "paused" | "closed">().default("active"),
+  applyLinkSlug: varchar("apply_link_slug").unique(),
+  candidateCount: integer("candidate_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Candidates who applied via employer assessment links
+export const employerCandidates = pgTable("employer_candidates", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  jobId: uuid("job_id").notNull().references(() => employerJobs.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => authUsers.id, { onDelete: "cascade" }),
+  hireadyIndexScore: integer("hiready_index_score"),
+  status: text("status").$type<"pending" | "in_progress" | "completed" | "reviewed" | "shortlisted" | "rejected">().default("pending"),
+  completedInterviewTypes: jsonb("completed_interview_types").$type<string[]>().default([]),
+  submittedAt: timestamp("submitted_at"),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewerNotes: text("reviewer_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User subscriptions
+export const subscriptions = pgTable("subscriptions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: varchar("user_id").notNull().references(() => authUsers.id, { onDelete: "cascade" }),
+  planType: text("plan_type").$type<"free" | "role_pack" | "pro">().notNull(),
+  status: text("status").$type<"active" | "canceled" | "expired" | "pending">().notNull().default("active"),
+  roleContext: jsonb("role_context").$type<{
+    roleKitId?: number;
+    jobTargetId?: string;
+    roleName?: string;
+  }>(),
+  jobTargetId: varchar("job_target_id").references(() => jobTargets.id, { onDelete: "set null" }),
+  roleKitId: integer("role_kit_id").references(() => roleKits.id, { onDelete: "set null" }),
+  unlockedInterviewTypes: jsonb("unlocked_interview_types").$type<string[]>().default([]),
+  startedAt: timestamp("started_at").defaultNow(),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Payment records
+export const payments = pgTable("payments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: varchar("user_id").notNull().references(() => authUsers.id, { onDelete: "cascade" }),
+  subscriptionId: uuid("subscription_id").references(() => subscriptions.id, { onDelete: "set null" }),
+  provider: text("provider").notNull().default("razorpay"),
+  providerRef: text("provider_ref"),
+  amount: integer("amount").notNull(),
+  currency: text("currency").notNull().default("INR"),
+  status: text("status").$type<"created" | "pending" | "captured" | "failed" | "refunded">().notNull().default("created"),
+  meta: jsonb("meta").$type<{
+    planType?: string;
+    roleKitId?: number;
+    jobTargetId?: string;
+    orderId?: string;
+    paymentId?: string;
+  }>().default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Consolidated Hiready Index per role/job
+export const hireadyRoleIndex = pgTable("hiready_role_index", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: varchar("user_id").notNull().references(() => authUsers.id, { onDelete: "cascade" }),
+  jobTargetId: varchar("job_target_id").references(() => jobTargets.id, { onDelete: "cascade" }),
+  roleKitId: integer("role_kit_id").references(() => roleKits.id, { onDelete: "set null" }),
+  employerJobId: uuid("employer_job_id").references(() => employerJobs.id, { onDelete: "set null" }),
+  overallScore: integer("overall_score").notNull(),
+  dimensionScores: jsonb("dimension_scores").$type<{
+    dimension: string;
+    score: number;
+    maxScore: number;
+    evidence: string[];
+    weight: number;
+  }[]>().notNull(),
+  completedInterviewTypes: jsonb("completed_interview_types").$type<string[]>().notNull().default([]),
+  totalSessions: integer("total_sessions").default(0),
+  sessionBreakdown: jsonb("session_breakdown").$type<{
+    sessionId: number;
+    interviewType: string;
+    score: number;
+    completedAt: string;
+  }[]>().default([]),
+  strengths: jsonb("strengths").$type<string[]>().default([]),
+  improvements: jsonb("improvements").$type<string[]>().default([]),
+  readinessLevel: text("readiness_level").$type<"not_ready" | "developing" | "ready" | "strong" | "exceptional">(),
+  shareToken: varchar("share_token").unique(),
+  isPublic: boolean("is_public").default(false),
+  lastUpdatedAt: timestamp("last_updated_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Hiready Platform Relations
+export const employerCompaniesRelations = relations(employerCompanies, ({ one, many }) => ({
+  owner: one(authUsers, {
+    fields: [employerCompanies.ownerUserId],
+    references: [authUsers.id],
+  }),
+  users: many(employerCompanyUsers),
+  jobs: many(employerJobs),
+}));
+
+export const employerJobsRelations = relations(employerJobs, ({ one, many }) => ({
+  company: one(employerCompanies, {
+    fields: [employerJobs.companyId],
+    references: [employerCompanies.id],
+  }),
+  roleKit: one(roleKits, {
+    fields: [employerJobs.roleKitId],
+    references: [roleKits.id],
+  }),
+  candidates: many(employerCandidates),
+}));
+
+export const employerCandidatesRelations = relations(employerCandidates, ({ one }) => ({
+  job: one(employerJobs, {
+    fields: [employerCandidates.jobId],
+    references: [employerJobs.id],
+  }),
+  user: one(authUsers, {
+    fields: [employerCandidates.userId],
+    references: [authUsers.id],
+  }),
+}));
+
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+  user: one(authUsers, {
+    fields: [subscriptions.userId],
+    references: [authUsers.id],
+  }),
+  jobTarget: one(jobTargets, {
+    fields: [subscriptions.jobTargetId],
+    references: [jobTargets.id],
+  }),
+  roleKit: one(roleKits, {
+    fields: [subscriptions.roleKitId],
+    references: [roleKits.id],
+  }),
+}));
+
+export const paymentsRelations = relations(payments, ({ one }) => ({
+  user: one(authUsers, {
+    fields: [payments.userId],
+    references: [authUsers.id],
+  }),
+  subscription: one(subscriptions, {
+    fields: [payments.subscriptionId],
+    references: [subscriptions.id],
+  }),
+}));
+
+export const hireadyRoleIndexRelations = relations(hireadyRoleIndex, ({ one }) => ({
+  user: one(authUsers, {
+    fields: [hireadyRoleIndex.userId],
+    references: [authUsers.id],
+  }),
+  jobTarget: one(jobTargets, {
+    fields: [hireadyRoleIndex.jobTargetId],
+    references: [jobTargets.id],
+  }),
+  roleKit: one(roleKits, {
+    fields: [hireadyRoleIndex.roleKitId],
+    references: [roleKits.id],
+  }),
+  employerJob: one(employerJobs, {
+    fields: [hireadyRoleIndex.employerJobId],
+    references: [employerJobs.id],
+  }),
+}));
+
+// =====================
 // Insert Schemas
 // =====================
 
@@ -1891,3 +2108,12 @@ export type RoleArchetype = typeof roleArchetypes.$inferSelect;
 export type InsertRoleArchetype = z.infer<typeof insertRoleArchetypeSchema>;
 export type RoleInterviewStructureDefault = typeof roleInterviewStructureDefaults.$inferSelect;
 export type InsertRoleInterviewStructureDefault = z.infer<typeof insertRoleInterviewStructureDefaultSchema>;
+
+// Hiready Platform Types
+export type EmployerCompany = typeof employerCompanies.$inferSelect;
+export type EmployerCompanyUser = typeof employerCompanyUsers.$inferSelect;
+export type EmployerJob = typeof employerJobs.$inferSelect;
+export type EmployerCandidate = typeof employerCandidates.$inferSelect;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type Payment = typeof payments.$inferSelect;
+export type HireadyRoleIndex = typeof hireadyRoleIndex.$inferSelect;

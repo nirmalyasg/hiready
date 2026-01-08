@@ -2842,4 +2842,186 @@ interviewRouter.post("/match-exercise", requireAuth, async (req: Request, res: R
   }
 });
 
+// =====================
+// Hiready Index Endpoints
+// =====================
+
+import { 
+  calculateConsolidatedHireadyIndex, 
+  saveHireadyIndex, 
+  getPublicHireadyIndex 
+} from "../lib/hiready-index.js";
+import { hireadyRoleIndex } from "../../shared/schema.js";
+
+interviewRouter.get("/hiready-index", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "User not authenticated" });
+    }
+
+    const { jobTargetId, roleKitId } = req.query;
+
+    const indexData = await calculateConsolidatedHireadyIndex(userId, {
+      jobTargetId: jobTargetId as string | undefined,
+      roleKitId: roleKitId ? parseInt(roleKitId as string) : undefined,
+    });
+
+    if (!indexData) {
+      return res.json({ 
+        success: true, 
+        hireadyIndex: null,
+        message: "No completed interviews found for this role" 
+      });
+    }
+
+    res.json({ success: true, hireadyIndex: indexData });
+  } catch (error: any) {
+    console.error("Error calculating Hiready Index:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.post("/hiready-index/save", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "User not authenticated" });
+    }
+
+    const { jobTargetId, roleKitId, employerJobId } = req.body;
+
+    const indexData = await calculateConsolidatedHireadyIndex(userId, {
+      jobTargetId,
+      roleKitId,
+      employerJobId,
+    });
+
+    if (!indexData) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "No completed interviews found to generate index" 
+      });
+    }
+
+    const shareToken = await saveHireadyIndex(userId, indexData, {
+      jobTargetId,
+      roleKitId,
+      employerJobId,
+    });
+
+    res.json({ 
+      success: true, 
+      shareToken,
+      hireadyIndex: indexData 
+    });
+  } catch (error: any) {
+    console.error("Error saving Hiready Index:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.post("/hiready-index/:id/share", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "User not authenticated" });
+    }
+
+    const { id } = req.params;
+    const { isPublic } = req.body;
+
+    await db
+      .update(hireadyRoleIndex)
+      .set({ isPublic: isPublic ?? true })
+      .where(
+        and(
+          eq(hireadyRoleIndex.id, id),
+          eq(hireadyRoleIndex.userId, userId)
+        )
+      );
+
+    const [updated] = await db
+      .select()
+      .from(hireadyRoleIndex)
+      .where(eq(hireadyRoleIndex.id, id))
+      .limit(1);
+
+    res.json({ 
+      success: true, 
+      shareToken: updated?.shareToken,
+      isPublic: updated?.isPublic 
+    });
+  } catch (error: any) {
+    console.error("Error updating share status:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.get("/hiready-index/public/:shareToken", async (req: Request, res: Response) => {
+  try {
+    const { shareToken } = req.params;
+
+    const index = await getPublicHireadyIndex(shareToken);
+
+    if (!index) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "Scorecard not found or not public" 
+      });
+    }
+
+    res.json({ 
+      success: true, 
+      hireadyIndex: {
+        overallScore: index.overallScore,
+        dimensionScores: index.dimensionScores,
+        completedInterviewTypes: index.completedInterviewTypes,
+        totalSessions: index.totalSessions,
+        readinessLevel: index.readinessLevel,
+        strengths: index.strengths,
+        improvements: index.improvements,
+        createdAt: index.createdAt,
+      }
+    });
+  } catch (error: any) {
+    console.error("Error fetching public Hiready Index:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+interviewRouter.get("/hiready-index/user-summary", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "User not authenticated" });
+    }
+
+    const userIndices = await db
+      .select()
+      .from(hireadyRoleIndex)
+      .where(eq(hireadyRoleIndex.userId, userId))
+      .orderBy(desc(hireadyRoleIndex.lastUpdatedAt));
+
+    res.json({ 
+      success: true, 
+      indices: userIndices.map(idx => ({
+        id: idx.id,
+        overallScore: idx.overallScore,
+        readinessLevel: idx.readinessLevel,
+        completedInterviewTypes: idx.completedInterviewTypes,
+        totalSessions: idx.totalSessions,
+        jobTargetId: idx.jobTargetId,
+        roleKitId: idx.roleKitId,
+        shareToken: idx.shareToken,
+        isPublic: idx.isPublic,
+        lastUpdatedAt: idx.lastUpdatedAt,
+      }))
+    });
+  } catch (error: any) {
+    console.error("Error fetching user Hiready indices:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 export default interviewRouter;
