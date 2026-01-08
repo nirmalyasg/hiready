@@ -207,21 +207,23 @@ jobsRouter.post("/import-linkedin", requireAuth, async (req: Request, res: Respo
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
     await new Promise((r) => setTimeout(r, 2000));
 
-    const scraped = await page.evaluate(() => {
-      const getText = (selectors: string[]): string => {
-        for (const s of selectors) {
-          const el = document.querySelector(s);
-          if (el?.textContent?.trim()) return el.textContent.trim();
+    const scraped = await page.evaluate(`
+      (function() {
+        function getText(selectors) {
+          for (var i = 0; i < selectors.length; i++) {
+            var el = document.querySelector(selectors[i]);
+            if (el && el.textContent && el.textContent.trim()) return el.textContent.trim();
+          }
+          return "";
         }
-        return "";
-      };
-      return {
-        title: getText(["h1.top-card-layout__title", "h1.jobs-unified-top-card__job-title", ".job-details-jobs-unified-top-card__job-title", "h1"]),
-        company: getText([".topcard__org-name-link", ".jobs-unified-top-card__company-name a", ".job-details-jobs-unified-top-card__company-name"]),
-        location: getText([".topcard__flavor--bullet", ".jobs-unified-top-card__bullet", ".job-details-jobs-unified-top-card__bullet"]),
-        description: getText([".description__text", ".jobs-description-content__text", ".jobs-box__html-content"]),
-      };
-    });
+        return {
+          title: getText(["h1.top-card-layout__title", "h1.jobs-unified-top-card__job-title", ".job-details-jobs-unified-top-card__job-title", "h1"]),
+          company: getText([".topcard__org-name-link", ".jobs-unified-top-card__company-name a", ".job-details-jobs-unified-top-card__company-name"]),
+          location: getText([".topcard__flavor--bullet", ".jobs-unified-top-card__bullet", ".job-details-jobs-unified-top-card__bullet"]),
+          description: getText([".description__text", ".jobs-description-content__text", ".jobs-box__html-content"])
+        };
+      })()
+    `) as { title: string; company: string; location: string; description: string };
 
     await browser.close();
 
