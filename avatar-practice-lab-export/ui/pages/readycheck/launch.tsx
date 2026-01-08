@@ -37,7 +37,14 @@ export default function ReadycheckLaunchPage() {
 
           const data = await response.json();
 
-          if (data.success && data.job) {
+          if (data.success && data.duplicate && data.existingJobId) {
+            sessionStorage.removeItem("readycheck_jd");
+            sessionStorage.removeItem("readycheck_type");
+            sessionStorage.removeItem("returnTo");
+            
+            setStatus("Found existing job, redirecting...");
+            navigate(`/jobs/${data.existingJobId}`);
+          } else if (data.success && data.job) {
             sessionStorage.removeItem("readycheck_jd");
             sessionStorage.removeItem("readycheck_type");
             sessionStorage.removeItem("returnTo");
@@ -65,7 +72,14 @@ export default function ReadycheckLaunchPage() {
 
           const data = await response.json();
 
-          if (data.success && data.job) {
+          if (data.success && data.duplicate && data.existingJobId) {
+            sessionStorage.removeItem("readycheck_linkedin");
+            sessionStorage.removeItem("readycheck_type");
+            sessionStorage.removeItem("returnTo");
+            
+            setStatus("Found existing job, redirecting...");
+            navigate(`/jobs/${data.existingJobId}`);
+          } else if (data.success && data.job) {
             sessionStorage.removeItem("readycheck_linkedin");
             sessionStorage.removeItem("readycheck_type");
             sessionStorage.removeItem("returnTo");

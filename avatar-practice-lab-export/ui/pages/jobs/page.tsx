@@ -164,7 +164,11 @@ export default function JobsPage() {
         body: JSON.stringify({ url: pastedUrl }),
       });
       const data = await response.json();
-      if (data.success) {
+      if (data.success && data.duplicate && data.existingJobId) {
+        setPastedUrl("");
+        setAddDialogOpen(false);
+        navigate(`/jobs/${data.existingJobId}`);
+      } else if (data.success && data.job) {
         setJobs([data.job, ...jobs]);
         setPastedUrl("");
         setAddDialogOpen(false);

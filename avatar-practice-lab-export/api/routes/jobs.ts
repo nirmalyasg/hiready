@@ -73,6 +73,38 @@ type JDParsedType = {
   salaryRange?: string;
 };
 
+async function findDuplicateJob(userId: string, options: { jobUrl?: string; roleTitle?: string; companyName?: string }) {
+  const { jobUrl, roleTitle, companyName } = options;
+  
+  if (jobUrl) {
+    const normalizedUrl = jobUrl.split('?')[0].replace(/\/$/, '');
+    const [existingByUrl] = await db
+      .select({ id: jobTargets.id, roleTitle: jobTargets.roleTitle, companyName: jobTargets.companyName })
+      .from(jobTargets)
+      .where(and(
+        eq(jobTargets.userId, userId),
+        sql`REPLACE(SPLIT_PART(${jobTargets.jobUrl}, '?', 1), '/', '') = REPLACE(${normalizedUrl}, '/', '')`
+      ))
+      .limit(1);
+    if (existingByUrl) return existingByUrl;
+  }
+  
+  if (roleTitle && companyName) {
+    const [existingByDetails] = await db
+      .select({ id: jobTargets.id, roleTitle: jobTargets.roleTitle, companyName: jobTargets.companyName })
+      .from(jobTargets)
+      .where(and(
+        eq(jobTargets.userId, userId),
+        sql`LOWER(${jobTargets.roleTitle}) = LOWER(${roleTitle})`,
+        sql`LOWER(${jobTargets.companyName}) = LOWER(${companyName})`
+      ))
+      .limit(1);
+    if (existingByDetails) return existingByDetails;
+  }
+  
+  return null;
+}
+
 type JobTarget = {
   id: string;
   userId: string;
@@ -138,6 +170,16 @@ jobsRouter.post("/", requireAuth, async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: "Role title is required" });
     }
 
+    const existingJob = await findDuplicateJob(userId, { roleTitle, companyName });
+    if (existingJob) {
+      return res.status(200).json({
+        success: true,
+        duplicate: true,
+        existingJobId: existingJob.id,
+        message: `You already have this role saved: ${existingJob.roleTitle}${existingJob.companyName ? ` at ${existingJob.companyName}` : ''}`
+      });
+    }
+
     let parsedJd: JDParsedType | null = null;
     if (jdText && jdText.length > 50) {
       try {
@@ -186,6 +228,16 @@ jobsRouter.post("/import-linkedin", requireAuth, async (req: Request, res: Respo
 
     if (!url || !url.includes("linkedin.com/jobs")) {
       return res.status(400).json({ success: false, error: "Valid LinkedIn job URL required" });
+    }
+
+    const existingJob = await findDuplicateJob(userId, { jobUrl: url });
+    if (existingJob) {
+      return res.status(200).json({
+        success: true,
+        duplicate: true,
+        existingJobId: existingJob.id,
+        message: `You already have this job saved: ${existingJob.roleTitle}${existingJob.companyName ? ` at ${existingJob.companyName}` : ''}`
+      });
     }
 
     const browser = await puppeteer.launch({
@@ -369,6 +421,16 @@ jobsRouter.post("/job-targets", requireAuth, async (req: Request, res: Response)
 
     if (!roleTitle) {
       return res.status(400).json({ success: false, error: "Role title is required" });
+    }
+
+    const existingJob = await findDuplicateJob(userId, { jobUrl, roleTitle, companyName });
+    if (existingJob) {
+      return res.status(200).json({
+        success: true,
+        duplicate: true,
+        existingJobId: existingJob.id,
+        message: `You already have this role saved: ${existingJob.roleTitle}${existingJob.companyName ? ` at ${existingJob.companyName}` : ''}`
+      });
     }
 
     const [newJob] = await db
@@ -661,6 +723,16 @@ jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res:
       });
     }
 
+    const existingJob = await findDuplicateJob(userId, { jobUrl: url });
+    if (existingJob) {
+      return res.status(200).json({
+        success: true,
+        duplicate: true,
+        existingJobId: existingJob.id,
+        message: `You already have this job saved: ${existingJob.roleTitle}${existingJob.companyName ? ` at ${existingJob.companyName}` : ''}`
+      });
+    }
+
     const portal = detectPortal(url);
     const config = PORTAL_CONFIGS[portal];
     console.log(`Scraping job from ${config.name}: ${url}`);
@@ -941,6 +1013,19 @@ requiredSkills, preferredSkills, experienceLevel, responsibilities, companyConte
       return res.status(400).json({
         success: false,
         error: "Could not extract job title from the pasted text. Please ensure it contains a valid job description.",
+      });
+    }
+
+    const existingJob = await findDuplicateJob(userId, { 
+      roleTitle: extracted.roleTitle, 
+      companyName: extracted.companyName 
+    });
+    if (existingJob) {
+      return res.status(200).json({
+        success: true,
+        duplicate: true,
+        existingJobId: existingJob.id,
+        message: `You already have this role saved: ${existingJob.roleTitle}${existingJob.companyName ? ` at ${existingJob.companyName}` : ''}`
       });
     }
 

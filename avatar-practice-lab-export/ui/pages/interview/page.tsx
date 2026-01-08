@@ -254,6 +254,10 @@ export default function InterviewPracticePage() {
         setAddMode("paste");
         return;
       }
+      if (data.success && data.duplicate && data.existingJobId) {
+        navigate(`/jobs/${data.existingJobId}`);
+        return;
+      }
       if (!data.success) throw new Error(data.error || data.message);
       navigate(`/jobs/${data.job.id}`);
     } catch (e: any) {
@@ -277,6 +281,10 @@ export default function InterviewPracticePage() {
         body: JSON.stringify({ roleTitle: "New Job", jdText: pasteText, source: "manual" }),
       });
       const data = await response.json();
+      if (data.success && data.duplicate && data.existingJobId) {
+        navigate(`/jobs/${data.existingJobId}`);
+        return;
+      }
       if (!data.success) throw new Error(data.error);
       navigate(`/jobs/${data.job.id}`);
     } catch (e: any) {
