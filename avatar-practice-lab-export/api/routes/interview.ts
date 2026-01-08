@@ -1301,12 +1301,61 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
       rubric = r;
     }
     
-    // Extract JD skills for the evaluator
+    // Helper to extract skills from a parsed JD object
+    const extractSkillsFromParsed = (parsed: any): string[] => {
+      if (!parsed) return [];
+      
+      // If it's a string, try to parse it as JSON
+      let data = parsed;
+      if (typeof parsed === 'string') {
+        try {
+          data = JSON.parse(parsed);
+        } catch {
+          return [];
+        }
+      }
+      
+      // Collect skills from multiple possible field names
+      const requiredSkills = data.requiredSkills || data.required_skills || [];
+      const preferredSkills = data.preferredSkills || data.preferred_skills || data.niceToHave || [];
+      const technicalSkills = data.technicalSkills || data.technical_skills || [];
+      const softSkills = data.softSkills || data.soft_skills || [];
+      const genericSkills = data.skills || [];
+      
+      // Combine all skills, prioritizing required skills first
+      const allSkills = [
+        ...requiredSkills, 
+        ...technicalSkills,
+        ...softSkills,
+        ...preferredSkills,
+        ...genericSkills
+      ];
+      
+      // Remove duplicates and empty strings
+      return [...new Set(allSkills.filter((s: any) => typeof s === 'string' && s.trim().length > 0))];
+    };
+    
+    // Extract JD skills for the evaluator - comprehensive extraction
     let jdSkills: string[] = [];
+    
+    // First try from jdParsed (JD document)
     if (jdParsed) {
-      jdSkills = jdParsed.requiredSkills || jdParsed.skills || jdParsed.technicalSkills || [];
-      if (jdParsed.softSkills) {
-        jdSkills = [...jdSkills, ...jdParsed.softSkills];
+      jdSkills = extractSkillsFromParsed(jdParsed);
+    }
+    
+    // If no skills from JD doc, try to get from jobTarget's parsedData
+    if (jdSkills.length === 0 && session.jobTargetId) {
+      const [jobTarget] = await db.select().from(jobTargets).where(eq(jobTargets.id, session.jobTargetId));
+      if (jobTarget?.parsedData) {
+        jdSkills = extractSkillsFromParsed(jobTarget.parsedData);
+      }
+    }
+    
+    // If still no skills and we have config with jdDocId, try that
+    if (jdSkills.length === 0 && config?.jdDocId) {
+      const [jdDoc] = await db.select().from(userDocuments).where(eq(userDocuments.id, config.jdDocId));
+      if (jdDoc?.parsedJson) {
+        jdSkills = extractSkillsFromParsed(jdDoc.parsedJson);
       }
     }
 
@@ -2054,9 +2103,9 @@ INPUTS
 
 DIMENSION SELECTION RULES (in priority order):
 
-1. IF rubric is provided (non-null): Use EXACTLY those dimensions. Do not add or remove any.
+1. IF jdSkills is provided (non-empty array): Create dimensions from the JD skills. For example, if jdSkills includes ["Python", "SQL", "Data Analysis", "Team Leadership"], create dimensions like "Python Proficiency", "SQL Skills", "Data Analysis Capability", "Team Leadership". Mix technical and soft skills as provided. Aim for 5-8 dimensions from the JD skills.
 
-2. ELSE IF jdSkills is provided: Create dimensions from the JD skills. For example, if jdSkills includes ["Python", "SQL", "Data Analysis"], create dimensions like "Python Proficiency", "SQL Skills", "Data Analysis Capability".
+2. ELSE IF rubric is provided (non-null): Use EXACTLY those dimensions. Do not add or remove any.
 
 3. ELSE generate dimensions based on interviewType and roleKit:
 
@@ -3030,6 +3079,219 @@ interviewRouter.get("/hiready-index/user-summary", requireAuth, async (req: Requ
     });
   } catch (error: any) {
     console.error("Error fetching user Hiready indices:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ========================
+// Session Analysis Sharing
+// ========================
+
+// Generate share token for a session analysis
+interviewRouter.post("/session/:sessionId/share", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "User not authenticated" });
+    }
+
+    const { sessionId } = req.params;
+    const sessionIdNum = parseInt(sessionId);
+
+    // Verify user owns this session
+    const [session] = await db
+      .select({
+        id: interviewSessions.id,
+        configId: interviewSessions.interviewConfigId,
+      })
+      .from(interviewSessions)
+      .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+      .where(
+        and(
+          eq(interviewSessions.id, sessionIdNum),
+          eq(interviewConfigs.userId, userId)
+        )
+      )
+      .limit(1);
+
+    if (!session) {
+      return res.status(404).json({ success: false, error: "Session not found" });
+    }
+
+    // Check if analysis exists
+    const [analysis] = await db
+      .select()
+      .from(interviewAnalysis)
+      .where(eq(interviewAnalysis.interviewSessionId, sessionIdNum))
+      .limit(1);
+
+    if (!analysis) {
+      return res.status(404).json({ success: false, error: "Analysis not found for this session" });
+    }
+
+    // Generate share token if not exists
+    let shareToken = analysis.shareToken;
+    if (!shareToken) {
+      const crypto = await import("crypto");
+      shareToken = crypto.randomBytes(16).toString("hex");
+      
+      await db
+        .update(interviewAnalysis)
+        .set({ shareToken, isPublic: true })
+        .where(eq(interviewAnalysis.id, analysis.id));
+    } else {
+      // Make public if not already
+      await db
+        .update(interviewAnalysis)
+        .set({ isPublic: true })
+        .where(eq(interviewAnalysis.id, analysis.id));
+    }
+
+    res.json({ 
+      success: true, 
+      shareToken,
+      shareUrl: `/results/${shareToken}`
+    });
+  } catch (error: any) {
+    console.error("Error generating share token:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Toggle share status
+interviewRouter.patch("/session/:sessionId/share", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "User not authenticated" });
+    }
+
+    const { sessionId } = req.params;
+    const { isPublic } = req.body;
+    const sessionIdNum = parseInt(sessionId);
+
+    // Verify user owns this session
+    const [session] = await db
+      .select({
+        id: interviewSessions.id,
+      })
+      .from(interviewSessions)
+      .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+      .where(
+        and(
+          eq(interviewSessions.id, sessionIdNum),
+          eq(interviewConfigs.userId, userId)
+        )
+      )
+      .limit(1);
+
+    if (!session) {
+      return res.status(404).json({ success: false, error: "Session not found" });
+    }
+
+    await db
+      .update(interviewAnalysis)
+      .set({ isPublic: isPublic ?? false })
+      .where(eq(interviewAnalysis.interviewSessionId, sessionIdNum));
+
+    res.json({ success: true, isPublic });
+  } catch (error: any) {
+    console.error("Error updating share status:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get public session analysis by share token
+interviewRouter.get("/results/public/:shareToken", async (req: Request, res: Response) => {
+  try {
+    const { shareToken } = req.params;
+
+    const [analysis] = await db
+      .select()
+      .from(interviewAnalysis)
+      .where(
+        and(
+          eq(interviewAnalysis.shareToken, shareToken),
+          eq(interviewAnalysis.isPublic, true)
+        )
+      )
+      .limit(1);
+
+    if (!analysis) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "Results not found or not public" 
+      });
+    }
+
+    // Get session info
+    const [sessionInfo] = await db
+      .select({
+        sessionId: interviewSessions.id,
+        configId: interviewSessions.interviewConfigId,
+        interviewType: interviewConfigs.interviewType,
+        style: interviewConfigs.style,
+        seniority: interviewConfigs.seniority,
+        roleKitId: interviewConfigs.roleKitId,
+        jobTargetId: interviewConfigs.jobTargetId,
+      })
+      .from(interviewSessions)
+      .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+      .where(eq(interviewSessions.id, analysis.interviewSessionId))
+      .limit(1);
+
+    // Get role kit name if available
+    let roleKitName: string | null = null;
+    if (sessionInfo?.roleKitId) {
+      const [kit] = await db
+        .select({ name: roleKits.name })
+        .from(roleKits)
+        .where(eq(roleKits.id, sessionInfo.roleKitId))
+        .limit(1);
+      roleKitName = kit?.name || null;
+    }
+
+    // Get job target info if available - only expose role title for privacy
+    let jobContext: { roleTitle: string } | null = null;
+    if (sessionInfo?.jobTargetId) {
+      const [job] = await db
+        .select({
+          roleTitle: jobTargets.roleTitle,
+        })
+        .from(jobTargets)
+        .where(eq(jobTargets.id, sessionInfo.jobTargetId))
+        .limit(1);
+      if (job) {
+        jobContext = {
+          roleTitle: job.roleTitle,
+        };
+      }
+    }
+
+    // Return only share-safe fields for public view
+    res.json({ 
+      success: true, 
+      analysis: {
+        overallRecommendation: analysis.overallRecommendation,
+        confidenceLevel: analysis.confidenceLevel,
+        summary: analysis.summary,
+        dimensionScores: analysis.dimensionScores,
+        wins: analysis.wins,
+        improvements: analysis.improvements,
+        betterAnswers: analysis.betterAnswers,
+        practicePlan: analysis.practicePlan,
+        createdAt: analysis.createdAt,
+      },
+      context: {
+        interviewType: sessionInfo?.interviewType,
+        style: sessionInfo?.style,
+        seniority: sessionInfo?.seniority,
+        roleKitName,
+        jobContext,
+      }
+    });
+  } catch (error: any) {
+    console.error("Error fetching public results:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

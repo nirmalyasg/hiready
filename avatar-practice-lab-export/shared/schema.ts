@@ -933,6 +933,8 @@ export const interviewAnalysis = pgTable("interview_analysis", {
   }[]>(),
   wins: jsonb("wins").$type<string[]>(),
   improvements: jsonb("improvements").$type<string[]>(),
+  shareToken: varchar("share_token").unique(),
+  isPublic: boolean("is_public").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

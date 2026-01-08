@@ -47,6 +47,7 @@ import ProfilePage from './pages/profile/page';
 import JobsPage from './pages/jobs/page';
 import JobDetailPage from './pages/jobs/detail-page';
 import PublicSharePage from './pages/share/page';
+import PublicResultsPage from './pages/results/public-page';
 import ApplyPage from './pages/apply/page';
 import ReadycheckPage from './pages/readycheck/page';
 import ReadycheckLaunchPage from './pages/readycheck/launch';
@@ -102,6 +103,7 @@ export default function App() {
         <Route path="/jobs" element={<ProtectedRoute><JobsPage /></ProtectedRoute>} />
         <Route path="/jobs/:jobId" element={<ProtectedRoute><JobDetailPage /></ProtectedRoute>} />
         <Route path="/share/:shareToken" element={<PublicSharePage />} />
+        <Route path="/results/:shareToken" element={<PublicResultsPage />} />
         <Route path="/apply/:slug" element={<ApplyPage />} />
         <Route path="/readycheck" element={<ReadycheckPage />} />
         <Route path="/readycheck/launch" element={<ProtectedRoute><ReadycheckLaunchPage /></ProtectedRoute>} />

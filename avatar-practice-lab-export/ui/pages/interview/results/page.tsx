@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronRight, TrendingUp, Target, CheckCircle, AlertTriangle, Calendar, ArrowRight, Award, MessageSquare, Lightbulb, Star, BarChart3, Briefcase, Play, ArrowUp, Building2, Code, Users, Zap, BookOpen, GraduationCap } from "lucide-react";
+import { ChevronRight, TrendingUp, Target, CheckCircle, AlertTriangle, Calendar, ArrowRight, Award, MessageSquare, Lightbulb, Star, BarChart3, Briefcase, Play, ArrowUp, Building2, Code, Users, Zap, BookOpen, GraduationCap, Share2, Copy, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -122,6 +122,9 @@ export default function InterviewResultsPage() {
   const [jdSkills, setJdSkills] = useState<string[]>([]);
   const [readinessData, setReadinessData] = useState<ReadinessData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchAnalysis = async () => {
@@ -173,6 +176,39 @@ export default function InterviewResultsPage() {
   const averageScore = analysis?.dimensionScores
     ? analysis.dimensionScores.reduce((sum, d) => sum + d.score, 0) / analysis.dimensionScores.length
     : 0;
+
+  const handleShare = async () => {
+    if (!sessionId) return;
+    
+    setIsSharing(true);
+    try {
+      const response = await fetch(`/api/interview/session/${sessionId}/share`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+      const data = await response.json();
+      if (data.success) {
+        const fullUrl = `${window.location.origin}/results/${data.shareToken}`;
+        setShareUrl(fullUrl);
+        await navigator.clipboard.writeText(fullUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 3000);
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (shareUrl) {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   const practiceTitle = jobContext?.roleTitle || roleKitInfo?.name || "Interview Practice";
   const practiceSubtitle = jobContext?.companyName || (roleKitInfo?.domain ? roleKitInfo.domain.replace(/_/g, ' ') : null);
@@ -261,18 +297,44 @@ export default function InterviewResultsPage() {
                 </div>
               </div>
               
-              {/* Quick Score Summary */}
-              <div className="flex items-center gap-4 bg-white/10 rounded-xl p-4">
-                <div className="text-center">
-                  <div className={`text-3xl font-bold ${averageScore >= 3 ? 'text-emerald-400' : 'text-[#ee7e65]'}`}>
-                    {averageScore.toFixed(1)}
+              {/* Quick Score Summary + Share */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4 bg-white/10 rounded-xl p-4">
+                  <div className="text-center">
+                    <div className={`text-3xl font-bold ${averageScore >= 3 ? 'text-emerald-400' : 'text-[#ee7e65]'}`}>
+                      {averageScore.toFixed(1)}
+                    </div>
+                    <div className="text-xs text-white/60">out of 5</div>
                   </div>
-                  <div className="text-xs text-white/60">out of 5</div>
+                  {recConfig && (
+                    <div className={`px-3 py-1.5 rounded-lg ${recConfig.bgColor} ${recConfig.borderColor} border`}>
+                      <div className={`text-sm font-semibold ${recConfig.color}`}>{recConfig.label}</div>
+                    </div>
+                  )}
                 </div>
-                {recConfig && (
-                  <div className={`px-3 py-1.5 rounded-lg ${recConfig.bgColor} ${recConfig.borderColor} border`}>
-                    <div className={`text-sm font-semibold ${recConfig.color}`}>{recConfig.label}</div>
-                  </div>
+                
+                {/* Share Button */}
+                {shareUrl ? (
+                  <Button
+                    onClick={handleCopyLink}
+                    variant="outline"
+                    size="sm"
+                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 gap-2"
+                  >
+                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                    {copied ? 'Copied!' : 'Copy Link'}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleShare}
+                    disabled={isSharing}
+                    variant="outline"
+                    size="sm"
+                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 gap-2"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    {isSharing ? 'Sharing...' : 'Share'}
+                  </Button>
                 )}
               </div>
             </div>

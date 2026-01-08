@@ -51,6 +51,13 @@ avatar-practice-lab-export/
 
 ## Recent Changes (January 8, 2026)
 
+### JD-Specific Skill Dimension Mapping
+Interview analysis now maps skill dimensions to the actual skills from the job description instead of using fixed 8-dimension rubric:
+- **Priority Order**: JD skills → Rubric dimensions → Role-based fallback
+- **Comprehensive Extraction**: Skills extracted from multiple sources (jdParsed, jobTarget.parsedData, config.jdDocId)
+- **Robust Parsing**: Handles both JSON objects and stringified JSON
+- **Field Coverage**: Extracts requiredSkills, preferredSkills, technicalSkills, softSkills, and generic skills
+
 ### UI Revamp - Blue Theme
 Complete visual refresh with blue accent theme:
 - Home page redesigned with modern hero, trust indicators, 3-step flow
