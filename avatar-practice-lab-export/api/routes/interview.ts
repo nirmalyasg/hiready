@@ -679,7 +679,7 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
     
     let resumeDocId = providedResumeDocId;
     
-    const skipResumeModes = ["role_based", "skill_only", "interview_mode", ...interviewModeTypes];
+    const skipResumeModes = ["role_based", "skill_only", "interview_mode", "job_target", ...interviewModeTypes];
     if (!skipResumeModes.includes(interviewMode) && !resumeDocId) {
       const [profile] = await db
         .select({ latestResumeDocId: userProfileExtracted.latestResumeDocId })
