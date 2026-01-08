@@ -50,6 +50,14 @@ interface JobTarget {
   archetypeConfidence?: "high" | "medium" | "low" | null;
   roleArchetypeId?: string | null;
   roleFamily?: string | null;
+  roleKitId?: number | null;
+}
+
+interface RoleKit {
+  id: number;
+  name: string;
+  description: string | null;
+  category: string | null;
 }
 
 const archetypeLabels: Record<string, string> = {
@@ -172,6 +180,9 @@ export default function JobDetailPage() {
   const [entitlements, setEntitlements] = useState<Entitlements | null>(null);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [pendingPracticeOption, setPendingPracticeOption] = useState<PracticeOption | null>(null);
+  const [roleKits, setRoleKits] = useState<RoleKit[]>([]);
+  const [showRoleSelector, setShowRoleSelector] = useState(false);
+  const [isSavingRole, setIsSavingRole] = useState(false);
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -179,15 +190,17 @@ export default function JobDetailPage() {
       
       try {
         setIsLoading(true);
-        const [jobRes, optionsRes, entitlementsRes] = await Promise.all([
+        const [jobRes, optionsRes, entitlementsRes, roleKitsRes] = await Promise.all([
           fetch(`/api/jobs/job-targets/${jobId}`),
           fetch(`/api/jobs/job-targets/${jobId}/practice-options`),
           fetch(`/api/payments/entitlements?jobTargetId=${jobId}`, { credentials: "include" }),
+          fetch(`/api/interview/role-kits`),
         ]);
         
         const jobData = await jobRes.json();
         const optionsData = await optionsRes.json();
         const entitlementsData = await entitlementsRes.json();
+        const roleKitsData = await roleKitsRes.json();
         
         if (jobData.success) {
           setJob(jobData.job);
@@ -210,6 +223,10 @@ export default function JobDetailPage() {
         if (entitlementsData.success) {
           setEntitlements(entitlementsData);
         }
+
+        if (roleKitsData.success) {
+          setRoleKits(roleKitsData.roleKits || []);
+        }
       } catch (error) {
         console.error("Error fetching job:", error);
       } finally {
@@ -219,6 +236,34 @@ export default function JobDetailPage() {
     
     fetchJob();
   }, [jobId]);
+
+  const handleUpdateRoleKit = async (roleKitId: number | null) => {
+    if (!job) return;
+    
+    setIsSavingRole(true);
+    try {
+      const response = await fetch(`/api/jobs/job-targets/${job.id}/role-kit`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roleKitId }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setJob(prev => prev ? { ...prev, roleKitId } : null);
+        setShowRoleSelector(false);
+        
+        const entitlementsRes = await fetch(`/api/payments/entitlements?roleKitId=${roleKitId}`, { credentials: "include" });
+        const entitlementsData = await entitlementsRes.json();
+        if (entitlementsData.success) {
+          setEntitlements(entitlementsData);
+        }
+      }
+    } catch (error) {
+      console.error("Error updating role kit:", error);
+    } finally {
+      setIsSavingRole(false);
+    }
+  };
 
   const handleParseJD = async () => {
     if (!job || !job.jdText) return;
@@ -394,6 +439,72 @@ export default function JobDetailPage() {
               </div>
             </div>
           )}
+
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+              <h2 className="font-semibold text-[#042c4c] text-sm">Practice Role</h2>
+              <button 
+                onClick={() => setShowRoleSelector(!showRoleSelector)}
+                className="text-xs text-[#ee7e65] hover:text-[#e06a50] font-medium"
+              >
+                {showRoleSelector ? "Cancel" : "Change"}
+              </button>
+            </div>
+            <div className="p-3">
+              {showRoleSelector ? (
+                <div className="space-y-2">
+                  <p className="text-xs text-slate-500 mb-2">Select the role that best matches this job for accurate practice:</p>
+                  <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
+                    {roleKits.map((kit) => (
+                      <button
+                        key={kit.id}
+                        onClick={() => handleUpdateRoleKit(kit.id)}
+                        disabled={isSavingRole}
+                        className={`p-2 text-left rounded-lg border text-sm transition-all ${
+                          job?.roleKitId === kit.id
+                            ? "border-[#ee7e65] bg-[#ee7e65]/5 text-[#042c4c]"
+                            : "border-slate-200 hover:border-[#ee7e65]/50 hover:bg-slate-50 text-[#042c4c]"
+                        }`}
+                      >
+                        <span className="font-medium block truncate">{kit.name}</span>
+                        {kit.category && (
+                          <span className="text-xs text-slate-500 block truncate">{kit.category}</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center flex-shrink-0">
+                    <Briefcase className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-[#042c4c] text-sm truncate">
+                      {job?.roleKitId 
+                        ? roleKits.find(k => k.id === job.roleKitId)?.name || "Role Selected"
+                        : job?.roleFamily || "Select a role"}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {job?.roleKitId 
+                        ? "Practicing for this role"
+                        : "Choose your practice focus"}
+                    </p>
+                  </div>
+                  {!job?.roleKitId && (
+                    <Button
+                      onClick={() => setShowRoleSelector(true)}
+                      size="sm"
+                      variant="outline"
+                      className="h-8 px-3 text-xs"
+                    >
+                      Select
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
 
           {entitlements && (
             <div className={`rounded-xl border p-3 ${

@@ -9,6 +9,7 @@ import {
   interviewAnalysis,
   exerciseAnalysis,
   userSkillPatterns,
+  roleKits,
 } from "../../shared/schema.js";
 import { requireAuth } from "../middleware/auth.js";
 import { getOpenAI } from "../utils/openai-client.js";
@@ -533,6 +534,45 @@ jobsRouter.patch("/job-targets/:id/status", requireAuth, async (req: Request, re
     res.json({ success: true, job: updated });
   } catch (error: any) {
     console.error("Error updating job status:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+jobsRouter.patch("/job-targets/:id/role-kit", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const jobId = req.params.id;
+    const { roleKitId } = req.body;
+
+    const [existing] = await db
+      .select()
+      .from(jobTargets)
+      .where(and(eq(jobTargets.id, jobId), eq(jobTargets.userId, userId)));
+
+    if (!existing) {
+      return res.status(404).json({ success: false, error: "Job target not found" });
+    }
+
+    if (roleKitId !== null) {
+      const [roleKit] = await db
+        .select()
+        .from(roleKits)
+        .where(eq(roleKits.id, roleKitId));
+
+      if (!roleKit) {
+        return res.status(400).json({ success: false, error: "Invalid role kit" });
+      }
+    }
+
+    const [updated] = await db
+      .update(jobTargets)
+      .set({ roleKitId, updatedAt: new Date() })
+      .where(eq(jobTargets.id, jobId))
+      .returning();
+
+    res.json({ success: true, job: updated });
+  } catch (error: any) {
+    console.error("Error updating job role kit:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

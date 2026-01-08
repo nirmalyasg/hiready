@@ -793,6 +793,7 @@ export const jobTargets = pgTable("job_targets", {
   archetypeConfidence: text("archetype_confidence").$type<"high" | "medium" | "low">(),
   roleArchetypeId: varchar("role_archetype_id"),
   roleFamily: text("role_family").$type<"tech" | "data" | "product" | "sales" | "business">(),
+  roleKitId: integer("role_kit_id").references(() => roleKits.id, { onDelete: "set null" }),
   status: text("status")
     .$type<"saved" | "applied" | "interview" | "offer" | "rejected" | "archived">()
     .notNull()

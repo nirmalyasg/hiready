@@ -716,6 +716,8 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
       return res.status(400).json({ success: false, error: "Role archetype is required for interview mode practice" });
     }
     
+    let jobTargetRoleKitId: number | null = null;
+    
     if (jobTargetId) {
       const [jobTarget] = await db
         .select()
@@ -725,9 +727,13 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
       if (!jobTarget) {
         return res.status(404).json({ success: false, error: "Job target not found" });
       }
+      
+      if (jobTarget.roleKitId) {
+        jobTargetRoleKitId = jobTarget.roleKitId;
+      }
     }
     
-    const targetRoleKitId = roleKitId || null;
+    const targetRoleKitId = roleKitId || jobTargetRoleKitId || null;
     
     if (targetRoleKitId || employerJobId) {
       const entitlement = await checkEntitlements(userId, { 
@@ -763,7 +769,7 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
       .insert(interviewConfigs)
       .values({
         userId,
-        roleKitId: roleKitId || null,
+        roleKitId: targetRoleKitId,
         roleArchetypeId: roleArchetypeId || null,
         interviewMode: interviewMode as any,
         resumeDocId: resumeDocId || null,
