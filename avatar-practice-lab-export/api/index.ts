@@ -10,6 +10,7 @@ import { jobsRouter } from "./routes/jobs.js";
 import employerRouter from "./routes/employer.js";
 import paymentsRouter from "./routes/payments.js";
 import employerAuthRouter from "./routes/employer-auth.js";
+import { readycheckRouter } from "./routes/readycheck.js";
 import { setupAuth } from "./replitAuth.js";
 import dotenv from "dotenv";
 
@@ -124,6 +125,9 @@ async function startServer() {
 
   // Mount payments/subscription routes
   app.use("/api/payments", paymentsRouter);
+
+  // Mount readycheck routes
+  app.use("/api/readycheck", readycheckRouter);
 
   // Health check
   app.get("/health", (req, res) => {
