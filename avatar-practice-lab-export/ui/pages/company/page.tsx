@@ -129,7 +129,21 @@ export default function CompanyDashboard() {
 
   useEffect(() => {
     if (authChecked && employerUser) {
-      fetchCompanies();
+      if (employerUser.company) {
+        const company: Company = {
+          id: employerUser.company.id,
+          name: employerUser.company.name,
+          logoUrl: employerUser.company.logoUrl,
+          domain: employerUser.company.domain,
+          plan: "free",
+          userRole: employerUser.role || "admin",
+        };
+        setCompanies([company]);
+        setSelectedCompany(company);
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+      }
     }
   }, [authChecked, employerUser]);
 
