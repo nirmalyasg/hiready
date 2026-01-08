@@ -106,6 +106,8 @@ export default function App() {
         <Route path="/company/login" element={<CompanyLoginPage />} />
         <Route path="/company/dashboard" element={<CompanyDashboard />} />
         <Route path="/company" element={<Navigate to="/company/login" replace />} />
+        <Route path="/employer/login" element={<Navigate to="/company/login" replace />} />
+        <Route path="/employer" element={<Navigate to="/company/login" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </RealtimeSessionPrewarmProvider>

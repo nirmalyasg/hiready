@@ -103,11 +103,11 @@ CREATE TABLE IF NOT EXISTS payments (
 
 -- Consolidated Hiready Index per role/job (aggregates multiple interview sessions)
 CREATE TABLE IF NOT EXISTS hiready_role_index (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::text,
   user_id VARCHAR NOT NULL REFERENCES auth_users(id) ON DELETE CASCADE,
   job_target_id VARCHAR REFERENCES job_targets(id) ON DELETE CASCADE,
   role_kit_id INTEGER REFERENCES role_kits(id) ON DELETE SET NULL,
-  employer_job_id UUID REFERENCES employer_jobs(id) ON DELETE SET NULL,
+  employer_job_id VARCHAR REFERENCES employer_jobs(id) ON DELETE SET NULL,
   overall_score INTEGER NOT NULL,
   dimension_scores JSONB NOT NULL,
   completed_interview_types JSONB NOT NULL DEFAULT '[]',
@@ -119,8 +119,7 @@ CREATE TABLE IF NOT EXISTS hiready_role_index (
   share_token VARCHAR UNIQUE,
   is_public BOOLEAN DEFAULT FALSE,
   last_updated_at TIMESTAMP DEFAULT NOW(),
-  created_at TIMESTAMP DEFAULT NOW(),
-  UNIQUE(user_id, COALESCE(job_target_id, ''), COALESCE(role_kit_id, 0))
+  created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- =====================
