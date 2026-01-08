@@ -13,9 +13,8 @@ import {
 } from "../../shared/schema.js";
 import { requireEmployerAuth } from "./employer-auth.js";
 import { 
-  resolveRoleArchetype, 
-  resolveCompanyArchetype, 
-  getUnifiedInterviewPlan 
+  buildEmployerInterviewPlan,
+  type EmployerInterviewPlan
 } from "../lib/archetype-resolver.js";
 
 const employerRouter = Router();
@@ -78,47 +77,25 @@ employerRouter.post("/jobs", requireEmployerAuth, async (req: Request, res: Resp
 
     const applyLinkSlug = generateSlug(title, company?.name || "job");
 
-    let generatedInterviewPlan: any = null;
+    let generatedInterviewPlan: EmployerInterviewPlan | null = null;
     let roleArchetypeId: string | null = null;
     let companyArchetype: string | null = null;
     let archetypeConfidence: string | null = null;
 
     if (jdText || title) {
       try {
-        const roleResolution = await resolveRoleArchetype(title, jdText || undefined);
-        const companyResolution = await resolveCompanyArchetype(company?.name || "", jdText || undefined);
-        
-        roleArchetypeId = roleResolution.roleArchetypeId;
-        companyArchetype = companyResolution.archetype;
-        archetypeConfidence = roleResolution.confidence;
-
-        const interviewPlan = await getUnifiedInterviewPlan(
-          roleArchetypeId,
-          roleResolution.roleFamily,
-          companyArchetype,
-          companyResolution.confidence as "high" | "medium" | "low",
-          "mid",
-          null,
-          company?.name || null
+        generatedInterviewPlan = await buildEmployerInterviewPlan(
+          title,
+          jdText || "",
+          company?.name || undefined,
+          "mid"
         );
+        
+        roleArchetypeId = generatedInterviewPlan.roleArchetype.id;
+        companyArchetype = generatedInterviewPlan.companyArchetype.type;
+        archetypeConfidence = generatedInterviewPlan.companyArchetype.confidence;
 
-        generatedInterviewPlan = {
-          ...interviewPlan,
-          roleArchetype: {
-            id: roleResolution.roleArchetypeId,
-            name: roleResolution.roleArchetypeName,
-            family: roleResolution.roleFamily,
-            confidence: roleResolution.confidence,
-          },
-          companyArchetype: {
-            name: company?.name,
-            archetype: companyResolution.archetype,
-            confidence: companyResolution.confidence,
-          },
-          generatedAt: new Date().toISOString(),
-        };
-
-        console.log(`Generated interview plan for job "${title}": ${interviewPlan.phases?.length || 0} phases`);
+        console.log(`Generated employer interview plan for job "${title}": ${generatedInterviewPlan.phases?.length || 0} phases, ${generatedInterviewPlan.totalMins} mins, ${generatedInterviewPlan.extractedSkills?.length || 0} skills extracted`);
       } catch (planError: any) {
         console.error("Error generating interview plan:", planError);
       }
@@ -132,8 +109,10 @@ employerRouter.post("/jobs", requireEmployerAuth, async (req: Request, res: Resp
       roleKitId,
       roleArchetypeId,
       assessmentConfig: assessmentConfig || { 
-        interviewTypes: generatedInterviewPlan?.phases?.map((p: any) => p.category) || ["hr", "technical"], 
-        totalDuration: generatedInterviewPlan?.totalMinutes || 45 
+        interviewTypes: generatedInterviewPlan?.phases?.map((p) => p.category) || ["hr", "technical"], 
+        totalDuration: generatedInterviewPlan?.totalMins || 12,
+        primarySkills: generatedInterviewPlan?.skillSummary?.primarySkills || [],
+        focusAreas: generatedInterviewPlan?.focusAreas || [],
       },
       applyLinkSlug,
       status: "active",

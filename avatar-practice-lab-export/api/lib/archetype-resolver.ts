@@ -1,6 +1,7 @@
 import { db } from "../db.js";
 import { companies, roleArchetypes, roleInterviewStructureDefaults, jobTargets, roleTaskBlueprints } from "../../shared/schema.js";
 import { eq, sql, ilike, and } from "drizzle-orm";
+import { extractSkillsFromText, type SkillTag } from "./capability-vectorizer.js";
 
 export type CompanyArchetype = 
   | "startup" | "enterprise" | "regulated" | "consumer" | "saas" | "fintech" | "edtech" | "services" | "industrial"
@@ -1082,5 +1083,175 @@ export async function getEnrichedInterviewPlan(
   return {
     ...basePlan,
     phases: enrichedPhases,
+  };
+}
+
+export interface EmployerInterviewPhase {
+  name: string;
+  mins: number;
+  category: string;
+  description: string;
+  focusAreas: string[];
+}
+
+export interface EmployerInterviewPlan {
+  roleArchetype: {
+    id: string | null;
+    name: string | null;
+    family: string | null;
+  };
+  companyArchetype: {
+    type: string | null;
+    confidence: string;
+  };
+  phases: EmployerInterviewPhase[];
+  totalMins: number;
+  extractedSkills: SkillTag[];
+  skillSummary: {
+    primarySkills: string[];
+    secondarySkills: string[];
+    domains: string[];
+  };
+  focusAreas: string[];
+  interviewStyle: string;
+}
+
+const EMPLOYER_PHASE_TEMPLATES: Record<string, { phases: { name: string; baseMins: number; category: string; description: string }[] }> = {
+  tech: {
+    phases: [
+      { name: "Introduction", baseMins: 2, category: "warmup", description: "Greeting and setting expectations" },
+      { name: "Technical Assessment", baseMins: 5, category: "technical", description: "Core technical skills and problem-solving ability" },
+      { name: "Behavioral", baseMins: 3, category: "behavioral", description: "Work style, collaboration, and situational responses" },
+      { name: "Wrap-up", baseMins: 2, category: "closing", description: "Questions and next steps" },
+    ],
+  },
+  data: {
+    phases: [
+      { name: "Introduction", baseMins: 2, category: "warmup", description: "Greeting and setting expectations" },
+      { name: "Analytical Assessment", baseMins: 5, category: "technical", description: "Data analysis skills and problem-solving" },
+      { name: "Behavioral", baseMins: 3, category: "behavioral", description: "Work style and data-driven decision making" },
+      { name: "Wrap-up", baseMins: 2, category: "closing", description: "Questions and next steps" },
+    ],
+  },
+  product: {
+    phases: [
+      { name: "Introduction", baseMins: 2, category: "warmup", description: "Greeting and setting expectations" },
+      { name: "Product Thinking", baseMins: 5, category: "case_study", description: "Product sense, prioritization, and strategic thinking" },
+      { name: "Behavioral", baseMins: 3, category: "behavioral", description: "Leadership, stakeholder management, and execution" },
+      { name: "Wrap-up", baseMins: 2, category: "closing", description: "Questions and next steps" },
+    ],
+  },
+  sales: {
+    phases: [
+      { name: "Introduction", baseMins: 2, category: "warmup", description: "Greeting and rapport building" },
+      { name: "Sales Assessment", baseMins: 5, category: "behavioral", description: "Sales approach, objection handling, and closing skills" },
+      { name: "Role Play", baseMins: 3, category: "situational", description: "Simulated sales conversation" },
+      { name: "Wrap-up", baseMins: 2, category: "closing", description: "Questions and next steps" },
+    ],
+  },
+  business: {
+    phases: [
+      { name: "Introduction", baseMins: 2, category: "warmup", description: "Greeting and setting expectations" },
+      { name: "Case Discussion", baseMins: 5, category: "case_study", description: "Business problem-solving and analytical thinking" },
+      { name: "Behavioral", baseMins: 3, category: "behavioral", description: "Work style, collaboration, and leadership" },
+      { name: "Wrap-up", baseMins: 2, category: "closing", description: "Questions and next steps" },
+    ],
+  },
+};
+
+const DEFAULT_EMPLOYER_PHASES = EMPLOYER_PHASE_TEMPLATES.business.phases;
+const TARGET_INTERVIEW_DURATION = 12;
+
+export async function buildEmployerInterviewPlan(
+  roleTitle: string,
+  jdText: string,
+  companyName?: string,
+  seniority: "entry" | "mid" | "senior" = "mid"
+): Promise<EmployerInterviewPlan> {
+  const roleResolution = await resolveRoleArchetype(roleTitle, jdText);
+  const companyResolution = companyName 
+    ? await resolveCompanyArchetype(companyName, jdText)
+    : { archetype: null, confidence: "low" as const };
+  
+  const extractedSkills = extractSkillsFromText(jdText, "jd");
+  
+  const sortedSkills = [...extractedSkills].sort((a, b) => b.weight - a.weight);
+  const primarySkills = sortedSkills.slice(0, 5).map(s => s.skill);
+  const secondarySkills = sortedSkills.slice(5, 10).map(s => s.skill);
+  const domains = sortedSkills
+    .filter(s => s.category === "domain")
+    .slice(0, 3)
+    .map(s => s.skill);
+  
+  const roleFamily = roleResolution.roleFamily || "business";
+  const phaseTemplate = EMPLOYER_PHASE_TEMPLATES[roleFamily] || { phases: DEFAULT_EMPLOYER_PHASES };
+  
+  const totalBaseMins = phaseTemplate.phases.reduce((sum, p) => sum + p.baseMins, 0);
+  const scaleFactor = TARGET_INTERVIEW_DURATION / totalBaseMins;
+  
+  const phases: EmployerInterviewPhase[] = phaseTemplate.phases.map((p) => {
+    const scaledMins = Math.max(1, Math.round(p.baseMins * scaleFactor));
+    
+    const focusAreas: string[] = [];
+    if (p.category === "technical" || p.category === "case_study") {
+      focusAreas.push(...primarySkills.slice(0, 3));
+    } else if (p.category === "behavioral") {
+      focusAreas.push("Communication", "Collaboration", "Problem-solving");
+    }
+    
+    return {
+      name: p.name,
+      mins: scaledMins,
+      category: p.category,
+      description: p.description,
+      focusAreas,
+    };
+  });
+  
+  const adjustedTotalMins = phases.reduce((sum, p) => sum + p.mins, 0);
+  if (adjustedTotalMins !== TARGET_INTERVIEW_DURATION) {
+    const diff = TARGET_INTERVIEW_DURATION - adjustedTotalMins;
+    const mainPhaseIndex = phases.findIndex(p => p.category === "technical" || p.category === "case_study");
+    if (mainPhaseIndex >= 0) {
+      phases[mainPhaseIndex].mins = Math.max(3, phases[mainPhaseIndex].mins + diff);
+    }
+  }
+  
+  const focusAreas = [
+    ...(roleResolution.primarySkillDimensions || []).slice(0, 2),
+    ...primarySkills.slice(0, 2),
+  ].filter((v, i, a) => a.indexOf(v) === i).slice(0, 4);
+  
+  let interviewStyle = "Standard Assessment";
+  if (roleResolution.roleFamily === "tech") {
+    interviewStyle = "Technical Interview";
+  } else if (roleResolution.roleFamily === "product") {
+    interviewStyle = "Product Thinking Interview";
+  } else if (roleResolution.roleFamily === "data") {
+    interviewStyle = "Analytical Interview";
+  } else if (roleResolution.roleFamily === "sales") {
+    interviewStyle = "Sales Assessment";
+  }
+  
+  return {
+    roleArchetype: {
+      id: roleResolution.roleArchetypeId,
+      name: roleResolution.roleArchetypeName,
+      family: roleResolution.roleFamily,
+    },
+    companyArchetype: {
+      type: companyResolution.archetype,
+      confidence: companyResolution.confidence,
+    },
+    phases,
+    totalMins: phases.reduce((sum, p) => sum + p.mins, 0),
+    extractedSkills: sortedSkills,
+    skillSummary: {
+      primarySkills,
+      secondarySkills,
+      domains,
+    },
+    focusAreas,
+    interviewStyle,
   };
 }

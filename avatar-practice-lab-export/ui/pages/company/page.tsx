@@ -47,24 +47,42 @@ interface InterviewPhase {
   name: string;
   category: string;
   mins: number;
-  practiceMode: string;
+  practiceMode?: string;
   description: string;
+  focusAreas?: string[];
+}
+
+interface SkillTag {
+  skill: string;
+  category: string;
+  weight: number;
+  source: string;
 }
 
 interface GeneratedInterviewPlan {
   phases: InterviewPhase[];
-  totalMinutes: number;
+  totalMinutes?: number;
+  totalMins?: number;
   roleArchetype?: {
     id: string | null;
     name: string | null;
     family: string | null;
-    confidence: string;
+    confidence?: string;
   };
   companyArchetype?: {
-    name: string;
-    archetype: string | null;
+    name?: string;
+    type?: string | null;
+    archetype?: string | null;
     confidence: string;
   };
+  extractedSkills?: SkillTag[];
+  skillSummary?: {
+    primarySkills: string[];
+    secondarySkills: string[];
+    domains: string[];
+  };
+  focusAreas?: string[];
+  interviewStyle?: string;
   generatedAt?: string;
 }
 
@@ -575,7 +593,7 @@ export default function CompanyDashboard() {
                           <div>
                             <CardTitle className="text-base">Interview Assessment Plan</CardTitle>
                             <p className="text-sm text-gray-500 mt-1">
-                              Auto-generated from job description
+                              {selectedJob.generatedInterviewPlan.interviewStyle || "Auto-generated from job description"}
                               {selectedJob.generatedInterviewPlan.roleArchetype?.name && (
                                 <span className="ml-2">
                                   • Role: <span className="font-medium text-[#042c4c]">{selectedJob.generatedInterviewPlan.roleArchetype.name}</span>
@@ -583,23 +601,57 @@ export default function CompanyDashboard() {
                               )}
                             </p>
                           </div>
-                          <Badge variant="outline" className="text-xs">
-                            {selectedJob.generatedInterviewPlan.totalMinutes || 
+                          <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                            {selectedJob.generatedInterviewPlan.totalMins || 
+                              selectedJob.generatedInterviewPlan.totalMinutes || 
                               selectedJob.generatedInterviewPlan.phases.reduce((acc, p) => acc + p.mins, 0)} mins total
                           </Badge>
                         </div>
                       </CardHeader>
-                      <CardContent className="p-4">
-                        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                      <CardContent className="p-4 space-y-4">
+                        {selectedJob.generatedInterviewPlan.skillSummary?.primarySkills && selectedJob.generatedInterviewPlan.skillSummary.primarySkills.length > 0 && (
+                          <div className="p-3 rounded-lg bg-blue-50 border border-blue-100">
+                            <h4 className="text-sm font-medium text-blue-900 mb-2">Skills Extracted from JD</h4>
+                            <div className="flex flex-wrap gap-2">
+                              {selectedJob.generatedInterviewPlan.skillSummary.primarySkills.map((skill, index) => (
+                                <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                                  {skill}
+                                </Badge>
+                              ))}
+                              {selectedJob.generatedInterviewPlan.skillSummary.secondarySkills?.slice(0, 3).map((skill, index) => (
+                                <Badge key={`secondary-${index}`} variant="outline" className="text-blue-600 border-blue-200 text-xs">
+                                  {skill}
+                                </Badge>
+                              ))}
+                            </div>
+                            {selectedJob.generatedInterviewPlan.focusAreas && selectedJob.generatedInterviewPlan.focusAreas.length > 0 && (
+                              <div className="mt-2 pt-2 border-t border-blue-100">
+                                <span className="text-xs text-blue-700 font-medium">Focus Areas: </span>
+                                <span className="text-xs text-blue-600">{selectedJob.generatedInterviewPlan.focusAreas.join(", ")}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
                           {selectedJob.generatedInterviewPlan.phases.map((phase, index) => (
                             <div 
                               key={index}
                               className="p-3 rounded-lg border bg-gray-50 hover:bg-gray-100 transition-colors"
                             >
                               <div className="flex items-start justify-between">
-                                <div>
+                                <div className="flex-1">
                                   <h4 className="font-medium text-gray-900 text-sm">{phase.name}</h4>
                                   <p className="text-xs text-gray-500 mt-1">{phase.description}</p>
+                                  {phase.focusAreas && phase.focusAreas.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                      {phase.focusAreas.slice(0, 2).map((area, i) => (
+                                        <span key={i} className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">
+                                          {area}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
                                 <Badge variant="secondary" className="text-xs shrink-0 ml-2">
                                   {phase.mins} min
