@@ -9,7 +9,6 @@ import {
   LogOut, 
   Menu, 
   X,
-  Mic,
   Sparkles,
   CheckCircle2,
   Play,
@@ -20,67 +19,93 @@ import {
   Clock,
   Shield,
   Zap,
-  Star
+  Star,
+  Download,
+  Share2,
+  FileText,
+  Award,
+  TrendingUp,
+  Building2
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import interviewScreenshot from '@/assets/screenshots/interview-main.jpg';
-import resultsScreenshot from '@/assets/screenshots/dashboard.jpg';
-import dashboardScreenshot from '@/assets/screenshots/dashboard.jpg';
-import roleSelectionScreenshot from '@/assets/screenshots/role-selection.jpg';
-import interviewTypesScreenshot from '@/assets/screenshots/interview-types.jpg';
-import preSessionScreenshot from '@/assets/screenshots/pre-session.jpg';
-import liveSessionScreenshot from '@/assets/screenshots/live-session.jpg';
 
 export default function HomePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const howItWorksSteps = [
+    {
+      step: '1',
+      title: 'Upload your job description',
+      description: 'Or choose from our Role Library with 15+ pre-built interview kits.'
+    },
+    {
+      step: '2',
+      title: 'Practice with AI interviewer',
+      description: 'Face realistic interviews across HR, behavioral, technical, and case rounds.'
+    },
+    {
+      step: '3',
+      title: 'Get your Hiready Index™',
+      description: 'A measurable scorecard of your readiness with detailed insights.'
+    },
+  ];
+
+  const indexMetrics = [
+    { name: 'Clarity', icon: MessageSquare },
+    { name: 'Confidence', icon: Shield },
+    { name: 'Structure', icon: Target },
+    { name: 'Problem-Solving', icon: Brain },
+    { name: 'Role Fit', icon: Briefcase },
+  ];
 
   const interviewTypes = [
     { 
       icon: Code, 
-      title: 'Coding & Technical', 
-      description: 'Practice coding problems, debugging, and technical discussions with AI feedback',
+      title: 'Technical', 
+      description: 'Coding problems, system design, and technical discussions',
       color: 'bg-[#042c4c]'
     },
     { 
       icon: Briefcase, 
-      title: 'Case & Problem Solving', 
-      description: 'Master business cases, product cases, and structured problem-solving',
+      title: 'Case Studies', 
+      description: 'Business cases, product cases, and structured problem-solving',
       color: 'bg-[#ee7e65]'
     },
     { 
       icon: MessageSquare, 
-      title: 'Behavioral & Leadership', 
-      description: 'Craft compelling STAR stories and demonstrate leadership qualities',
+      title: 'Behavioral', 
+      description: 'STAR stories, leadership examples, and competency questions',
       color: 'bg-[#768c9c]'
     },
     { 
       icon: Users, 
-      title: 'HR & Culture Fit', 
-      description: 'Practice motivation questions, culture fit, and career alignment discussions',
+      title: 'HR & Culture', 
+      description: 'Motivation, culture fit, and career alignment discussions',
       color: 'bg-[#6c8194]'
     },
   ];
 
   return (
     <div className="min-h-screen bg-brand-dark overflow-hidden">
-      {/* Header */}
       <header className="relative z-50">
         <nav className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex justify-between items-center">
           <Link to="/" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-brand-accent rounded-xl flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-white">Practice Lab</span>
+            <span className="text-lg font-bold text-white">Hiready</span>
           </Link>
           
           <div className="hidden md:flex items-center gap-8">
-            <Link to="/interview" className="text-white/70 hover:text-white font-medium transition-colors">
+            <Link to="/readycheck" className="text-white/70 hover:text-white font-medium transition-colors">
               Practice
             </Link>
-            <Link to="/jobs" className="text-white/70 hover:text-white font-medium transition-colors">
-              Jobs
+            <Link to="/interview" className="text-white/70 hover:text-white font-medium transition-colors">
+              Role Library
+            </Link>
+            <Link to="/employer/login" className="text-white/70 hover:text-white font-medium transition-colors">
+              For Employers
             </Link>
             {isAuthenticated ? (
               <>
@@ -125,10 +150,10 @@ export default function HomePage() {
                   Sign in
                 </Link>
                 <Link
-                  to="/interview"
+                  to="/readycheck"
                   className="px-6 py-2.5 bg-brand-accent text-white rounded-full font-semibold hover:bg-brand-accent/90 transition-all shadow-lg shadow-brand-accent/30"
                 >
-                  Get Started Free
+                  Start Free Interview
                 </Link>
               </>
             )}
@@ -142,14 +167,16 @@ export default function HomePage() {
           </button>
         </nav>
 
-        {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 bg-brand-dark/95 backdrop-blur-xl border-t border-white/10 p-6 space-y-4">
-            <Link to="/interview" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white font-medium">
+            <Link to="/readycheck" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white font-medium">
               Practice
             </Link>
-            <Link to="/jobs" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white font-medium">
-              Jobs
+            <Link to="/interview" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white font-medium">
+              Role Library
+            </Link>
+            <Link to="/employer/login" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white font-medium">
+              For Employers
             </Link>
             {isAuthenticated && (
               <>
@@ -170,8 +197,8 @@ export default function HomePage() {
                   Sign out
                 </button>
               ) : (
-                <Link to="/interview" onClick={() => setMobileMenuOpen(false)} className="block w-full py-3 bg-brand-accent text-white text-center rounded-xl font-semibold">
-                  Get Started Free
+                <Link to="/readycheck" onClick={() => setMobileMenuOpen(false)} className="block w-full py-3 bg-brand-accent text-white text-center rounded-xl font-semibold">
+                  Start Free Interview
                 </Link>
               )}
             </div>
@@ -179,71 +206,71 @@ export default function HomePage() {
         )}
       </header>
 
-      {/* Hero Section */}
       <section className="relative pt-12 pb-20 lg:pt-20 lg:pb-32">
-        {/* Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-accent/20 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-brand-light/10 rounded-full blur-3xl" />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm font-medium mb-6">
-                <Zap className="w-4 h-4 text-brand-accent" />
-                AI-Powered Interview Practice
-              </div>
-              
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-                Ace Your Next
-                <span className="block text-brand-accent">Interview</span>
-              </h1>
-              
-              <p className="text-lg sm:text-xl text-white/60 mb-8 max-w-xl">
-                Practice with AI interviewers that adapt to your role, provide real-time feedback, 
-                and help you prepare for coding, case studies, behavioral, and HR rounds.
-              </p>
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm font-medium mb-6">
+              <Award className="w-4 h-4 text-brand-accent" />
+              Your Interview Readiness Index
+            </div>
+            
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
+              Your CV tells your story.
+              <span className="block text-brand-accent">Hiready shows your readiness.</span>
+            </h1>
+            
+            <p className="text-lg sm:text-xl text-white/60 mb-10 max-w-2xl mx-auto">
+              Practice real interviews, get your Readiness Scorecard, and show the world how prepared you are.
+            </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 mb-10">
-                <Link
-                  to="/interview"
-                  className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-brand-accent text-white rounded-2xl font-semibold text-lg hover:bg-brand-accent/90 transition-all shadow-xl shadow-brand-accent/30 group"
-                >
-                  <Play className="w-5 h-5" />
-                  Start Practicing
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link
-                  to="/jobs"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 text-white rounded-2xl font-semibold text-lg hover:bg-white/20 transition-all border border-white/20"
-                >
-                  <Briefcase className="w-5 h-5" />
-                  Import Job
-                </Link>
-              </div>
-
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Link
+                to="/readycheck"
+                className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-brand-accent text-white rounded-2xl font-semibold text-lg hover:bg-brand-accent/90 transition-all shadow-xl shadow-brand-accent/30 group"
+              >
+                <Play className="w-5 h-5" />
+                Start Free Interview
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                to="/share/example"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 text-white rounded-2xl font-semibold text-lg hover:bg-white/20 transition-all border border-white/20"
+              >
+                <FileText className="w-5 h-5" />
+                View Scorecard Example
+              </Link>
             </div>
 
-            {/* Hero Screenshot */}
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/30 to-brand-light/20 rounded-3xl blur-2xl transform rotate-3" />
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-                <img 
-                  src={interviewScreenshot} 
-                  alt="Interview Practice Selection" 
-                  className="w-full h-auto"
-                />
-              </div>
-              <div className="hidden sm:block absolute -bottom-4 -right-4 bg-white rounded-xl p-3 shadow-xl border border-gray-100">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+            <div className="relative max-w-3xl mx-auto">
+              <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/30 to-brand-light/20 rounded-3xl blur-2xl" />
+              <div className="relative bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="text-left">
+                    <div className="text-white/60 text-sm mb-1">Hiready Index™</div>
+                    <div className="text-5xl font-bold text-white">81<span className="text-2xl text-white/60">/100</span></div>
                   </div>
-                  <div>
-                    <div className="text-xs text-gray-500">Session Complete</div>
-                    <div className="text-sm font-semibold text-gray-900">4.2/5 Score</div>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-full">
+                    <TrendingUp className="w-4 h-4 text-green-400" />
+                    <span className="text-green-400 font-medium text-sm">Ready to Interview</span>
                   </div>
+                </div>
+                <div className="grid grid-cols-5 gap-4">
+                  {indexMetrics.map((metric, idx) => {
+                    const IconComponent = metric.icon;
+                    return (
+                      <div key={idx} className="text-center">
+                        <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-2">
+                          <IconComponent className="w-5 h-5 text-brand-accent" />
+                        </div>
+                        <div className="text-xs text-white/60">{metric.name}</div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -251,134 +278,157 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Interview Types Section */}
       <section className="py-20 bg-[#f8f9fb]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-brand-dark mb-4">
-              Practice Every Interview Type
+              How Hiready Works
             </h2>
             <p className="text-lg text-brand-muted max-w-2xl mx-auto">
-              From coding challenges to behavioral questions, we cover all the rounds you'll face.
+              Get started in minutes. Practice, measure, and prove your readiness.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {interviewTypes.map((type, idx) => {
-              const IconComponent = type.icon;
-              return (
-                <Link
-                  key={idx}
-                  to="/interview"
-                  className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100"
-                >
-                  <div className={`w-14 h-14 ${type.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                    <IconComponent className="w-7 h-7 text-white" />
-                  </div>
-                  <h3 className="text-lg font-bold text-brand-dark mb-2 group-hover:text-brand-accent transition-colors">
-                    {type.title}
-                  </h3>
-                  <p className="text-sm text-brand-muted leading-relaxed">
-                    {type.description}
-                  </p>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Practice Interfaces Gallery */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#ee7e65]/10 rounded-full text-[#ee7e65] text-sm font-medium mb-4">
-              <Play className="w-4 h-4" />
-              See It In Action
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-brand-dark mb-4">
-              Real Practice Interfaces
-            </h2>
-            <p className="text-lg text-brand-muted max-w-2xl mx-auto">
-              Clean, focused interfaces designed to help you practice effectively and track your progress.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            {[
-              { src: roleSelectionScreenshot, title: 'Browse 21+ Role Kits', desc: 'From Business Analyst to Data Scientist - find your career path' },
-              { src: interviewTypesScreenshot, title: 'Four Interview Types', desc: 'Coding, Case Studies, Behavioral, and HR rounds covered' },
-              { src: preSessionScreenshot, title: 'Personalized Session Plan', desc: 'AI builds your interview phases, skills tested, and language options' },
-              { src: liveSessionScreenshot, title: 'Practice with AI Interviewer', desc: 'Face real scenarios with avatar Wayne guiding you through' },
-            ].map((item, idx) => (
-              <div key={idx} className="group">
-                <div className="relative rounded-2xl overflow-hidden shadow-lg border border-gray-200 mb-4 group-hover:shadow-xl transition-shadow">
-                  <img 
-                    src={item.src} 
-                    alt={item.title}
-                    className="w-full h-auto"
-                  />
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            {howItWorksSteps.map((item, idx) => (
+              <div key={idx} className="relative bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                <div className="absolute -top-4 left-6 w-8 h-8 bg-brand-accent rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  {item.step}
                 </div>
-                <h3 className="font-semibold text-brand-dark text-lg mb-1">{item.title}</h3>
-                <p className="text-brand-muted text-sm">{item.desc}</p>
+                <h3 className="text-xl font-bold text-brand-dark mb-3 mt-2">{item.title}</h3>
+                <p className="text-brand-muted leading-relaxed">{item.description}</p>
               </div>
             ))}
           </div>
+
+          <div className="text-center">
+            <Link
+              to="/readycheck"
+              className="inline-flex items-center gap-2 text-brand-accent font-semibold text-lg hover:gap-3 transition-all"
+            >
+              Try Your First Interview
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Results & Feedback Section */}
-      <section className="py-20 bg-[#f8f9fb]">
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-accent/10 rounded-full text-brand-accent text-sm font-medium mb-4">
+                <Zap className="w-4 h-4" />
+                Why Practice Matters
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-brand-dark mb-6">
+                Every interview is practice for the next one.
+              </h2>
+              <p className="text-lg text-brand-muted mb-8">
+                Build confidence through repetition. Hiready lets you rehearse HR, case, technical, and behavioral interviews anytime. Each session enhances your real-world performance.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                {interviewTypes.map((type, idx) => {
+                  const IconComponent = type.icon;
+                  return (
+                    <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                      <div className={`w-10 h-10 ${type.color} rounded-lg flex items-center justify-center`}>
+                        <IconComponent className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-brand-dark text-sm">{type.title}</div>
+                        <div className="text-xs text-brand-muted">{type.description.split(',')[0]}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <Link
+                to="/readycheck"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-brand-accent text-white rounded-xl font-semibold hover:bg-brand-accent/90 transition-colors"
+              >
+                Practice a Skill Now
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/20 to-brand-light/10 rounded-3xl blur-2xl transform rotate-3" />
+              <div className="relative bg-white rounded-3xl shadow-2xl border border-gray-100 p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <div className="text-sm text-brand-muted mb-1">Practice Progress</div>
+                    <div className="text-2xl font-bold text-brand-dark">12 Sessions</div>
+                  </div>
+                  <div className="text-3xl font-bold text-green-600">+23%</div>
+                </div>
+                <div className="space-y-3">
+                  {['Clarity', 'Confidence', 'Structure'].map((skill, idx) => (
+                    <div key={idx}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-brand-muted">{skill}</span>
+                        <span className="font-medium text-brand-dark">{75 + idx * 8}%</span>
+                      </div>
+                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-brand-accent rounded-full transition-all"
+                          style={{ width: `${75 + idx * 8}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-brand-dark">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="order-2 lg:order-1">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-brand-dark/10 to-brand-accent/10 rounded-3xl blur-2xl transform -rotate-3" />
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
-                  <img 
-                    src={resultsScreenshot} 
-                    alt="Interview Results Dashboard" 
-                    className="w-full h-auto"
-                  />
+                <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/30 to-brand-light/20 rounded-3xl blur-2xl transform -rotate-3" />
+                <div className="relative bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-8">
+                  <div className="text-center mb-6">
+                    <div className="text-white/60 text-sm mb-2">Hiready Index™ Score</div>
+                    <div className="text-6xl font-bold text-white mb-2">84</div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/20 rounded-full">
+                      <CheckCircle2 className="w-4 h-4 text-green-400" />
+                      <span className="text-green-400 text-sm font-medium">Interview Ready</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {['Clarity 88%', 'Confidence 82%', 'Structure 86%', 'Role Fit 80%'].map((item, idx) => (
+                      <div key={idx} className="bg-white/5 rounded-lg px-3 py-2 text-center">
+                        <span className="text-white/80 text-sm">{item}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
             
             <div className="order-1 lg:order-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 rounded-full text-green-700 text-sm font-medium mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-accent/20 rounded-full text-brand-accent text-sm font-medium mb-4">
                 <BarChart3 className="w-4 h-4" />
-                Detailed Analytics
+                The Hiready Index
               </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-brand-dark mb-6">
-                Know Exactly Where to Improve
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+                Every response. Every insight. Quantified.
               </h2>
-              <p className="text-lg text-brand-muted mb-8">
-                Every session gives you a detailed breakdown across 8 dimensions, 
-                with specific examples from your answers and actionable improvement tips.
+              <p className="text-lg text-white/60 mb-8">
+                The Hiready Index measures what really matters in interviews – clarity, confidence, communication, and problem-solving. Watch your readiness grow with every session.
               </p>
               
-              <div className="grid grid-cols-2 gap-4 mb-8">
-                {[
-                  { label: 'Clarity & Structure', icon: MessageSquare },
-                  { label: 'Problem Solving', icon: Brain },
-                  { label: 'Role Fit Evidence', icon: Target },
-                  { label: 'Confidence & Composure', icon: Shield },
-                ].map((item, idx) => {
-                  const IconComponent = item.icon;
-                  return (
-                    <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                      <IconComponent className="w-5 h-5 text-[#ee7e65]" />
-                      <span className="text-sm font-medium text-gray-700">{item.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-
               <Link
-                to="/interview"
-                className="inline-flex items-center gap-2 text-brand-accent font-semibold hover:gap-3 transition-all"
+                to="/readycheck"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-brand-accent text-white rounded-xl font-semibold hover:bg-brand-accent/90 transition-colors"
               >
-                Try a practice session
+                Generate My Index
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -386,109 +436,167 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Job Tracking Section */}
-      <section className="py-20 bg-brand-dark">
+      <section className="py-20 bg-[#f8f9fb]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#ee7e65]/20 rounded-full text-[#ee7e65] text-sm font-medium mb-4">
-                <Briefcase className="w-4 h-4" />
-                Job-Specific Prep
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 rounded-full text-green-700 text-sm font-medium mb-4">
+                <Share2 className="w-4 h-4" />
+                Scorecard & Sharing
               </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-                Practice for Your Dream Job
+              <h2 className="text-3xl sm:text-4xl font-bold text-brand-dark mb-6">
+                Turn your practice into proof.
               </h2>
-              <p className="text-lg text-white/60 mb-8">
-                Paste any job description and get tailored interview questions 
-                based on the actual requirements, company culture, and role expectations.
+              <p className="text-lg text-brand-muted mb-8">
+                Get a personalized Readiness Scorecard after each interview – complete with strengths, insights, and improvement plan. Attach it to your CV or share it with recruiters.
               </p>
               
-              <div className="grid grid-cols-2 gap-4 mb-8">
-                {[
-                  { icon: Target, label: 'Job-Specific Questions' },
-                  { icon: Brain, label: 'AI-Parsed Requirements' },
-                  { icon: Clock, label: 'Track Readiness' },
-                  { icon: Star, label: 'Company Insights' },
-                ].map((item, idx) => {
-                  const IconComponent = item.icon;
-                  return (
-                    <div key={idx} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
-                      <IconComponent className="w-5 h-5 text-brand-accent" />
-                      <span className="text-white/80 text-sm font-medium">{item.label}</span>
-                    </div>
-                  );
-                })}
+              <div className="flex flex-wrap gap-3 mb-8">
+                <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-brand-dark hover:bg-gray-50 transition-colors">
+                  <Download className="w-4 h-4" />
+                  Download Scorecard PDF
+                </button>
+                <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-brand-dark hover:bg-gray-50 transition-colors">
+                  <Share2 className="w-4 h-4" />
+                  Copy Share Link
+                </button>
               </div>
 
-              <Link
-                to="/jobs"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#ee7e65] text-white rounded-xl font-semibold hover:bg-[#e06a50] transition-colors"
-              >
-                <Briefcase className="w-5 h-5" />
-                Add Your Job Target
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-brand-accent/10 rounded-xl flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-brand-accent" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-brand-muted">Your shareable link</div>
+                    <div className="font-medium text-brand-dark">hiready.app/share/abc123</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#ee7e65]/30 to-[#768c9c]/20 rounded-3xl blur-2xl transform rotate-3" />
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-                <img 
-                  src={dashboardScreenshot} 
-                  alt="Dashboard with Job Tracking" 
-                  className="w-full h-auto"
-                />
+              <div className="absolute inset-0 bg-gradient-to-br from-brand-dark/10 to-brand-accent/10 rounded-3xl blur-2xl transform rotate-3" />
+              <div className="relative bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+                <div className="bg-brand-dark p-6 text-center">
+                  <div className="text-white/60 text-sm mb-1">Readiness Scorecard</div>
+                  <div className="text-3xl font-bold text-white">Product Manager</div>
+                </div>
+                <div className="p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-brand-muted">Overall Index</span>
+                    <span className="text-2xl font-bold text-brand-dark">84/100</span>
+                  </div>
+                  <div className="space-y-2">
+                    {[
+                      { label: 'Clarity & Structure', score: 88 },
+                      { label: 'Problem Solving', score: 82 },
+                      { label: 'Role Fit Evidence', score: 80 },
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between py-2 border-b border-gray-100">
+                        <span className="text-sm text-brand-muted">{item.label}</span>
+                        <span className="font-medium text-brand-dark">{item.score}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-20 bg-[#f8f9fb]">
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-brand-dark mb-4">
-              How It Works
-            </h2>
-            <p className="text-lg text-brand-muted max-w-2xl mx-auto">
-              Get started in minutes. No complex setup required.
-            </p>
-          </div>
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div className="relative order-2 lg:order-1">
+              <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/20 to-brand-light/10 rounded-3xl blur-2xl transform -rotate-3" />
+              <div className="relative bg-white rounded-3xl shadow-2xl border border-gray-100 p-8">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-brand-dark rounded-xl flex items-center justify-center">
+                    <Building2 className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-brand-dark">Acme Corp</div>
+                    <div className="text-sm text-brand-muted">3 open positions</div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  {['Senior PM - 12 candidates', 'Data Analyst - 8 candidates', 'UX Designer - 5 candidates'].map((job, idx) => (
+                    <div key={idx} className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-xl">
+                      <span className="text-sm font-medium text-brand-dark">{job}</span>
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Active</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            <div className="order-1 lg:order-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-dark/10 rounded-full text-brand-dark text-sm font-medium mb-4">
+                <Building2 className="w-4 h-4" />
+                For Employers
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-brand-dark mb-6">
+                Hire smarter with Hiready.
+              </h2>
+              <p className="text-lg text-brand-muted mb-8">
+                Automate candidate screening with structured AI interviews. Get instant Readiness Summaries and see how each applicant performs in real conversation.
+              </p>
+              
+              <div className="space-y-3 mb-8">
+                {[
+                  'AI-suggested assessments per job role',
+                  'Automated candidate scoring and summaries',
+                  'Insightful analytics dashboard',
+                ].map((feature, idx) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    <span className="text-brand-muted">{feature}</span>
+                  </div>
+                ))}
+              </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+              <Link
+                to="/employer/login"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-brand-dark text-white rounded-xl font-semibold hover:bg-brand-dark/90 transition-colors"
+              >
+                Learn More for Employers
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-[#f8f9fb]">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-accent/10 rounded-full text-brand-accent text-sm font-medium mb-4">
+            <Star className="w-4 h-4" />
+            Join the Community
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-brand-dark mb-4">
+            Join 10,000+ professionals improving their readiness with Hiready.
+          </h2>
+          <p className="text-lg text-brand-muted mb-8 max-w-2xl mx-auto">
+            Real professionals, real results. From students to mid-career leaders, Hiready users report higher confidence, clarity, and success in real interviews.
+          </p>
+          
+          <div className="grid sm:grid-cols-3 gap-6 mb-10">
             {[
-              {
-                step: '01',
-                title: 'Choose Your Path',
-                description: 'Select a role kit, interview type, or import a specific job you\'re applying for.'
-              },
-              {
-                step: '02',
-                title: 'Practice with AI',
-                description: 'Have a realistic conversation with an AI interviewer that adapts to your responses.'
-              },
-              {
-                step: '03',
-                title: 'Get Detailed Feedback',
-                description: 'Receive comprehensive analysis with scores, specific examples, and improvement tips.'
-              },
+              { stat: '10,000+', label: 'Interviews Completed' },
+              { stat: '87%', label: 'Report Higher Confidence' },
+              { stat: '4.8/5', label: 'User Satisfaction' },
             ].map((item, idx) => (
-              <div key={idx} className="relative">
-                <div className="text-6xl font-bold text-brand-accent/10 absolute -top-4 -left-2">
-                  {item.step}
-                </div>
-                <div className="relative pt-8">
-                  <h3 className="text-xl font-bold text-brand-dark mb-3">{item.title}</h3>
-                  <p className="text-brand-muted leading-relaxed">{item.description}</p>
-                </div>
+              <div key={idx} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div className="text-3xl font-bold text-brand-accent mb-1">{item.stat}</div>
+                <div className="text-sm text-brand-muted">{item.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
           <div className="bg-gradient-to-br from-brand-dark to-[#0a3d5c] rounded-3xl p-10 lg:p-16">
@@ -496,24 +604,31 @@ export default function HomePage() {
               <Sparkles className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Ready to Ace Your Interview?
+              Show, don't tell — prove you're interview-ready.
             </h2>
             <p className="text-lg text-white/60 mb-8 max-w-xl mx-auto">
-              Join thousands of professionals who've improved their interview skills with Practice Lab.
+              Attach your Hiready Scorecard. Let your performance speak.
             </p>
-            <Link
-              to="/interview"
-              className="inline-flex items-center justify-center gap-3 px-10 py-5 bg-brand-accent text-white rounded-2xl font-semibold text-lg hover:bg-brand-accent/90 transition-all shadow-xl shadow-brand-accent/30 group"
-            >
-              <Play className="w-5 h-5" />
-              Start Your First Session
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/readycheck"
+                className="inline-flex items-center justify-center gap-3 px-10 py-5 bg-brand-accent text-white rounded-2xl font-semibold text-lg hover:bg-brand-accent/90 transition-all shadow-xl shadow-brand-accent/30 group"
+              >
+                <Play className="w-5 h-5" />
+                Get My Readiness Score
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                to="/employer/login"
+                className="inline-flex items-center justify-center gap-2 px-8 py-5 bg-white/10 text-white rounded-2xl font-semibold text-lg hover:bg-white/20 transition-all border border-white/20"
+              >
+                Book Employer Demo
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-brand-dark border-t border-white/10 py-12">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
@@ -521,21 +636,21 @@ export default function HomePage() {
               <div className="w-8 h-8 bg-brand-accent rounded-lg flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
-              <span className="text-white font-bold">Practice Lab</span>
+              <span className="text-white font-bold">Hiready</span>
             </div>
             <div className="flex items-center gap-8">
-              <Link to="/interview" className="text-white/60 hover:text-white text-sm transition-colors">
-                Practice
+              <Link to="/readycheck" className="text-white/60 hover:text-white text-sm transition-colors">
+                For Candidates
               </Link>
-              <Link to="/jobs" className="text-white/60 hover:text-white text-sm transition-colors">
-                Jobs
+              <Link to="/employer/login" className="text-white/60 hover:text-white text-sm transition-colors">
+                For Employers
               </Link>
               <Link to="/login" className="text-white/60 hover:text-white text-sm transition-colors">
                 Sign In
               </Link>
             </div>
             <p className="text-white/40 text-sm">
-              © {new Date().getFullYear()} Ascend Business Solutions
+              © {new Date().getFullYear()} Hiready. All rights reserved.
             </p>
           </div>
         </div>
