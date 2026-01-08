@@ -62,7 +62,7 @@ Complete platform rebranding and new features:
 3. **Self-Practice Landing** (`/readycheck`)
    - Simplified two-tab input: Paste JD or LinkedIn URL
    - Session storage preserves data through auth redirect
-   - `/readycheck/launch` hydrates data post-auth and auto-routes to interview config
+   - `/readycheck/launch` hydrates data post-auth and auto-routes to `/jobs/:jobTargetId`
    - LinkedIn URL parsing via `/api/readycheck/parse-linkedin`
 
 4. **Payment System** (Razorpay integration)

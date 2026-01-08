@@ -43,7 +43,7 @@ export default function ReadycheckLaunchPage() {
             sessionStorage.removeItem("returnTo");
             
             setStatus("Setting up your practice session...");
-            navigate(`/interview/config?jobTargetId=${data.jobTarget.id}`);
+            navigate(`/jobs/${data.jobTarget.id}`);
           } else {
             setError("Could not analyze the job description. Please try again.");
           }
@@ -71,7 +71,7 @@ export default function ReadycheckLaunchPage() {
             sessionStorage.removeItem("returnTo");
             
             setStatus("Setting up your practice session...");
-            navigate(`/interview/config?jobTargetId=${data.jobTarget.id}`);
+            navigate(`/jobs/${data.jobTarget.id}`);
           } else if (data.success && data.jdText) {
             sessionStorage.setItem("readycheck_jd", data.jdText);
             sessionStorage.setItem("readycheck_type", "jd");
