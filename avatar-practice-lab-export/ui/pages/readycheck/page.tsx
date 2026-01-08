@@ -1,27 +1,23 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import { 
-  FileText,
-  Linkedin,
   ArrowRight,
-  Target,
   Sparkles,
   CheckCircle,
-  Zap,
-  Shield
+  Loader2,
+  FileText,
+  Link as LinkIcon,
+  Clock,
+  Target,
+  BarChart3
 } from "lucide-react";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function ReadycheckPage() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-  const [jdText, setJdText] = useState("");
-  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [inputValue, setInputValue] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [activeTab, setActiveTab] = useState("jd");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -37,32 +33,33 @@ export default function ReadycheckPage() {
     checkAuth();
   }, []);
 
-  const handleContinue = async () => {
+  const isLinkedInUrl = (text: string) => {
+    return text.includes("linkedin.com/jobs") || text.includes("linkedin.com/job");
+  };
+
+  const inputType = isLinkedInUrl(inputValue) ? "linkedin" : "jd";
+
+  const handleStart = async () => {
     setError("");
     
-    if (activeTab === "jd" && !jdText.trim()) {
-      setError("Please paste a job description to continue.");
-      return;
-    }
-    
-    if (activeTab === "linkedin" && !linkedinUrl.trim()) {
-      setError("Please enter a LinkedIn URL to continue.");
+    if (!inputValue.trim()) {
+      setError("Please paste a job description or LinkedIn URL");
       return;
     }
 
-    if (activeTab === "linkedin" && !linkedinUrl.includes("linkedin.com")) {
-      setError("Please enter a valid LinkedIn URL.");
+    if (inputValue.trim().length < 50 && !isLinkedInUrl(inputValue)) {
+      setError("Please paste a complete job description (at least 50 characters)");
       return;
     }
 
     setIsProcessing(true);
 
-    if (activeTab === "jd") {
-      sessionStorage.setItem("readycheck_jd", jdText);
-      sessionStorage.setItem("readycheck_type", "jd");
-    } else {
-      sessionStorage.setItem("readycheck_linkedin", linkedinUrl);
+    if (inputType === "linkedin") {
+      sessionStorage.setItem("readycheck_linkedin", inputValue);
       sessionStorage.setItem("readycheck_type", "linkedin");
+    } else {
+      sessionStorage.setItem("readycheck_jd", inputValue);
+      sessionStorage.setItem("readycheck_type", "jd");
     }
 
     if (!isLoggedIn) {
@@ -74,149 +71,131 @@ export default function ReadycheckPage() {
     navigate("/readycheck/launch");
   };
 
+  const benefits = [
+    { icon: Clock, text: "10-minute practice session" },
+    { icon: Target, text: "Questions tailored to your role" },
+    { icon: BarChart3, text: "Instant feedback & score" },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c]">
-      <div className="container mx-auto px-4 py-12 max-w-2xl">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-            <Target className="w-5 h-5 text-[#ee7e65]" />
-            <span className="text-white font-semibold">Hiready</span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Get Your{" "}
-            <span className="text-[#ee7e65]">Hiready Index</span>
-          </h1>
-          <p className="text-white/70 text-lg max-w-xl mx-auto">
-            Practice a real interview and get your readiness score in minutes.
-          </p>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 mb-8">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 rounded-xl">
-              <TabsTrigger 
-                value="jd" 
-                className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg py-3"
-              >
-                <FileText className="w-4 h-4 mr-2" />
-                Paste JD
-              </TabsTrigger>
-              <TabsTrigger 
-                value="linkedin" 
-                className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg py-3"
-              >
-                <Linkedin className="w-4 h-4 mr-2" />
-                LinkedIn URL
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="jd" className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Paste the Job Description
-                </label>
-                <textarea
-                  value={jdText}
-                  onChange={(e) => {
-                    setJdText(e.target.value);
-                    setError("");
-                  }}
-                  placeholder="Paste the full job description here...
-
-We'll analyze the role requirements and create a personalized interview practice session tailored to this specific job."
-                  className="w-full h-56 p-4 border border-gray-200 rounded-xl text-sm resize-none focus:ring-2 focus:ring-[#ee7e65] focus:border-transparent transition-all"
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                  {jdText.length > 0 && `${jdText.length} characters`}
-                </p>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="linkedin" className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  LinkedIn Job URL
-                </label>
-                <Input
-                  type="url"
-                  value={linkedinUrl}
-                  onChange={(e) => {
-                    setLinkedinUrl(e.target.value);
-                    setError("");
-                  }}
-                  placeholder="https://linkedin.com/jobs/view/..."
-                  className="h-12 text-base"
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                  Paste the LinkedIn job posting URL and we'll extract the details.
-                </p>
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-              {error}
+    <div className="min-h-screen bg-gradient-to-b from-[#042c4c] to-[#0a3d66] flex flex-col">
+      {/* Header */}
+      <header className="p-4 sm:p-6">
+        <div className="max-w-4xl mx-auto flex justify-between items-center">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-[#ee7e65] rounded-lg flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-white" />
             </div>
-          )}
-
-          <Button 
-            onClick={handleContinue}
-            disabled={isProcessing}
-            className="w-full mt-6 bg-[#ee7e65] hover:bg-[#d96a52] h-14 text-lg font-semibold rounded-xl"
-          >
-            {isProcessing ? (
-              <>
-                <LoadingSpinner className="w-5 h-5 mr-2" />
-                Processing...
-              </>
-            ) : (
-              <>
-                Start Free Interview
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </>
-            )}
-          </Button>
-
-          <p className="text-center text-sm text-gray-500 mt-4">
-            Already have an account?{" "}
-            <Link to="/login" className="text-[#ee7e65] font-medium hover:underline">
-              Log in
+            <span className="font-bold text-white text-lg">Hiready</span>
+          </Link>
+          {isLoggedIn && (
+            <Link to="/avatar/dashboard">
+              <Button variant="ghost" size="sm" className="text-white/70 hover:text-white hover:bg-white/10">
+                Dashboard
+              </Button>
             </Link>
-          </p>
+          )}
         </div>
+      </header>
 
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-            <div className="w-10 h-10 rounded-full bg-[#ee7e65]/20 flex items-center justify-center mx-auto mb-3">
-              <Zap className="w-5 h-5 text-[#ee7e65]" />
-            </div>
-            <h3 className="font-medium text-white text-sm mb-1">AI-Powered</h3>
-            <p className="text-xs text-white/60">Realistic interview</p>
+      {/* Main Content */}
+      <main className="flex-1 flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-xl">
+          {/* Title */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
+              Start your interview prep
+            </h1>
+            <p className="text-white/60 text-lg">
+              Paste a job description or LinkedIn job URL below
+            </p>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-            <div className="w-10 h-10 rounded-full bg-[#ee7e65]/20 flex items-center justify-center mx-auto mb-3">
-              <Sparkles className="w-5 h-5 text-[#ee7e65]" />
-            </div>
-            <h3 className="font-medium text-white text-sm mb-1">Hiready Index</h3>
-            <p className="text-xs text-white/60">Readiness score</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-            <div className="w-10 h-10 rounded-full bg-[#ee7e65]/20 flex items-center justify-center mx-auto mb-3">
-              <CheckCircle className="w-5 h-5 text-[#ee7e65]" />
-            </div>
-            <h3 className="font-medium text-white text-sm mb-1">1 Free</h3>
-            <p className="text-xs text-white/60">Per role</p>
-          </div>
-        </div>
 
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 text-white/50 text-sm">
-            <Shield className="w-4 h-4" />
-            Your data is secure and never shared
+          {/* Input Card */}
+          <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
+            <div className="relative">
+              <textarea
+                value={inputValue}
+                onChange={(e) => {
+                  setInputValue(e.target.value);
+                  setError("");
+                }}
+                placeholder="Paste job description or LinkedIn job URL here..."
+                className="w-full h-40 sm:h-48 p-4 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#ee7e65] focus:border-transparent text-gray-800 placeholder:text-gray-400"
+              />
+              
+              {/* Input type indicator */}
+              {inputValue.trim() && (
+                <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                  {inputType === "linkedin" ? (
+                    <>
+                      <LinkIcon className="w-3 h-3" />
+                      LinkedIn URL detected
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="w-3 h-3" />
+                      Job description
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {error && (
+              <p className="text-red-500 text-sm mt-3">{error}</p>
+            )}
+
+            <Button
+              onClick={handleStart}
+              disabled={isProcessing}
+              className="w-full mt-4 h-12 bg-[#ee7e65] hover:bg-[#e06a50] text-white text-base font-medium"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  Start Free Interview
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </>
+              )}
+            </Button>
+
+            <p className="text-center text-sm text-gray-500 mt-4">
+              <CheckCircle className="w-4 h-4 inline mr-1 text-green-500" />
+              Free • No credit card required
+            </p>
+          </div>
+
+          {/* Benefits */}
+          <div className="mt-8 flex flex-wrap justify-center gap-4 sm:gap-6">
+            {benefits.map((b, i) => (
+              <div key={i} className="flex items-center gap-2 text-white/70 text-sm">
+                <b.icon className="w-4 h-4 text-[#ee7e65]" />
+                <span>{b.text}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* How it works link */}
+          <div className="text-center mt-8">
+            <Link 
+              to="/#how-it-works" 
+              className="text-white/50 hover:text-white/80 text-sm underline underline-offset-4"
+            >
+              How does this work?
+            </Link>
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="p-4 text-center text-white/30 text-sm">
+        © {new Date().getFullYear()} Hiready
+      </footer>
     </div>
   );
 }
