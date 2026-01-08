@@ -47,6 +47,9 @@ import ProfilePage from './pages/profile/page';
 import JobsPage from './pages/jobs/page';
 import JobDetailPage from './pages/jobs/detail-page';
 import PublicSharePage from './pages/share/page';
+import ApplyPage from './pages/apply/page';
+import ReadycheckPage from './pages/readycheck/page';
+import CompanyDashboard from './pages/company/page';
 
 export default function App() {
   return (
@@ -97,6 +100,9 @@ export default function App() {
         <Route path="/jobs" element={<ProtectedRoute><JobsPage /></ProtectedRoute>} />
         <Route path="/jobs/:jobId" element={<ProtectedRoute><JobDetailPage /></ProtectedRoute>} />
         <Route path="/share/:shareToken" element={<PublicSharePage />} />
+        <Route path="/apply/:slug" element={<ApplyPage />} />
+        <Route path="/readycheck" element={<ReadycheckPage />} />
+        <Route path="/company" element={<ProtectedRoute><CompanyDashboard /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </RealtimeSessionPrewarmProvider>

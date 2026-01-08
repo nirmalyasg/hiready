@@ -7,6 +7,8 @@ import { interviewRouter } from "./routes/interview.js";
 import { exerciseModeRouter } from "./routes/exercise-mode.js";
 import { realtimeRouter } from "./routes/realtime.js";
 import { jobsRouter } from "./routes/jobs.js";
+import employerRouter from "./routes/employer.js";
+import paymentsRouter from "./routes/payments.js";
 import { setupAuth } from "./replitAuth.js";
 import dotenv from "dotenv";
 
@@ -94,6 +96,30 @@ async function startServer() {
 
   // Mount jobs/career target routes
   app.use("/api/jobs", jobsRouter);
+
+  // Middleware to populate req.user from session for employer routes
+  app.use("/api/employer", (req, res, next) => {
+    const sessionUser = (req.session as any)?.user;
+    if (sessionUser) {
+      req.user = sessionUser;
+    }
+    next();
+  });
+
+  // Mount employer workspace routes
+  app.use("/api/employer", employerRouter);
+
+  // Middleware to populate req.user from session for payments routes
+  app.use("/api/payments", (req, res, next) => {
+    const sessionUser = (req.session as any)?.user;
+    if (sessionUser) {
+      req.user = sessionUser;
+    }
+    next();
+  });
+
+  // Mount payments/subscription routes
+  app.use("/api/payments", paymentsRouter);
 
   // Health check
   app.get("/health", (req, res) => {
