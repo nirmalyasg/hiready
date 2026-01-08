@@ -167,13 +167,19 @@ employerRouter.get("/jobs", requireEmployerAuth, async (req: Request, res: Respo
       return res.status(403).json({ success: false, error: "No company associated with this account" });
     }
 
-    const jobs = await db
-      .select()
-      .from(employerJobs)
-      .where(eq(employerJobs.companyId, employerUser.companyId))
-      .orderBy(desc(employerJobs.createdAt));
+    const rawJobs = await db.execute(sql`
+      SELECT id, company_id as "companyId", title, jd_text as "jdText", jd_url as "jdUrl",
+             role_kit_id as "roleKitId", role_archetype_id as "roleArchetypeId",
+             assessment_config as "assessmentConfig", status, apply_link_slug as "applyLinkSlug",
+             candidate_count as "candidateCount", generated_interview_plan as "generatedInterviewPlan",
+             company_archetype as "companyArchetype", archetype_confidence as "archetypeConfidence",
+             created_at as "createdAt", updated_at as "updatedAt"
+      FROM employer_jobs 
+      WHERE company_id = ${employerUser.companyId}
+      ORDER BY created_at DESC
+    `);
 
-    res.json({ success: true, jobs });
+    res.json({ success: true, jobs: rawJobs.rows });
   } catch (error: any) {
     console.error("Error fetching jobs:", error);
     res.status(500).json({ success: false, error: error.message });

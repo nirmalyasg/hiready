@@ -43,16 +43,43 @@ interface Company {
   userRole: string;
 }
 
+interface InterviewPhase {
+  name: string;
+  category: string;
+  mins: number;
+  practiceMode: string;
+  description: string;
+}
+
+interface GeneratedInterviewPlan {
+  phases: InterviewPhase[];
+  totalMinutes: number;
+  roleArchetype?: {
+    id: string | null;
+    name: string | null;
+    family: string | null;
+    confidence: string;
+  };
+  companyArchetype?: {
+    name: string;
+    archetype: string | null;
+    confidence: string;
+  };
+  generatedAt?: string;
+}
+
 interface Job {
   id: string;
   title: string;
   status: string;
   applyLinkSlug: string;
   candidateCount: number;
+  jdText?: string;
   assessmentConfig: {
     interviewTypes: string[];
     totalDuration?: number;
   };
+  generatedInterviewPlan?: GeneratedInterviewPlan;
   createdAt: string;
 }
 
@@ -122,6 +149,8 @@ export default function CompanyDashboard() {
   const [newJobTitle, setNewJobTitle] = useState("");
   const [newJobJd, setNewJobJd] = useState("");
   const [candidateSearch, setCandidateSearch] = useState("");
+  const [isJobDialogOpen, setIsJobDialogOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     checkEmployerAuth();
@@ -180,7 +209,7 @@ export default function CompanyDashboard() {
 
   useEffect(() => {
     if (selectedCompany) {
-      fetchJobs(selectedCompany.id);
+      fetchJobs();
     }
   }, [selectedCompany]);
 
@@ -207,21 +236,25 @@ export default function CompanyDashboard() {
     }
   };
 
-  const fetchJobs = async (companyId: string) => {
+  const fetchJobs = async () => {
     try {
       const response = await fetch(`/api/employer/jobs`, { credentials: "include" });
       const data = await response.json();
       if (data.success) {
-        setJobs(data.jobs);
-        if (data.jobs.length > 0) {
+        setJobs(data.jobs || []);
+        if (data.jobs && data.jobs.length > 0) {
           setSelectedJob(data.jobs[0]);
         } else {
           setSelectedJob(null);
           setCandidates([]);
         }
+      } else {
+        console.error("Failed to fetch jobs:", data.error);
+        setJobs([]);
       }
     } catch (err) {
       console.error("Error fetching jobs:", err);
+      setJobs([]);
     }
   };
 
@@ -271,15 +304,23 @@ export default function CompanyDashboard() {
         body: JSON.stringify({ 
           title: newJobTitle,
           jdText: newJobJd || null,
-          assessmentConfig: { interviewTypes: ["hr", "technical"], totalDuration: 45 },
         }),
       });
       const data = await response.json();
       if (data.success) {
-        setJobs([data.job, ...jobs]);
-        setSelectedJob(data.job);
+        const newJob = {
+          ...data.job,
+          generatedInterviewPlan: data.job.generatedInterviewPlan,
+          candidateCount: 0,
+        };
+        setJobs([newJob, ...jobs]);
+        setSelectedJob(newJob);
         setNewJobTitle("");
         setNewJobJd("");
+        setIsJobDialogOpen(false);
+        const phaseCount = data.job.generatedInterviewPlan?.phases?.length || 0;
+        setSuccessMessage(`Job created with ${phaseCount} interview phases!`);
+        setTimeout(() => setSuccessMessage(null), 4000);
       }
     } catch (err) {
       console.error("Error creating job:", err);
@@ -376,6 +417,12 @@ export default function CompanyDashboard() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fb]">
+      {successMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-emerald-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+          <CheckCircle className="w-5 h-5" />
+          {successMessage}
+        </div>
+      )}
       <div className="bg-gradient-to-r from-[#042c4c] to-[#0a3d66] text-white">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
@@ -390,7 +437,7 @@ export default function CompanyDashboard() {
             </div>
             
             <div className="flex items-center gap-3">
-              <Dialog>
+              <Dialog open={isJobDialogOpen} onOpenChange={setIsJobDialogOpen}>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
                     <Plus className="w-4 h-4 mr-2" />
@@ -413,18 +460,26 @@ export default function CompanyDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Job Description (optional)</label>
                       <textarea
-                        placeholder="Paste the job description..."
+                        placeholder="Paste the job description to auto-generate interview plan..."
                         value={newJobJd}
                         onChange={(e) => setNewJobJd(e.target.value)}
                         className="w-full h-32 p-3 border rounded-lg text-sm resize-none"
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        The system will analyze the JD to create a tailored interview assessment plan.
+                      </p>
                     </div>
                     <Button 
                       onClick={handleCreateJob}
                       disabled={!newJobTitle.trim() || isCreatingJob}
                       className="w-full bg-[#ee7e65] hover:bg-[#d96a52]"
                     >
-                      {isCreatingJob ? <LoadingSpinner className="w-4 h-4" /> : "Create Job"}
+                      {isCreatingJob ? (
+                        <span className="flex items-center gap-2">
+                          <LoadingSpinner className="w-4 h-4" />
+                          Analyzing & Creating...
+                        </span>
+                      ) : "Create Job"}
                     </Button>
                   </div>
                 </DialogContent>
@@ -512,6 +567,50 @@ export default function CompanyDashboard() {
                       </div>
                     </CardContent>
                   </Card>
+
+                  {selectedJob.generatedInterviewPlan?.phases && selectedJob.generatedInterviewPlan.phases.length > 0 && (
+                    <Card>
+                      <CardHeader className="pb-3 border-b">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <CardTitle className="text-base">Interview Assessment Plan</CardTitle>
+                            <p className="text-sm text-gray-500 mt-1">
+                              Auto-generated from job description
+                              {selectedJob.generatedInterviewPlan.roleArchetype?.name && (
+                                <span className="ml-2">
+                                  • Role: <span className="font-medium text-[#042c4c]">{selectedJob.generatedInterviewPlan.roleArchetype.name}</span>
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            {selectedJob.generatedInterviewPlan.totalMinutes || 
+                              selectedJob.generatedInterviewPlan.phases.reduce((acc, p) => acc + p.mins, 0)} mins total
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-4">
+                        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                          {selectedJob.generatedInterviewPlan.phases.map((phase, index) => (
+                            <div 
+                              key={index}
+                              className="p-3 rounded-lg border bg-gray-50 hover:bg-gray-100 transition-colors"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <h4 className="font-medium text-gray-900 text-sm">{phase.name}</h4>
+                                  <p className="text-xs text-gray-500 mt-1">{phase.description}</p>
+                                </div>
+                                <Badge variant="secondary" className="text-xs shrink-0 ml-2">
+                                  {phase.mins} min
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
 
                   <Card>
                     <CardHeader className="pb-3 border-b">
