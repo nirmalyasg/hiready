@@ -54,34 +54,26 @@ export default function ReadycheckLaunchPage() {
             return;
           }
 
-          setStatus("Fetching job details from LinkedIn...");
+          setStatus("Importing job from LinkedIn...");
 
-          const response = await fetch("/api/readycheck/parse-linkedin", {
+          const response = await fetch("/api/jobs/import-linkedin", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
-            body: JSON.stringify({ linkedinUrl }),
+            body: JSON.stringify({ url: linkedinUrl }),
           });
 
           const data = await response.json();
 
-          if (data.success && data.jobTarget) {
+          if (data.success && data.job) {
             sessionStorage.removeItem("readycheck_linkedin");
             sessionStorage.removeItem("readycheck_type");
             sessionStorage.removeItem("returnTo");
             
             setStatus("Setting up your practice session...");
-            navigate(`/jobs/${data.jobTarget.id}`);
-          } else if (data.success && data.jdText) {
-            sessionStorage.setItem("readycheck_jd", data.jdText);
-            sessionStorage.setItem("readycheck_type", "jd");
-            sessionStorage.removeItem("readycheck_linkedin");
-            
-            setStatus("Analyzing extracted job description...");
-            await processAndLaunch();
-            return;
+            navigate(`/jobs/${data.job.id}`);
           } else {
-            setError(data.error || "Could not fetch job details from LinkedIn. Please paste the job description instead.");
+            setError(data.error || "Could not import job from LinkedIn. Please paste the job description instead.");
           }
         }
       } catch (err) {
