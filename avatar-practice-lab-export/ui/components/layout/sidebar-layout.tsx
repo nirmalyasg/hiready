@@ -51,7 +51,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
     <div className="min-h-screen bg-[#f8f9fb]">
       {/* Desktop Sidebar - Hidden on mobile */}
       <aside className={cn(
-        "hidden lg:block fixed top-0 left-0 h-full bg-gradient-to-b from-[#1e40af] to-[#1e3a5f] z-50 transition-all duration-300 ease-out",
+        "hidden lg:block fixed top-0 left-0 h-full bg-gradient-to-b from-[#042c4c] to-[#0a3d62] z-50 transition-all duration-300 ease-out",
         collapsed ? "w-20" : "w-64"
       )}>
         <div className="flex flex-col h-full">
@@ -64,7 +64,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
               <div className="w-9 h-9 bg-white/10 backdrop-blur rounded-xl flex items-center justify-center border border-white/20">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
-              <span className="text-white font-bold text-lg">Hiready</span>
+              <span className="text-white font-bold text-lg">SkillLift</span>
             </Link>
             {collapsed && (
               <Link to="/">
@@ -93,7 +93,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                     collapsed && "justify-center px-0"
                   )}
                 >
-                  <Icon className={cn("w-5 h-5 flex-shrink-0", active && "text-[#2563eb]")} />
+                  <Icon className={cn("w-5 h-5 flex-shrink-0", active && "text-[#ee7e65]")} />
                   <span className={cn(collapsed && "hidden")}>{item.label}</span>
                 </Link>
               );
@@ -117,8 +117,8 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                       className="w-9 h-9 rounded-full object-cover ring-2 ring-white/20"
                     />
                   ) : (
-                    <div className="w-9 h-9 rounded-full bg-[#60a5fa]/20 flex items-center justify-center">
-                      <User className="w-4 h-4 text-[#60a5fa]" />
+                    <div className="w-9 h-9 rounded-full bg-[#ee7e65]/20 flex items-center justify-center">
+                      <User className="w-4 h-4 text-[#ee7e65]" />
                     </div>
                   )}
                   <div className={cn("flex-1 min-w-0", collapsed && "hidden")}>

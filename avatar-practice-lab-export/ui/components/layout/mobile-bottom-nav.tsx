@@ -52,19 +52,19 @@ export default function MobileBottomNav() {
               className={cn(
                 "flex flex-col items-center justify-center flex-1 gap-0.5 transition-all duration-200 active:scale-95",
                 active 
-                  ? "text-[#2563eb]" 
+                  ? "text-[#ee7e65]" 
                   : "text-slate-400"
               )}
             >
               <div className={cn(
                 "p-1.5 rounded-xl transition-colors",
-                active && "bg-[#2563eb]/10"
+                active && "bg-[#ee7e65]/10"
               )}>
                 <Icon className="w-5 h-5" />
               </div>
               <span className={cn(
                 "text-[10px] font-semibold",
-                active ? "text-[#2563eb]" : "text-slate-500"
+                active ? "text-[#ee7e65]" : "text-slate-500"
               )}>
                 {label}
               </span>
