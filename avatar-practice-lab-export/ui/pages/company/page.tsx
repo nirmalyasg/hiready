@@ -209,7 +209,7 @@ export default function CompanyDashboard() {
 
   const fetchJobs = async (companyId: string) => {
     try {
-      const response = await fetch(`/api/employer/companies/${companyId}/jobs`, { credentials: "include" });
+      const response = await fetch(`/api/employer/jobs`, { credentials: "include" });
       const data = await response.json();
       if (data.success) {
         setJobs(data.jobs);
@@ -264,7 +264,7 @@ export default function CompanyDashboard() {
     if (!newJobTitle.trim() || !selectedCompany) return;
     setIsCreatingJob(true);
     try {
-      const response = await fetch(`/api/employer/companies/${selectedCompany.id}/jobs`, {
+      const response = await fetch(`/api/employer/jobs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -291,7 +291,7 @@ export default function CompanyDashboard() {
   const handleUpdateCandidateStatus = async (candidateId: string, status: string) => {
     try {
       const response = await fetch(`/api/employer/candidates/${candidateId}/status`, {
-        method: "PATCH",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ status }),
