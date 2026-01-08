@@ -334,7 +334,7 @@ export default function AvatarSimulatorDashboard() {
 
         {/* Quick Action Bar */}
         <div className="flex gap-3">
-          <Link to="/interview/custom" className="flex-1">
+          <Link to="/readycheck" className="flex-1">
             <Button className="w-full gap-2 h-12 bg-[#ee7e65] hover:bg-[#e06a50]">
               <Play className="w-4 h-4" />
               Practice Interview
@@ -363,7 +363,7 @@ export default function AvatarSimulatorDashboard() {
                 const practiceType = needsBehavioral ? 'Behavioral' : needsTechnical ? 'Technical' : 'Mock Interview';
                 
                 return (
-                  <Link key={job.id} to={`/interview/custom?company=${encodeURIComponent(job.companyName || '')}&role=${encodeURIComponent(job.roleTitle)}`} className="block">
+                  <Link key={job.id} to={`/jobs/${job.id}`} className="block">
                     <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -549,7 +549,7 @@ export default function AvatarSimulatorDashboard() {
                 Complete your first practice session or add a job target to get personalized recommendations.
               </p>
               <div className="flex justify-center gap-3">
-                <Link to="/interview/custom">
+                <Link to="/readycheck">
                   <Button className="bg-white text-[#042c4c] hover:bg-white/90">
                     Start Practice
                   </Button>
