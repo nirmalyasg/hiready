@@ -6,6 +6,7 @@ import {
   interviewConfigs,
   employerCandidates,
   employerJobs,
+  jobTargets,
 } from "../../shared/schema.js";
 
 export interface EntitlementResult {
@@ -93,15 +94,14 @@ export async function checkEntitlements(
   let targetRoleKitId = roleKitId;
   
   if (!targetRoleKitId && jobTargetId) {
-    const [latestConfig] = await db
-      .select({ roleKitId: interviewConfigs.roleKitId })
-      .from(interviewConfigs)
-      .where(eq(interviewConfigs.jobTargetId, jobTargetId))
-      .orderBy(desc(interviewConfigs.createdAt))
+    const [jobTarget] = await db
+      .select({ roleKitId: jobTargets.roleKitId })
+      .from(jobTargets)
+      .where(eq(jobTargets.id, jobTargetId))
       .limit(1);
     
-    if (latestConfig?.roleKitId) {
-      targetRoleKitId = latestConfig.roleKitId;
+    if (jobTarget?.roleKitId) {
+      targetRoleKitId = jobTarget.roleKitId;
     }
   }
 
@@ -131,35 +131,27 @@ export async function checkEntitlements(
     }
   }
 
-  let completedSessionsResult;
-  
-  if (targetRoleKitId) {
-    completedSessionsResult = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(interviewSessions)
-      .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
-      .where(
-        and(
-          eq(interviewConfigs.userId, userId),
-          eq(interviewConfigs.roleKitId, targetRoleKitId)
-        )
-      );
-  } else if (jobTargetId) {
-    completedSessionsResult = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(interviewSessions)
-      .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
-      .where(eq(interviewConfigs.userId, userId));
-  } else {
+  if (!targetRoleKitId) {
     return {
       hasAccess: false,
       accessType: "none",
-      reason: "Role selection required. Please select a role to determine pricing.",
+      reason: "Role selection required. Please select a practice role to continue.",
       canStartSession: false,
       freeTrialUsed: false,
       remainingFreeTrials: 0,
     };
   }
+
+  const completedSessionsResult = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(interviewSessions)
+    .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+    .where(
+      and(
+        eq(interviewConfigs.userId, userId),
+        eq(interviewConfigs.roleKitId, targetRoleKitId)
+      )
+    );
 
   const sessionCount = Number(completedSessionsResult[0]?.count || 0);
   const FREE_TRIAL_LIMIT = 1;

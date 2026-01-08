@@ -735,22 +735,21 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
     
     const targetRoleKitId = roleKitId || jobTargetRoleKitId || null;
     
-    if (targetRoleKitId || employerJobId) {
-      const entitlement = await checkEntitlements(userId, { 
-        roleKitId: targetRoleKitId, 
-        jobTargetId,
-        employerJobId: employerJobId || undefined,
+    const entitlement = await checkEntitlements(userId, { 
+      roleKitId: targetRoleKitId, 
+      jobTargetId,
+      employerJobId: employerJobId || undefined,
+    });
+    
+    if (!entitlement.canStartSession) {
+      return res.status(403).json({
+        success: false,
+        error: entitlement.reason || "Access denied",
+        requiresPayment: !targetRoleKitId ? false : true,
+        requiresRoleSelection: !targetRoleKitId,
+        accessType: entitlement.accessType,
+        roleKitId: targetRoleKitId,
       });
-      
-      if (!entitlement.canStartSession) {
-        return res.status(403).json({
-          success: false,
-          error: entitlement.reason || "Access denied",
-          requiresPayment: true,
-          accessType: entitlement.accessType,
-          roleKitId: targetRoleKitId,
-        });
-      }
     }
     
     const modeToInterviewType: Record<string, string> = {

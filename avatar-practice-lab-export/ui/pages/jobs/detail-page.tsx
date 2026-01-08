@@ -476,29 +476,30 @@ export default function JobDetailPage() {
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center flex-shrink-0">
-                    <Briefcase className="w-4 h-4" />
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                    job?.roleKitId ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
+                  }`}>
+                    {job?.roleKitId ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-[#042c4c] text-sm truncate">
                       {job?.roleKitId 
-                        ? roleKits.find(k => k.id === job.roleKitId)?.name || "Role Selected"
-                        : job?.roleFamily || "Select a role"}
+                        ? roleKits.find(k => k.id === job.roleKitId)?.name || "Role Detected"
+                        : "Role selection required"}
                     </p>
                     <p className="text-xs text-slate-500">
                       {job?.roleKitId 
-                        ? "Practicing for this role"
-                        : "Choose your practice focus"}
+                        ? "Auto-detected from your job description"
+                        : "Please select a role to continue practicing"}
                     </p>
                   </div>
                   {!job?.roleKitId && (
                     <Button
                       onClick={() => setShowRoleSelector(true)}
                       size="sm"
-                      variant="outline"
-                      className="h-8 px-3 text-xs"
+                      className="bg-[#ee7e65] hover:bg-[#e06a50] text-white text-xs"
                     >
-                      Select
+                      Select Role
                     </Button>
                   )}
                 </div>

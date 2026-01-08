@@ -25,6 +25,7 @@ import {
 } from "../../shared/practice-context.js";
 import { execSync } from "child_process";
 import { resolveAndSaveJobArchetypes, resolveCompanyArchetype, resolveRoleArchetype, listAllRoleArchetypes, listAllCompanyArchetypes, getRoleInterviewStructure, getUnifiedInterviewPlan, getEnrichedInterviewPlan, getRoleTaskBlueprints } from "../lib/archetype-resolver.js";
+import { mapRoleTitleToRoleKit } from "../lib/role-kit-mapper.js";
 
 let cachedChromiumPath: string | null = null;
 
@@ -199,23 +200,28 @@ jobsRouter.post("/", requireAuth, async (req: Request, res: Response) => {
       }
     }
 
+    const finalRoleTitle = parsedJd?.focusAreas?.[0] ? roleTitle.replace("Job from Paste", parsedJd.focusAreas[0]) : roleTitle;
+    
+    const roleKitMatch = await mapRoleTitleToRoleKit(finalRoleTitle, null, jdText);
+
     const [newJob] = await db
       .insert(jobTargets)
       .values({
         userId,
-        roleTitle: parsedJd?.focusAreas?.[0] ? roleTitle.replace("Job from Paste", parsedJd.focusAreas[0]) : roleTitle,
+        roleTitle: finalRoleTitle,
         companyName: companyName || null,
         location: location || null,
         jdText: jdText || null,
         jdParsed: parsedJd,
         source,
         status: "saved",
+        roleKitId: roleKitMatch?.roleKitId || null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
       .returning();
 
-    res.status(201).json({ success: true, job: newJob });
+    res.status(201).json({ success: true, job: newJob, roleKitMatch });
   } catch (error: any) {
     console.error("Error creating job:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -298,11 +304,14 @@ jobsRouter.post("/import-linkedin", requireAuth, async (req: Request, res: Respo
       }
     }
 
+    const finalRoleTitle = scraped.title || "Untitled Role";
+    const roleKitMatch = await mapRoleTitleToRoleKit(finalRoleTitle, null, scraped.description);
+
     const [newJob] = await db
       .insert(jobTargets)
       .values({
         userId,
-        roleTitle: scraped.title || "Untitled Role",
+        roleTitle: finalRoleTitle,
         companyName: scraped.company || null,
         location: scraped.location || null,
         jobUrl: url,
@@ -310,12 +319,13 @@ jobsRouter.post("/import-linkedin", requireAuth, async (req: Request, res: Respo
         jdParsed: parsedJd,
         source: "linkedin",
         status: "saved",
+        roleKitId: roleKitMatch?.roleKitId || null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
       .returning();
 
-    res.status(201).json({ success: true, job: newJob });
+    res.status(201).json({ success: true, job: newJob, roleKitMatch });
   } catch (error: any) {
     console.error("Error importing LinkedIn job:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -434,6 +444,8 @@ jobsRouter.post("/job-targets", requireAuth, async (req: Request, res: Response)
       });
     }
 
+    const roleKitMatch = await mapRoleTitleToRoleKit(roleTitle, null, jdText);
+
     const [newJob] = await db
       .insert(jobTargets)
       .values({
@@ -445,6 +457,7 @@ jobsRouter.post("/job-targets", requireAuth, async (req: Request, res: Response)
         location: location || null,
         source: source || "manual",
         status: "saved",
+        roleKitId: roleKitMatch?.roleKitId || null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -464,7 +477,7 @@ jobsRouter.post("/job-targets", requireAuth, async (req: Request, res: Response)
       }
     }
 
-    res.status(201).json({ success: true, job: newJob, archetypeInfo });
+    res.status(201).json({ success: true, job: newJob, archetypeInfo, roleKitMatch });
   } catch (error: any) {
     console.error("Error creating job target:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -919,6 +932,8 @@ jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res:
         }
       }
 
+      const roleKitMatch = await mapRoleTitleToRoleKit(jobData.title, null, jobData.description);
+
       const [newJob] = await db
         .insert(jobTargets)
         .values({
@@ -931,6 +946,7 @@ jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res:
           jobUrl: url,
           source: portal,
           status: "saved",
+          roleKitId: roleKitMatch?.roleKitId || null,
           createdAt: new Date(),
           updatedAt: new Date(),
         })
@@ -940,6 +956,7 @@ jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res:
         success: true, 
         job: newJob,
         portal: config.name,
+        roleKitMatch,
         scraped: {
           title: jobData.title,
           company: jobData.company,
