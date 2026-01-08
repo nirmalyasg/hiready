@@ -64,7 +64,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
               <div className="w-9 h-9 bg-white/10 backdrop-blur rounded-xl flex items-center justify-center border border-white/20">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
-              <span className="text-white font-bold text-lg">SkillLift</span>
+              <span className="text-white font-bold text-lg">Hiready</span>
             </Link>
             {collapsed && (
               <Link to="/">

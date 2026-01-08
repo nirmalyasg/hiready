@@ -79,10 +79,10 @@ export default function ReadycheckPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1e3a5f] via-[#1e40af] to-[#1e3a5f] flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#042c4c] via-[#0a3d62] to-[#042c4c] flex flex-col relative overflow-hidden">
       {/* Background decorations */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#3b82f6]/20 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#2563eb]/20 rounded-full blur-3xl" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#ee7e65]/20 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#768c9c]/20 rounded-full blur-3xl" />
       
       {/* Header */}
       <header className="relative z-10 p-4 sm:p-6">
@@ -109,7 +109,7 @@ export default function ReadycheckPage() {
           {/* Title */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur text-white/90 px-4 py-1.5 rounded-full text-sm font-medium mb-4 border border-white/10">
-              <Zap className="w-3.5 h-3.5 text-[#60a5fa]" />
+              <Zap className="w-3.5 h-3.5 text-[#ee7e65]" />
               Free AI Interview Practice
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
@@ -130,7 +130,7 @@ export default function ReadycheckPage() {
                   setError("");
                 }}
                 placeholder="Paste job description or LinkedIn job URL here..."
-                className="w-full h-40 sm:h-48 p-4 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent text-gray-800 placeholder:text-gray-400"
+                className="w-full h-40 sm:h-48 p-4 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#ee7e65] focus:border-transparent text-gray-800 placeholder:text-gray-400"
               />
               
               {/* Input type indicator */}
@@ -138,8 +138,8 @@ export default function ReadycheckPage() {
                 <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                   {inputType === "linkedin" ? (
                     <>
-                      <LinkIcon className="w-3 h-3 text-[#2563eb]" />
-                      <span className="text-[#2563eb]">LinkedIn URL detected</span>
+                      <LinkIcon className="w-3 h-3 text-[#ee7e65]" />
+                      <span className="text-[#ee7e65]">LinkedIn URL detected</span>
                     </>
                   ) : (
                     <>
@@ -158,7 +158,7 @@ export default function ReadycheckPage() {
             <Button
               onClick={handleStart}
               disabled={isProcessing}
-              className="w-full mt-4 h-12 bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] hover:from-[#1d4ed8] hover:to-[#1e40af] text-white text-base font-medium shadow-lg shadow-blue-500/25"
+              className="w-full mt-4 h-12 bg-gradient-to-r from-[#ee7e65] to-[#e06a50] hover:from-[#e06a50] hover:to-[#d55a40] text-white text-base font-medium shadow-lg shadow-[#ee7e65]/25"
             >
               {isProcessing ? (
                 <>
@@ -184,7 +184,7 @@ export default function ReadycheckPage() {
             {benefits.map((b, i) => (
               <div key={i} className="flex items-center gap-2 text-white/70 text-sm">
                 <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
-                  <b.icon className="w-3.5 h-3.5 text-[#60a5fa]" />
+                  <b.icon className="w-3.5 h-3.5 text-[#ee7e65]" />
                 </div>
                 <span>{b.text}</span>
               </div>
