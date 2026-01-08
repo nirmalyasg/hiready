@@ -2406,19 +2406,22 @@ avatarSimulator.get("/get-transcript", async (req, res) => {
 });
 avatarSimulator.get("/get-transcripts", async (req, res) => {
   try {
-    let userId: number = 1; // Default to demo user
-
-    // If authenticated, get the legacy user ID linked to this auth user
-    if (req.user?.id) {
-      const legacyUser = await storage.getLegacyUserByAuthUserId(req.user.id);
-      if (legacyUser) {
-        userId = legacyUser.id;
-      }
-    } else if (req.query.userId) {
-      const parsed = parseInt(req.query.userId as string, 10);
-      if (!isNaN(parsed)) userId = parsed;
+    // Require authentication - no more defaulting to demo user
+    if (!req.user?.id) {
+      return res.json({ success: true, transcripts: [], source: "no-auth" });
     }
 
+    // Get or create legacy user for this authenticated user
+    let legacyUser = await storage.getLegacyUserByAuthUserId(req.user.id);
+    if (!legacyUser && req.user.username) {
+      legacyUser = await storage.getOrCreateLegacyUser(req.user.id, req.user.username);
+    }
+    
+    if (!legacyUser) {
+      return res.json({ success: true, transcripts: [], source: "no-legacy-user" });
+    }
+
+    const userId = legacyUser.id;
     const result = await getAllTranscripts(userId);
     if (!result) {
       console.error("No result returned from getTranscriptById");
@@ -2451,18 +2454,22 @@ avatarSimulator.get("/get-transcripts", async (req, res) => {
 });
 avatarSimulator.get("/skill-progress", async (req, res) => {
   try {
-    let userId: number = 1; // Default to demo user
-
-    // If authenticated, get the legacy user ID linked to this auth user
-    if (req.user?.id) {
-      const legacyUser = await storage.getLegacyUserByAuthUserId(req.user.id);
-      if (legacyUser) {
-        userId = legacyUser.id;
-      }
-    } else if (req.query.userId) {
-      const parsed = parseInt(req.query.userId as string, 10);
-      if (!isNaN(parsed)) userId = parsed;
+    // Require authentication - no more defaulting to demo user
+    if (!req.user?.id) {
+      return res.json({ success: true, skillProgress: [] });
     }
+
+    // Get or create legacy user for this authenticated user
+    let legacyUser = await storage.getLegacyUserByAuthUserId(req.user.id);
+    if (!legacyUser && req.user.username) {
+      legacyUser = await storage.getOrCreateLegacyUser(req.user.id, req.user.username);
+    }
+    
+    if (!legacyUser) {
+      return res.json({ success: true, skillProgress: [] });
+    }
+
+    const userId = legacyUser.id;
 
     // Get skill progress with average scores per skill for this user
     // Join with roleplay_session (where skill assessments are stored)
@@ -3204,17 +3211,22 @@ avatarSimulator.post("/save-roleplay-session", async (req, res) => {
     // Get auth user ID from session (this is the UUID from auth_users table)
     const authUserId = req.user?.id;
 
+    // Require authentication - no more defaulting to demo user
+    if (!authUserId) {
+      return res.status(401).json({ success: false, error: "Authentication required" });
+    }
+
     // Convert auth user ID (UUID) to legacy user ID (integer)
-    let legacyUserId: number = 1; // Default to demo user
-    if (authUserId) {
-      const legacyUser = await storage.getLegacyUserByAuthUserId(authUserId);
-      if (legacyUser) {
-        legacyUserId = legacyUser.id;
-      } else if (req.user?.username) {
-        // Create legacy user if authenticated but not linked
-        const created = await storage.getOrCreateLegacyUser(authUserId, req.user.username);
-        legacyUserId = created.id;
-      }
+    let legacyUserId: number;
+    const legacyUser = await storage.getLegacyUserByAuthUserId(authUserId);
+    if (legacyUser) {
+      legacyUserId = legacyUser.id;
+    } else if (req.user?.username) {
+      // Create legacy user if authenticated but not linked
+      const created = await storage.getOrCreateLegacyUser(authUserId, req.user.username);
+      legacyUserId = created.id;
+    } else {
+      return res.status(401).json({ success: false, error: "User not found" });
     }
 
     // Insert row
