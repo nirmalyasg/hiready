@@ -1,7 +1,22 @@
-# Avatar Practice Lab
+# Hiready (formerly Avatar Practice Lab)
 
 ## Overview
-AI-powered interview practice platform with voice conversations and detailed feedback.
+AI-powered interview preparation platform with two core user journeys:
+1. **Employer Assessment Flow** - Candidates access jobs via assessment links (e.g., /apply/acme-engineer-xyz), complete interviews, and employers view consolidated Hiready Index scores
+2. **Self-Practice Flow** - Users practice for roles at /readycheck with 1 free interview type, then pay for role packs or subscribe for unlimited access
+
+### Hiready Index™
+Role/JD-specific scoring system that consolidates scores across multiple interview types with weighted averaging:
+- Technical interviews: 3.0x weight
+- Coding assessments: 2.5x weight
+- Case studies: 2.0x weight
+- HR/Behavioral: 1.5x weight
+
+## Pricing Tiers
+- **Free Trial**: 1 completed interview per role
+- **Role Pack** (₹199): 4 interview types for specific role
+- **Pro Monthly** (₹499): Unlimited access
+- **Pro Yearly** (₹3999): Unlimited access (33% savings)
 
 ## Project Structure
 ```
@@ -26,7 +41,52 @@ avatar-practice-lab-export/
     └── schema.ts           # Drizzle ORM schema
 ```
 
-## Recent Changes (January 6, 2026)
+## Recent Changes (January 8, 2026)
+
+### Hiready Platform Transformation
+Complete platform rebranding and new features:
+
+1. **Employer Assessment Flow** (`/apply/:slug`)
+   - Public job application page with company branding
+   - Candidate registration for assessments
+   - Assessment launch/completion tracking
+   - API routes: `/api/employer/apply/:slug` (GET, POST /start, POST /complete)
+
+2. **Employer Workspace** (`/company`)
+   - Company and job management dashboard
+   - Candidate list with Hiready Index scores
+   - Status updates (shortlist/reject)
+   - CSV export functionality
+   - Access control via company membership
+
+3. **Self-Practice Landing** (`/readycheck`)
+   - Role library with search and domain filtering
+   - JD paste/upload functionality
+   - Auth-gated practice flow
+
+4. **Payment System** (Razorpay integration)
+   - Order creation and signature verification
+   - Test mode fallback when keys not configured
+   - Subscription management (role_pack, pro_monthly, pro_yearly)
+   - API routes: `/api/payments/*`
+
+5. **Hiready Index Calculation Engine** (`api/lib/hiready-index.ts`)
+   - Weighted scoring by interview type
+   - Type normalization
+   - Dimension aggregation with 0-100 clamping
+
+6. **Public Scorecard Sharing** (`/share/:shareToken`)
+   - Secure token generation using crypto
+   - HireadyIndexCard component with circular gauge
+
+7. **Database Schema Additions**
+   - `employer_companies`, `employer_jobs`, `employer_candidates`
+   - `subscriptions`, `payments`
+   - `hiready_role_index`
+
+---
+
+## Previous Changes (January 6, 2026)
 
 ### Exercise Content Generation During Plan Creation (Latest)
 Actual exercise content (coding problems, case studies, puzzles) is now generated during plan creation rather than using empty placeholders:
