@@ -43,6 +43,7 @@ import {
 } from "../lib/capability-vectorizer.js";
 import { requireAuth } from "../middleware/auth.js";
 import { getOpenAI } from "../utils/openai-client.js";
+import { enforceEntitlements } from "../lib/entitlements.js";
 import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
 import {
@@ -964,7 +965,7 @@ interviewRouter.get("/plan/:id", requireAuth, async (req: Request, res: Response
 interviewRouter.post("/session/start", requireAuth, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
-    const { interviewConfigId, interviewPlanId, rubricId } = req.body;
+    const { interviewConfigId, interviewPlanId, rubricId, employerJobId } = req.body;
     
     if (!interviewConfigId) {
       return res.status(400).json({ success: false, error: "Interview config ID is required" });
@@ -977,6 +978,21 @@ interviewRouter.post("/session/start", requireAuth, async (req: Request, res: Re
     
     if (!config) {
       return res.status(404).json({ success: false, error: "Config not found" });
+    }
+
+    const entitlementCheck = await enforceEntitlements(userId, {
+      jobTargetId: config.jobTargetId || undefined,
+      roleKitId: config.roleKitId || undefined,
+      employerJobId: employerJobId || undefined,
+    });
+
+    if (!entitlementCheck.allowed) {
+      return res.status(403).json({
+        success: false,
+        error: entitlementCheck.error,
+        requiresPayment: true,
+        entitlement: entitlementCheck.entitlement,
+      });
     }
     
     let defaultRubricId = rubricId;

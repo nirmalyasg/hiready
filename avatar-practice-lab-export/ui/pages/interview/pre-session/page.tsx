@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronRight, Play, Clock, Target, Users, MessageSquare, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
+import { ChevronRight, Play, Clock, Target, Users, MessageSquare, ArrowRight, CheckCircle, Loader2, Lock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useToast } from "@/hooks/use-toast";
+import { PurchaseModal } from "@/components/purchase-modal";
 
 interface InterviewPlan {
   phases: {
@@ -42,6 +43,7 @@ export default function InterviewPreSessionPage() {
   const [searchParams] = useSearchParams();
   const configId = searchParams.get("configId");
   const planId = searchParams.get("planId");
+  const employerJobId = searchParams.get("employerJobId");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -50,6 +52,7 @@ export default function InterviewPreSessionPage() {
   const [roleKit, setRoleKit] = useState<RoleKit | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [starting, setStarting] = useState(false);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,6 +90,7 @@ export default function InterviewPreSessionPage() {
         body: JSON.stringify({
           interviewConfigId: configId ? parseInt(configId) : null,
           interviewPlanId: planId ? parseInt(planId) : null,
+          employerJobId: employerJobId || undefined,
         }),
       });
 
@@ -101,6 +105,12 @@ export default function InterviewPreSessionPage() {
       }
 
       const data = await response.json();
+      
+      if (response.status === 403 && data.requiresPayment) {
+        setShowPurchaseModal(true);
+        return;
+      }
+      
       if (data.success) {
         navigate(`/interview/session?interviewSessionId=${data.session.id}&configId=${configId}`);
       } else {
@@ -288,6 +298,17 @@ export default function InterviewPreSessionPage() {
           </div>
         </div>
       </div>
+
+      <PurchaseModal
+        isOpen={showPurchaseModal}
+        onClose={() => setShowPurchaseModal(false)}
+        roleKitId={roleKit?.id}
+        jobTargetId={config?.jobTargetId}
+        onSuccess={() => {
+          setShowPurchaseModal(false);
+          handleStartInterview();
+        }}
+      />
     </SidebarLayout>
   );
 }
