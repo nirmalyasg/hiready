@@ -41,7 +41,25 @@ avatar-practice-lab-export/
     └── schema.ts           # Drizzle ORM schema
 ```
 
+## Brand Colors (January 2026)
+- **Primary Blue**: #2563eb - CTAs, active states, accents
+- **Dark Blue**: #1e40af - Gradients, sidebar, header backgrounds
+- **Light Blue**: #60a5fa - Icons, secondary accents
+- **Navy Text**: #042c4c - Dark text, headings
+- **Background**: #f8f9fb - Page backgrounds
+- **Gradient Pattern**: from-[#1e40af] to-[#2563eb] or from-[#2563eb] to-[#1d4ed8]
+
 ## Recent Changes (January 8, 2026)
+
+### UI Revamp - Blue Theme
+Complete visual refresh with blue accent theme:
+- Home page redesigned with modern hero, trust indicators, 3-step flow
+- Readycheck page with blue gradient background and smart input
+- Auth pages (login/register) with split layout and blue branding panel
+- Dashboard with blue gradient KPI strip and modern cards
+- Sidebar uses blue gradient (from-[#1e40af] to-[#1e3a5f])
+- Mobile bottom nav with blue active states
+- All pages share coherent blue visual hierarchy
 
 ### Hiready Platform Transformation
 Complete platform rebranding and new features:
