@@ -281,7 +281,7 @@ export default function AvatarSimulatorDashboard() {
   const getReadinessColor = (score: number | null) => {
     if (score === null) return "text-slate-400";
     if (score >= 80) return "text-emerald-600";
-    if (score >= 60) return "text-[#2563eb]";
+    if (score >= 60) return "text-[#ee7e65]";
     return "text-slate-500";
   };
 
@@ -313,7 +313,7 @@ export default function AvatarSimulatorDashboard() {
 
         {/* Hero KPI Strip */}
         {hasActivity && (
-          <div className="bg-gradient-to-r from-[#1e40af] to-[#2563eb] rounded-2xl p-5 sm:p-6 shadow-lg shadow-blue-500/20">
+          <div className="bg-gradient-to-r from-[#042c4c] to-[#0a3d62] rounded-2xl p-5 sm:p-6 shadow-lg shadow-[#042c4c]/20">
             <div className="grid grid-cols-3 gap-4 sm:gap-8">
               <div className="text-center">
                 <p className="text-3xl sm:text-4xl font-bold text-white">
@@ -336,13 +336,13 @@ export default function AvatarSimulatorDashboard() {
         {/* Quick Action Bar */}
         <div className="flex gap-3">
           <Link to="/readycheck" className="flex-1">
-            <Button className="w-full gap-2 h-12 bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] hover:from-[#1d4ed8] hover:to-[#1e40af] shadow-lg shadow-blue-500/20">
+            <Button className="w-full gap-2 h-12 bg-gradient-to-r from-[#ee7e65] to-[#e06a50] hover:from-[#e06a50] hover:to-[#d55a40] shadow-lg shadow-[#ee7e65]/20">
               <Play className="w-4 h-4" />
               Practice Interview
             </Button>
           </Link>
           <Link to="/readycheck" className="flex-1">
-            <Button variant="outline" className="w-full gap-2 h-12 border-[#2563eb]/20 text-[#2563eb] hover:bg-[#2563eb]/5">
+            <Button variant="outline" className="w-full gap-2 h-12 border-[#ee7e65]/20 text-[#ee7e65] hover:bg-[#ee7e65]/5">
               <Plus className="w-4 h-4" />
               Add Job Target
             </Button>
@@ -352,7 +352,7 @@ export default function AvatarSimulatorDashboard() {
         {/* Recommended Practice */}
         {activeJobs.length > 0 && (
           <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-            <div className="flex items-center gap-1 text-xs font-medium text-[#2563eb] mb-3">
+            <div className="flex items-center gap-1 text-xs font-medium text-[#ee7e65] mb-3">
               <Zap className="w-3.5 h-3.5" />
               RECOMMENDED PRACTICE
             </div>
@@ -365,10 +365,10 @@ export default function AvatarSimulatorDashboard() {
                 
                 return (
                   <Link key={job.id} to={`/jobs/${job.id}`} className="block">
-                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl hover:bg-[#2563eb]/5 hover:border-[#2563eb]/20 border border-transparent transition-all">
+                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl hover:bg-[#ee7e65]/5 hover:border-[#ee7e65]/20 border border-transparent transition-all">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-[#2563eb]/10 text-[#2563eb] font-medium">{practiceType}</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-[#ee7e65]/10 text-[#ee7e65] font-medium">{practiceType}</span>
                         </div>
                         <p className="font-medium text-[#042c4c] mt-1 truncate">{job.roleTitle}</p>
                         {job.companyName && (
@@ -382,7 +382,7 @@ export default function AvatarSimulatorDashboard() {
                           </p>
                           <p className="text-xs text-slate-400">ready</p>
                         </div>
-                        <div className="w-8 h-8 rounded-full bg-[#2563eb] flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-[#ee7e65] flex items-center justify-center">
                           <Play className="w-3.5 h-3.5 text-white" />
                         </div>
                       </div>
@@ -395,7 +395,7 @@ export default function AvatarSimulatorDashboard() {
               <div className="text-center py-4">
                 <p className="text-sm text-slate-500 mb-3">Add job targets to get personalized practice recommendations</p>
                 <Link to="/readycheck">
-                  <Button variant="outline" size="sm" className="gap-2 border-[#2563eb]/20 text-[#2563eb]">
+                  <Button variant="outline" size="sm" className="gap-2 border-[#ee7e65]/20 text-[#ee7e65]">
                     <Plus className="w-4 h-4" />
                     Add Job Target
                   </Button>
@@ -410,7 +410,7 @@ export default function AvatarSimulatorDashboard() {
           <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-[#042c4c]">Your Skills</h3>
-              <Link to="/avatar/results" className="text-sm text-[#2563eb] hover:underline flex items-center gap-1">
+              <Link to="/avatar/results" className="text-sm text-[#ee7e65] hover:underline flex items-center gap-1">
                 View all
                 <ChevronRight className="w-4 h-4" />
               </Link>
@@ -431,13 +431,13 @@ export default function AvatarSimulatorDashboard() {
               
               {/* Needs Work */}
               {lowestSkill && lowestSkill.avgScore !== null && (
-                <div className="bg-[#2563eb]/5 rounded-xl p-4 border border-[#2563eb]/10">
+                <div className="bg-[#ee7e65]/5 rounded-xl p-4 border border-[#ee7e65]/10">
                   <div className="flex items-center gap-2 mb-2">
-                    <Target className="w-4 h-4 text-[#2563eb]" />
-                    <span className="text-xs font-medium text-[#2563eb]">Focus Area</span>
+                    <Target className="w-4 h-4 text-[#ee7e65]" />
+                    <span className="text-xs font-medium text-[#ee7e65]">Focus Area</span>
                   </div>
                   <p className="font-medium text-[#042c4c] text-sm truncate">{lowestSkill.skillName}</p>
-                  <p className="text-lg font-bold text-[#2563eb] mt-1">{lowestSkill.avgScore.toFixed(1)}/5</p>
+                  <p className="text-lg font-bold text-[#ee7e65] mt-1">{lowestSkill.avgScore.toFixed(1)}/5</p>
                 </div>
               )}
             </div>
@@ -449,7 +449,7 @@ export default function AvatarSimulatorDashboard() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-[#042c4c]">Other Job Targets</h3>
-              <Link to="/jobs" className="text-sm text-[#2563eb] hover:underline flex items-center gap-1">
+              <Link to="/jobs" className="text-sm text-[#ee7e65] hover:underline flex items-center gap-1">
                 View all
                 <ChevronRight className="w-4 h-4" />
               </Link>
@@ -457,7 +457,7 @@ export default function AvatarSimulatorDashboard() {
             <div className="space-y-2">
               {activeJobs.slice(1, 3).map((job) => (
                 <Link key={job.id} to={`/jobs/${job.id}`} className="block">
-                  <div className="bg-white rounded-xl p-4 border border-slate-100 hover:border-[#2563eb]/20 hover:shadow-sm transition-all flex items-center justify-between">
+                  <div className="bg-white rounded-xl p-4 border border-slate-100 hover:border-[#ee7e65]/20 hover:shadow-sm transition-all flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-[#042c4c] truncate">{job.roleTitle}</p>
                       {job.companyName && (
@@ -485,7 +485,7 @@ export default function AvatarSimulatorDashboard() {
               className="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#2563eb] to-[#3b82f6] rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <div className="w-10 h-10 bg-gradient-to-br from-[#ee7e65] to-[#f59e8b] rounded-xl flex items-center justify-center shadow-lg shadow-[#ee7e65]/20">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <div className="text-left">
@@ -503,14 +503,14 @@ export default function AvatarSimulatorDashboard() {
                     key={idx}
                     className={`p-4 rounded-xl ${
                       insight.type === "strength" ? "bg-emerald-50 border border-emerald-100" :
-                      insight.type === "weakness" ? "bg-[#2563eb]/5 border border-[#2563eb]/10" :
+                      insight.type === "weakness" ? "bg-[#ee7e65]/5 border border-[#ee7e65]/10" :
                       "bg-slate-50"
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
                         insight.type === "strength" ? "bg-emerald-500" :
-                        insight.type === "weakness" ? "bg-[#2563eb]" :
+                        insight.type === "weakness" ? "bg-[#ee7e65]" :
                         "bg-[#042c4c]"
                       }`}>
                         {insight.type === "strength" ? (
@@ -524,7 +524,7 @@ export default function AvatarSimulatorDashboard() {
                       <div>
                         <p className={`text-sm font-medium ${
                           insight.type === "strength" ? "text-emerald-800" :
-                          insight.type === "weakness" ? "text-[#2563eb]" :
+                          insight.type === "weakness" ? "text-[#ee7e65]" :
                           "text-[#042c4c]"
                         }`}>
                           {insight.title}
@@ -541,7 +541,7 @@ export default function AvatarSimulatorDashboard() {
 
         {/* Empty State */}
         {!hasActivity && (
-          <div className="bg-gradient-to-br from-[#1e40af] to-[#2563eb] rounded-2xl p-8 text-center relative overflow-hidden shadow-xl shadow-blue-500/20">
+          <div className="bg-gradient-to-br from-[#042c4c] to-[#0a3d62] rounded-2xl p-8 text-center relative overflow-hidden shadow-xl shadow-[#042c4c]/20">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
             <div className="relative">
               <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -553,7 +553,7 @@ export default function AvatarSimulatorDashboard() {
               </p>
               <div className="flex justify-center gap-3">
                 <Link to="/readycheck">
-                  <Button className="bg-white text-[#2563eb] hover:bg-white/90 shadow-lg">
+                  <Button className="bg-white text-[#ee7e65] hover:bg-white/90 shadow-lg">
                     Start Practice
                   </Button>
                 </Link>

@@ -264,7 +264,7 @@ export default function JobDetailPage() {
   return (
     <SidebarLayout>
       <div className="min-h-screen bg-slate-50">
-        <div className="bg-gradient-to-br from-[#1e40af] via-[#2563eb] to-[#1e40af] text-white">
+        <div className="bg-gradient-to-br from-[#042c4c] via-[#0a3d62] to-[#042c4c] text-white">
           <div className="max-w-2xl mx-auto px-4 pt-4 pb-5">
             <div className="flex items-center justify-between mb-3">
               <button
@@ -375,7 +375,7 @@ export default function JobDetailPage() {
                       <Button
                         onClick={() => handleStartPracticeOption(option)}
                         size="sm"
-                        className="bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] hover:from-[#1d4ed8] hover:to-[#1e40af] text-white h-8 px-3 text-xs shadow-sm shadow-blue-500/20"
+                        className="bg-gradient-to-r from-[#ee7e65] to-[#e06a50] hover:from-[#e06a50] hover:to-[#d55a40] text-white h-8 px-3 text-xs shadow-sm shadow-[#ee7e65]/20"
                       >
                         <Play className="w-3 h-3 mr-1" />
                         Start
@@ -394,7 +394,7 @@ export default function JobDetailPage() {
                 className="w-full px-4 py-3 flex items-center justify-between bg-slate-50/50 border-b border-slate-100 hover:bg-slate-50 transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#2563eb]" />
+                  <Sparkles className="w-4 h-4 text-[#ee7e65]" />
                   <span className="font-semibold text-[#042c4c] text-sm">AI Requirements</span>
                 </div>
                 {requirementsExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -416,7 +416,7 @@ export default function JobDetailPage() {
                       <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1.5">Focus Areas</p>
                       <div className="flex flex-wrap gap-1.5">
                         {parsed.focusAreas.slice(0, 6).map((area, idx) => (
-                          <span key={idx} className="px-2 py-0.5 bg-[#2563eb]/10 text-[#2563eb] rounded-full text-xs font-medium">
+                          <span key={idx} className="px-2 py-0.5 bg-[#ee7e65]/10 text-[#ee7e65] rounded-full text-xs font-medium">
                             {area}
                           </span>
                         ))}
@@ -486,7 +486,7 @@ export default function JobDetailPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="text-xs text-[#2563eb] hover:underline flex items-center gap-1"
+                      className="text-xs text-[#ee7e65] hover:underline flex items-center gap-1"
                     >
                       Original
                       <ExternalLink className="w-3 h-3" />

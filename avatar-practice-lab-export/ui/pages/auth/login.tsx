@@ -50,11 +50,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#1e3a5f] via-[#1e40af] to-[#1e3a5f] relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#042c4c] via-[#0a3d62] to-[#042c4c] relative overflow-hidden">
         {/* Background Elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#3b82f6]/30 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[#60a5fa]/20 rounded-full blur-3xl" />
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#ee7e65]/30 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[#768c9c]/20 rounded-full blur-3xl" />
         </div>
 
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
@@ -71,7 +71,7 @@ export default function LoginPage() {
             <div className="max-w-md">
               <h1 className="text-4xl font-bold text-white mb-6">
                 Welcome back to
-                <span className="block text-[#60a5fa]">interview success</span>
+                <span className="block text-[#ee7e65]">interview success</span>
               </h1>
               <p className="text-white/60 text-lg mb-10">
                 Continue practicing and improving your interview skills with AI-powered feedback.
@@ -80,19 +80,19 @@ export default function LoginPage() {
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                    <Zap className="w-5 h-5 text-[#60a5fa]" />
+                    <Zap className="w-5 h-5 text-[#ee7e65]" />
                   </div>
                   <span className="text-white/80">10-minute AI interviews</span>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                    <Target className="w-5 h-5 text-[#60a5fa]" />
+                    <Target className="w-5 h-5 text-[#ee7e65]" />
                   </div>
                   <span className="text-white/80">Role-specific questions</span>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                    <BarChart3 className="w-5 h-5 text-[#60a5fa]" />
+                    <BarChart3 className="w-5 h-5 text-[#ee7e65]" />
                   </div>
                   <span className="text-white/80">Instant feedback & scoring</span>
                 </div>
@@ -112,7 +112,7 @@ export default function LoginPage() {
         {/* Mobile Header */}
         <header className="lg:hidden px-6 py-6">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-[#2563eb] to-[#1d4ed8] rounded-xl flex items-center justify-center">
+            <div className="w-9 h-9 bg-gradient-to-br from-[#042c4c] to-[#0a3d62] rounded-xl flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <span className="text-lg font-bold text-[#042c4c]">Hiready</span>
@@ -141,7 +141,7 @@ export default function LoginPage() {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] transition-all"
+                    className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all"
                     placeholder="Enter your username"
                     required
                   />
@@ -156,7 +156,7 @@ export default function LoginPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] transition-all"
+                    className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all"
                     placeholder="Enter your password"
                     required
                   />
@@ -165,7 +165,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] text-white py-4 rounded-xl font-semibold hover:from-[#1d4ed8] hover:to-[#1e40af] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
+                  className="w-full bg-gradient-to-r from-[#ee7e65] to-[#e06a50] text-white py-4 rounded-xl font-semibold hover:from-[#e06a50] hover:to-[#d55a40] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#ee7e65]/20"
                 >
                   {isLoading ? (
                     <>
@@ -181,7 +181,7 @@ export default function LoginPage() {
               <div className="mt-8 text-center">
                 <p className="text-gray-500">
                   Don't have an account?{' '}
-                  <Link to="/register" className="text-[#2563eb] hover:text-[#1d4ed8] font-semibold transition-colors">
+                  <Link to="/register" className="text-[#ee7e65] hover:text-[#e06a50] font-semibold transition-colors">
                     Create one
                   </Link>
                 </p>

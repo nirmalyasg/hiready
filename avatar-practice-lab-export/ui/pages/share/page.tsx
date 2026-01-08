@@ -147,7 +147,7 @@ export default function PublicSharePage() {
                     strokeDashoffset={strokeDashoffset}
                     style={{ 
                       stroke: indexData.overallScore >= 80 ? '#059669' : 
-                              indexData.overallScore >= 60 ? '#2563eb' : 
+                              indexData.overallScore >= 60 ? '#ee7e65' : 
                               indexData.overallScore >= 40 ? '#d97706' : '#dc2626'
                     }}
                   />
