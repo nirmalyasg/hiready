@@ -79,7 +79,7 @@ const getRecommendationConfig = (rec: string) => {
 const getScoreColor = (score: number) => {
   if (score >= 4) return "text-emerald-600";
   if (score >= 3) return "text-amber-600";
-  return "text-[#ee7e65]";
+  return "text-red-500";
 };
 
 const getScoreBg = (score: number) => {

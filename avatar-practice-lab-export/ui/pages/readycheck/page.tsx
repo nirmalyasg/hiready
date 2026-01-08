@@ -10,7 +10,8 @@ import {
   Link as LinkIcon,
   Clock,
   Target,
-  BarChart3
+  BarChart3,
+  Zap
 } from "lucide-react";
 
 export default function ReadycheckPage() {
@@ -78,12 +79,16 @@ export default function ReadycheckPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#042c4c] to-[#0a3d66] flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-[#1e3a5f] via-[#1e40af] to-[#1e3a5f] flex flex-col relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#3b82f6]/20 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#2563eb]/20 rounded-full blur-3xl" />
+      
       {/* Header */}
-      <header className="p-4 sm:p-6">
+      <header className="relative z-10 p-4 sm:p-6">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#ee7e65] rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-white/10 backdrop-blur rounded-lg flex items-center justify-center border border-white/20">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold text-white text-lg">Hiready</span>
@@ -99,10 +104,14 @@ export default function ReadycheckPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 py-8">
+      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-xl">
           {/* Title */}
           <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur text-white/90 px-4 py-1.5 rounded-full text-sm font-medium mb-4 border border-white/10">
+              <Zap className="w-3.5 h-3.5 text-[#60a5fa]" />
+              Free AI Interview Practice
+            </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
               Start your interview prep
             </h1>
@@ -112,7 +121,7 @@ export default function ReadycheckPage() {
           </div>
 
           {/* Input Card */}
-          <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 border border-white/20">
             <div className="relative">
               <textarea
                 value={inputValue}
@@ -121,7 +130,7 @@ export default function ReadycheckPage() {
                   setError("");
                 }}
                 placeholder="Paste job description or LinkedIn job URL here..."
-                className="w-full h-40 sm:h-48 p-4 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#ee7e65] focus:border-transparent text-gray-800 placeholder:text-gray-400"
+                className="w-full h-40 sm:h-48 p-4 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent text-gray-800 placeholder:text-gray-400"
               />
               
               {/* Input type indicator */}
@@ -129,8 +138,8 @@ export default function ReadycheckPage() {
                 <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                   {inputType === "linkedin" ? (
                     <>
-                      <LinkIcon className="w-3 h-3" />
-                      LinkedIn URL detected
+                      <LinkIcon className="w-3 h-3 text-[#2563eb]" />
+                      <span className="text-[#2563eb]">LinkedIn URL detected</span>
                     </>
                   ) : (
                     <>
@@ -149,7 +158,7 @@ export default function ReadycheckPage() {
             <Button
               onClick={handleStart}
               disabled={isProcessing}
-              className="w-full mt-4 h-12 bg-[#ee7e65] hover:bg-[#e06a50] text-white text-base font-medium"
+              className="w-full mt-4 h-12 bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] hover:from-[#1d4ed8] hover:to-[#1e40af] text-white text-base font-medium shadow-lg shadow-blue-500/25"
             >
               {isProcessing ? (
                 <>
@@ -165,7 +174,7 @@ export default function ReadycheckPage() {
             </Button>
 
             <p className="text-center text-sm text-gray-500 mt-4">
-              <CheckCircle className="w-4 h-4 inline mr-1 text-green-500" />
+              <CheckCircle className="w-4 h-4 inline mr-1 text-emerald-500" />
               Free • No credit card required
             </p>
           </div>
@@ -174,7 +183,9 @@ export default function ReadycheckPage() {
           <div className="mt-8 flex flex-wrap justify-center gap-4 sm:gap-6">
             {benefits.map((b, i) => (
               <div key={i} className="flex items-center gap-2 text-white/70 text-sm">
-                <b.icon className="w-4 h-4 text-[#ee7e65]" />
+                <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
+                  <b.icon className="w-3.5 h-3.5 text-[#60a5fa]" />
+                </div>
                 <span>{b.text}</span>
               </div>
             ))}
@@ -184,7 +195,7 @@ export default function ReadycheckPage() {
           <div className="text-center mt-8">
             <Link 
               to="/#how-it-works" 
-              className="text-white/50 hover:text-white/80 text-sm underline underline-offset-4"
+              className="text-white/50 hover:text-white/80 text-sm underline underline-offset-4 transition-colors"
             >
               How does this work?
             </Link>
@@ -193,7 +204,7 @@ export default function ReadycheckPage() {
       </main>
 
       {/* Footer */}
-      <footer className="p-4 text-center text-white/30 text-sm">
+      <footer className="relative z-10 p-4 text-center text-white/30 text-sm">
         © {new Date().getFullYear()} Hiready
       </footer>
     </div>

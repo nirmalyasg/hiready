@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Loader2, Sparkles, MessageSquare, Target, Brain } from 'lucide-react';
+import { Loader2, Sparkles, CheckCircle, Zap, Target, BarChart3 } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -50,52 +50,51 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-brand-dark relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#1e3a5f] via-[#1e40af] to-[#1e3a5f] relative overflow-hidden">
         {/* Background Elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-accent/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-brand-light/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#3b82f6]/30 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[#60a5fa]/20 rounded-full blur-3xl" />
         </div>
 
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-brand-accent rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-white/10 backdrop-blur rounded-xl flex items-center justify-center border border-white/20">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-white">Practice Lab</span>
+            <span className="text-lg font-bold text-white">Hiready</span>
           </Link>
 
           {/* Main Content */}
           <div className="flex-1 flex items-center">
             <div className="max-w-md">
               <h1 className="text-4xl font-bold text-white mb-6">
-                Practice makes
-                <span className="block text-brand-accent">perfect</span>
+                Welcome back to
+                <span className="block text-[#60a5fa]">interview success</span>
               </h1>
               <p className="text-white/60 text-lg mb-10">
-                Build confidence by rehearsing difficult conversations with AI avatars. 
-                Get instant feedback and improve.
+                Continue practicing and improving your interview skills with AI-powered feedback.
               </p>
 
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                    <MessageSquare className="w-5 h-5 text-white" />
+                    <Zap className="w-5 h-5 text-[#60a5fa]" />
                   </div>
-                  <span className="text-white/80">Voice-first AI conversations</span>
+                  <span className="text-white/80">10-minute AI interviews</span>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                    <Target className="w-5 h-5 text-white" />
+                    <Target className="w-5 h-5 text-[#60a5fa]" />
                   </div>
-                  <span className="text-white/80">Real workplace scenarios</span>
+                  <span className="text-white/80">Role-specific questions</span>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                    <Brain className="w-5 h-5 text-white" />
+                    <BarChart3 className="w-5 h-5 text-[#60a5fa]" />
                   </div>
-                  <span className="text-white/80">Personalized AI coaching</span>
+                  <span className="text-white/80">Instant feedback & scoring</span>
                 </div>
               </div>
             </div>
@@ -103,28 +102,28 @@ export default function LoginPage() {
 
           {/* Footer */}
           <p className="text-white/40 text-sm">
-            © {new Date().getFullYear()} Ascend Business Solutions
+            © {new Date().getFullYear()} Hiready
           </p>
         </div>
       </div>
 
       {/* Right Panel - Form */}
-      <div className="flex-1 flex flex-col bg-[#f8f9fb]">
+      <div className="flex-1 flex flex-col bg-[#f8fafc]">
         {/* Mobile Header */}
         <header className="lg:hidden px-6 py-6">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-brand-dark rounded-xl flex items-center justify-center">
+            <div className="w-9 h-9 bg-gradient-to-br from-[#2563eb] to-[#1d4ed8] rounded-xl flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <span className="text-lg font-bold text-brand-dark">Practice Lab</span>
+            <span className="text-lg font-bold text-[#042c4c]">Hiready</span>
           </Link>
         </header>
 
         <main className="flex-1 flex items-center justify-center px-6 py-12">
           <div className="w-full max-w-md">
-            <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-sm border border-gray-100">
-              <h1 className="text-2xl font-bold text-brand-dark mb-2">Welcome back</h1>
-              <p className="text-brand-muted mb-8">Sign in to continue practicing</p>
+            <div className="bg-white rounded-2xl p-8 sm:p-10 shadow-sm border border-gray-100">
+              <h1 className="text-2xl font-bold text-[#042c4c] mb-2">Welcome back</h1>
+              <p className="text-gray-500 mb-8">Sign in to continue practicing</p>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 {error && (
@@ -134,7 +133,7 @@ export default function LoginPage() {
                 )}
 
                 <div>
-                  <label htmlFor="username" className="block text-sm font-medium text-brand-dark mb-2">
+                  <label htmlFor="username" className="block text-sm font-medium text-[#042c4c] mb-2">
                     Username
                   </label>
                   <input
@@ -142,14 +141,14 @@ export default function LoginPage() {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-brand-dark placeholder:text-brand-muted/60 focus:outline-none focus:ring-2 focus:ring-brand-dark/10 focus:border-brand-dark transition-all"
+                    className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] transition-all"
                     placeholder="Enter your username"
                     required
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-brand-dark mb-2">
+                  <label htmlFor="password" className="block text-sm font-medium text-[#042c4c] mb-2">
                     Password
                   </label>
                   <input
@@ -157,7 +156,7 @@ export default function LoginPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-brand-dark placeholder:text-brand-muted/60 focus:outline-none focus:ring-2 focus:ring-brand-dark/10 focus:border-brand-dark transition-all"
+                    className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20 focus:border-[#2563eb] transition-all"
                     placeholder="Enter your password"
                     required
                   />
@@ -166,7 +165,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-brand-dark text-white py-4 rounded-xl font-semibold hover:bg-brand-dark/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-brand-dark/20"
+                  className="w-full bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] text-white py-4 rounded-xl font-semibold hover:from-[#1d4ed8] hover:to-[#1e40af] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
                 >
                   {isLoading ? (
                     <>
@@ -180,17 +179,17 @@ export default function LoginPage() {
               </form>
 
               <div className="mt-8 text-center">
-                <p className="text-brand-muted">
+                <p className="text-gray-500">
                   Don't have an account?{' '}
-                  <Link to="/register" className="text-brand-accent hover:text-brand-accent/80 font-semibold transition-colors">
+                  <Link to="/register" className="text-[#2563eb] hover:text-[#1d4ed8] font-semibold transition-colors">
                     Create one
                   </Link>
                 </p>
               </div>
             </div>
 
-            <p className="text-center text-brand-muted text-sm mt-8 lg:hidden">
-              © {new Date().getFullYear()} Ascend Business Solutions
+            <p className="text-center text-gray-400 text-sm mt-8 lg:hidden">
+              © {new Date().getFullYear()} Hiready
             </p>
           </div>
         </main>
