@@ -1,0 +1,597 @@
+FUNCTIONAL ENHANCEMENT PLAN
+
+(Developer-ready additions to current codebase)
+
+🔹 A. Candidate Journey: “Readiness Index” Flow
+
+Frontend
+
+New route: /readycheck
+
+Props: ?role, ?source, ?company
+
+UI: “Upload JD or paste LinkedIn profile → Start Interview → View Hiready Scorecard”
+
+Modify /interview/config
+
+Allow “One Free Interview” state; grey-out other types until paid.
+
+Extend /interview/results
+
+Add Share CTA + “Attach to Application” link generator (creates short URL).
+
+Backend
+
+Extend interview_sessions table → add source_company, is_free_trial.
+
+New endpoint /api/interview/share/:id → returns public-view JSON + scorecard image.
+
+OTP or LinkedIn login (hybrid model) before session start.
+
+🔹 B. Practice & Subscription Flow
+
+Frontend
+
+Paywall modal after results:
+“Unlock Technical, HR & Case Interviews for ₹199 / $4.99”.
+
+New dashboard widget /avatar/dashboard:
+“Completed 1 of 3 interviews for this role – Unlock Remaining.”
+
+7-day challenge tab reused from existing results’ “Practice Plan”.
+
+Backend
+
+Add subscription_plans table (tier = basic | role pack | pro).
+
+Payment endpoint stub /api/payments/initiate (Stripe / Razorpay).
+
+Flag in session to unlock additional interview types (technical, HR, case).
+
+🔹 C. Employer / Recruiter Workspace
+
+Frontend
+
+New section /company (reuses existing /jobs layout):
+
+Company setup → Add JD → AI suggested assessment bundle.
+
+Each JD generates candidate-shareable link hiready.app/apply/:jobId.
+
+Dashboard view: candidate name, score, status.
+
+Backend
+
+Reuse jobs, interview_configs, interview_analysis.
+
+Add companies and company_users tables.
+
+Employer APIs:
+
+POST /api/company/jobs
+
+GET /api/company/jobs/:id/candidates
+
+GET /api/company/analytics/summary
+
+🔹 D. Authentication & Onboarding
+
+Hybrid flow recommended
+
+Upload CV → parse name + email.
+
+Prefill email → send OTP (login route already exists as /api/auth/login).
+
+Store parsed profile in user_profile_extracted.
+
+If no CV → fallback Google / LinkedIn login.
+
+🔹 E. Public Scorecard & Sharing
+
+Frontend
+
+/share/:sessionId public view:
+Circular score → dimension bars → “Generated via Hiready”.
+
+Social meta-tags (OpenGraph) for LinkedIn / Insta share.
+
+Backend
+
+GET /api/interview/public/:sessionId returns limited data.
+
+S3 storage for scorecard image (see AWS integration already in docs 
+
+Hiready documentation
+
+).
+
+🧱 4. DATABASE & API UPDATES SUMMARY
+Table	New Columns / Tables
+auth_users	user_type (candidate / company)
+interview_sessions	source_company, is_free_trial
+companies (new)	id, name, domain, plan, created_at
+company_jobs (new)	company_id, title, jd_text, rolekit_ref
+company_candidates (new)	job_id, user_id, scorecard_id
+subscriptions (new)	user_id, plan_type, status, expiry
+
+API Additions / Changes:
+
+/api/company/* suite (CRUD + analytics)
+
+/api/interview/public/:id
+
+/api/payments/*
+
+/api/interview/share/:id
+
+📊 5. USER FLOW MAP (End-to-End)
+Marketing Campaign → hiready.app/readycheck
+   ↓
+Upload JD / Role → Login → Start Interview
+   ↓
+AI Interview (Session via OpenAI Realtime)
+   ↓
+Hiready Scorecard (Free Round)
+   ↓
+→ Option A: Attach Scorecard to CV
+→ Option B: Unlock Full Practice Pack (Paid)
+   ↓
+(Optional Employer Journey)
+Employer adds JD → Generates Hiready Link → Receives Candidate Scores
+
+💰 6. BUSINESS MODEL & CONVERSION LOGIC
+User Tier	What They Get	Conversion Hook
+Free User	1 interview + Hiready Scorecard	Curiosity + social share
+Role Pack Buyer	All formats for 1 role + 7-day challenge	Completion desire
+Hiready Pro	Unlimited roles + track history	Progress visualization
+Employer Client	10 candidate assessments / month	Efficiency & branding
+🧠 7. NEXT SPRINT DELIVERABLES FOR DEV TEAM
+Sprint Item	Responsibility	Est. Time
+/readycheck landing + JD upload flow	Frontend	2 days
+OTP login integration & CV parser	Backend + UI	3 days
+Public Scorecard page + share link	Full-stack	2 days
+Paywall flow + Stripe/Razorpay stub	Full-stack	3 days
+Company dashboard (MVP)	Full-stack	4 days
+Database migrations (new tables)	Backend	1 day
+Analytics + admin summary	Backend / Admin UI	2 days
+
+Total ≈ 15 dev days (≈ 2–2.5 weeks MVP upgrade).
+
+🧭 8. STRATEGIC METRICS TO TRACK
+Funnel Stage	KPI
+Campaign → Signup	CTR > 3 %, Signup > 25 %
+Signup → Interview Start	80 %
+Free → Paid Upgrade	> 10 %
+Avg Sessions / User	≥ 3
+Employer Conversion	2 paid clients / month pilot
+✅ 9. SUMMARY RECOMMENDATION
+
+Hiready can now credibly evolve into:
+
+A candidate-owned, AI-driven readiness platform
+where individuals prove their interview capability and companies discover verified talent.
+
+The foundation from the existing Avatar Practice Lab codebase already provides 80 % of what’s needed — only new routes, tables, and UI states must be layered on top.
+
+Would you like me to produce a developer hand-off pack next — a concise PRD + API contract + UI wireframes (text-based) — so your coding team can start sprinting without ambiguity?
+
+Sources
+Yes and for login , lets use normal login as well as google...
+
+Awesome — locking in normal (email + OTP/password) and Google sign-in.
+Here’s a tight developer hand-off pack: PRD, flows, UI wireframes, API contracts, DB changes, and sprint plan — all aligned to the current codebase.
+
+PRD — Hiready “Readiness Index + Paywall + Employer Links” (MVP+)
+1) Goals (what we’re shipping now)
+
+Post-click journey: Role/JD → 1 free interview → Hiready Scorecard → upsell to unlock more interview types.
+
+Employer campaign links: Companies create a JD, get a share link → candidates complete the Hiready interview → employer sees summary.
+
+Auth: Email/password and Google login options (plus OTP fallback later if desired).
+
+Public scorecard: Shareable link + PNG/PDF artifact.
+
+Payments: Unlock all interview types for a role (one-time) + “Pro” plan (monthly).
+
+The current app already has the core practice modes and routes (Interview, Custom Interview, Case/Coding, Results) — we will extend them rather than reinvent
+
+Hiready documentation
+
+.
+
+2) Key User Stories
+Candidate
+
+As a candidate, I can choose a role or upload a JD, take one free interview, and get a Readiness Scorecard.
+
+I can pay to unlock other interview types (HR/Behavioral, Case, Technical) for the same role.
+
+I can share my scorecard via link or attach a PNG/PDF to applications.
+
+Employer
+
+As an employer, I can create a job with AI-suggested assessments and generate an apply link.
+
+I can view candidate submissions with a compact readiness summary.
+
+Platform
+
+As the platform, I collect source attribution (which job/company link), measure conversion, and prevent abuse.
+
+3) IA & Flows (aligned to existing pages)
+New / Adjusted Routes
+
+GET /readycheck (landing with three tiles: Role Library, Upload JD, Practice a Skill)
+
+GET /share/:sessionId (public scorecard view)
+
+GET /company (employer workspace)
+
+GET /company/jobs/:jobId (candidate list + analytics)
+
+GET /apply/:jobId (candidate entry for a specific job)
+
+Reuses existing Interview pages & flows (/interview, /interview/config, /interview/session, /interview/results) and Exercise Mode (/exercise-mode/*)
+
+Hiready documentation
+
+.
+Uses current ProtectedRoute, SidebarLayout, MobileBottomNav scaffolding
+
+Hiready documentation
+
+.
+
+4) Screen-by-Screen Wireframes (text)
+A) /readycheck (Public)
+
+Hero: “Show, don’t tell — prove you’re interview-ready.”
+
+Tiles:
+
+From Role Library → /interview
+
+Your Own Role (Upload JD) → /interview/custom
+
+Practice a Skill → /exercise-mode
+
+CTA strip (sticky): Sign in with Google | Sign in | Create account
+
+B) Auth
+
+/login: Email + Password, Continue with Google. Forgot password. (Map to existing auth pages)
+
+Hiready documentation
+
+.
+
+/register: Name, Email, Password, Continue with Google. (Existing page extends)
+
+Hiready documentation
+
+.
+
+C) JD Upload (Custom)
+
+/interview/custom:
+
+Buttons: Import from URL, Paste JD, Enter Manually (already described)
+
+Hiready documentation
+
+.
+
+After save → Plan Preview → Start Interview.
+
+D) Interview Type Gate (Paywall preview)
+
+/interview/config:
+
+Show types for the chosen role: Technical / HR / Behavioral / Case.
+
+One type = Unlocked (FREE); others greyed with lock + tooltip “Unlock with Role Pack”.
+
+Start button launches the unlocked one.
+
+E) Session (unchanged UI, ensure timers/controls per docs)
+
+Hiready documentation
+
+.
+F) Results & Scorecard (Upsell)
+
+/interview/results:
+
+Top: Circular overall score + five dimensions (e.g., Clarity, Confidence, Structure, Storytelling, Relevance).
+
+Buttons:
+
+Download Scorecard (PNG/PDF)
+
+Copy Public Link
+
+Unlock All Interview Types for this Role (₹199/$4.99)
+
+Try Another Role
+
+Mini progress: “You’ve completed 1 of 3 interviews for this role.”
+
+G) Public Share
+
+/share/:sessionId:
+
+Read-only card: Score, dimensions, role/JD context, timestamp.
+
+“Generated via Hiready” footer + soft CTA “Practice your own”.
+
+H) Employer Workspace
+
+/company:
+
+Create Company (name, domain)
+
+Create Job (paste JD) → AI suggested assessment bundle (types, counts) → Generate Apply Link.
+
+/company/jobs/:jobId:
+
+Candidate list: Name, email, score, date, link to details.
+
+Export CSV.
+
+5) Authentication Spec (Normal + Google)
+
+Normal login: existing POST /api/auth/login, POST /api/auth/register, session-based auth (Express + Postgres sessions) remains valid
+
+Hiready documentation
+
+.
+
+Google OAuth:
+
+Add /api/auth/google/start (redirect) and /api/auth/google/callback.
+
+On success, create/find auth_users row, start session, redirect to /avatar/dashboard (or returnTo).
+
+Keep ProtectedRoute on app pages; reuse session checks (frontend & backend middleware)
+
+Hiready documentation
+
+.
+
+Existing auth endpoints and session middleware are already described; we extend with Google OAuth and keep session cookies secure/HTTP-only per current security section
+
+Hiready documentation
+
+.
+
+6) API Contracts (new or extended)
+Auth
+
+POST /api/auth/login (email, password) — existing
+
+Hiready documentation
+
+POST /api/auth/register (name, email, password) — existing
+
+Hiready documentation
+
+GET /api/auth/user — existing
+
+Hiready documentation
+
+GET /api/auth/google/start → 302 to Google
+
+GET /api/auth/google/callback → starts session
+
+Interview / Scorecard
+
+POST /api/interview/documents/upload — upload JD/CV (existing)
+
+Hiready documentation
+
+POST /api/interview/config — create config (existing)
+
+Hiready documentation
+
+POST /api/interview/plans/generate — plan (existing)
+
+Hiready documentation
+
+POST /api/interview/sessions — start (existing)
+
+Hiready documentation
+
+POST /api/interview/sessions/:id/analyze — analyze (existing)
+
+Hiready documentation
+
+NEW GET /api/interview/public/:sessionId — public safe view (role name, overall, dimensions, created_at; NO PII)
+
+NEW POST /api/interview/scorecard/:id/export → returns PNG/PDF (store in S3; you already use S3 for artifacts)
+
+Hiready documentation
+
+.
+
+Payments
+
+NEW POST /api/payments/initiate (plan: role_pack | pro, role_id?) → gateway client secret
+
+NEW POST /api/payments/webhook (Stripe/Razorpay) → mark subscription/entitlements.
+
+Employer
+
+NEW POST /api/company (name, domain) → {company_id}
+
+NEW POST /api/company/jobs (company_id, jd_text | jd_url, rolekit_ref?) → {job_id, apply_url}
+
+NEW GET /api/company/jobs/:jobId/candidates → [{user_id, name, email, session_id, score, submitted_at}]
+
+NEW GET /api/company/analytics/summary → {totals, conversion}
+
+All new endpoints follow the existing REST style and session middleware patterns from the codebase
+
+Hiready documentation
+
+.
+
+7) Database Migrations (additive)
+New tables
+-- companies
+id (pk), name, domain, plan, created_at, updated_at
+
+-- company_jobs
+id (pk), company_id (fk), title, jd_text, jd_url, rolekit_ref, status, created_at
+
+-- company_candidates
+id (pk), job_id (fk), user_id (fk), interview_session_id (fk), score_overall, submitted_at
+
+-- subscriptions
+id (pk), user_id (fk), plan_type ENUM('free','role_pack','pro'),
+status ENUM('active','canceled','expired'),
+role_context JSONB NULL, started_at, expires_at
+
+-- payments (optional for audits)
+id (pk), user_id, amount, currency, provider, provider_ref, status, meta JSONB, created_at
+
+Existing table extensions
+-- interview_sessions: add monetization & source fields
+ALTER TABLE interview_sessions
+  ADD COLUMN source_company VARCHAR(120) NULL,
+  ADD COLUMN source_job_id UUID NULL,
+  ADD COLUMN is_free_trial BOOLEAN DEFAULT TRUE,
+  ADD COLUMN unlocked_types JSONB DEFAULT '[]';
+
+
+Map to your existing interview_ tables* and artifacts model; keep transcripts/analysis in current structure
+
+Hiready documentation
+
+.
+
+8) Paywall & Entitlements (logic)
+
+Default: first interview type unlocked per role/JD.
+
+On successful payment:
+
+If role_pack: set interview_sessions.unlocked_types = ["hr","behavioral","case","technical"] for that role context.
+
+If pro: entitle user globally; skip locks on future roles.
+
+Guard: server checks entitlement before spinning up a locked session type; else returns 402-like error → UI shows purchase modal.
+
+9) Scorecard (structure & share)
+
+Scorecard fields (public):
+
+Role/JD label, Overall Index (0–100), dimension bars (5), date/time
+
+“Generated by Hiready” + link
+
+Optional watermark; no PII by default
+
+Private (owner view only):
+
+Narrative feedback, strengths, improvements, session link
+
+Export
+
+PNG for LinkedIn/Instagram share
+
+PDF to attach to CV
+
+S3 fits for storage; you already use S3 for artifacts per docs
+
+Hiready documentation
+
+.
+
+10) Analytics & Admin
+
+Track funnel in session_journey_events (already present) — add events:
+
+readycheck_viewed, role_selected, jd_uploaded, interview_started, interview_completed, scorecard_viewed, share_clicked, paywall_viewed, payment_success.
+
+Extend Admin Console summary tiles to show: free→paid conversion, top roles, top sources (company/job) — plug into existing admin routes and dashboard cards
+
+Hiready documentation
+
+.
+
+11) Security & Privacy
+
+Session cookies HTTP-only/secure (already in stack)
+
+Hiready documentation
+
+.
+
+Public scorecard endpoint must whitelist safe fields only.
+
+Consent flags:
+
+Candidate flow: “Your scorecard is private by default. Public link sharing is optional.”
+
+Employer flow: explicit consent to share with this employer (checkbox).
+
+12) Sprint Plan (10–12 working days)
+
+Week 1
+
+FE: /readycheck + type-lock UI on /interview/config (2d)
+
+BE: Google OAuth routes + session integration (1.5d)
+
+BE: new DB migrations (companies/jobs/candidates/subscriptions) (1d)
+
+FE/BE: /share/:sessionId + GET /api/interview/public/:id + PNG export (2d)
+
+FE: Results page upsell/paywall modal, progress bar (1d)
+
+Week 2
+6. Payments: provider integration + entitlements (3d)
+7. Employer workspace: create job, generate apply link, candidate table (3d)
+8. Admin: minimal analytics tiles for new funnel (1d)
+
+Buffer: 1–2 days.
+
+13) Copy Snippets (drop-in)
+
+Results Upsell Modal
+
+You’ve completed 1 of 3 interview types for Product Manager (SaaS).
+Unlock Technical, HR & Case interviews + a 7-day improvement plan.
+₹199 / $4.99 — Unlock Role Pack
+
+Public Scorecard Footer
+
+This Readiness Index was generated by Hiready after an AI-simulated interview.
+Create your own: hiready.app
+
+14) References to Current Code/Docs (for engineers)
+
+Practice modes & pages (/interview, /interview/custom, /exercise-mode) — present and ready to extend
+
+Hiready documentation
+
+Results & history page — extend with share/export + paywall buttons
+
+Hiready documentation
+
+Auth layer (session-based, ProtectedRoute) — keep; add Google OAuth endpoints
+
+Hiready documentation
+
+Interview API suite (/api/interview/*) — reuse for configs, plans, sessions, analysis
+
+Hiready documentation
+
+S3 storage already integrated for artifacts — reuse for scorecard PNG/PDF
+
+Hiready documentation
+
+Admin console — extend analytics tiles for new funnel metrics
+
+Hiready documentation
