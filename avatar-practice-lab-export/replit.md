@@ -42,12 +42,14 @@ avatar-practice-lab-export/
 ```
 
 ## Brand Colors (January 2026)
-- **Primary Blue**: #2563eb - CTAs, active states, accents
-- **Dark Blue**: #1e40af - Gradients, sidebar, header backgrounds
-- **Light Blue**: #60a5fa - Icons, secondary accents
-- **Navy Text**: #042c4c - Dark text, headings
+- **Primary Coral**: #ee7e65 - CTAs, active states, accents
+- **Secondary Coral**: #e06a50 - Button hover states
+- **Dark Navy**: #042c4c - Sidebar, header backgrounds, dark text
+- **Navy Gradient**: #0a3d62 - Gradient secondary
+- **Gray-Blue**: #768c9c - Secondary elements, muted text
 - **Background**: #f8f9fb - Page backgrounds
-- **Gradient Pattern**: from-[#1e40af] to-[#2563eb] or from-[#2563eb] to-[#1d4ed8]
+- **CTA Gradient Pattern**: from-[#ee7e65] to-[#e06a50]
+- **Dark Gradient Pattern**: from-[#042c4c] to-[#0a3d62]
 
 ## Recent Changes (January 8, 2026)
 
@@ -58,15 +60,16 @@ Interview analysis now maps skill dimensions to the actual skills from the job d
 - **Robust Parsing**: Handles both JSON objects and stringified JSON
 - **Field Coverage**: Extracts requiredSkills, preferredSkills, technicalSkills, softSkills, and generic skills
 
-### UI Revamp - Blue Theme
-Complete visual refresh with blue accent theme:
-- Home page redesigned with modern hero, trust indicators, 3-step flow
-- Readycheck page with blue gradient background and smart input
-- Auth pages (login/register) with split layout and blue branding panel
-- Dashboard with blue gradient KPI strip and modern cards
-- Sidebar uses blue gradient (from-[#1e40af] to-[#1e3a5f])
-- Mobile bottom nav with blue active states
-- All pages share coherent blue visual hierarchy
+### UI Revamp - Coral/Navy Theme
+Complete visual refresh with coral accent theme for modern, engaging UX:
+- Home page redesigned with modern hero, coral CTAs, trust indicators
+- Readycheck page with coral gradient accents and smart input
+- Auth pages (login/register) with split layout and navy branding panel
+- Dashboard with navy gradient KPI strip and coral action buttons
+- Sidebar uses navy gradient (from-[#042c4c] to-[#0a3d62])
+- Mobile bottom nav with coral active states
+- All pages share coherent coral/navy visual hierarchy
+- Target demographic: Young job seekers aged 20-40
 
 ### Hiready Platform Transformation
 Complete platform rebranding and new features:
