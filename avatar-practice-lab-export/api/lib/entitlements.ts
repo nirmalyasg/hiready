@@ -131,7 +131,26 @@ export async function checkEntitlements(
     }
   }
 
-  if (!targetRoleKitId) {
+  let completedSessionsResult;
+  
+  if (targetRoleKitId) {
+    completedSessionsResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(interviewSessions)
+      .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+      .where(
+        and(
+          eq(interviewConfigs.userId, userId),
+          eq(interviewConfigs.roleKitId, targetRoleKitId)
+        )
+      );
+  } else if (jobTargetId) {
+    completedSessionsResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(interviewSessions)
+      .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+      .where(eq(interviewConfigs.userId, userId));
+  } else {
     return {
       hasAccess: false,
       accessType: "none",
@@ -141,17 +160,6 @@ export async function checkEntitlements(
       remainingFreeTrials: 0,
     };
   }
-
-  const completedSessionsResult = await db
-    .select({ count: sql<number>`count(*)` })
-    .from(interviewSessions)
-    .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
-    .where(
-      and(
-        eq(interviewConfigs.userId, userId),
-        eq(interviewConfigs.roleKitId, targetRoleKitId)
-      )
-    );
 
   const sessionCount = Number(completedSessionsResult[0]?.count || 0);
   const FREE_TRIAL_LIMIT = 1;

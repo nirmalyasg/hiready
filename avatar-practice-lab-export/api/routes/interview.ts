@@ -43,7 +43,7 @@ import {
 } from "../lib/capability-vectorizer.js";
 import { requireAuth } from "../middleware/auth.js";
 import { getOpenAI } from "../utils/openai-client.js";
-import { enforceEntitlements } from "../lib/entitlements.js";
+import { enforceEntitlements, checkEntitlements } from "../lib/entitlements.js";
 import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
 import {
@@ -671,6 +671,7 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
       jobTargetId,
       exerciseCount,
       includePuzzles,
+      employerJobId,
     } = req.body;
     
     const interviewModeTypes = ["coding_technical", "case_problem_solving", "behavioral", "hiring_manager", "system_deep_dive"];
@@ -723,6 +724,26 @@ interviewRouter.post("/config", requireAuth, async (req: Request, res: Response)
       
       if (!jobTarget) {
         return res.status(404).json({ success: false, error: "Job target not found" });
+      }
+    }
+    
+    const targetRoleKitId = roleKitId || null;
+    
+    if (targetRoleKitId || employerJobId) {
+      const entitlement = await checkEntitlements(userId, { 
+        roleKitId: targetRoleKitId, 
+        jobTargetId,
+        employerJobId: employerJobId || undefined,
+      });
+      
+      if (!entitlement.canStartSession) {
+        return res.status(403).json({
+          success: false,
+          error: entitlement.reason || "Access denied",
+          requiresPayment: true,
+          accessType: entitlement.accessType,
+          roleKitId: targetRoleKitId,
+        });
       }
     }
     

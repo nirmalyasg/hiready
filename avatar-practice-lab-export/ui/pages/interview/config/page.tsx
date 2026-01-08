@@ -8,6 +8,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useToast } from "@/hooks/use-toast";
+import { PurchaseModal } from "@/components/purchase-modal";
 
 interface RoleKit {
   id: number;
@@ -94,6 +95,7 @@ export default function InterviewConfigPage() {
   const typicalDurationParam = searchParams.get("typicalDuration");
   const configIdParam = searchParams.get("configId");
   const interviewModeParam = searchParams.get("interviewMode");
+  const employerJobId = searchParams.get("employerJobId");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -111,6 +113,7 @@ export default function InterviewConfigPage() {
   const [language, setLanguage] = useState<string>("english");
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const hasInitialized = useRef(false);
 
   const languages = [
@@ -220,6 +223,13 @@ export default function InterviewConfigPage() {
             }),
           });
           const configData = await configResponse.json();
+          
+          if (configResponse.status === 403 && configData.requiresPayment) {
+            setIsGeneratingPlan(false);
+            setShowPurchaseModal(true);
+            return;
+          }
+          
           if (configData.success) {
             setConfig(configData.config);
             
@@ -280,6 +290,13 @@ export default function InterviewConfigPage() {
               }),
             });
             const configData = await configResponse.json();
+            
+            if (configResponse.status === 403 && configData.requiresPayment) {
+              setIsGeneratingPlan(false);
+              setShowPurchaseModal(true);
+              return;
+            }
+            
             if (configData.success) {
               setConfig(configData.config);
               
@@ -360,9 +377,17 @@ export default function InterviewConfigPage() {
                 seniority: rolePracticeContext.roleContext?.level || "entry",
                 mode: "role_based",
                 roundCategory: rolePracticeContext.roundCategory,
+                employerJobId: employerJobId || undefined,
               }),
             });
             const configData = await configResponse.json();
+            
+            if (configResponse.status === 403 && configData.requiresPayment) {
+              setIsGeneratingPlan(false);
+              setShowPurchaseModal(true);
+              return;
+            }
+            
             if (configData.success) {
               setConfig(configData.config);
               
@@ -403,9 +428,17 @@ export default function InterviewConfigPage() {
                   seniority: data.roleKit.level,
                   mode: "role_based",
                   roundCategory: roundCategory || null,
+                  employerJobId: employerJobId || undefined,
                 }),
               });
               const configData = await configResponse.json();
+              
+              if (configResponse.status === 403 && configData.requiresPayment) {
+                setIsGeneratingPlan(false);
+                setShowPurchaseModal(true);
+                return;
+              }
+              
               if (configData.success) {
                 setConfig(configData.config);
                 
@@ -469,6 +502,7 @@ export default function InterviewConfigPage() {
         body: JSON.stringify({
           interviewConfigId: config.id,
           interviewPlanId: planId,
+          employerJobId: employerJobId || undefined,
         }),
       });
 
@@ -483,6 +517,12 @@ export default function InterviewConfigPage() {
       }
 
       const data = await response.json();
+      
+      if (response.status === 403 && data.requiresPayment) {
+        setShowPurchaseModal(true);
+        return;
+      }
+      
       if (data.success) {
         sessionStorage.removeItem("interviewModeSetup");
         sessionStorage.removeItem("interviewModeContext");
@@ -833,6 +873,14 @@ export default function InterviewConfigPage() {
           </div>
         </div>
       </div>
+      
+      <PurchaseModal
+        isOpen={showPurchaseModal}
+        onClose={() => setShowPurchaseModal(false)}
+        roleKitId={roleKitId ? parseInt(roleKitId) : undefined}
+        roleName={roleKit?.name}
+        jobTargetId={jobTargetId || undefined}
+      />
     </SidebarLayout>
   );
 }
