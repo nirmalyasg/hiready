@@ -14,7 +14,9 @@ import {
   CheckCircle2,
   ChevronDown,
   Plus,
-  Zap
+  Zap,
+  Crown,
+  Lock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -169,6 +171,25 @@ export default function AvatarSimulatorDashboard() {
 
   const aiInsights = aiInsightsQuery.data;
 
+  const fetchSubscriptionStatus = async () => {
+    try {
+      const res = await fetch("/api/payments/subscription-status", { credentials: 'include' });
+      const data = await res.json();
+      if (!data.success) return null;
+      return data;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const subscriptionQuery = useQuery({
+    queryKey: ["/payments/subscription-status"],
+    queryFn: fetchSubscriptionStatus,
+    staleTime: 60000,
+  });
+
+  const subscription = subscriptionQuery.data;
+
   const jobTargets: JobTarget[] = jobTargetsQuery.data || [];
   const activeJobs = jobTargets.filter(j => j.status !== 'archived' && j.status !== 'rejected');
 
@@ -310,6 +331,44 @@ export default function AvatarSimulatorDashboard() {
             {hasActivity ? "Here's your interview readiness at a glance." : "Start practicing to build your readiness."}
           </p>
         </div>
+
+        {/* Subscription Status */}
+        {subscription && (
+          <div className={`rounded-xl p-4 flex items-center justify-between ${
+            subscription.hasPro 
+              ? "bg-gradient-to-r from-[#ee7e65]/10 to-[#e06a50]/10 border border-[#ee7e65]/20"
+              : "bg-slate-50 border border-slate-100"
+          }`}>
+            <div className="flex items-center gap-3">
+              {subscription.hasPro ? (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#ee7e65] to-[#e06a50] flex items-center justify-center">
+                  <Crown className="w-5 h-5 text-white" />
+                </div>
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
+                  <Lock className="w-5 h-5 text-slate-500" />
+                </div>
+              )}
+              <div>
+                <p className="font-semibold text-[#042c4c]">
+                  {subscription.hasPro ? "Pro Member" : "Free Plan"}
+                </p>
+                <p className="text-sm text-slate-500">
+                  {subscription.hasPro 
+                    ? `Unlimited interviews${subscription.planType === 'yearly' ? ' (Annual)' : ''}`
+                    : `${subscription.rolePacks?.length || 0} role pack(s) purchased`}
+                </p>
+              </div>
+            </div>
+            {!subscription.hasPro && (
+              <Link to="/pricing">
+                <Button size="sm" className="bg-gradient-to-r from-[#ee7e65] to-[#e06a50] hover:from-[#e06a50] hover:to-[#d55a40] text-white">
+                  Upgrade
+                </Button>
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* Hero KPI Strip */}
         {hasActivity && (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Building2, MapPin, Sparkles, Play, FileText, Code, CheckCircle2, AlertCircle, MoreVertical, Trash2, ChevronDown, ChevronUp, Phone, User, Briefcase, MessageCircle, Heart, TrendingUp, ExternalLink } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, Sparkles, Play, FileText, Code, CheckCircle2, AlertCircle, MoreVertical, Trash2, ChevronDown, ChevronUp, Phone, User, Briefcase, MessageCircle, Heart, TrendingUp, ExternalLink, Lock, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SidebarLayout from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -10,6 +10,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PurchaseModal } from "@/components/purchase-modal";
+
+interface Entitlements {
+  hasAccess: boolean;
+  accessType: "free_trial" | "role_pack" | "pro_subscription" | "employer_assessment" | "none";
+  reason: string;
+  canStartSession: boolean;
+  freeTrialUsed: boolean;
+  sessionsCompleted?: number;
+  pricing?: any;
+}
 
 interface JobTarget {
   id: string;
@@ -158,6 +169,9 @@ export default function JobDetailPage() {
   const [isParsing, setIsParsing] = useState(false);
   const [jdExpanded, setJdExpanded] = useState(false);
   const [requirementsExpanded, setRequirementsExpanded] = useState(true);
+  const [entitlements, setEntitlements] = useState<Entitlements | null>(null);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [pendingPracticeOption, setPendingPracticeOption] = useState<PracticeOption | null>(null);
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -165,13 +179,15 @@ export default function JobDetailPage() {
       
       try {
         setIsLoading(true);
-        const [jobRes, optionsRes] = await Promise.all([
+        const [jobRes, optionsRes, entitlementsRes] = await Promise.all([
           fetch(`/api/jobs/job-targets/${jobId}`),
           fetch(`/api/jobs/job-targets/${jobId}/practice-options`),
+          fetch(`/api/payments/entitlements?jobTargetId=${jobId}`, { credentials: "include" }),
         ]);
         
         const jobData = await jobRes.json();
         const optionsData = await optionsRes.json();
+        const entitlementsData = await entitlementsRes.json();
         
         if (jobData.success) {
           setJob(jobData.job);
@@ -189,6 +205,10 @@ export default function JobDetailPage() {
               hasContext: !!optionsData.companyContext.companyId,
             });
           }
+        }
+
+        if (entitlementsData.success) {
+          setEntitlements(entitlementsData);
         }
       } catch (error) {
         console.error("Error fetching job:", error);
@@ -235,7 +255,35 @@ export default function JobDetailPage() {
   };
 
   const handleStartPracticeOption = (option: PracticeOption) => {
+    if (entitlements && !entitlements.canStartSession) {
+      setPendingPracticeOption(option);
+      setShowPurchaseModal(true);
+      return;
+    }
     navigate(`/interview/config?jobTargetId=${job?.id}&roundCategory=${option.roundCategory}`);
+  };
+
+  const handlePurchaseSuccess = () => {
+    setEntitlements((prev) =>
+      prev ? { ...prev, hasAccess: true, canStartSession: true, accessType: "role_pack" } : null
+    );
+    if (pendingPracticeOption) {
+      navigate(`/interview/config?jobTargetId=${job?.id}&roundCategory=${pendingPracticeOption.roundCategory}`);
+    }
+    setPendingPracticeOption(null);
+  };
+
+  const refreshEntitlements = async () => {
+    if (!jobId) return;
+    try {
+      const res = await fetch(`/api/payments/entitlements?jobTargetId=${jobId}`, { credentials: "include" });
+      const data = await res.json();
+      if (data.success) {
+        setEntitlements(data);
+      }
+    } catch (e) {
+      console.error("Error refreshing entitlements:", e);
+    }
   };
 
   if (isLoading) {
@@ -347,6 +395,67 @@ export default function JobDetailPage() {
             </div>
           )}
 
+          {entitlements && (
+            <div className={`rounded-xl border p-3 ${
+              entitlements.accessType === "pro_subscription"
+                ? "bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200"
+                : entitlements.accessType === "role_pack"
+                  ? "bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200"
+                  : entitlements.accessType === "free_trial"
+                    ? "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200"
+                    : "bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200"
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                  entitlements.accessType === "pro_subscription"
+                    ? "bg-amber-100 text-amber-600"
+                    : entitlements.accessType === "role_pack"
+                      ? "bg-emerald-100 text-emerald-600"
+                      : entitlements.accessType === "free_trial"
+                        ? "bg-blue-100 text-blue-600"
+                        : "bg-slate-100 text-slate-600"
+                }`}>
+                  {entitlements.accessType === "pro_subscription" ? (
+                    <Crown className="w-4 h-4" />
+                  ) : entitlements.canStartSession ? (
+                    <Sparkles className="w-4 h-4" />
+                  ) : (
+                    <Lock className="w-4 h-4" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-sm text-[#042c4c]">
+                    {entitlements.accessType === "pro_subscription"
+                      ? "Pro Member"
+                      : entitlements.accessType === "role_pack"
+                        ? "Role Pack Active"
+                        : entitlements.accessType === "free_trial"
+                          ? "Free Trial"
+                          : "Unlock More Practice"}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {entitlements.accessType === "pro_subscription"
+                      ? "Unlimited access to all roles"
+                      : entitlements.accessType === "role_pack"
+                        ? "Unlimited interviews for this role"
+                        : entitlements.accessType === "free_trial"
+                          ? "1 free interview available"
+                          : `Free trial used - upgrade to continue`}
+                  </p>
+                </div>
+                {!entitlements.canStartSession && (
+                  <Button
+                    onClick={() => setShowPurchaseModal(true)}
+                    size="sm"
+                    className="bg-[#ee7e65] hover:bg-[#e06a50] text-white text-xs"
+                  >
+                    Upgrade
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
           {practiceOptions.length > 0 && (
             <div className="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
               <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
@@ -375,10 +484,23 @@ export default function JobDetailPage() {
                       <Button
                         onClick={() => handleStartPracticeOption(option)}
                         size="sm"
-                        className="bg-gradient-to-r from-[#ee7e65] to-[#e06a50] hover:from-[#e06a50] hover:to-[#d55a40] text-white h-8 px-3 text-xs shadow-sm shadow-[#ee7e65]/20"
+                        className={`h-8 px-3 text-xs shadow-sm ${
+                          entitlements?.canStartSession
+                            ? "bg-gradient-to-r from-[#ee7e65] to-[#e06a50] hover:from-[#e06a50] hover:to-[#d55a40] text-white shadow-[#ee7e65]/20"
+                            : "bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200"
+                        }`}
                       >
-                        <Play className="w-3 h-3 mr-1" />
-                        Start
+                        {entitlements?.canStartSession ? (
+                          <>
+                            <Play className="w-3 h-3 mr-1" />
+                            Start
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="w-3 h-3 mr-1" />
+                            Unlock
+                          </>
+                        )}
                       </Button>
                     </div>
                   );
@@ -506,6 +628,17 @@ export default function JobDetailPage() {
           )}
         </div>
       </div>
+
+      <PurchaseModal
+        isOpen={showPurchaseModal}
+        onClose={() => {
+          setShowPurchaseModal(false);
+          setPendingPracticeOption(null);
+        }}
+        jobTargetId={job?.id}
+        roleName={job?.roleTitle}
+        onSuccess={handlePurchaseSuccess}
+      />
     </SidebarLayout>
   );
 }

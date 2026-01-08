@@ -82,7 +82,7 @@ paymentsRouter.get("/subscription", requireAuth, async (req: Request, res: Respo
       .limit(1);
 
     if (activeSubscription) {
-      const isProUser = activeSubscription.planType === "pro";
+      const isProUser = activeSubscription.planType === "pro" || activeSubscription.planType?.startsWith("pro");
       return res.json({ 
         success: true, 
         subscription: activeSubscription,
@@ -140,6 +140,49 @@ paymentsRouter.get("/free-trial-status", requireAuth, async (req: Request, res: 
     });
   } catch (error: any) {
     console.error("Error checking free trial status:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+paymentsRouter.get("/subscription-status", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "Unauthorized" });
+    }
+
+    const userSubscriptions = await db
+      .select()
+      .from(subscriptions)
+      .where(
+        and(
+          eq(subscriptions.userId, userId),
+          eq(subscriptions.status, "active")
+        )
+      )
+      .orderBy(desc(subscriptions.createdAt));
+
+    const proSubscription = userSubscriptions.find(
+      (s) => s.planType === "pro"
+    );
+
+    const rolePacks = userSubscriptions.filter(
+      (s) => s.planType === "role_pack" && s.roleKitId
+    );
+
+    res.json({
+      success: true,
+      hasPro: !!proSubscription,
+      planType: proSubscription?.planType || null,
+      proExpiresAt: proSubscription?.currentPeriodEnd || null,
+      rolePacks: rolePacks.map((rp) => ({
+        roleKitId: rp.roleKitId,
+        jobTargetId: rp.jobTargetId,
+        createdAt: rp.createdAt,
+      })),
+    });
+  } catch (error: any) {
+    console.error("Error fetching subscription status:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -338,6 +381,169 @@ paymentsRouter.post("/verify-payment", requireAuth, async (req: Request, res: Re
     });
   } catch (error: any) {
     console.error("Error verifying payment:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Comprehensive entitlements check - consolidates all access logic
+paymentsRouter.get("/entitlements", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "Unauthorized" });
+    }
+
+    const { jobTargetId, roleKitId, employerJobId } = req.query;
+
+    // 1. Check for employer assessment flow - always free for candidates
+    if (employerJobId) {
+      return res.json({
+        success: true,
+        hasAccess: true,
+        accessType: "employer_assessment",
+        reason: "Employer-sponsored assessment - no payment required",
+        canStartSession: true,
+        freeTrialUsed: false,
+        subscription: null,
+        pricing: null,
+      });
+    }
+
+    // 2. Check for active Pro subscription (unlimited access)
+    const [proSubscription] = await db
+      .select()
+      .from(subscriptions)
+      .where(
+        and(
+          eq(subscriptions.userId, userId),
+          eq(subscriptions.planType, "pro"),
+          eq(subscriptions.status, "active"),
+          gte(subscriptions.expiresAt, new Date())
+        )
+      )
+      .orderBy(desc(subscriptions.createdAt))
+      .limit(1);
+
+    if (proSubscription) {
+      return res.json({
+        success: true,
+        hasAccess: true,
+        accessType: "pro_subscription",
+        reason: "Active Pro subscription",
+        canStartSession: true,
+        freeTrialUsed: true,
+        subscription: proSubscription,
+        pricing: null,
+      });
+    }
+
+    // 3. Check for role-specific subscription (role pack)
+    const rolePackConditions = [
+      eq(subscriptions.userId, userId),
+      eq(subscriptions.planType, "role_pack"),
+      eq(subscriptions.status, "active"),
+    ];
+    
+    if (jobTargetId) {
+      rolePackConditions.push(eq(subscriptions.jobTargetId, jobTargetId as string));
+    }
+    if (roleKitId) {
+      rolePackConditions.push(eq(subscriptions.roleKitId, parseInt(roleKitId as string)));
+    }
+
+    const [rolePackSubscription] = await db
+      .select()
+      .from(subscriptions)
+      .where(and(...rolePackConditions))
+      .orderBy(desc(subscriptions.createdAt))
+      .limit(1);
+
+    if (rolePackSubscription) {
+      return res.json({
+        success: true,
+        hasAccess: true,
+        accessType: "role_pack",
+        reason: "Active role pack for this job/role",
+        canStartSession: true,
+        freeTrialUsed: true,
+        subscription: rolePackSubscription,
+        pricing: null,
+      });
+    }
+
+    // 4. Check free trial status (1 free interview per job/role)
+    const sessionConditions = [
+      eq(interviewConfigs.userId, userId),
+    ];
+    
+    if (jobTargetId) {
+      sessionConditions.push(eq(interviewConfigs.jobTargetId, jobTargetId as string));
+    }
+    if (roleKitId) {
+      sessionConditions.push(eq(interviewConfigs.roleKitId, parseInt(roleKitId as string)));
+    }
+
+    const completedSessions = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(interviewSessions)
+      .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+      .where(
+        and(
+          ...sessionConditions,
+          eq(interviewSessions.status, "analyzed")
+        )
+      );
+
+    const sessionCount = Number(completedSessions[0]?.count || 0);
+    const freeTrialUsed = sessionCount >= 1;
+
+    if (!freeTrialUsed) {
+      return res.json({
+        success: true,
+        hasAccess: true,
+        accessType: "free_trial",
+        reason: "Free trial - first interview is free",
+        canStartSession: true,
+        freeTrialUsed: false,
+        sessionsCompleted: sessionCount,
+        subscription: null,
+        pricing: null,
+      });
+    }
+
+    // 5. No access - show pricing
+    return res.json({
+      success: true,
+      hasAccess: false,
+      accessType: "none",
+      reason: "Free trial used - purchase required",
+      canStartSession: false,
+      freeTrialUsed: true,
+      sessionsCompleted: sessionCount,
+      subscription: null,
+      pricing: {
+        role_pack: {
+          price: 199,
+          currency: "INR",
+          name: "Role Pack",
+          description: "Unlimited interviews for this role",
+        },
+        pro_monthly: {
+          price: 499,
+          currency: "INR", 
+          name: "Pro Monthly",
+          description: "Unlimited access to all roles",
+        },
+        pro_yearly: {
+          price: 3999,
+          currency: "INR",
+          name: "Pro Yearly",
+          description: "Best value - save 33%",
+        },
+      },
+    });
+  } catch (error: any) {
+    console.error("Error checking entitlements:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
