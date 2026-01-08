@@ -28,24 +28,24 @@ export default function ReadycheckLaunchPage() {
 
           setStatus("Analyzing job description...");
 
-          const response = await fetch("/api/interview/parse-jd", {
+          const response = await fetch("/api/jobs/job-targets/parse-paste", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
-            body: JSON.stringify({ jdText }),
+            body: JSON.stringify({ pastedText: jdText }),
           });
 
           const data = await response.json();
 
-          if (data.success && data.jobTarget) {
+          if (data.success && data.job) {
             sessionStorage.removeItem("readycheck_jd");
             sessionStorage.removeItem("readycheck_type");
             sessionStorage.removeItem("returnTo");
             
             setStatus("Setting up your practice session...");
-            navigate(`/jobs/${data.jobTarget.id}`);
+            navigate(`/jobs/${data.job.id}`);
           } else {
-            setError("Could not analyze the job description. Please try again.");
+            setError(data.error || "Could not analyze the job description. Please try again.");
           }
         } else if (type === "linkedin") {
           const linkedinUrl = sessionStorage.getItem("readycheck_linkedin");
