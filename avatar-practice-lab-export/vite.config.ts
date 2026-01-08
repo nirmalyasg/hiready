@@ -14,6 +14,7 @@ export default defineConfig({
       '@/lib': path.resolve(__dirname, './ui/lib'),
       '@/contexts': path.resolve(__dirname, './ui/contexts'),
       '@/types': path.resolve(__dirname, './ui/types'),
+      '@assets': path.resolve(__dirname, './attached_assets'),
     },
   },
   server: {
