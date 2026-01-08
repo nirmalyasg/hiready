@@ -1363,13 +1363,23 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
     
     const feedbackResult = JSON.parse(feedbackResponse.choices[0].message.content || "{}");
     
+    // Normalize confidence level to match DB constraint: 'high', 'medium', 'low'
+    const rawConfidence = evaluatorResult.overall?.confidence?.toLowerCase() || null;
+    let normalizedConfidence: string | null = null;
+    if (rawConfidence) {
+      if (rawConfidence.includes('high')) normalizedConfidence = 'high';
+      else if (rawConfidence.includes('med')) normalizedConfidence = 'medium';
+      else if (rawConfidence.includes('low')) normalizedConfidence = 'low';
+      else normalizedConfidence = 'medium'; // default fallback
+    }
+    
     const [analysisRecord] = await db
       .insert(interviewAnalysis)
       .values({
         interviewSessionId: sessionId,
         transcriptId: transcriptId || null,
         overallRecommendation: evaluatorResult.overall?.recommendation?.toLowerCase().replace(/\s+/g, "_") || null,
-        confidenceLevel: evaluatorResult.overall?.confidence?.toLowerCase() || null,
+        confidenceLevel: normalizedConfidence,
         summary: evaluatorResult.overall?.summary || null,
         dimensionScores: evaluatorResult.dimension_scores || null,
         strengths: evaluatorResult.strengths || null,
