@@ -60,9 +60,10 @@ Complete platform rebranding and new features:
    - Access control via company membership
 
 3. **Self-Practice Landing** (`/readycheck`)
-   - Role library with search and domain filtering
-   - JD paste/upload functionality
-   - Auth-gated practice flow
+   - Simplified two-tab input: Paste JD or LinkedIn URL
+   - Session storage preserves data through auth redirect
+   - `/readycheck/launch` hydrates data post-auth and auto-routes to interview config
+   - LinkedIn URL parsing via `/api/readycheck/parse-linkedin`
 
 4. **Payment System** (Razorpay integration)
    - Order creation and signature verification
