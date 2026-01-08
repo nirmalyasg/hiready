@@ -1,0 +1,284 @@
+🧭 HIREADY – Product & Technical Design Document (v1.0 – January 2026)
+
+“Your CV tells your story. Hiready shows your readiness.”
+
+🧩 OVERVIEW
+
+Hiready is an AI-powered interview practice and evaluation platform that helps candidates prove their interview readiness and companies evaluate real job applicants.
+It builds a candidate-owned Readiness Index™, allowing individuals to attach their interview performance alongside their CV.
+
+The platform serves three core user journeys:
+
+Audience	Goal	Outcome
+Candidates / Job Seekers	Practice interviews for roles or JDs, receive a Hiready Scorecard, and optionally attach it to job applications.	Self-awareness, measurable improvement, shareable readiness proof.
+Employers / Recruiters	Create custom assessments using AI-suggested interview kits and receive structured candidate readiness data.	Consistent screening, reduced manual evaluation.
+Platform (Hiready)	Offer practice, evaluation, and learning loops with monetization via Razorpay.	Scalable product-led growth engine.
+🎯 PRODUCT GOALS
+
+Create a shareable “Hiready Index™” that quantifies real interview readiness.
+
+Enable one-click interview practice for roles or JDs — free first interview, paid unlock thereafter.
+
+Allow employers to post openings and automatically assess applicants via Hiready.
+
+Monetize through Razorpay for individual role packs and Pro subscriptions.
+
+Track readiness progression across interview types (HR, behavioral, case, technical).
+
+🧠 BRAND POSITIONING
+
+“Your CV tells your story. Hiready shows your readiness.”
+“Show, don’t tell — prove you’re interview-ready.”
+“Attach your Hiready Scorecard. Let your performance speak.”
+
+This positions Hiready as a career companion, not just an app — bridging practice, assessment, and proof.
+
+⚙️ CORE FEATURES & FLOWS
+🧩 Candidate Flows
+1. Role-Based Readiness
+
+Choose from Role Library or upload a custom JD.
+
+Take one AI interview (free).
+
+Get Hiready Index™ Scorecard (overall + skill dimensions).
+
+Unlock more interview types (technical / HR / case) for ₹199 via Razorpay.
+
+Option to share scorecard link or download PDF.
+
+2. Skill Practice Mode
+
+Choose from “coding,” “case,” or “HR interview” skill modules.
+
+Practice repeatedly.
+
+Each attempt adds data to readiness history.
+
+3. Scorecard & Sharing
+
+AI-generated analytics with metrics like Clarity, Confidence, Structure, Storytelling, Relevance.
+
+Shareable short link (hiready.app/share/:id) or downloadable PDF.
+
+🧩 Employer Flows
+1. Company Workspace
+
+Register company.
+
+Create job → Paste JD or upload document.
+
+Hiready auto-suggests interview structure (types + difficulty).
+
+Employer customizes and generates Apply Link.
+
+Candidates click, complete AI interview, and get scored.
+
+Dashboard shows all candidates, scores, and transcripts.
+
+2. Candidate Screening
+
+Each candidate has:
+
+Name, email, JD context.
+
+Readiness Index + breakdown.
+
+Transcript + highlights.
+
+Export data as CSV.
+
+🧩 Platform Flow
+Growth Loop
+Campaign → Candidate clicks ad → 
+Upload JD / choose role → 
+Free interview → 
+Scorecard → 
+Upgrade (pay) → 
+Share scorecard → 
+New users join.
+
+Employer Loop
+Employer adds job → 
+Generates link → 
+Applicants take AI interviews → 
+Employer sees reports → 
+Applicants convert to paying users.
+
+🧩 USER JOURNEY MAP
+A. Campaign → Role Readiness Flow
+1. User clicks ad → hiready.app/readycheck?role=marketing
+2. Upload JD or select from Role Library.
+3. Login via Google or Email/Password.
+4. AI interview starts (1 free interview).
+5. Results: Hiready Scorecard (Index + Insights).
+6. Paywall: “Unlock all interview types for this role ₹199”.
+7. On payment success → full access.
+8. Optional: Share scorecard (public link).
+
+B. Employer Evaluation Flow
+1. Employer registers company.
+2. Adds JD → AI suggests interviews.
+3. Generates “Apply via Hiready” link.
+4. Candidates take AI interviews.
+5. Employer dashboard shows scores + analytics.
+
+🧩 LOGIN & AUTHENTICATION FLOW
+
+Normal Login: Email + Password
+
+Google OAuth: For one-tap access
+
+Session-based (Express middleware)
+
+JWT stored securely via cookies (HTTP-only)
+
+Endpoints:
+
+POST /api/auth/login
+POST /api/auth/register
+GET /api/auth/google/start
+GET /api/auth/google/callback
+GET /api/auth/user
+
+🧩 DATABASE SCHEMA
+New Tables
+-- Companies
+CREATE TABLE companies (
+  id UUID PRIMARY KEY,
+  name TEXT,
+  domain TEXT,
+  plan TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Company Jobs
+CREATE TABLE company_jobs (
+  id UUID PRIMARY KEY,
+  company_id UUID REFERENCES companies(id),
+  title TEXT,
+  jd_text TEXT,
+  jd_url TEXT,
+  rolekit_ref TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Company Candidates
+CREATE TABLE company_candidates (
+  id UUID PRIMARY KEY,
+  job_id UUID REFERENCES company_jobs(id),
+  user_id UUID REFERENCES users(id),
+  interview_session_id UUID,
+  score_overall INT,
+  submitted_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Payments
+CREATE TABLE payments (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES users(id),
+  provider TEXT,
+  provider_ref TEXT,
+  amount INT,
+  currency TEXT,
+  status TEXT,
+  meta JSONB,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Subscriptions
+CREATE TABLE subscriptions (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES users(id),
+  plan_type TEXT,
+  status TEXT,
+  role_context JSONB,
+  started_at TIMESTAMP DEFAULT NOW(),
+  expires_at TIMESTAMP
+);
+
+Extend Existing Tables
+ALTER TABLE interview_sessions
+ADD COLUMN source_company VARCHAR(120),
+ADD COLUMN source_job_id UUID,
+ADD COLUMN is_free_trial BOOLEAN DEFAULT TRUE,
+ADD COLUMN unlocked_types JSONB DEFAULT '[]';
+
+🧩 RAZORPAY PAYMENT INTEGRATION
+Environment Variables
+RAZORPAY_KEY_ID=rzp_test_xxxxxx
+RAZORPAY_KEY_SECRET=yyyyyyyyyyyyy
+
+Backend (Express)
+import Razorpay from "razorpay";
+export const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID!,
+  key_secret: process.env.RAZORPAY_KEY_SECRET!,
+});
+
+// Create order
+POST /api/payments/initiate
+router.post("/payments/initiate", async (req, res) => {
+  const { planType, amount } = req.body;
+  const order = await razorpay.orders.create({
+    amount: amount * 100,
+    currency: "INR",
+    receipt: `hiready_${req.user.id}_${Date.now()}`
+  });
+  await db.insert("payments").values({
+    user_id: req.user.id,
+    provider: "razorpay",
+    provider_ref: order.id,
+    amount, currency: "INR", status: "created"
+  });
+  res.json({ orderId: order.id, key: process.env.RAZORPAY_KEY_ID });
+});
+
+// Webhook
+POST /api/payments/webhook
+router.post("/payments/webhook", async (req, res) => {
+  const { event, payload } = req.body;
+  if (event === "payment.captured") {
+    const payment = payload.payment.entity;
+    await db.update("payments").set({ status: "captured" }).where({ provider_ref: payment.order_id });
+    await activateSubscription(payment.notes.user_id, payment.notes.plan_type);
+  }
+  res.status(200).json({ received: true });
+});
+
+Frontend (React)
+const openCheckout = async (planType) => {
+  const res = await fetch("/api/payments/initiate", {
+    method: "POST",
+    body: JSON.stringify({ planType, amount: 199 }),
+    headers: { "Content-Type": "application/json" },
+  });
+  const data = await res.json();
+  const options = {
+    key: data.key,
+    amount: 19900,
+    currency: "INR",
+    name: "Hiready",
+    description: "Unlock Role Pack",
+    order_id: data.orderId,
+    handler: () => alert("Payment successful!"),
+  };
+  const rzp = new window.Razorpay(options);
+  rzp.open();
+};
+
+🧩 UI FLOW (MAJOR SCREENS)
+Screen	Key Elements
+/readycheck	Role Library • Upload JD • “Practice a Skill” options • CTA: Google Sign-In / Start Free Interview
+/login	Email + Password • Google Sign-In
+/interview/config	Interview type cards (1 unlocked, others locked) • Paywall overlay
+/interview/results	Hiready Index score • Insights • “Unlock All” (₹199) • “Download / Share Scorecard”
+/share/:id	Public read-only view • Minimal UI • CTA “Create your own”
+/company	Company setup • JD upload • Generate Apply Link
+/company/jobs/:id	Candidate table (Name, Score, Date, Link) • Export CSV
+🧩 PAYWALL & ENTITLEMENTS
+Tier	Access	Trigger
+Free	1 interview (role)	Campaign / Trial
+Role Pack	All interview types for one role	Razorpay payment
+Pro	Unlimited roles & sessions	Subscription
+Employer	10 candidate evaluations/month	Company plan
