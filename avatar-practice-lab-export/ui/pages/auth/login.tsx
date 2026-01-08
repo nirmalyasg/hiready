@@ -33,7 +33,13 @@ export default function LoginPage() {
         return;
       }
 
-      window.location.href = decodeURIComponent(returnUrl);
+      const sessionReturnTo = sessionStorage.getItem('returnTo');
+      if (sessionReturnTo) {
+        sessionStorage.removeItem('returnTo');
+        navigate(sessionReturnTo);
+      } else {
+        window.location.href = decodeURIComponent(returnUrl);
+      }
     } catch (err) {
       console.error('Login error:', err);
       setError('An error occurred. Please try again.');

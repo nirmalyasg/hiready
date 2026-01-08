@@ -44,7 +44,13 @@ export default function RegisterPage() {
         return;
       }
 
-      navigate('/interview');
+      const returnTo = sessionStorage.getItem('returnTo');
+      if (returnTo) {
+        sessionStorage.removeItem('returnTo');
+        navigate(returnTo);
+      } else {
+        navigate('/interview');
+      }
     } catch (err) {
       setError('An error occurred. Please try again.');
       setIsLoading(false);
