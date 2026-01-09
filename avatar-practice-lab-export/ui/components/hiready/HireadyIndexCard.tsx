@@ -114,7 +114,7 @@ export function HireadyIndexCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white rounded-lg shadow-sm">
-              <Target className="w-5 h-5 text-[#ee7e65]" />
+              <Target className="w-5 h-5 text-slate-700" />
             </div>
             <div>
               <CardTitle className="text-lg font-semibold text-gray-900">
