@@ -231,14 +231,14 @@ export default function InterviewResultsPage() {
   if (!analysis) {
     return (
       <SidebarLayout>
-        <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center">
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
           <Card className="max-w-md mx-4 border-slate-200">
             <CardContent className="p-8 text-center">
               <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-[#042c4c] mb-2">Analysis Not Found</h2>
+              <h2 className="text-xl font-bold text-slate-900 mb-2">Analysis Not Found</h2>
               <p className="text-slate-600 mb-6">We couldn't find the interview analysis. It may still be processing.</p>
               <Link to="/interview">
-                <Button className="bg-[#ee7e65] hover:bg-[#d96a52]">Back to Interview Practice</Button>
+                <Button className="bg-slate-600 hover:bg-slate-700">Back to Interview Practice</Button>
               </Link>
             </CardContent>
           </Card>
@@ -252,9 +252,9 @@ export default function InterviewResultsPage() {
 
   return (
     <SidebarLayout>
-      <div className="min-h-screen bg-[#f8f9fb] pb-24 sm:pb-8">
+      <div className="min-h-screen bg-slate-50 pb-24 sm:pb-8">
         {/* Header with Practice Context */}
-        <div className="bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] text-white">
+        <div className="bg-slate-900 text-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-5xl">
             <Link
               to="/avatar/results"
@@ -268,7 +268,7 @@ export default function InterviewResultsPage() {
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-                    <InterviewIcon className="w-5 h-5 text-[#ee7e65]" />
+                    <InterviewIcon className="w-5 h-5 text-slate-600" />
                   </div>
                   <div>
                     <h1 className="text-xl sm:text-2xl font-bold">{practiceTitle}</h1>
@@ -287,7 +287,7 @@ export default function InterviewResultsPage() {
                     {getInterviewTypeLabel(interviewType, interviewMode)}
                   </Badge>
                   {(readinessData?.readinessScore ?? jobContext?.readinessScore) !== null && (
-                    <Badge className="bg-[#ee7e65]/20 text-[#ee7e65] border-[#ee7e65]/30 gap-1">
+                    <Badge className="bg-slate-600/20 text-slate-600 border-slate-600/30 gap-1">
                       {readinessData?.readinessScore ?? jobContext?.readinessScore}% Ready
                       {readinessData?.readinessDelta !== undefined && readinessData.readinessDelta > 0 && (
                         <ArrowUp className="w-3 h-3" />
@@ -301,7 +301,7 @@ export default function InterviewResultsPage() {
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-4 bg-white/10 rounded-xl p-4">
                   <div className="text-center">
-                    <div className={`text-3xl font-bold ${averageScore >= 3 ? 'text-emerald-400' : 'text-[#ee7e65]'}`}>
+                    <div className={`text-3xl font-bold ${averageScore >= 3 ? 'text-emerald-400' : 'text-slate-600'}`}>
                       {averageScore.toFixed(1)}
                     </div>
                     <div className="text-xs text-white/60">out of 5</div>
@@ -344,10 +344,10 @@ export default function InterviewResultsPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-5xl">
           {/* Role Fit Assessment */}
           {(skillGaps.length > 0 || strongSkills.length > 0 || jdSkills.length > 0) && (
-            <Card className="border-[#042c4c]/10 rounded-2xl mb-6 overflow-hidden">
-              <div className="bg-gradient-to-r from-[#042c4c] to-[#0a3d66] p-4 sm:p-6">
+            <Card className="border-slate-900/10 rounded-2xl mb-6 overflow-hidden">
+              <div className="bg-slate-900 p-4 sm:p-6">
                 <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                  <Target className="w-5 h-5 text-[#ee7e65]" />
+                  <Target className="w-5 h-5 text-slate-600" />
                   Role Fit Assessment
                   {jobContext && <span className="text-white/60 font-normal text-sm ml-2">for {jobContext.roleTitle}</span>}
                 </h3>
@@ -356,13 +356,13 @@ export default function InterviewResultsPage() {
                 {/* JD Skills Match */}
                 {jdSkills.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-medium text-[#042c4c] mb-3 flex items-center gap-2">
-                      <BookOpen className="w-4 h-4 text-[#768c9c]" />
+                    <h4 className="text-sm font-medium text-slate-900 mb-3 flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-slate-500" />
                       Skills from Job Description
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {jdSkills.slice(0, 10).map((skill, idx) => (
-                        <Badge key={idx} variant="outline" className="bg-[#042c4c]/5 border-[#042c4c]/20 text-[#042c4c]">
+                        <Badge key={idx} variant="outline" className="bg-slate-900/5 border-slate-900/20 text-slate-900">
                           {skill}
                         </Badge>
                       ))}
@@ -419,14 +419,14 @@ export default function InterviewResultsPage() {
                 
                 {/* Recommendations */}
                 {skillGaps.length > 0 && (
-                  <div className="bg-[#ee7e65]/5 rounded-xl p-4 border border-[#ee7e65]/20">
-                    <h4 className="text-sm font-medium text-[#042c4c] mb-2 flex items-center gap-2">
-                      <GraduationCap className="w-4 h-4 text-[#ee7e65]" />
+                  <div className="bg-slate-600/5 rounded-xl p-4 border border-slate-600/20">
+                    <h4 className="text-sm font-medium text-slate-900 mb-2 flex items-center gap-2">
+                      <GraduationCap className="w-4 h-4 text-slate-600" />
                       Priority Focus
                     </h4>
                     <p className="text-sm text-slate-700">
-                      Based on your results, focus on <span className="font-medium text-[#ee7e65]">{skillGaps[0]?.dimension}</span>
-                      {skillGaps[1] && <> and <span className="font-medium text-[#ee7e65]">{skillGaps[1]?.dimension}</span></>} 
+                      Based on your results, focus on <span className="font-medium text-slate-600">{skillGaps[0]?.dimension}</span>
+                      {skillGaps[1] && <> and <span className="font-medium text-slate-600">{skillGaps[1]?.dimension}</span></>} 
                       {' '}to improve your interview performance for this role.
                     </p>
                   </div>
@@ -439,7 +439,7 @@ export default function InterviewResultsPage() {
           {analysis.wins && analysis.wins.length > 0 && (
             <Card className="border-slate-200 rounded-2xl mb-6">
               <CardContent className="p-4 sm:p-6">
-                <h4 className="font-semibold text-[#042c4c] mb-4 flex items-center gap-2">
+                <h4 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <Star className="w-5 h-5 text-amber-500" />
                   Key Wins
                 </h4>
@@ -458,7 +458,7 @@ export default function InterviewResultsPage() {
           {analysis.summary && (
             <Card className="border-slate-200 rounded-2xl mb-6">
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg text-[#042c4c]">Summary</CardTitle>
+                <CardTitle className="text-lg text-slate-900">Summary</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-slate-700 leading-relaxed">{analysis.summary}</p>
@@ -468,17 +468,17 @@ export default function InterviewResultsPage() {
 
           <Tabs defaultValue="scores" className="space-y-6">
             <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-flex bg-white border border-slate-200">
-              <TabsTrigger value="scores" className="data-[state=active]:bg-[#042c4c] data-[state=active]:text-white">Skills</TabsTrigger>
-              <TabsTrigger value="feedback" className="data-[state=active]:bg-[#042c4c] data-[state=active]:text-white">Feedback</TabsTrigger>
-              <TabsTrigger value="answers" className="data-[state=active]:bg-[#042c4c] data-[state=active]:text-white">Better Answers</TabsTrigger>
-              <TabsTrigger value="plan" className="data-[state=active]:bg-[#042c4c] data-[state=active]:text-white">7-Day Plan</TabsTrigger>
+              <TabsTrigger value="scores" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">Skills</TabsTrigger>
+              <TabsTrigger value="feedback" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">Feedback</TabsTrigger>
+              <TabsTrigger value="answers" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">Better Answers</TabsTrigger>
+              <TabsTrigger value="plan" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">7-Day Plan</TabsTrigger>
             </TabsList>
 
             <TabsContent value="scores">
               <Card className="border-slate-200 rounded-2xl">
                 <CardHeader className="border-b border-slate-100 bg-slate-50/50">
-                  <CardTitle className="flex items-center gap-2 text-[#042c4c]">
-                    <BarChart3 className="w-5 h-5 text-[#ee7e65]" />
+                  <CardTitle className="flex items-center gap-2 text-slate-900">
+                    <BarChart3 className="w-5 h-5 text-slate-600" />
                     {jobContext || roleKitInfo ? (
                       <span>Skills Assessed for {practiceTitle}</span>
                     ) : (
@@ -495,7 +495,7 @@ export default function InterviewResultsPage() {
                   {analysis.dimensionScores?.map((dim, idx) => (
                     <div key={idx} className={`p-4 sm:p-5 ${idx !== (analysis.dimensionScores?.length || 0) - 1 ? "border-b border-slate-100" : ""}`}>
                       <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-semibold text-[#042c4c]">{dim.dimension}</h4>
+                        <h4 className="font-semibold text-slate-900">{dim.dimension}</h4>
                         <div className="flex items-center gap-2">
                           <Badge className={`${getScoreBg(dim.score)} ${getScoreColor(dim.score)} border`}>
                             {getScoreLabel(dim.score)}
@@ -507,9 +507,9 @@ export default function InterviewResultsPage() {
                       <Progress value={dim.score * 20} className="h-2 mb-4" />
                       <p className="text-sm text-slate-600 mb-3">{dim.rationale}</p>
                       {dim.improvement && (
-                        <div className="flex items-start gap-3 p-3 bg-[#ee7e65]/5 rounded-xl border border-[#ee7e65]/20">
-                          <Lightbulb className="w-4 h-4 text-[#ee7e65] flex-shrink-0 mt-0.5" />
-                          <p className="text-sm text-[#042c4c]">{dim.improvement}</p>
+                        <div className="flex items-start gap-3 p-3 bg-slate-600/5 rounded-xl border border-slate-600/20">
+                          <Lightbulb className="w-4 h-4 text-slate-600 flex-shrink-0 mt-0.5" />
+                          <p className="text-sm text-slate-900">{dim.improvement}</p>
                         </div>
                       )}
                     </div>
@@ -584,8 +584,8 @@ export default function InterviewResultsPage() {
             <TabsContent value="answers">
               <Card className="border-slate-200 rounded-2xl">
                 <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2 text-[#042c4c]">
-                    <MessageSquare className="w-5 h-5 text-[#ee7e65]" />
+                  <CardTitle className="flex items-center gap-2 text-slate-900">
+                    <MessageSquare className="w-5 h-5 text-slate-600" />
                     Improved Answer Examples
                   </CardTitle>
                 </CardHeader>
@@ -593,7 +593,7 @@ export default function InterviewResultsPage() {
                   {analysis.betterAnswers?.map((ba, idx) => (
                     <div key={idx} className={`p-5 ${idx !== (analysis.betterAnswers?.length || 0) - 1 ? "border-b border-slate-100" : ""}`}>
                       <div className="mb-3">
-                        <Badge variant="outline" className="mb-2 text-[#042c4c]">Question</Badge>
+                        <Badge variant="outline" className="mb-2 text-slate-900">Question</Badge>
                         <p className="text-slate-900 font-medium">{ba.question}</p>
                       </div>
                       <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
@@ -609,8 +609,8 @@ export default function InterviewResultsPage() {
             <TabsContent value="plan">
               <Card className="border-slate-200 rounded-2xl">
                 <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2 text-[#042c4c]">
-                    <Calendar className="w-5 h-5 text-[#ee7e65]" />
+                  <CardTitle className="flex items-center gap-2 text-slate-900">
+                    <Calendar className="w-5 h-5 text-slate-600" />
                     7-Day Practice Plan
                     {(jobContext || roleKitInfo) && (
                       <span className="text-sm font-normal text-slate-500 ml-2">
@@ -622,7 +622,7 @@ export default function InterviewResultsPage() {
                 <CardContent className="p-0">
                   {analysis.practicePlan?.map((day, idx) => (
                     <div key={idx} className={`p-4 flex items-start gap-4 ${idx !== (analysis.practicePlan?.length || 0) - 1 ? "border-b border-slate-100" : ""}`}>
-                      <div className="w-12 h-12 rounded-xl bg-[#042c4c] flex flex-col items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-slate-900 flex flex-col items-center justify-center flex-shrink-0">
                         <span className="text-xs text-white/60">Day</span>
                         <span className="text-lg font-bold text-white">{day.day}</span>
                       </div>
@@ -641,7 +641,7 @@ export default function InterviewResultsPage() {
           </Tabs>
 
           {/* Next Steps CTA */}
-          <div className="mt-8 bg-gradient-to-r from-[#042c4c] to-[#0a3d66] rounded-2xl p-6 text-white">
+          <div className="mt-8 bg-slate-900 rounded-2xl p-6 text-white">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h3 className="text-lg font-semibold mb-1">Ready to Improve?</h3>
@@ -652,7 +652,7 @@ export default function InterviewResultsPage() {
                 </p>
               </div>
               <Link to="/interview">
-                <Button className="bg-[#ee7e65] hover:bg-[#d96a52] text-white gap-2">
+                <Button className="bg-slate-600 hover:bg-slate-700 text-white gap-2">
                   <Play className="w-4 h-4" />
                   Practice Again
                 </Button>

@@ -604,8 +604,8 @@ export default function InterviewConfigPage() {
 
   return (
     <SidebarLayout>
-      <div className="min-h-screen bg-[#f8f9fb]">
-        <div className="bg-[#042c4c] text-white">
+      <div className="min-h-screen bg-slate-50">
+        <div className="bg-slate-900 text-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-3xl">
             <button
               onClick={handleBack}
@@ -617,7 +617,7 @@ export default function InterviewConfigPage() {
             
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                {isJobTargetMode ? <Building2 className="w-5 h-5 text-[#ee7e65]" /> : <Briefcase className="w-5 h-5 text-[#ee7e65]" />}
+                {isJobTargetMode ? <Building2 className="w-5 h-5 text-slate-600" /> : <Briefcase className="w-5 h-5 text-slate-600" />}
               </div>
               <div>
                 <h1 className="text-xl font-bold">{title}</h1>
@@ -647,7 +647,7 @@ export default function InterviewConfigPage() {
             {isGeneratingPlan ? (
               <Card className="border-slate-200 rounded-xl">
                 <CardContent className="p-8 text-center">
-                  <Loader2 className="w-8 h-8 animate-spin text-[#ee7e65] mx-auto mb-3" />
+                  <Loader2 className="w-8 h-8 animate-spin text-slate-600 mx-auto mb-3" />
                   <p className="text-slate-600 font-medium">Generating your interview plan...</p>
                   <p className="text-sm text-slate-400 mt-1">This takes a few seconds</p>
                 </CardContent>
@@ -655,7 +655,7 @@ export default function InterviewConfigPage() {
             ) : plan ? (
               <>
                 <div className="flex flex-wrap gap-2">
-                  <Badge className="bg-[#042c4c] text-white px-3 py-1">
+                  <Badge className="bg-slate-900 text-white px-3 py-1">
                     <Clock className="w-3.5 h-3.5 mr-1.5" />
                     ~{getTotalDuration()} min
                   </Badge>
@@ -683,25 +683,25 @@ export default function InterviewConfigPage() {
                 </div>
 
                 {isInterviewModeType && modeSetupData && (
-                  <Card className="border-slate-200 rounded-xl bg-gradient-to-r from-[#042c4c]/5 to-transparent">
+                  <Card className="border-slate-200 rounded-xl bg-gradient-to-r from-slate-900/5 to-transparent">
                     <CardContent className="p-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <p className="text-xs text-slate-500 mb-1">Role</p>
-                          <p className="text-sm font-medium text-[#042c4c]">
+                          <p className="text-sm font-medium text-slate-900">
                             {modeSetupData.roleArchetypeName || "General Practice"}
                           </p>
                         </div>
                         <div>
                           <p className="text-xs text-slate-500 mb-1">Difficulty</p>
-                          <p className="text-sm font-medium text-[#042c4c] capitalize">
+                          <p className="text-sm font-medium text-slate-900 capitalize">
                             {modeSetupData.seniority || "Mid"} Level
                           </p>
                         </div>
                         {modeSetupData.companyName && (
                           <div className="col-span-2">
                             <p className="text-xs text-slate-500 mb-1">Company Context</p>
-                            <p className="text-sm font-medium text-[#042c4c]">
+                            <p className="text-sm font-medium text-slate-900">
                               {modeSetupData.companyName}
                             </p>
                           </div>
@@ -711,7 +711,7 @@ export default function InterviewConfigPage() {
                             <p className="text-xs text-slate-500 mb-2">Skills Being Tested</p>
                             <div className="flex flex-wrap gap-1.5">
                               {modeSetupData.primarySkillDimensions.map((skill, idx) => (
-                                <span key={idx} className="text-xs px-2 py-1 bg-[#ee7e65]/10 text-[#ee7e65] rounded-full font-medium">
+                                <span key={idx} className="text-xs px-2 py-1 bg-slate-600/10 text-slate-600 rounded-full font-medium">
                                   {skill}
                                 </span>
                               ))}
@@ -727,7 +727,7 @@ export default function InterviewConfigPage() {
                   <Card className="border-slate-200 rounded-xl">
                     <CardHeader className="py-3 px-4 border-b border-slate-100">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <Target className="w-4 h-4 text-[#ee7e65]" />
+                        <Target className="w-4 h-4 text-slate-600" />
                         Focus Areas
                       </CardTitle>
                     </CardHeader>
@@ -747,7 +747,7 @@ export default function InterviewConfigPage() {
                   <Card className="border-slate-200 rounded-xl">
                     <CardHeader className="py-3 px-4 border-b border-slate-100">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <MessageSquare className="w-4 h-4 text-[#ee7e65]" />
+                        <MessageSquare className="w-4 h-4 text-slate-600" />
                         Interview Phases
                       </CardTitle>
                     </CardHeader>
@@ -755,12 +755,12 @@ export default function InterviewConfigPage() {
                       <div className="divide-y divide-slate-100">
                         {plan.phases.map((phase, idx) => (
                           <div key={idx} className="p-4 flex items-start gap-3">
-                            <div className="w-6 h-6 rounded-full bg-[#ee7e65]/10 flex items-center justify-center flex-shrink-0 text-xs font-medium text-[#ee7e65]">
+                            <div className="w-6 h-6 rounded-full bg-slate-600/10 flex items-center justify-center flex-shrink-0 text-xs font-medium text-slate-600">
                               {idx + 1}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
-                                <p className="font-medium text-sm text-[#042c4c]">{phase.name}</p>
+                                <p className="font-medium text-sm text-slate-900">{phase.name}</p>
                                 <span className="text-xs text-slate-400">{formatDuration(phase.duration)}</span>
                               </div>
                               {phase.objectives && phase.objectives.length > 0 && (
@@ -795,7 +795,7 @@ export default function InterviewConfigPage() {
             <Card className="border-slate-200 rounded-xl">
               <CardHeader className="py-3 px-4 border-b border-slate-100">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Settings className="w-4 h-4 text-[#ee7e65]" />
+                  <Settings className="w-4 h-4 text-slate-600" />
                   Session Settings
                 </CardTitle>
               </CardHeader>
@@ -809,7 +809,7 @@ export default function InterviewConfigPage() {
                         onClick={() => setLanguage(lang.value)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                           language === lang.value
-                            ? "bg-[#ee7e65] text-white"
+                            ? "bg-slate-600 text-white"
                             : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                         }`}
                       >
@@ -832,12 +832,12 @@ export default function InterviewConfigPage() {
                         onClick={() => setStyle(s.value)}
                         className={`p-2.5 rounded-lg border-2 text-center transition-all ${
                           style === s.value
-                            ? "border-[#042c4c] bg-[#042c4c]/5"
+                            ? "border-slate-900 bg-slate-900/5"
                             : "border-slate-200 hover:border-slate-300"
                         }`}
                       >
                         <span className="text-lg">{s.emoji}</span>
-                        <p className={`text-xs font-medium mt-1 ${style === s.value ? "text-[#042c4c]" : "text-slate-600"}`}>
+                        <p className={`text-xs font-medium mt-1 ${style === s.value ? "text-slate-900" : "text-slate-600"}`}>
                           {s.label}
                         </p>
                       </button>
@@ -851,7 +851,7 @@ export default function InterviewConfigPage() {
               size="lg"
               onClick={handleStartInterview}
               disabled={starting || isGeneratingPlan || !config || !planId}
-              className="w-full rounded-xl bg-[#ee7e65] hover:bg-[#e06a50] h-12 text-base"
+              className="w-full rounded-xl bg-slate-600 hover:bg-slate-700 h-12 text-base"
             >
               {starting ? (
                 <>

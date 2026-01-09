@@ -728,10 +728,10 @@ export default function ResultsPage() {
                             to={`/avatar/practice/presentation/results?sessionId=${pSession.sessionUid}&presentationId=${pSession.presentation.id}`}
                             className="block"
                           >
-                            <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 hover:border-[#768c9c]/40 transition-colors">
+                            <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 hover:border-slate-500/40 transition-colors">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-[#768c9c]/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                                  <Eye className="w-5 h-5 text-[#768c9c]" />
+                                <div className="w-10 h-10 bg-slate-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                  <Eye className="w-5 h-5 text-slate-500" />
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <h3 className="font-medium text-slate-900 text-sm sm:text-base truncate">

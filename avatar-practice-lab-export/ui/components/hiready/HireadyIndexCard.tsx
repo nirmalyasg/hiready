@@ -322,7 +322,7 @@ export function HireadyIndexMini({ score, level }: { score: number; level: strin
   
   return (
     <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${readinessConfig.bgColor} border ${readinessConfig.borderColor}`}>
-      <Target className="w-4 h-4 text-[#ee7e65]" />
+      <Target className="w-4 h-4 text-slate-600" />
       <span className="text-sm font-semibold text-gray-900">{score}</span>
       <Badge className={`${readinessConfig.color} bg-transparent border-0 px-0 text-xs`}>
         {readinessConfig.label}

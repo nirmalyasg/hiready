@@ -130,7 +130,7 @@ export default function ApplyPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#042c4c] to-[#0a3d66] flex items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -138,7 +138,7 @@ export default function ApplyPage() {
 
   if (error || !jobData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#042c4c] to-[#0a3d66] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardContent className="p-8 text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
@@ -149,7 +149,7 @@ export default function ApplyPage() {
             </h2>
             <p className="text-gray-600 mb-6">{error || "This job listing doesn't exist or has been removed."}</p>
             <Link to="/">
-              <Button className="bg-[#ee7e65] hover:bg-[#d96a52]">
+              <Button className="bg-slate-900 hover:bg-slate-800">
                 Go to Homepage
               </Button>
             </Link>
@@ -163,7 +163,7 @@ export default function ApplyPage() {
   const totalDuration = jobData.assessmentConfig?.totalDuration || 45;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c]">
+    <div className="min-h-screen bg-slate-900">
       <div className="container mx-auto px-4 py-8 max-w-3xl">
         <div className="text-center mb-8">
           {jobData.company.logoUrl ? (
@@ -186,18 +186,18 @@ export default function ApplyPage() {
 
         <Card className="shadow-2xl mb-6">
           <CardHeader className="border-b border-gray-100">
-            <CardTitle className="text-lg text-[#042c4c] flex items-center gap-2">
-              <Briefcase className="w-5 h-5 text-[#ee7e65]" />
+            <CardTitle className="text-lg text-slate-900 flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-slate-600" />
               Assessment Overview
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
-            <div className="flex items-center justify-between p-4 bg-[#042c4c]/5 rounded-xl">
+            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
               <div className="flex items-center gap-3">
-                <Clock className="w-5 h-5 text-[#042c4c]" />
+                <Clock className="w-5 h-5 text-slate-900" />
                 <span className="text-gray-700">Estimated Duration</span>
               </div>
-              <span className="font-semibold text-[#042c4c]">{totalDuration} minutes</span>
+              <span className="font-semibold text-slate-900">{totalDuration} minutes</span>
             </div>
 
             <div>
@@ -210,11 +210,11 @@ export default function ApplyPage() {
                       key={type}
                       className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl"
                     >
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#ee7e65]/10 text-[#ee7e65] font-semibold text-sm">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900/10 text-slate-600 font-semibold text-sm">
                         {idx + 1}
                       </div>
                       <div className="flex items-center gap-3 flex-1">
-                        <Icon className="w-5 h-5 text-[#042c4c]" />
+                        <Icon className="w-5 h-5 text-slate-900" />
                         <span className="font-medium text-gray-900">
                           {formatInterviewType(type)} Interview
                         </span>
@@ -259,7 +259,7 @@ export default function ApplyPage() {
             size="lg"
             onClick={handleStartAssessment}
             disabled={isStarting}
-            className="bg-[#ee7e65] hover:bg-[#d96a52] text-white px-8 py-6 text-lg rounded-xl shadow-lg"
+            className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-6 text-lg rounded-xl shadow-lg"
           >
             {isStarting ? (
               <>
@@ -284,7 +284,7 @@ export default function ApplyPage() {
               Already have an account?{" "}
               <Link 
                 to={`/login?returnTo=/apply/${slug}`}
-                className="text-[#ee7e65] hover:underline"
+                className="text-slate-600 hover:underline"
               >
                 Log in
               </Link>

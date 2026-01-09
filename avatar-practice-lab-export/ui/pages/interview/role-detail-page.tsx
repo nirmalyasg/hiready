@@ -164,7 +164,7 @@ export default function RoleDetailPage() {
   if (isLoading) {
     return (
       <SidebarLayout>
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#042c4c] to-[#0a4a7a]">
+        <div className="min-h-screen flex items-center justify-center bg-slate-900">
           <LoadingSpinner />
         </div>
       </SidebarLayout>
@@ -190,7 +190,7 @@ export default function RoleDetailPage() {
   return (
     <SidebarLayout>
       <div className="min-h-screen bg-slate-50">
-        <div className="bg-gradient-to-br from-[#042c4c] via-[#0a3d5c] to-[#042c4c] text-white">
+        <div className="bg-slate-900 text-white">
           <div className="max-w-2xl mx-auto px-4 pt-4 pb-5">
             <div className="flex items-center justify-between mb-3">
               <button
@@ -223,8 +223,8 @@ export default function RoleDetailPage() {
           {practiceOptions.length > 0 && (
             <div className="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
               <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
-                <h2 className="font-semibold text-[#042c4c] text-sm flex items-center gap-2">
-                  <Target className="w-4 h-4 text-[#ee7e65]" />
+                <h2 className="font-semibold text-slate-900 text-sm flex items-center gap-2">
+                  <Target className="w-4 h-4 text-slate-600" />
                   Interview Stages
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">Practice each stage to prepare</p>
@@ -236,7 +236,7 @@ export default function RoleDetailPage() {
                   return (
                     <div
                       key={option.id}
-                      className="group bg-white border border-slate-200 rounded-xl p-4 transition-all hover:border-[#ee7e65]/40 hover:shadow-md"
+                      className="group bg-white border border-slate-200 rounded-xl p-4 transition-all hover:border-slate-600/40 hover:shadow-md"
                     >
                       <div className="flex items-start gap-3">
                         <div className={`w-10 h-10 rounded-xl ${config.bg} ${config.color} flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105`}>
@@ -245,7 +245,7 @@ export default function RoleDetailPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <p className="font-semibold text-[#042c4c] text-sm">{option.label}</p>
+                              <p className="font-semibold text-slate-900 text-sm">{option.label}</p>
                               <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{option.description}</p>
                             </div>
                             <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-xs font-medium flex-shrink-0">
@@ -255,7 +255,7 @@ export default function RoleDetailPage() {
                           {focusAreas.length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-2">
                               {focusAreas.slice(0, 3).map((area: string, areaIdx: number) => (
-                                <span key={areaIdx} className="px-1.5 py-0.5 bg-[#ee7e65]/10 text-[#ee7e65] rounded text-[10px] font-medium">
+                                <span key={areaIdx} className="px-1.5 py-0.5 bg-slate-600/10 text-slate-600 rounded text-[10px] font-medium">
                                   {area}
                                 </span>
                               ))}
@@ -266,7 +266,7 @@ export default function RoleDetailPage() {
                       <div className="mt-3 pt-3 border-t border-slate-100">
                         <Button
                           onClick={() => handleStartPractice(option)}
-                          className="w-full bg-[#042c4c] hover:bg-[#0a3d5c] text-white h-9 text-sm font-medium shadow-sm"
+                          className="w-full bg-slate-900 hover:bg-slate-800 text-white h-9 text-sm font-medium shadow-sm"
                         >
                           <Play className="w-3.5 h-3.5 mr-2" />
                           Start Practice
@@ -286,8 +286,8 @@ export default function RoleDetailPage() {
                 className="w-full px-4 py-3 flex items-center justify-between bg-slate-50/50 border-b border-slate-100 hover:bg-slate-50 transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#ee7e65]" />
-                  <span className="font-semibold text-[#042c4c] text-sm">Role Details</span>
+                  <Sparkles className="w-4 h-4 text-slate-600" />
+                  <span className="font-semibold text-slate-900 text-sm">Role Details</span>
                 </div>
                 {skillsExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
               </button>
@@ -306,7 +306,7 @@ export default function RoleDetailPage() {
                       <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1.5">Skills Focus</p>
                       <div className="flex flex-wrap gap-1.5">
                         {roleKit.skillsFocus.slice(0, 8).map((skill, idx) => (
-                          <span key={idx} className="px-2 py-0.5 bg-[#ee7e65]/10 text-[#ee7e65] rounded-full text-xs font-medium">
+                          <span key={idx} className="px-2 py-0.5 bg-slate-600/10 text-slate-600 rounded-full text-xs font-medium">
                             {skill}
                           </span>
                         ))}

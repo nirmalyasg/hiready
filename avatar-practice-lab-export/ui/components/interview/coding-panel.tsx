@@ -256,7 +256,7 @@ export function CodingPanel({
           <div className="px-4 py-3 bg-white border-b border-gray-200">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold text-[#042c4c]">{problem.title}</h3>
+                <h3 className="text-base font-semibold text-slate-900">{problem.title}</h3>
                 <span className={cn(
                   "px-2 py-0.5 text-xs font-medium rounded",
                   getDifficultyColor(problem.difficulty)
@@ -275,7 +275,7 @@ export function CodingPanel({
                   <div key={idx} className="bg-gray-50 rounded-lg p-3 text-sm font-mono">
                     <div className="text-gray-600">
                       <span className="text-gray-500">Input: </span>
-                      <span className="text-[#042c4c]">{ex.input}</span>
+                      <span className="text-slate-900">{ex.input}</span>
                     </div>
                     <div className="text-gray-600">
                       <span className="text-gray-500">Output: </span>
@@ -313,7 +313,7 @@ export function CodingPanel({
           showProblem ? "max-h-24" : "max-h-0"
         )}>
           <div className="px-4 py-3 bg-white border-b border-gray-200">
-            <h3 className="text-sm font-semibold text-[#042c4c] mb-1">Problem</h3>
+            <h3 className="text-sm font-semibold text-slate-900 mb-1">Problem</h3>
             <p className="text-sm text-gray-600">{problemStatement}</p>
           </div>
         </div>
@@ -325,7 +325,7 @@ export function CodingPanel({
 
   return (
     <div className={cn("flex flex-col h-full bg-gray-50", className)}>
-      <div className="flex items-center justify-between px-4 py-2 bg-[#042c4c] text-white border-b border-gray-200">
+      <div className="flex items-center justify-between px-4 py-2 bg-slate-900 text-white border-b border-gray-200">
         <div className="flex items-center gap-2">
           <Code2 className="w-4 h-4" />
           <span className="text-sm font-medium">Code Editor</span>
@@ -383,7 +383,7 @@ export function CodingPanel({
             size="sm"
             onClick={handleRun}
             disabled={isRunning}
-            className="bg-[#ee7e65] hover:bg-[#dd6d54] text-white"
+            className="bg-slate-600 hover:bg-slate-700 text-white"
           >
             {isRunning ? (
               <Loader2 className="w-4 h-4 mr-1 animate-spin" />
@@ -424,7 +424,7 @@ export function CodingPanel({
             onClick={() => setActiveTab("output")}
             className={cn(
               "px-3 py-1.5 text-xs font-medium rounded transition-colors",
-              activeTab === "output" ? "bg-white text-[#042c4c] shadow-sm" : "text-gray-500 hover:text-gray-700"
+              activeTab === "output" ? "bg-white text-slate-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
             )}
           >
             Output

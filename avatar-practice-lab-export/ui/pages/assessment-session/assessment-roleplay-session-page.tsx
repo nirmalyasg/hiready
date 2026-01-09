@@ -1193,7 +1193,7 @@ ${scenario?.instructions ? `## How to Play Your Character\n${scenario.instructio
   console.log(scenario);
   return (
     <SidebarLayout>
-      <div className="h-[calc(100vh-100px)] flex flex-col bg-gradient-to-b from-brand-dark via-[#0a3a5c] to-brand-dark rounded-2xl overflow-hidden">
+      <div className="h-[calc(100vh-100px)] flex flex-col bg-slate-900 rounded-2xl overflow-hidden">
         <Transcript
           avatar={avatarData}
           sessionStatus={sessionStatus}
@@ -1621,7 +1621,7 @@ function Transcript({
     .slice(-1)[0];
 
   const avatarContent = (
-    <div className="flex-1 flex flex-col items-center justify-center relative bg-gradient-to-b from-brand-dark via-[#0a3a5c] to-brand-dark">
+    <div className="flex-1 flex flex-col items-center justify-center relative bg-slate-900">
       {/* Scenario Info - Top */}
       <div className="absolute top-4 left-4 right-4 text-center">
         <p className="text-white/60 text-sm">

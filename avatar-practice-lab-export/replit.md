@@ -44,16 +44,21 @@ avatar-practice-lab-export/
 ## UI Design System (January 2026)
 
 ### Design Philosophy
-Minimalist, professional aesthetic prioritizing simplicity and readability. Clean slate/white palette with flat design, minimal gradients.
+Minimalist, professional aesthetic prioritizing simplicity and readability. Clean slate/white palette with flat solid colors.
 
 ### Color Palette
 - **Primary/Text**: slate-900 (#0f172a) - Headings, primary buttons, key text
 - **Secondary Text**: slate-500 - Descriptions, helper text
 - **Borders**: slate-200 - Card borders, dividers
 - **Backgrounds**: White cards on slate-50 page backgrounds
-- **Accent (limited use)**: #ee7e65 coral for critical actions only
 - **Success**: emerald-500/600 - Positive indicators
 - **Warning**: amber-500/600 - Focus areas, caution states
+- **Semantic Accents**: Blue/emerald/red used sparingly for status badges and semantic cues
+
+### Gradient Policy
+- **Standard pages**: Use solid slate backgrounds only (no gradients)
+- **Immersive exercise sessions**: May use subtle `from-slate-900 via-slate-800 to-slate-900` gradients for depth in focused coding/case-study environments
+- **Legacy colors removed**: #042c4c, #ee7e65, #0a3d62, #e06a50, #768c9c, #6c8194 (no longer used)
 
 ### Components
 - **Cards**: White background, slate-200 border, 8px (rounded-lg) radius

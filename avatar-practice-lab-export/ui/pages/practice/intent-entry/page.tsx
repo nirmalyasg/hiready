@@ -51,7 +51,7 @@ export default function IntentEntryPage() {
     <SidebarLayout>
       <div className="max-w-5xl mx-auto space-y-8 pb-12">
         <div>
-          <h1 className="text-2xl font-bold text-[#042c4c] mb-1">Practice Lab</h1>
+          <h1 className="text-2xl font-bold text-slate-900 mb-1">Practice Lab</h1>
           <p className="text-slate-500">Build your skills with AI-powered practice sessions</p>
         </div>
 
@@ -59,18 +59,18 @@ export default function IntentEntryPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <button
               onClick={() => setSelectedPath("interview")}
-              className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-[#ee7e65] hover:shadow-xl transition-all"
+              className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-slate-600 hover:shadow-xl transition-all"
             >
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+              <div className="w-14 h-14 rounded-2xl bg-slate-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                 <Target className="w-7 h-7 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-[#042c4c] mb-2 group-hover:text-[#ee7e65] transition-colors">
+              <h2 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-slate-600 transition-colors">
                 Interview Practice
               </h2>
               <p className="text-slate-500 text-sm mb-4">
                 Prepare for job interviews with AI interviewers. Practice behavioral, technical, and case interviews.
               </p>
-              <div className="flex items-center gap-2 text-[#ee7e65] font-medium text-sm">
+              <div className="flex items-center gap-2 text-slate-600 font-medium text-sm">
                 <span>Get started</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -83,7 +83,7 @@ export default function IntentEntryPage() {
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                 <MessageSquare className="w-7 h-7 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-[#042c4c] mb-2 group-hover:text-purple-600 transition-colors">
+              <h2 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-purple-600 transition-colors">
                 Communication Skills
               </h2>
               <p className="text-slate-500 text-sm mb-4">
@@ -102,7 +102,7 @@ export default function IntentEntryPage() {
             <div className="flex items-center justify-between">
               <button
                 onClick={() => setSelectedPath(null)}
-                className="flex items-center gap-2 text-slate-500 hover:text-[#042c4c] text-sm font-medium transition-colors"
+                className="flex items-center gap-2 text-slate-500 hover:text-slate-900 text-sm font-medium transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Back to options
@@ -112,13 +112,13 @@ export default function IntentEntryPage() {
             <div className="grid gap-4">
               <button
                 onClick={() => navigate("/interview")}
-                className="group flex items-center gap-4 bg-white border-2 border-slate-200 rounded-2xl p-5 hover:border-[#ee7e65] hover:shadow-lg transition-all text-left"
+                className="group flex items-center gap-4 bg-white border-2 border-slate-200 rounded-2xl p-5 hover:border-slate-600 hover:shadow-lg transition-all text-left"
               >
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <div className="w-14 h-14 rounded-2xl bg-slate-700 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <UserCheck className="w-7 h-7 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-[#042c4c] mb-1 group-hover:text-[#ee7e65] transition-colors">Interview Hub</h3>
+                  <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-slate-600 transition-colors">Interview Hub</h3>
                   <p className="text-sm text-slate-500 mb-2">Practice for specific jobs or browse 15+ role kits for quick practice</p>
                   <div className="flex flex-wrap gap-2">
                     <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
@@ -132,18 +132,18 @@ export default function IntentEntryPage() {
                     </span>
                   </div>
                 </div>
-                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-[#ee7e65] group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-1 transition-all" />
               </button>
 
               <button
                 onClick={() => navigate("/exercise-mode")}
                 className="group flex items-center gap-4 bg-white border-2 border-slate-200 rounded-2xl p-5 hover:border-slate-400 hover:shadow-lg transition-all text-left"
               >
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <div className="w-14 h-14 rounded-2xl bg-slate-700 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <BookOpen className="w-7 h-7 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-[#042c4c] mb-1 group-hover:text-slate-700 transition-colors">Case Study & Coding</h3>
+                  <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-slate-700 transition-colors">Case Study & Coding</h3>
                   <p className="text-sm text-slate-500 mb-2">Standalone exercises for technical and business problem-solving</p>
                   <div className="flex flex-wrap gap-2">
                     <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
@@ -168,7 +168,7 @@ export default function IntentEntryPage() {
             <div className="flex items-center justify-between">
               <button
                 onClick={() => setSelectedPath(null)}
-                className="flex items-center gap-2 text-slate-500 hover:text-[#042c4c] text-sm font-medium transition-colors"
+                className="flex items-center gap-2 text-slate-500 hover:text-slate-900 text-sm font-medium transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Back to options
@@ -188,7 +188,7 @@ export default function IntentEntryPage() {
                       <Icon className="w-7 h-7 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-[#042c4c] mb-1 group-hover:text-purple-600 transition-colors">{option.title}</h3>
+                      <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-purple-600 transition-colors">{option.title}</h3>
                       <p className="text-sm text-slate-500 mb-2">{option.description}</p>
                       <div className="flex flex-wrap gap-2">
                         {option.features.map((feature, idx) => (
@@ -212,7 +212,7 @@ export default function IntentEntryPage() {
           </p>
           <button
             onClick={() => navigate("/results")}
-            className="inline-flex items-center gap-2 text-[#042c4c] hover:text-[#ee7e65] font-medium text-sm transition-colors"
+            className="inline-flex items-center gap-2 text-slate-900 hover:text-slate-600 font-medium text-sm transition-colors"
           >
             View your results
             <ArrowRight className="w-4 h-4" />

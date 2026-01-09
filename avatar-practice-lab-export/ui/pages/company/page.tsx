@@ -384,7 +384,7 @@ export default function CompanyDashboard() {
 
   if (!authChecked || isLoading) {
     return (
-      <div className="min-h-screen bg-[#f8f9fb] flex justify-center items-center">
+      <div className="min-h-screen bg-slate-50 flex justify-center items-center">
         <LoadingSpinner />
       </div>
     );
@@ -392,7 +392,7 @@ export default function CompanyDashboard() {
 
   if (companies.length === 0) {
     return (
-      <div className="min-h-screen bg-[#f8f9fb]">
+      <div className="min-h-screen bg-slate-50">
         <header className="bg-slate-900 text-white py-4">
           <div className="container mx-auto px-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -434,7 +434,7 @@ export default function CompanyDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb]">
+    <div className="min-h-screen bg-slate-50">
       {successMessage && (
         <div className="fixed top-4 right-4 z-50 bg-emerald-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
           <CheckCircle className="w-5 h-5" />

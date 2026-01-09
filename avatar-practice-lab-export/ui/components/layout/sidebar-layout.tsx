@@ -51,7 +51,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
     <div className="min-h-screen bg-slate-50">
       {/* Desktop Sidebar - Hidden on mobile */}
       <aside className={cn(
-        "hidden lg:block fixed top-0 left-0 h-full bg-[#0f172a] z-50 transition-all duration-300 ease-out",
+        "hidden lg:block fixed top-0 left-0 h-full bg-slate-900 z-50 transition-all duration-300 ease-out",
         collapsed ? "w-20" : "w-60"
       )}>
         <div className="flex flex-col h-full">
@@ -61,14 +61,14 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             collapsed && "justify-center px-0"
           )}>
             <Link to="/" className={cn("flex items-center gap-2.5", collapsed && "hidden")}>
-              <div className="w-8 h-8 bg-[#ee7e65] rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-slate-700 rounded-lg flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <span className="text-white font-semibold tracking-tight">Hiready</span>
             </Link>
             {collapsed && (
               <Link to="/">
-                <div className="w-9 h-9 bg-[#ee7e65] rounded-lg flex items-center justify-center">
+                <div className="w-9 h-9 bg-slate-700 rounded-lg flex items-center justify-center">
                   <Sparkles className="w-4 h-4 text-white" />
                 </div>
               </Link>
@@ -145,7 +145,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
               <Link
                 to="/login"
                 className={cn(
-                  "flex items-center justify-center gap-2 px-4 py-2.5 bg-[#ee7e65] text-white rounded-lg text-sm font-medium hover:bg-[#e06a50] transition-colors",
+                  "flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-700 text-white rounded-lg text-sm font-medium hover:bg-slate-600 transition-colors",
                   collapsed && "px-3"
                 )}
               >

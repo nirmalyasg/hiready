@@ -59,7 +59,7 @@ export default function CompanyLoginPage() {
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-8 bg-[#f8f9fb]">
+      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50">
         <div className="w-full max-w-md">
           <div className="lg:hidden text-center mb-8">
             <div className="inline-flex items-center gap-2 bg-slate-900 px-4 py-2 rounded-full">
@@ -127,7 +127,7 @@ export default function CompanyLoginPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-slate-700 hover:bg-[#e06a4f] text-white py-6 text-lg"
+                className="w-full bg-slate-700 hover:bg-slate-800 text-white py-6 text-lg"
               >
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>

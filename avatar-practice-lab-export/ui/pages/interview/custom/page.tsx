@@ -163,10 +163,10 @@ export default function InterviewCustomPage() {
 
   return (
     <SidebarLayout>
-      <div className="min-h-screen bg-[#f8f9fb]">
+      <div className="min-h-screen bg-slate-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-2xl">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-[#042c4c] mb-2">Interview Practice</h1>
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Interview Practice</h1>
             <p className="text-slate-500">Add a job or select one to start practicing</p>
           </div>
 
@@ -181,7 +181,7 @@ export default function InterviewCustomPage() {
 
           {loadingJobs ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 className="w-6 h-6 animate-spin text-[#ee7e65]" />
+              <Loader2 className="w-6 h-6 animate-spin text-slate-600" />
             </div>
           ) : (
             <div className="space-y-4">
@@ -191,7 +191,7 @@ export default function InterviewCustomPage() {
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setAddMode("url")}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-[#042c4c] text-white rounded-lg hover:bg-[#0a3d66] transition-colors text-sm font-medium"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium"
                     >
                       <Link2 className="w-4 h-4" />
                       Import from URL
@@ -240,7 +240,7 @@ export default function InterviewCustomPage() {
                         onClick={handleAddViaUrl}
                         disabled={adding}
                         size="sm"
-                        className="bg-[#ee7e65] hover:bg-[#e06a50] rounded-lg"
+                        className="bg-slate-600 hover:bg-slate-700 rounded-lg"
                       >
                         {adding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                         Import
@@ -260,7 +260,7 @@ export default function InterviewCustomPage() {
                         onClick={handleAddViaPaste}
                         disabled={adding || !pasteText.trim()}
                         size="sm"
-                        className="bg-[#ee7e65] hover:bg-[#e06a50] rounded-lg"
+                        className="bg-slate-600 hover:bg-slate-700 rounded-lg"
                       >
                         {adding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                         Create Job
@@ -294,7 +294,7 @@ export default function InterviewCustomPage() {
                         onClick={handleAddManual}
                         disabled={adding || !title.trim()}
                         size="sm"
-                        className="bg-[#ee7e65] hover:bg-[#e06a50] rounded-lg"
+                        className="bg-slate-600 hover:bg-slate-700 rounded-lg"
                       >
                         {adding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                         Create Job
@@ -314,14 +314,14 @@ export default function InterviewCustomPage() {
                       <button
                         key={job.id}
                         onClick={() => handleSelectJob(job)}
-                        className="w-full bg-white rounded-xl border border-slate-200 px-4 py-3 text-left hover:border-[#ee7e65] hover:shadow-sm transition-all group flex items-center justify-between"
+                        className="w-full bg-white rounded-xl border border-slate-200 px-4 py-3 text-left hover:border-slate-600 hover:shadow-sm transition-all group flex items-center justify-between"
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-[#ee7e65]/10 transition-colors">
-                            <Briefcase className="w-4 h-4 text-slate-500 group-hover:text-[#ee7e65]" />
+                          <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-slate-600/10 transition-colors">
+                            <Briefcase className="w-4 h-4 text-slate-500 group-hover:text-slate-600" />
                           </div>
                           <div className="min-w-0">
-                            <p className="font-medium text-[#042c4c] truncate text-sm">{job.roleTitle}</p>
+                            <p className="font-medium text-slate-900 truncate text-sm">{job.roleTitle}</p>
                             <div className="flex items-center gap-2 text-xs text-slate-400">
                               {job.companyName && (
                                 <span className="flex items-center gap-1 truncate">
@@ -338,7 +338,7 @@ export default function InterviewCustomPage() {
                             </div>
                           </div>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#ee7e65] flex-shrink-0" />
+                        <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-600 flex-shrink-0" />
                       </button>
                     ))}
                   </div>

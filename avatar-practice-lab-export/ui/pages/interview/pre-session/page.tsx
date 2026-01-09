@@ -168,9 +168,9 @@ export default function InterviewPreSessionPage() {
 
   return (
     <SidebarLayout>
-      <div className="min-h-screen bg-[#f8f9fb] pb-24 sm:pb-8">
+      <div className="min-h-screen bg-slate-50 pb-24 sm:pb-8">
         {/* Header */}
-        <div className="bg-[#042c4c] text-white">
+        <div className="bg-slate-900 text-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 max-w-3xl">
             <button
               onClick={() => {
@@ -190,7 +190,7 @@ export default function InterviewPreSessionPage() {
             
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                <Target className="w-5 h-5 text-[#ee7e65]" />
+                <Target className="w-5 h-5 text-slate-600" />
               </div>
               <div>
                 <h1 className="text-xl font-bold">
@@ -210,7 +210,7 @@ export default function InterviewPreSessionPage() {
             <div className="flex flex-wrap gap-2">
               {config && (
                 <>
-                  <Badge className="bg-[#042c4c] text-white px-3 py-1">
+                  <Badge className="bg-slate-900 text-white px-3 py-1">
                     <Clock className="w-3.5 h-3.5 mr-1.5" />
                     ~{Math.round(getTotalDuration() / 60)} min
                   </Badge>
@@ -228,8 +228,8 @@ export default function InterviewPreSessionPage() {
             {plan?.focusAreas && plan.focusAreas.length > 0 && (
               <div className="bg-white rounded-xl border border-slate-200 p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Target className="w-4 h-4 text-[#ee7e65]" />
-                  <h3 className="text-sm font-medium text-[#042c4c]">Focus Areas</h3>
+                  <Target className="w-4 h-4 text-slate-600" />
+                  <h3 className="text-sm font-medium text-slate-900">Focus Areas</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {plan.focusAreas.map((area, idx) => (
@@ -245,18 +245,18 @@ export default function InterviewPreSessionPage() {
             {plan?.phases && plan.phases.length > 0 && (
               <div className="bg-white rounded-xl border border-slate-200">
                 <div className="py-3 px-4 border-b border-slate-100 flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-[#ee7e65]" />
-                  <h3 className="text-sm font-medium text-[#042c4c]">Interview Phases</h3>
+                  <MessageSquare className="w-4 h-4 text-slate-600" />
+                  <h3 className="text-sm font-medium text-slate-900">Interview Phases</h3>
                 </div>
                 <div className="divide-y divide-slate-100">
                   {plan.phases.map((phase, idx) => (
                     <div key={idx} className="p-4 flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-[#ee7e65]/10 flex items-center justify-center flex-shrink-0 text-xs font-medium text-[#ee7e65]">
+                      <div className="w-6 h-6 rounded-full bg-slate-600/10 flex items-center justify-center flex-shrink-0 text-xs font-medium text-slate-600">
                         {idx + 1}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <h4 className="font-medium text-sm text-[#042c4c]">{phase.name}</h4>
+                          <h4 className="font-medium text-sm text-slate-900">{phase.name}</h4>
                           <span className="text-xs text-slate-400">{Math.round(phase.duration / 60)} min</span>
                         </div>
                         {phase.objectives && phase.objectives.length > 0 && (
@@ -281,7 +281,7 @@ export default function InterviewPreSessionPage() {
               size="lg"
               onClick={handleStartInterview}
               disabled={starting}
-              className="w-full rounded-xl bg-[#ee7e65] hover:bg-[#e06a50] h-12 text-base"
+              className="w-full rounded-xl bg-slate-600 hover:bg-slate-700 h-12 text-base"
             >
               {starting ? (
                 <>

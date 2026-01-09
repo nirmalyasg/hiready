@@ -138,7 +138,7 @@ export default function PublicResultsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#042c4c] to-[#0a3d62] flex items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -146,14 +146,14 @@ export default function PublicResultsPage() {
 
   if (error || !analysis) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#042c4c] to-[#0a3d62] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardContent className="p-8 text-center">
             <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-gray-900 mb-2">Results Not Found</h2>
             <p className="text-gray-600 mb-6">{error || "These results may have been removed or made private."}</p>
             <Link to="/">
-              <Button className="bg-gradient-to-r from-[#ee7e65] to-[#e06a50] hover:from-[#e06a50] hover:to-[#d55a40]">
+              <Button className="bg-slate-900 hover:bg-slate-800">
                 Practice Your Own Interview
               </Button>
             </Link>
@@ -172,7 +172,7 @@ export default function PublicResultsPage() {
   const practiceTitle = context?.jobContext?.roleTitle || context?.roleKitName || "Interview Practice";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#042c4c] via-[#0a3d62] to-[#042c4c]">
+    <div className="min-h-screen bg-slate-900">
       <div className="container mx-auto px-4 py-8 max-w-3xl">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
@@ -184,10 +184,10 @@ export default function PublicResultsPage() {
         </div>
 
         <Card className="shadow-2xl border-0 overflow-hidden">
-          <div className="bg-gradient-to-r from-[#042c4c] to-[#0a3d66] p-6">
+          <div className="bg-slate-900 p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-                <InterviewIcon className="w-6 h-6 text-[#ee7e65]" />
+                <InterviewIcon className="w-6 h-6 text-slate-600" />
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">{practiceTitle}</h2>
@@ -208,7 +208,7 @@ export default function PublicResultsPage() {
 
           <CardContent className="p-6 space-y-8">
             <div className="flex flex-col sm:flex-row items-center gap-6">
-              <div className="text-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl">
+              <div className="text-center p-6 bg-slate-50 rounded-2xl">
                 <div className={`text-5xl font-bold ${averageScore >= 3 ? 'text-emerald-600' : 'text-amber-600'}`}>
                   {averageScore.toFixed(1)}
                 </div>
@@ -226,7 +226,7 @@ export default function PublicResultsPage() {
             {analysis.summary && (
               <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
                 <h3 className="text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
-                  <Award className="w-4 h-4 text-[#ee7e65]" />
+                  <Award className="w-4 h-4 text-slate-600" />
                   Summary
                 </h3>
                 <p className="text-slate-700">{analysis.summary}</p>
@@ -236,7 +236,7 @@ export default function PublicResultsPage() {
             {analysis.dimensionScores && analysis.dimensionScores.length > 0 && (
               <div>
                 <h3 className="text-sm font-medium text-slate-700 mb-4 flex items-center gap-2">
-                  <Star className="w-4 h-4 text-[#ee7e65]" />
+                  <Star className="w-4 h-4 text-slate-600" />
                   Skill Dimensions
                 </h3>
                 <div className="space-y-3">
@@ -293,7 +293,7 @@ export default function PublicResultsPage() {
             {analysis.betterAnswers && analysis.betterAnswers.length > 0 && (
               <div>
                 <h3 className="text-sm font-medium text-slate-700 mb-4 flex items-center gap-2">
-                  <Lightbulb className="w-4 h-4 text-[#ee7e65]" />
+                  <Lightbulb className="w-4 h-4 text-slate-600" />
                   Sample Improved Answers
                 </h3>
                 <div className="space-y-4">
@@ -310,13 +310,13 @@ export default function PublicResultsPage() {
             {analysis.practicePlan && analysis.practicePlan.length > 0 && (
               <div>
                 <h3 className="text-sm font-medium text-slate-700 mb-4 flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-[#ee7e65]" />
+                  <Calendar className="w-4 h-4 text-slate-600" />
                   7-Day Practice Plan
                 </h3>
                 <div className="grid gap-2">
                   {analysis.practicePlan.map((day) => (
                     <div key={day.day} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                      <div className="w-8 h-8 rounded-full bg-[#ee7e65]/10 flex items-center justify-center text-[#ee7e65] font-bold text-sm">
+                      <div className="w-8 h-8 rounded-full bg-slate-600/10 flex items-center justify-center text-slate-600 font-bold text-sm">
                         {day.day}
                       </div>
                       <div className="flex-1">
@@ -331,10 +331,10 @@ export default function PublicResultsPage() {
 
             <div className="text-center pt-6 border-t border-slate-100">
               <p className="text-sm text-slate-500 mb-4">
-                Results generated via <span className="font-semibold text-[#042c4c]">Hiready</span>
+                Results generated via <span className="font-semibold text-slate-900">Hiready</span>
               </p>
               <Link to="/readycheck">
-                <Button className="bg-gradient-to-r from-[#ee7e65] to-[#e06a50] hover:from-[#e06a50] hover:to-[#d55a40]">
+                <Button className="bg-slate-900 hover:bg-slate-800">
                   Practice Your Own Interview
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>

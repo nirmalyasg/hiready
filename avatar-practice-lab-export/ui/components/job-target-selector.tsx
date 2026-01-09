@@ -70,15 +70,15 @@ export function JobTargetSelector({ value, onChange, className = "" }: JobTarget
         onClick={() => setIsOpen(!isOpen)}
         className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
           selectedJob 
-            ? "bg-[#ee7e65]/5 border-[#ee7e65]/30 hover:border-[#ee7e65]/50" 
+            ? "bg-slate-600/5 border-slate-600/30 hover:border-slate-600/50" 
             : "bg-white border-slate-200 hover:border-slate-300"
         }`}
       >
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-            selectedJob ? "bg-[#ee7e65]/10" : "bg-slate-100"
+            selectedJob ? "bg-slate-600/10" : "bg-slate-100"
           }`}>
-            <Briefcase className={`w-5 h-5 ${selectedJob ? "text-[#ee7e65]" : "text-slate-400"}`} />
+            <Briefcase className={`w-5 h-5 ${selectedJob ? "text-slate-600" : "text-slate-400"}`} />
           </div>
           <div className="text-left">
             {selectedJob ? (
@@ -133,7 +133,7 @@ export function JobTargetSelector({ value, onChange, className = "" }: JobTarget
                   <X className="w-4 h-4 text-slate-400" />
                 </div>
                 <span className="text-sm text-slate-600">No job selected (general practice)</span>
-                {!selectedJob && <Check className="w-4 h-4 text-[#ee7e65] ml-auto" />}
+                {!selectedJob && <Check className="w-4 h-4 text-slate-600 ml-auto" />}
               </button>
               
               {jobs.map((job) => (
@@ -142,14 +142,14 @@ export function JobTargetSelector({ value, onChange, className = "" }: JobTarget
                   type="button"
                   onClick={() => handleSelect(job)}
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                    selectedJob?.id === job.id ? "bg-[#ee7e65]/5" : "hover:bg-slate-50"
+                    selectedJob?.id === job.id ? "bg-slate-600/5" : "hover:bg-slate-50"
                   }`}
                 >
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                    selectedJob?.id === job.id ? "bg-[#ee7e65]/10" : "bg-slate-100"
+                    selectedJob?.id === job.id ? "bg-slate-600/10" : "bg-slate-100"
                   }`}>
                     <Briefcase className={`w-4 h-4 ${
-                      selectedJob?.id === job.id ? "text-[#ee7e65]" : "text-slate-400"
+                      selectedJob?.id === job.id ? "text-slate-600" : "text-slate-400"
                     }`} />
                   </div>
                   <div className="text-left flex-1 min-w-0">
@@ -159,7 +159,7 @@ export function JobTargetSelector({ value, onChange, className = "" }: JobTarget
                     </p>
                   </div>
                   {selectedJob?.id === job.id && (
-                    <Check className="w-4 h-4 text-[#ee7e65] flex-shrink-0" />
+                    <Check className="w-4 h-4 text-slate-600 flex-shrink-0" />
                   )}
                 </button>
               ))}

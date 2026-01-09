@@ -198,7 +198,7 @@ export default function InterviewModeSetupPage() {
 
   return (
     <SidebarLayout>
-      <div className="min-h-screen bg-[#f8f9fb]">
+      <div className="min-h-screen bg-slate-50">
         <div className={`bg-gradient-to-br ${config.gradient} text-white`}>
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-5 max-w-xl">
             <button
@@ -230,7 +230,7 @@ export default function InterviewModeSetupPage() {
 
           <div className="space-y-4">
             <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <Label className="text-sm font-semibold text-[#042c4c] mb-3 block">
+              <Label className="text-sm font-semibold text-slate-900 mb-3 block">
                 Select your target role
               </Label>
               
@@ -245,7 +245,7 @@ export default function InterviewModeSetupPage() {
                 >
                   <div className="flex items-center gap-2">
                     <Briefcase className={`w-4 h-4 ${selectedArchetypeData ? config.color : "text-slate-400"}`} />
-                    <span className={`font-medium ${selectedArchetypeData ? "text-[#042c4c]" : "text-slate-400"}`}>
+                    <span className={`font-medium ${selectedArchetypeData ? "text-slate-900" : "text-slate-400"}`}>
                       {selectedArchetypeData?.name || "Choose a role..."}
                     </span>
                   </div>
@@ -282,7 +282,7 @@ export default function InterviewModeSetupPage() {
                           }`}
                         >
                           <div>
-                            <p className={`font-medium text-sm ${selectedArchetype === archetype.id ? config.color : "text-[#042c4c]"}`}>
+                            <p className={`font-medium text-sm ${selectedArchetype === archetype.id ? config.color : "text-slate-900"}`}>
                               {archetype.name}
                             </p>
                             <p className="text-xs text-slate-500 line-clamp-1">{archetype.description}</p>
@@ -298,7 +298,7 @@ export default function InterviewModeSetupPage() {
                       >
                         <Plus className="w-4 h-4 text-slate-400" />
                         <div>
-                          <p className="font-medium text-sm text-[#042c4c]">Add Job Description</p>
+                          <p className="font-medium text-sm text-slate-900">Add Job Description</p>
                           <p className="text-xs text-slate-500">Use a specific job posting</p>
                         </div>
                       </button>
@@ -337,7 +337,7 @@ export default function InterviewModeSetupPage() {
             )}
 
             <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <Label className="text-sm font-semibold text-[#042c4c] mb-3 block">
+              <Label className="text-sm font-semibold text-slate-900 mb-3 block">
                 Experience Level
               </Label>
               <div className="flex gap-2">
@@ -351,7 +351,7 @@ export default function InterviewModeSetupPage() {
                         : "border-slate-200 hover:border-slate-300"
                     }`}
                   >
-                    <p className={`font-semibold text-sm ${selectedSeniority === option.value ? config.color : "text-[#042c4c]"}`}>
+                    <p className={`font-semibold text-sm ${selectedSeniority === option.value ? config.color : "text-slate-900"}`}>
                       {option.label}
                     </p>
                     <p className="text-xs text-slate-500">{option.description}</p>
@@ -363,7 +363,7 @@ export default function InterviewModeSetupPage() {
             {isProblemSolvingMode && (
               <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-4">
                 <div>
-                  <Label className="text-sm font-semibold text-[#042c4c] mb-3 block">
+                  <Label className="text-sm font-semibold text-slate-900 mb-3 block">
                     Number of Exercises
                   </Label>
                   <div className="flex gap-2">
@@ -379,7 +379,7 @@ export default function InterviewModeSetupPage() {
                       >
                         <div className="flex items-center justify-center gap-1.5">
                           <Hash className={`w-4 h-4 ${exerciseCount === count ? config.color : "text-slate-400"}`} />
-                          <span className={`font-semibold text-sm ${exerciseCount === count ? config.color : "text-[#042c4c]"}`}>
+                          <span className={`font-semibold text-sm ${exerciseCount === count ? config.color : "text-slate-900"}`}>
                             {count}
                           </span>
                         </div>
@@ -405,7 +405,7 @@ export default function InterviewModeSetupPage() {
                         <Lightbulb className={`w-4 h-4 ${includePuzzles ? config.color : "text-slate-400"}`} />
                       </div>
                       <div className="text-left">
-                        <p className={`font-semibold text-sm ${includePuzzles ? config.color : "text-[#042c4c]"}`}>
+                        <p className={`font-semibold text-sm ${includePuzzles ? config.color : "text-slate-900"}`}>
                           Include Brain Teasers / Puzzles
                         </p>
                         <p className="text-xs text-slate-500">
@@ -426,7 +426,7 @@ export default function InterviewModeSetupPage() {
             )}
 
             <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <Label className="text-sm font-semibold text-[#042c4c] mb-1 block">
+              <Label className="text-sm font-semibold text-slate-900 mb-1 block">
                 Target Company <span className="font-normal text-slate-400">(Optional)</span>
               </Label>
               <p className="text-xs text-slate-500 mb-3">

@@ -70,11 +70,11 @@ export function SplitPanelLayout({
       </div>
 
       <div
-        className="relative w-1 cursor-col-resize bg-gray-200 hover:bg-[#ee7e65] transition-colors flex-shrink-0 group"
+        className="relative w-1 cursor-col-resize bg-gray-200 hover:bg-slate-400 transition-colors flex-shrink-0 group"
         onMouseDown={handleMouseDown}
       >
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-12 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="w-1 h-8 bg-[#ee7e65] rounded-full" />
+          <div className="w-1 h-8 bg-slate-500 rounded-full" />
         </div>
       </div>
 

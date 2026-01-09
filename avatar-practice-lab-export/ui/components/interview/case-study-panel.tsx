@@ -62,7 +62,7 @@ export function CaseStudyPanel({
 
   return (
     <div className={cn("flex flex-col h-full bg-gray-50", className)}>
-      <div className="flex items-center justify-between px-4 py-2 bg-[#042c4c] text-white border-b border-gray-200">
+      <div className="flex items-center justify-between px-4 py-2 bg-slate-900 text-white border-b border-gray-200">
         <div className="flex items-center gap-2">
           <FileText className="w-4 h-4" />
           <span className="text-sm font-medium">Case Study Materials</span>
@@ -81,7 +81,7 @@ export function CaseStudyPanel({
           className={cn(
             "flex-1 px-4 py-2 text-sm font-medium transition-colors",
             activeTab === "materials"
-              ? "text-[#ee7e65] border-b-2 border-[#ee7e65]"
+              ? "text-slate-600 border-b-2 border-slate-600"
               : "text-gray-500 hover:text-gray-700"
           )}
         >
@@ -93,7 +93,7 @@ export function CaseStudyPanel({
           className={cn(
             "flex-1 px-4 py-2 text-sm font-medium transition-colors",
             activeTab === "notes"
-              ? "text-[#ee7e65] border-b-2 border-[#ee7e65]"
+              ? "text-slate-600 border-b-2 border-slate-600"
               : "text-gray-500 hover:text-gray-700"
           )}
         >
@@ -105,7 +105,7 @@ export function CaseStudyPanel({
           className={cn(
             "flex-1 px-4 py-2 text-sm font-medium transition-colors",
             activeTab === "calculation"
-              ? "text-[#ee7e65] border-b-2 border-[#ee7e65]"
+              ? "text-slate-600 border-b-2 border-slate-600"
               : "text-gray-500 hover:text-gray-700"
           )}
         >
@@ -116,7 +116,7 @@ export function CaseStudyPanel({
 
       {casePrompt && (
         <div className="px-4 py-3 bg-amber-50 border-b border-amber-200">
-          <h3 className="text-sm font-semibold text-[#042c4c] mb-1">Case Prompt</h3>
+          <h3 className="text-sm font-semibold text-slate-900 mb-1">Case Prompt</h3>
           <p className="text-sm text-gray-700">{casePrompt}</p>
         </div>
       )}
@@ -182,7 +182,7 @@ export function CaseStudyPanel({
 • Framework/approach
 • Assumptions
 • Questions to ask"
-              className="w-full h-full min-h-[300px] p-3 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65]"
+              className="w-full h-full min-h-[300px] p-3 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-slate-600/20 focus:border-slate-600"
             />
           </div>
         )}
@@ -198,7 +198,7 @@ Example:
 Market Size = Population × Adoption Rate × ARPU
            = 100M × 10% × $50
            = $500M"
-              className="w-full h-full min-h-[300px] p-3 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] font-mono"
+              className="w-full h-full min-h-[300px] p-3 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-slate-600/20 focus:border-slate-600 font-mono"
             />
           </div>
         )}
@@ -213,7 +213,7 @@ Market Size = Population × Adoption Rate × ARPU
           <Button
             size="sm"
             variant="ghost"
-            className="text-[#ee7e65] hover:text-[#dd6d54] hover:bg-[#ee7e65]/10"
+            className="text-slate-600 hover:text-slate-700 hover:bg-slate-600/10"
           >
             <Save className="w-4 h-4 mr-1" />
             Auto-saved
