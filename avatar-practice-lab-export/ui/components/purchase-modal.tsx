@@ -173,7 +173,7 @@ export function PurchaseModal({
         },
         prefill: {},
         theme: {
-          color: "#ee7e65",
+          color: "#0f172a",
         },
         modal: {
           ondismiss: function () {
@@ -195,10 +195,10 @@ export function PurchaseModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-[#042c4c]">
+          <DialogTitle className="text-xl font-semibold text-slate-900">
             Unlock More Practice
           </DialogTitle>
-          <DialogDescription className="text-[#768c9c]">
+          <DialogDescription className="text-slate-500">
             {roleName
               ? `Continue practicing for ${roleName}`
               : "Choose a plan to continue your interview preparation"}
@@ -215,14 +215,14 @@ export function PurchaseModal({
               <button
                 key={planKey}
                 onClick={() => setSelectedPlan(planKey)}
-                className={`relative p-4 rounded-xl border-2 text-left transition-all ${
+                className={`relative p-4 rounded-lg border text-left transition-all ${
                   isSelected
-                    ? "border-[#ee7e65] bg-[#ee7e65]/5"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-slate-900 bg-slate-50"
+                    : "border-slate-200 hover:border-slate-300"
                 }`}
               >
                 {plan.popular && (
-                  <span className="absolute -top-2.5 right-4 bg-[#ee7e65] text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                  <span className="absolute -top-2.5 right-4 bg-slate-900 text-white text-xs font-medium px-2 py-0.5 rounded-full">
                     Most Popular
                   </span>
                 )}
@@ -230,29 +230,29 @@ export function PurchaseModal({
                 <div className="flex items-start gap-4">
                   <div
                     className={`p-2 rounded-lg ${
-                      isSelected ? "bg-[#ee7e65]/10" : "bg-gray-100"
+                      isSelected ? "bg-slate-200" : "bg-slate-100"
                     }`}
                   >
                     <Icon
                       className={`w-5 h-5 ${
-                        isSelected ? "text-[#ee7e65]" : "text-[#768c9c]"
+                        isSelected ? "text-slate-700" : "text-slate-500"
                       }`}
                     />
                   </div>
 
                   <div className="flex-1">
                     <div className="flex items-baseline gap-2">
-                      <h3 className="font-semibold text-[#042c4c]">
+                      <h3 className="font-medium text-slate-900">
                         {plan.name}
                       </h3>
-                      <span className="text-xl font-bold text-[#042c4c]">
+                      <span className="text-xl font-semibold text-slate-900">
                         ₹{plan.price}
                       </span>
-                      <span className="text-sm text-[#768c9c]">
+                      <span className="text-sm text-slate-500">
                         {plan.period}
                       </span>
                     </div>
-                    <p className="text-sm text-[#768c9c] mt-0.5">
+                    <p className="text-sm text-slate-500 mt-0.5">
                       {plan.description}
                     </p>
 
@@ -260,9 +260,9 @@ export function PurchaseModal({
                       {plan.features.slice(0, 3).map((feature, idx) => (
                         <span
                           key={idx}
-                          className="text-xs text-[#768c9c] flex items-center gap-1"
+                          className="text-xs text-slate-500 flex items-center gap-1"
                         >
-                          <Check className="w-3 h-3 text-green-500" />
+                          <Check className="w-3 h-3 text-emerald-500" />
                           {feature}
                         </span>
                       ))}
@@ -272,8 +272,8 @@ export function PurchaseModal({
                   <div
                     className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                       isSelected
-                        ? "border-[#ee7e65] bg-[#ee7e65]"
-                        : "border-gray-300"
+                        ? "border-slate-900 bg-slate-900"
+                        : "border-slate-300"
                     }`}
                   >
                     {isSelected && <Check className="w-3 h-3 text-white" />}
@@ -297,7 +297,7 @@ export function PurchaseModal({
           <Button
             onClick={handlePurchase}
             disabled={loading}
-            className="flex-1 bg-[#ee7e65] hover:bg-[#d96a52] text-white"
+            className="flex-1 bg-slate-900 hover:bg-slate-800 text-white"
           >
             {loading ? (
               <>
@@ -312,7 +312,7 @@ export function PurchaseModal({
           </Button>
         </div>
 
-        <p className="text-xs text-center text-[#768c9c] mt-2">
+        <p className="text-xs text-center text-slate-400 mt-2">
           Secure payment powered by Razorpay. Cancel anytime.
         </p>
       </DialogContent>
