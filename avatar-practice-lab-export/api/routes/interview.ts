@@ -59,10 +59,13 @@ import {
   generateSevenDayPlan,
   generateAIPracticePlan,
   buildDynamicRubric,
+  getOrGenerateQuestions,
+  extractJDRichContext,
   type InterviewContext,
   type JobTargetForReadiness,
   type ReadinessScore,
   type JDExtract,
+  type JDRichContext,
   type DynamicEvaluationRubric,
 } from "../lib/interview-intelligence.js";
 
@@ -887,6 +890,8 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
       }
     }
     
+    let jobTargetForRichContext: any = null;
+    
     if (config.jobTargetId) {
       const [job] = await db.select().from(jobTargets).where(eq(jobTargets.id, config.jobTargetId));
       if (job) {
@@ -897,9 +902,44 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
           description: job.jdText,
           parsedJd: job.jdParsed,
         };
+        // Also build jobTarget data for rich context question generation
+        jobTargetForRichContext = {
+          companyName: job.companyName,
+          roleTitle: job.roleTitle,
+          companyArchetype: job.companyArchetype,
+          jdParsed: job.jdParsed,
+        };
         if (!jdParsed && job.jdParsed) {
           jdParsed = job.jdParsed;
         }
+      }
+    }
+    
+    // Build JD extract for question generation
+    const jdExtractForQuestions: JDExtract | undefined = jdParsed ? {
+      responsibilities: jdParsed.responsibilities || [],
+      mustHave: jdParsed.requiredSkills || jdParsed.required_skills || [],
+      niceToHave: jdParsed.preferredSkills || jdParsed.preferred_skills || [],
+      interviewTopics: jdParsed.interviewTopics || jdParsed.interview_topics || [],
+      analysisDimensions: jdParsed.analysisDimensions || jdParsed.analysis_dimensions || [],
+      senioritySignal: jdParsed.seniority || jdParsed.experienceLevel,
+    } : undefined;
+    
+    // Generate questions with rich JD context (company, role, complexity)
+    let generatedQuestions: any[] = [];
+    if (jdExtractForQuestions?.interviewTopics?.length) {
+      try {
+        generatedQuestions = await getOrGenerateQuestions({
+          roleKitId: config.roleKitId || undefined,
+          interviewType: config.interviewType || 'behavioral',
+          jdExtract: jdExtractForQuestions,
+          roleCategory: roleKitData?.roleCategory || roleKitData?.domain || 'general',
+          sourceJobTargetId: config.jobTargetId || undefined,
+          jobTarget: jobTargetForRichContext,
+        }, 5);
+        console.log(`[Plan Generation] Generated ${generatedQuestions.length} JD-context questions for config ${configId}`);
+      } catch (error) {
+        console.error("[Plan Generation] Question generation failed:", error);
       }
     }
     
@@ -917,6 +957,14 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
       jobTarget: jobTargetData,
       roundCategory: roundCategory || null,
       targetDuration: typicalDuration || "30-45 min",
+      // Pre-generated questions with JD context (company-specific, role-appropriate complexity)
+      preGeneratedQuestions: generatedQuestions.length > 0 ? generatedQuestions.map(q => ({
+        question: q.question,
+        topic: q.topic || q.assessmentDimension,
+        followUps: q.followUps || [],
+        difficulty: q.difficulty || 'intermediate',
+        skillsTested: q.skillsTested || [],
+      })) : undefined,
     };
     
     if (blueprintData.taskBlueprints.length > 0) {
