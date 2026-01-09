@@ -398,17 +398,22 @@ export default function ResultsPage() {
   if (sessions.length === 0 && presentations.length === 0 && interviews.length === 0 && exercises.length === 0) {
     return (
       <SidebarLayout>
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center py-16">
-            <h2 className="text-2xl font-bold text-brand-dark mb-3">No Practice Sessions Yet</h2>
-            <p className="text-brand-dark/60 mb-6 max-w-md mx-auto">
-              Start practicing to see your results and track progress over time.
-            </p>
-            <Link to="/avatar/start">
-              <Button className="bg-brand-primary hover:bg-brand-dark text-white px-6">
-                Start Your First Session
-              </Button>
-            </Link>
+        <div className="min-h-screen bg-[#fbfbfc]">
+          <div className="bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] text-white py-16">
+            <div className="max-w-4xl mx-auto px-4 text-center">
+              <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <BarChart3 className="w-8 h-8 text-[#ee7e65]" />
+              </div>
+              <h2 className="text-2xl font-bold mb-3">No Practice Sessions Yet</h2>
+              <p className="text-white/70 mb-8 max-w-md mx-auto">
+                Start practicing to see your results and track progress over time.
+              </p>
+              <Link to="/interview">
+                <Button className="bg-[#ee7e65] hover:bg-[#e06a50] text-white px-8 py-3 rounded-xl shadow-lg shadow-[#ee7e65]/25">
+                  Start Your First Session
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </SidebarLayout>
@@ -417,106 +422,112 @@ export default function ResultsPage() {
 
   return (
     <SidebarLayout>
-      <div className="max-w-5xl mx-auto px-4 sm:px-0 space-y-4 sm:space-y-6 pb-20 sm:pb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Your Results</h1>
-            <p className="text-sm sm:text-base text-slate-500 mt-1">
-              {totalSessions} sessions, {Math.round(totalDuration / 60)} min practiced
-              {activeJobs.length > 0 && ` for ${activeJobs.length} job${activeJobs.length !== 1 ? 's' : ''}`}
-            </p>
-          </div>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Link to="/interview" className="flex-1 sm:flex-none">
-              <Button className="gap-2 w-full bg-[#ee7e65] hover:bg-[#e06a50]">
-                <Play className="w-4 h-4" />
-                Practice
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        {/* Stats Grid - 4 columns on mobile, 5 on desktop */}
-        <div className="grid grid-cols-4 gap-2 sm:gap-4 lg:grid-cols-5">
-          <div className="bg-white rounded-xl border border-slate-100 p-2.5 sm:p-4">
-            <p className="text-[9px] sm:text-xs text-slate-500 font-medium uppercase">Sessions</p>
-            <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-0.5">{totalSessions}</p>
-          </div>
-          <div className="bg-slate-100 rounded-xl border border-slate-200 p-2.5 sm:p-4">
-            <p className="text-[9px] sm:text-xs text-slate-700 font-medium uppercase">Interviews</p>
-            <p className="text-lg sm:text-2xl font-bold text-slate-700 mt-0.5">{totalInterviewSessions}</p>
-          </div>
-          <div className="bg-slate-100 rounded-xl border border-slate-200 p-2.5 sm:p-4">
-            <p className="text-[9px] sm:text-xs text-slate-900 font-medium uppercase">Exercises</p>
-            <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-0.5">{totalExerciseSessions}</p>
-          </div>
-          <div className="bg-white rounded-xl border border-slate-100 p-2.5 sm:p-4">
-            <p className="text-[9px] sm:text-xs text-slate-500 font-medium uppercase">Time</p>
-            <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-0.5">{Math.round(totalDuration / 60)}m</p>
-          </div>
-          <div className="hidden lg:block bg-white rounded-xl border border-slate-100 p-2.5 sm:p-4">
-            <p className="text-[9px] sm:text-xs text-slate-500 font-medium uppercase">Practice</p>
-            <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-0.5">{totalConversationSessions}</p>
-          </div>
-        </div>
-
-        {/* View Toggle + Search */}
-        <div className="space-y-3">
-          {/* View mode toggle */}
-          <div className="flex bg-slate-100 rounded-xl p-1">
-            <button
-              onClick={() => setViewMode("sessions")}
-              className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                viewMode === "sessions" 
-                  ? "bg-white text-slate-900 shadow-sm" 
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              Sessions
-            </button>
-            <button
-              onClick={() => setViewMode("skills")}
-              className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                viewMode === "skills" 
-                  ? "bg-white text-slate-900 shadow-sm" 
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              Performance
-            </button>
-          </div>
-
-          {/* Search and filter */}
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-11 rounded-xl bg-white"
-              />
+      <div className="min-h-screen bg-[#fbfbfc]">
+        <div className="bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] text-white">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-[#ee7e65] rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-[#ee7e65] text-sm font-semibold uppercase tracking-wide">Analytics</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold">Your Results</h1>
+                <p className="text-white/70 mt-2">
+                  {totalSessions} sessions, {Math.round(totalDuration / 60)} min practiced
+                  {activeJobs.length > 0 && ` for ${activeJobs.length} job${activeJobs.length !== 1 ? 's' : ''}`}
+                </p>
+              </div>
+              <Link to="/interview">
+                <Button className="gap-2 bg-[#ee7e65] hover:bg-[#e06a50] text-white font-semibold rounded-xl px-6 py-3 shadow-lg shadow-[#ee7e65]/25">
+                  <Play className="w-4 h-4" />
+                  Practice More
+                </Button>
+              </Link>
             </div>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 min-w-[100px]"
-            >
-              <option value="all">All</option>
-              <option value="interviews">Interviews</option>
-              {exercises.some(e => e.exerciseType === "coding_lab") && (
-                <option value="coding">Coding</option>
-              )}
-              {exercises.some(e => e.exerciseType === "case_study") && (
-                <option value="case_study">Case Study</option>
-              )}
-              <option value="conversations">Conversations</option>
-              {presentations.length > 0 && (
-                <option value="presentations">Presentations</option>
-              )}
-            </select>
+            
+            <div className="grid grid-cols-4 gap-3 sm:gap-4 mt-6 bg-white/10 backdrop-blur-sm rounded-xl p-4">
+              <div className="text-center">
+                <p className="text-2xl sm:text-3xl font-bold text-white">{totalSessions}</p>
+                <p className="text-white/60 text-xs sm:text-sm">Sessions</p>
+              </div>
+              <div className="text-center border-x border-white/20">
+                <p className="text-2xl sm:text-3xl font-bold text-[#ee7e65]">{totalInterviewSessions}</p>
+                <p className="text-white/60 text-xs sm:text-sm">Interviews</p>
+              </div>
+              <div className="text-center border-r border-white/20">
+                <p className="text-2xl sm:text-3xl font-bold text-white">{totalExerciseSessions}</p>
+                <p className="text-white/60 text-xs sm:text-sm">Exercises</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl sm:text-3xl font-bold text-white">{Math.round(totalDuration / 60)}m</p>
+                <p className="text-white/60 text-xs sm:text-sm">Total Time</p>
+              </div>
+            </div>
           </div>
         </div>
+
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 -mt-6">
+          <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-4 sm:p-6 border border-slate-100">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex bg-slate-100 rounded-xl p-1 flex-shrink-0">
+                <button
+                  onClick={() => setViewMode("sessions")}
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    viewMode === "sessions" 
+                      ? "bg-[#042c4c] text-white shadow-lg" 
+                      : "text-[#6c8194] hover:text-[#042c4c]"
+                  }`}
+                >
+                  Sessions
+                </button>
+                <button
+                  onClick={() => setViewMode("skills")}
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    viewMode === "skills" 
+                      ? "bg-[#042c4c] text-white shadow-lg" 
+                      : "text-[#6c8194] hover:text-[#042c4c]"
+                  }`}
+                >
+                  Performance
+                </button>
+              </div>
+              
+              <div className="flex gap-3 flex-1">
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#768c9c]" />
+                  <Input
+                    placeholder="Search sessions..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-12 h-11 rounded-xl bg-[#fbfbfc] border-slate-200 focus:border-[#ee7e65] focus:ring-[#ee7e65]/20"
+                  />
+                </div>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-[#042c4c] font-medium min-w-[120px] focus:border-[#ee7e65] focus:ring-[#ee7e65]/20"
+                >
+                  <option value="all">All Types</option>
+                  <option value="interviews">Interviews</option>
+                  {exercises.some(e => e.exerciseType === "coding_lab") && (
+                    <option value="coding">Coding</option>
+                  )}
+                  {exercises.some(e => e.exerciseType === "case_study") && (
+                    <option value="case_study">Case Study</option>
+                  )}
+                  <option value="conversations">Conversations</option>
+                  {presentations.length > 0 && (
+                    <option value="presentations">Presentations</option>
+                  )}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-4 sm:space-y-6 pb-20 sm:pb-8">
 
         {viewMode === "skills" && (
           <div className="space-y-4">
@@ -929,24 +940,25 @@ export default function ResultsPage() {
 
         {/* Next Recommended Exercise CTA */}
         {activeJobs.length > 0 && (
-          <div className="mt-6 bg-slate-900 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          <div className="bg-gradient-to-r from-[#042c4c] to-[#0a3d66] rounded-2xl p-5 sm:p-6 text-white shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h3 className="text-base sm:text-lg font-bold mb-0.5">Continue practicing?</h3>
-                <p className="text-white/70 text-xs sm:text-sm">
+                <h3 className="text-lg font-bold mb-1">Continue practicing?</h3>
+                <p className="text-white/70 text-sm">
                   Keep preparing for {(activeJobs[0] as { roleTitle: string }).roleTitle}
                   {(activeJobs[0] as { companyName: string | null }).companyName && ` at ${(activeJobs[0] as { companyName: string | null }).companyName}`}
                 </p>
               </div>
               <Link to={`/jobs/${(activeJobs[0] as { id: string }).id}`} className="sm:flex-shrink-0">
-                <Button className="bg-[#ee7e65] hover:bg-[#e06a50] text-white gap-2 w-full sm:w-auto">
+                <Button className="bg-[#ee7e65] hover:bg-[#e06a50] text-white gap-2 w-full sm:w-auto font-semibold rounded-xl shadow-lg shadow-[#ee7e65]/25">
                   <Play className="w-4 h-4" />
-                  Practice
+                  Practice Now
                 </Button>
               </Link>
             </div>
           </div>
         )}
+        </div>
       </div>
     </SidebarLayout>
   );

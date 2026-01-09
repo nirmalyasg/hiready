@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Loader2, Sparkles, Zap } from 'lucide-react';
+import { Loader2, Sparkles, Zap, Target, TrendingUp, Users, Award } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -47,90 +47,143 @@ export default function LoginPage() {
     }
   };
 
+  const features = [
+    { icon: Target, title: 'AI Interview Practice', description: 'Practice with realistic AI avatars' },
+    { icon: TrendingUp, title: 'Track Progress', description: 'See your improvement over time' },
+    { icon: Award, title: 'Get Feedback', description: 'Detailed insights on every session' },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-[#fbfbfc] relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-b from-[#042c4c]/5 to-transparent" />
-      <div className="absolute top-20 right-20 w-64 h-64 bg-[#ee7e65]/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 left-20 w-64 h-64 bg-[#768c9c]/5 rounded-full blur-3xl" />
-      
-      <div className="w-full max-w-sm relative">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2.5 mb-8">
-            <div className="w-11 h-11 bg-[#042c4c] rounded-xl flex items-center justify-center shadow-lg">
-              <Sparkles className="w-5 h-5 text-white" />
+    <div className="min-h-screen flex">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] text-white p-12 flex-col justify-between relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#ee7e65]/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#768c9c]/10 rounded-full blur-3xl" />
+        
+        <div className="relative">
+          <Link to="/" className="inline-flex items-center gap-3">
+            <div className="w-12 h-12 bg-[#ee7e65] rounded-xl flex items-center justify-center shadow-lg shadow-[#ee7e65]/30">
+              <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-[#042c4c]">Hiready</span>
+            <span className="text-2xl font-bold">Hiready</span>
           </Link>
-          <h1 className="text-2xl font-bold text-[#042c4c]">Welcome back</h1>
-          <p className="text-[#6c8194] mt-2">Sign in to continue your journey</p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-xl shadow-gray-100/50 p-7">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
-              <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm border border-red-100 flex items-center gap-2">
-                <Zap className="w-4 h-4" />
-                {error}
+        <div className="relative space-y-8">
+          <div>
+            <h2 className="text-4xl font-bold mb-4">Welcome back</h2>
+            <p className="text-white/70 text-lg">Continue your interview preparation journey</p>
+          </div>
+          
+          <div className="space-y-4">
+            {features.map((feature, idx) => {
+              const Icon = feature.icon;
+              return (
+                <div key={idx} className="flex items-start gap-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+                  <div className="w-10 h-10 bg-[#ee7e65] rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{feature.title}</h3>
+                    <p className="text-white/60 text-sm">{feature.description}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="relative flex items-center gap-3">
+          <div className="flex -space-x-2">
+            <div className="w-8 h-8 rounded-full bg-[#ee7e65] flex items-center justify-center text-xs font-bold ring-2 ring-[#042c4c]">JD</div>
+            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-xs font-bold ring-2 ring-[#042c4c]">MK</div>
+            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-xs font-bold ring-2 ring-[#042c4c]">AS</div>
+          </div>
+          <p className="text-white/70 text-sm">Join 10,000+ candidates practicing daily</p>
+        </div>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center px-6 bg-[#fbfbfc] relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-b from-[#042c4c]/5 to-transparent lg:hidden" />
+        <div className="absolute top-20 right-20 w-64 h-64 bg-[#ee7e65]/5 rounded-full blur-3xl" />
+        
+        <div className="w-full max-w-sm relative">
+          <div className="text-center mb-8 lg:hidden">
+            <Link to="/" className="inline-flex items-center gap-2.5 mb-8">
+              <div className="w-11 h-11 bg-[#042c4c] rounded-xl flex items-center justify-center shadow-lg">
+                <Sparkles className="w-5 h-5 text-white" />
               </div>
-            )}
+              <span className="text-2xl font-bold text-[#042c4c]">Hiready</span>
+            </Link>
+          </div>
+          
+          <div className="lg:mb-8">
+            <h1 className="text-2xl lg:text-3xl font-bold text-[#042c4c]">Sign in</h1>
+            <p className="text-[#6c8194] mt-2">Enter your credentials to continue</p>
+          </div>
 
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-[#042c4c] mb-2">
-                Username
-              </label>
-              <input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-[#768c9c] focus:outline-none focus:ring-2 focus:ring-[#042c4c]/10 focus:border-[#042c4c] transition-all bg-[#fbfbfc]"
-                placeholder="Enter your username"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[#042c4c] mb-2">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-[#768c9c] focus:outline-none focus:ring-2 focus:ring-[#042c4c]/10 focus:border-[#042c4c] transition-all bg-[#fbfbfc]"
-                placeholder="Enter your password"
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-[#ee7e65] hover:bg-[#e06a50] text-white py-3.5 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#ee7e65]/25"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                'Sign In'
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-xl shadow-gray-100/50 p-7 mt-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm border border-red-100 flex items-center gap-2">
+                  <Zap className="w-4 h-4" />
+                  {error}
+                </div>
               )}
-            </button>
-          </form>
+
+              <div>
+                <label htmlFor="username" className="block text-sm font-medium text-[#042c4c] mb-2">
+                  Username
+                </label>
+                <input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-[#768c9c] focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all bg-[#fbfbfc]"
+                  placeholder="Enter your username"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-[#042c4c] mb-2">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-[#768c9c] focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all bg-[#fbfbfc]"
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-[#ee7e65] hover:bg-[#e06a50] text-white py-3.5 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#ee7e65]/25"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
+              </button>
+            </form>
+          </div>
+
+          <p className="text-center text-[#6c8194] mt-6">
+            Don't have an account?{' '}
+            <Link to="/register" className="text-[#ee7e65] hover:text-[#e06a50] font-semibold">
+              Create one
+            </Link>
+          </p>
         </div>
-
-        <p className="text-center text-[#6c8194] mt-6">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-[#ee7e65] hover:text-[#e06a50] font-semibold">
-            Create one
-          </Link>
-        </p>
-
-        <p className="text-center text-[#768c9c] text-xs mt-10">
-          © {new Date().getFullYear()} Hiready
-        </p>
       </div>
     </div>
   );

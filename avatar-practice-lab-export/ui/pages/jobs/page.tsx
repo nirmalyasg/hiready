@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Plus, Briefcase, Building2, MapPin, Clock, ChevronRight, MoreVertical, Target, CheckCircle2, XCircle, Archive, ClipboardPaste, Sparkles, Link2, Play, TrendingUp } from "lucide-react";
+import { Search, Plus, Briefcase, Building2, MapPin, Clock, ChevronRight, Target, ClipboardPaste, Link2, Play, TrendingUp, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -12,12 +12,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface JobTarget {
   id: string;
@@ -52,15 +46,14 @@ interface JobTarget {
   };
 }
 
-const statusConfig: Record<string, { label: string; color: string; bgColor: string; borderColor: string }> = {
-  saved: { label: "Saved", color: "text-slate-600", bgColor: "bg-slate-50", borderColor: "border-slate-200" },
-  applied: { label: "Applied", color: "text-blue-600", bgColor: "bg-blue-50", borderColor: "border-blue-200" },
-  interview: { label: "Interviewing", color: "text-purple-600", bgColor: "bg-purple-50", borderColor: "border-purple-200" },
-  offer: { label: "Offer", color: "text-green-600", bgColor: "bg-green-50", borderColor: "border-green-200" },
-  rejected: { label: "Rejected", color: "text-red-600", bgColor: "bg-red-50", borderColor: "border-red-200" },
-  archived: { label: "Archived", color: "text-gray-400", bgColor: "bg-gray-50", borderColor: "border-gray-200" },
+const statusConfig: Record<string, { label: string; bg: string; text: string; border: string }> = {
+  saved: { label: "Saved", bg: "bg-[#042c4c]", text: "text-white", border: "border-[#042c4c]" },
+  applied: { label: "Applied", bg: "bg-[#768c9c]", text: "text-white", border: "border-[#768c9c]" },
+  interview: { label: "Interviewing", bg: "bg-[#ee7e65]", text: "text-white", border: "border-[#ee7e65]" },
+  offer: { label: "Offer", bg: "bg-emerald-500", text: "text-white", border: "border-emerald-500" },
+  rejected: { label: "Rejected", bg: "bg-red-500", text: "text-white", border: "border-red-500" },
+  archived: { label: "Archived", bg: "bg-slate-400", text: "text-white", border: "border-slate-400" },
 };
-
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState<JobTarget[]>([]);
@@ -106,6 +99,12 @@ export default function JobsPage() {
     );
   });
 
+  const activeJobs = jobs.filter(j => !['archived', 'rejected'].includes(j.status));
+  const interviewingJobs = jobs.filter(j => j.status === 'interview');
+  const avgReadiness = activeJobs.length > 0 
+    ? Math.round(activeJobs.reduce((sum, j) => sum + (j.readinessScore || 0), 0) / activeJobs.length)
+    : 0;
+
   const handleAddJob = async () => {
     if (!newJob.roleTitle.trim()) return;
     
@@ -125,6 +124,7 @@ export default function JobsPage() {
         setNewJob({ roleTitle: "", companyName: "", location: "" });
         setPastedJD("");
         setAddDialogOpen(false);
+        setAddMode(null);
       }
     } catch (error) {
       console.error("Error adding job:", error);
@@ -136,70 +136,32 @@ export default function JobsPage() {
   const handleParseUrl = async () => {
     if (!pastedUrl.trim()) return;
     
-    setUrlError("");
-    
-    try {
-      new URL(pastedUrl);
-    } catch {
-      setUrlError("Please enter a valid URL starting with http:// or https://");
-      return;
-    }
-    
     try {
       setIsParsingUrl(true);
-      const response = await fetch("/api/jobs/job-targets/parse-url", {
+      setUrlError("");
+      
+      const response = await fetch("/api/jobs/parse-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: pastedUrl }),
       });
+      
       const data = await response.json();
-      if (data.success && data.duplicate && data.existingJobId) {
-        setPastedUrl("");
-        setAddDialogOpen(false);
-        navigate(`/jobs/${data.existingJobId}`);
-      } else if (data.success && data.job) {
+      
+      if (data.success && data.job) {
         setJobs([data.job, ...jobs]);
-        setPastedUrl("");
         setAddDialogOpen(false);
-        navigate(`/jobs/${data.job.id}`);
-      } else if (data.error === "IMPORT_BLOCKED") {
-        setUrlError(data.message || "This site requires login. Copy the job description and paste it in the 'Paste JD' tab instead.");
+        setAddMode(null);
+        setPastedUrl("");
       } else {
-        setUrlError(data.error || data.message || "Failed to parse the job URL");
+        setUrlError(data.error || "Could not parse this URL. Try pasting the job description manually.");
       }
     } catch (error) {
       console.error("Error parsing URL:", error);
-      setUrlError("Failed to connect. Please try again or paste the job description instead.");
+      setUrlError("Failed to parse URL. Please try again.");
     } finally {
       setIsParsingUrl(false);
     }
-  };
-
-  const handleUpdateStatus = async (jobId: string, status: string) => {
-    try {
-      const response = await fetch(`/api/jobs/job-targets/${jobId}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        setJobs(jobs.map(j => j.id === jobId ? data.job : j));
-      }
-    } catch (error) {
-      console.error("Error updating status:", error);
-    }
-  };
-
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
   const resetDialog = () => {
@@ -210,124 +172,178 @@ export default function JobsPage() {
     setNewJob({ roleTitle: "", companyName: "", location: "" });
   };
 
+  const getReadinessColor = (score: number | null) => {
+    if (score === null || score === 0) return "bg-slate-200";
+    if (score >= 70) return "bg-emerald-500";
+    if (score >= 40) return "bg-amber-500";
+    return "bg-red-400";
+  };
+
   return (
     <SidebarLayout>
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Jobs</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Track your target roles</p>
+      <div className="min-h-screen bg-[#fbfbfc]">
+        <div className="bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] text-white">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-[#ee7e65] rounded-lg flex items-center justify-center">
+                    <Briefcase className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-[#ee7e65] text-sm font-semibold uppercase tracking-wide">Job Tracker</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold">Your Job Targets</h1>
+                <p className="text-white/70 mt-2 text-sm sm:text-base">
+                  Track applications and build interview readiness
+                </p>
+              </div>
+              <div className="grid grid-cols-3 gap-4 bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-white">{activeJobs.length}</p>
+                  <p className="text-white/60 text-xs">Active</p>
+                </div>
+                <div className="text-center border-x border-white/20 px-4">
+                  <p className="text-2xl font-bold text-[#ee7e65]">{interviewingJobs.length}</p>
+                  <p className="text-white/60 text-xs">Interviewing</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-white">{avgReadiness}%</p>
+                  <p className="text-white/60 text-xs">Readiness</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <Dialog open={addDialogOpen} onOpenChange={(open) => { 
-            setAddDialogOpen(open); 
-            if (!open) resetDialog();
-          }}>
-            <DialogTrigger asChild>
-              <Button className="h-9 px-4 gap-1.5 bg-[#ee7e65] hover:bg-[#e06a50] text-white text-sm font-medium rounded-lg">
-                <Plus className="w-4 h-4" />
-                Add Job
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle className="text-slate-900">
-                  {addMode === "url" ? "Import from URL" :
-                   addMode === "manual" ? "Enter Job Details" :
-                   "Add Job Target"}
-                </DialogTitle>
-              </DialogHeader>
-              {renderDialogContent()}
-            </DialogContent>
-          </Dialog>
         </div>
 
-        {/* Search */}
-        {jobs.length > 0 && (
-          <div className="mb-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input
-                type="text"
-                placeholder="Search jobs..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-10 bg-white border-slate-200 rounded-lg text-sm"
-              />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-6">
+          <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-4 sm:p-6 border border-slate-100">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#768c9c]" />
+                <Input
+                  type="text"
+                  placeholder="Search jobs..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 h-12 bg-[#fbfbfc] rounded-xl border-slate-200 focus:border-[#ee7e65] focus:ring-[#ee7e65]/20 text-[#042c4c]"
+                />
+              </div>
+              <Dialog open={addDialogOpen} onOpenChange={(open) => { 
+                setAddDialogOpen(open); 
+                if (!open) resetDialog();
+              }}>
+                <DialogTrigger asChild>
+                  <Button className="h-12 px-6 gap-2 bg-[#ee7e65] hover:bg-[#e06a50] text-white font-semibold rounded-xl shadow-lg shadow-[#ee7e65]/25">
+                    <Plus className="w-5 h-5" />
+                    Add Job
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="text-[#042c4c]">
+                      {addMode === "url" ? "Import from URL" :
+                       addMode === "manual" ? "Enter Job Details" :
+                       "Add Job Target"}
+                    </DialogTitle>
+                  </DialogHeader>
+                  {renderDialogContent()}
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
-        )}
+        </div>
 
-        {/* Loading State */}
-        {isLoading && jobs.length === 0 ? (
-          <div className="flex justify-center items-center py-20">
-            <LoadingSpinner />
-          </div>
-        ) : filteredJobs.length === 0 ? (
-          /* Empty State */
-          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-            <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <Briefcase className="w-6 h-6 text-slate-400" />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          {isLoading && jobs.length === 0 ? (
+            <div className="flex justify-center items-center py-20">
+              <LoadingSpinner />
             </div>
-            <h3 className="text-base font-medium text-slate-900 mb-1">
-              {searchQuery ? "No matching jobs" : "No jobs yet"}
-            </h3>
-            <p className="text-slate-500 text-sm mb-5">
-              {searchQuery 
-                ? "Try a different search" 
-                : "Add a job to start preparing"}
-            </p>
-          </div>
-        ) : (
-          /* Job Cards */
-          <div className="space-y-2">
-            {filteredJobs.map((job) => {
-              return (
-                <div
-                  key={job.id}
-                  className="bg-white rounded-lg border border-slate-200 p-4 hover:border-slate-300 transition-colors cursor-pointer"
-                  onClick={() => navigate(`/jobs/${job.id}`)}
+          ) : filteredJobs.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm">
+              <div className="w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Briefcase className="w-8 h-8 text-[#768c9c]" />
+              </div>
+              <h3 className="text-xl font-bold text-[#042c4c] mb-2">
+                {searchQuery ? "No matching jobs" : "No jobs yet"}
+              </h3>
+              <p className="text-[#6c8194] mb-6">
+                {searchQuery 
+                  ? "Try a different search" 
+                  : "Add your target jobs to start preparing"}
+              </p>
+              {!searchQuery && (
+                <Button 
+                  onClick={() => setAddDialogOpen(true)}
+                  className="bg-[#ee7e65] hover:bg-[#e06a50] text-white rounded-xl px-6"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-slate-900 text-[15px] truncate">
-                        {job.roleTitle}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-1 text-sm text-slate-500">
-                        {job.companyName && (
-                          <span className="truncate">{job.companyName}</span>
-                        )}
-                        {job.companyName && job.location && (
-                          <span className="text-slate-300">·</span>
-                        )}
-                        {job.location && (
-                          <span className="truncate">{job.location}</span>
-                        )}
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Your First Job
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredJobs.map((job) => {
+                const status = statusConfig[job.status] || statusConfig.saved;
+                const readiness = job.readinessScore || 0;
+                
+                return (
+                  <div
+                    key={job.id}
+                    className="bg-white rounded-xl border border-slate-200 p-5 hover:border-[#ee7e65]/40 hover:shadow-lg hover:shadow-[#ee7e65]/5 transition-all duration-200 cursor-pointer group"
+                    onClick={() => navigate(`/jobs/${job.id}`)}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#042c4c] to-[#0a3d66] rounded-xl flex items-center justify-center flex-shrink-0">
+                        <Building2 className="w-6 h-6 text-white" />
                       </div>
-                    </div>
-                    
-                    {job.readinessScore !== null && job.readinessScore > 0 && (
-                      <div className="hidden sm:flex items-center gap-2 text-sm">
-                        <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-bold text-[#042c4c] truncate group-hover:text-[#ee7e65] transition-colors">
+                            {job.roleTitle}
+                          </h3>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${status.bg} ${status.text}`}>
+                            {status.label}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-[#6c8194]">
+                          {job.companyName && (
+                            <span className="truncate font-medium">{job.companyName}</span>
+                          )}
+                          {job.location && (
+                            <>
+                              <span className="text-slate-300">•</span>
+                              <span className="flex items-center gap-1 truncate">
+                                <MapPin className="w-3 h-3" />
+                                {job.location}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="hidden sm:flex items-center gap-4">
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-[#042c4c]">{readiness}%</p>
+                          <p className="text-xs text-[#6c8194]">ready</p>
+                        </div>
+                        <div className="w-16 h-2 bg-slate-100 rounded-full overflow-hidden">
                           <div 
-                            className={`h-full rounded-full ${
-                              job.readinessScore >= 70 ? 'bg-emerald-500' :
-                              job.readinessScore >= 40 ? 'bg-amber-500' : 'bg-slate-400'
-                            }`}
-                            style={{ width: `${job.readinessScore}%` }}
+                            className={`h-full rounded-full transition-all duration-500 ${getReadinessColor(readiness)}`}
+                            style={{ width: `${readiness}%` }}
                           />
                         </div>
-                        <span className="text-xs text-slate-500 w-8">{job.readinessScore}%</span>
                       </div>
-                    )}
-                    
-                    <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
+                      
+                      <ChevronRight className="w-5 h-5 text-[#768c9c] flex-shrink-0 group-hover:text-[#ee7e65] group-hover:translate-x-1 transition-all" />
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </SidebarLayout>
   );
@@ -335,29 +351,35 @@ export default function JobsPage() {
   function renderDialogContent() {
     if (!addMode) {
       return (
-        <div className="space-y-2 pt-2">
+        <div className="space-y-3 pt-2">
           <button
             onClick={() => setAddMode("url")}
-            className="w-full p-3 border border-slate-200 rounded-lg text-left hover:bg-slate-50 transition-colors"
+            className="w-full p-4 border border-slate-200 rounded-xl text-left hover:bg-slate-50 hover:border-[#ee7e65]/30 transition-all group"
           >
-            <div className="flex items-center gap-3">
-              <Link2 className="w-4 h-4 text-slate-400" />
-              <div className="flex-1">
-                <p className="text-sm font-medium text-slate-900">Import from URL</p>
-                <p className="text-xs text-slate-500">LinkedIn, Indeed, Glassdoor...</p>
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#042c4c] to-[#0a3d66] rounded-lg flex items-center justify-center">
+                <Link2 className="w-5 h-5 text-white" />
               </div>
+              <div className="flex-1">
+                <p className="font-semibold text-[#042c4c] group-hover:text-[#ee7e65] transition-colors">Import from URL</p>
+                <p className="text-sm text-[#6c8194]">LinkedIn, Indeed, Glassdoor...</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#768c9c]" />
             </div>
           </button>
           <button
             onClick={() => setAddMode("manual")}
-            className="w-full p-3 border border-slate-200 rounded-lg text-left hover:bg-slate-50 transition-colors"
+            className="w-full p-4 border border-slate-200 rounded-xl text-left hover:bg-slate-50 hover:border-[#ee7e65]/30 transition-all group"
           >
-            <div className="flex items-center gap-3">
-              <ClipboardPaste className="w-4 h-4 text-slate-400" />
-              <div className="flex-1">
-                <p className="text-sm font-medium text-slate-900">Enter manually</p>
-                <p className="text-xs text-slate-500">Type or paste job details</p>
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#ee7e65] to-[#e06a50] rounded-lg flex items-center justify-center">
+                <ClipboardPaste className="w-5 h-5 text-white" />
               </div>
+              <div className="flex-1">
+                <p className="font-semibold text-[#042c4c] group-hover:text-[#ee7e65] transition-colors">Enter manually</p>
+                <p className="text-sm text-[#6c8194]">Type or paste job details</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#768c9c]" />
             </div>
           </button>
         </div>
@@ -371,17 +393,17 @@ export default function JobsPage() {
             value={pastedUrl}
             onChange={(e) => { setPastedUrl(e.target.value); setUrlError(""); }}
             placeholder="Paste job URL..."
-            className={`h-10 rounded-lg text-sm ${urlError ? "border-red-500" : ""}`}
+            className={`h-12 rounded-xl text-[#042c4c] ${urlError ? "border-red-500" : ""}`}
           />
           {urlError && <p className="text-sm text-red-500">{urlError}</p>}
-          <div className="flex gap-2">
-            <Button variant="ghost" onClick={() => setAddMode(null)} className="flex-1 h-9 text-sm">
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => setAddMode(null)} className="flex-1 h-11 rounded-xl border-slate-200">
               Back
             </Button>
             <Button 
               onClick={handleParseUrl}
               disabled={isParsingUrl || !pastedUrl.trim()}
-              className="flex-1 h-9 text-sm bg-[#ee7e65] hover:bg-[#e06a50]"
+              className="flex-1 h-11 rounded-xl bg-[#ee7e65] hover:bg-[#e06a50] shadow-lg shadow-[#ee7e65]/25"
             >
               {isParsingUrl ? "Importing..." : "Import"}
             </Button>
@@ -391,41 +413,41 @@ export default function JobsPage() {
     }
     
     return (
-      <div className="space-y-3 pt-2">
+      <div className="space-y-4 pt-2">
         <Input
           value={newJob.roleTitle}
           onChange={(e) => setNewJob({ ...newJob, roleTitle: e.target.value })}
           placeholder="Role title *"
-          className="h-10 rounded-lg text-sm"
+          className="h-12 rounded-xl text-[#042c4c]"
         />
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           <Input
             value={newJob.companyName}
             onChange={(e) => setNewJob({ ...newJob, companyName: e.target.value })}
             placeholder="Company"
-            className="h-10 rounded-lg text-sm"
+            className="h-12 rounded-xl text-[#042c4c]"
           />
           <Input
             value={newJob.location}
             onChange={(e) => setNewJob({ ...newJob, location: e.target.value })}
             placeholder="Location"
-            className="h-10 rounded-lg text-sm"
+            className="h-12 rounded-xl text-[#042c4c]"
           />
         </div>
         <textarea
           value={pastedJD}
           onChange={(e) => setPastedJD(e.target.value)}
           placeholder="Paste job description (optional)"
-          className="w-full h-20 p-3 border border-slate-200 rounded-lg resize-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 text-sm"
+          className="w-full h-24 p-4 border border-slate-200 rounded-xl resize-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] text-[#042c4c] placeholder:text-[#768c9c]"
         />
-        <div className="flex gap-2">
-          <Button variant="ghost" onClick={() => setAddMode(null)} className="flex-1 h-9 text-sm">
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={() => setAddMode(null)} className="flex-1 h-11 rounded-xl border-slate-200">
             Back
           </Button>
           <Button 
             onClick={handleAddJob}
             disabled={isSubmitting || !newJob.roleTitle.trim()}
-            className="flex-1 h-9 text-sm bg-[#ee7e65] hover:bg-[#e06a50]"
+            className="flex-1 h-11 rounded-xl bg-[#ee7e65] hover:bg-[#e06a50] shadow-lg shadow-[#ee7e65]/25"
           >
             {isSubmitting ? "Adding..." : "Add Job"}
           </Button>

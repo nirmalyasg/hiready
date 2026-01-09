@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, LogOut, ChevronRight, Settings, HelpCircle, Shield, FileText, Upload, Trash2, Check, Loader2 } from 'lucide-react';
+import { User, Mail, LogOut, ChevronRight, Settings, HelpCircle, Shield, FileText, Upload, Trash2, Check, Loader2, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import SidebarLayout from '@/components/layout/sidebar-layout';
@@ -84,7 +84,7 @@ export default function ProfilePage() {
     return (
       <SidebarLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="w-8 h-8 border-2 border-brand-accent border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-[#ee7e65] border-t-transparent rounded-full animate-spin" />
         </div>
       </SidebarLayout>
     );
@@ -96,9 +96,9 @@ export default function ProfilePage() {
   }
 
   const menuItems = [
-    { icon: Settings, label: 'Settings', onClick: () => {} },
-    { icon: HelpCircle, label: 'Help & Support', onClick: () => {} },
-    { icon: Shield, label: 'Privacy', onClick: () => {} },
+    { icon: Settings, label: 'Settings', description: 'Preferences and account settings' },
+    { icon: HelpCircle, label: 'Help & Support', description: 'Get help with your account' },
+    { icon: Shield, label: 'Privacy', description: 'Manage your privacy settings' },
   ];
 
   const formatDate = (dateStr: string) => {
@@ -108,154 +108,159 @@ export default function ProfilePage() {
 
   return (
     <SidebarLayout>
-      <div className="max-w-lg mx-auto">
-        <h1 className="text-xl font-bold text-brand-dark mb-6 lg:mb-8">Profile</h1>
-        
-        <div className="bg-white rounded-2xl p-6 mb-4 shadow-sm">
-          <div className="flex items-center gap-4">
-            {user.profileImageUrl ? (
-              <img
-                src={user.profileImageUrl}
-                alt={user.firstName || 'User'}
-                className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-100"
-              />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-brand-accent/10 flex items-center justify-center">
-                <User className="w-8 h-8 text-brand-accent" />
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-semibold text-brand-dark truncate">
-                {user.firstName || user.username || 'User'}
-              </h2>
-              {user.email && (
-                <p className="text-sm text-brand-muted flex items-center gap-1.5 truncate">
-                  <Mail className="w-3.5 h-3.5 flex-shrink-0" />
-                  {user.email}
-                </p>
+      <div className="min-h-screen bg-[#fbfbfc]">
+        <div className="bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] text-white">
+          <div className="max-w-lg mx-auto px-4 py-10 text-center">
+            <div className="relative inline-block mb-4">
+              {user.profileImageUrl ? (
+                <img
+                  src={user.profileImageUrl}
+                  alt={user.firstName || 'User'}
+                  className="w-24 h-24 rounded-full object-cover ring-4 ring-white/20"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center ring-4 ring-white/20">
+                  <User className="w-12 h-12 text-white" />
+                </div>
               )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-[#ee7e65] rounded-full flex items-center justify-center border-2 border-[#042c4c]">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
             </div>
+            <h1 className="text-2xl font-bold">
+              {user.firstName || user.username || 'User'}
+            </h1>
+            {user.email && (
+              <p className="text-white/70 flex items-center justify-center gap-2 mt-2">
+                <Mail className="w-4 h-4" />
+                {user.email}
+              </p>
+            )}
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-brand-dark flex items-center gap-2">
-              <FileText className="w-5 h-5 text-brand-accent" />
-              My Resume
-            </h3>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.doc,.docx,.txt"
-              onChange={handleFileUpload}
-              className="hidden"
-            />
-          </div>
-
-          {docsLoading ? (
-            <div className="flex items-center justify-center py-6">
-              <Loader2 className="w-5 h-5 animate-spin text-brand-muted" />
+        <div className="max-w-lg mx-auto px-4 -mt-6 pb-8 space-y-4">
+          <div className="bg-white rounded-2xl p-5 shadow-xl shadow-slate-200/50 border border-slate-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-[#042c4c] flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#ee7e65] to-[#e06a50] rounded-lg flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-white" />
+                </div>
+                My Resume
+              </h3>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,.txt"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
             </div>
-          ) : latestResume ? (
-            <div className="bg-gray-50 rounded-xl p-4">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-brand-accent/10 flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-5 h-5 text-brand-accent" />
+
+            {docsLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="w-5 h-5 animate-spin text-[#768c9c]" />
+              </div>
+            ) : latestResume ? (
+              <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl p-4 border border-slate-200">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-[#042c4c] truncate">{latestResume.fileName}</p>
+                    <p className="text-sm text-[#6c8194]">
+                      Uploaded {formatDate(latestResume.createdAt)}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-brand-dark truncate">{latestResume.fileName}</p>
-                  <p className="text-sm text-brand-muted">
-                    Uploaded {formatDate(latestResume.createdAt)}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Check className="w-4 h-4 text-emerald-500" />
+                <div className="flex gap-2 mt-4">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#042c4c] bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                    Replace
+                  </button>
+                  <button
+                    onClick={() => deleteMutation.mutate(latestResume.id)}
+                    disabled={deleteMutation.isPending}
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 bg-white border border-slate-200 rounded-xl hover:bg-red-50 hover:border-red-200 transition-colors disabled:opacity-50"
+                  >
+                    {deleteMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                  </button>
                 </div>
               </div>
-              <div className="flex gap-2 mt-4">
+            ) : (
+              <div className="text-center py-8">
+                <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                  <FileText className="w-7 h-7 text-[#768c9c]" />
+                </div>
+                <p className="text-[#6c8194] mb-4">
+                  No resume uploaded yet
+                </p>
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-brand-dark bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-[#ee7e65] rounded-xl hover:bg-[#e06a50] transition-colors shadow-lg shadow-[#ee7e65]/25 disabled:opacity-50"
                 >
                   {isUploading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <Upload className="w-4 h-4" />
                   )}
-                  Replace
+                  Upload Resume
                 </button>
-                <button
-                  onClick={() => deleteMutation.mutate(latestResume.id)}
-                  disabled={deleteMutation.isPending}
-                  className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-red-600 bg-white border border-gray-200 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
-                >
-                  {deleteMutation.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="w-4 h-4" />
-                  )}
-                </button>
+                <p className="text-xs text-[#768c9c] mt-3">
+                  PDF, DOC, DOCX, or TXT
+                </p>
               </div>
-            </div>
-          ) : (
-            <div className="text-center py-6">
-              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                <FileText className="w-6 h-6 text-gray-400" />
-              </div>
-              <p className="text-sm text-brand-muted mb-4">
-                No resume uploaded yet
-              </p>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-brand-accent rounded-lg hover:bg-brand-accent/90 transition-colors disabled:opacity-50"
-              >
-                {isUploading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Upload className="w-4 h-4" />
-                )}
-                Upload Resume
-              </button>
-              <p className="text-xs text-brand-muted mt-2">
-                PDF, DOC, DOCX, or TXT
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm mb-4">
-          {menuItems.map((item, index) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.label}
-                onClick={item.onClick}
-                className={`w-full flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors ${
-                  index !== menuItems.length - 1 ? 'border-b border-gray-100' : ''
-                }`}
-              >
-                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-brand-muted" />
-                </div>
-                <span className="flex-1 text-left font-medium text-brand-dark">{item.label}</span>
-                <ChevronRight className="w-5 h-5 text-gray-300" />
-              </button>
-            );
-          })}
-        </div>
-
-        <button
-          onClick={handleLogout}
-          className="w-full bg-white rounded-2xl px-5 py-4 flex items-center gap-4 hover:bg-red-50 transition-colors shadow-sm"
-        >
-          <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
-            <LogOut className="w-5 h-5 text-red-500" />
+            )}
           </div>
-          <span className="flex-1 text-left font-medium text-red-500">Sign Out</span>
-        </button>
+
+          <div className="bg-white rounded-2xl overflow-hidden shadow-xl shadow-slate-200/50 border border-slate-100">
+            {menuItems.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.label}
+                  className={`w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors group ${
+                    index !== menuItems.length - 1 ? 'border-b border-slate-100' : ''
+                  }`}
+                >
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center group-hover:from-[#042c4c]/10 group-hover:to-[#042c4c]/5 transition-colors">
+                    <Icon className="w-5 h-5 text-[#6c8194] group-hover:text-[#042c4c] transition-colors" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <span className="font-semibold text-[#042c4c] block">{item.label}</span>
+                    <span className="text-sm text-[#6c8194]">{item.description}</span>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-[#768c9c] group-hover:text-[#ee7e65] group-hover:translate-x-1 transition-all" />
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={handleLogout}
+            className="w-full bg-white rounded-2xl px-5 py-4 flex items-center gap-4 hover:bg-red-50 transition-colors shadow-xl shadow-slate-200/50 border border-slate-100 group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
+              <LogOut className="w-5 h-5 text-red-500" />
+            </div>
+            <span className="flex-1 text-left font-semibold text-red-500">Sign Out</span>
+            <ChevronRight className="w-5 h-5 text-red-300 group-hover:text-red-500 group-hover:translate-x-1 transition-all" />
+          </button>
+        </div>
       </div>
     </SidebarLayout>
   );

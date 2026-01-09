@@ -1,32 +1,30 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, ChevronRight, Sparkles, Target, Zap, MessageSquare, Users, Briefcase, Filter, Check, ChevronDown, Clock, ArrowRight, Play, X } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Search, ChevronRight, Sparkles, Target, Zap, MessageSquare, Users, Briefcase, Filter, Clock, Play, Flame, Trophy, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import SidebarLayout from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const scenarioIcons = [
-  { icon: MessageSquare, color: "text-blue-600", bg: "bg-blue-500" },
-  { icon: Target, color: "text-purple-600", bg: "bg-purple-500" },
-  { icon: Zap, color: "text-amber-600", bg: "bg-amber-500" },
-  { icon: Users, color: "text-emerald-600", bg: "bg-emerald-500" },
-  { icon: Briefcase, color: "text-rose-600", bg: "bg-rose-500" },
-  { icon: Sparkles, color: "text-indigo-600", bg: "bg-indigo-500" },
+  { icon: MessageSquare, color: "text-blue-600", bg: "bg-gradient-to-br from-blue-500 to-blue-600", glow: "shadow-blue-500/30" },
+  { icon: Target, color: "text-purple-600", bg: "bg-gradient-to-br from-purple-500 to-purple-600", glow: "shadow-purple-500/30" },
+  { icon: Zap, color: "text-amber-600", bg: "bg-gradient-to-br from-amber-500 to-amber-600", glow: "shadow-amber-500/30" },
+  { icon: Users, color: "text-emerald-600", bg: "bg-gradient-to-br from-emerald-500 to-emerald-600", glow: "shadow-emerald-500/30" },
+  { icon: Briefcase, color: "text-rose-600", bg: "bg-gradient-to-br from-rose-500 to-rose-600", glow: "shadow-rose-500/30" },
+  { icon: Sparkles, color: "text-indigo-600", bg: "bg-gradient-to-br from-indigo-500 to-indigo-600", glow: "shadow-indigo-500/30" },
 ];
 
 const getDifficultyConfig = (difficulty: string) => {
   switch (difficulty?.toUpperCase()) {
     case "BEGINNER":
-      return { label: "Beginner", color: "bg-green-100 text-green-700" };
+      return { label: "Beginner", color: "bg-emerald-100 text-emerald-700 border-emerald-200" };
     case "INTERMEDIATE":
-      return { label: "Intermediate", color: "bg-amber-100 text-amber-700" };
+      return { label: "Intermediate", color: "bg-amber-100 text-amber-700 border-amber-200" };
     case "ADVANCED":
-      return { label: "Advanced", color: "bg-red-100 text-red-700" };
+      return { label: "Advanced", color: "bg-red-100 text-red-700 border-red-200" };
     default:
-      return { label: "Standard", color: "bg-gray-100 text-gray-600" };
+      return { label: "Standard", color: "bg-slate-100 text-slate-600 border-slate-200" };
   }
 };
 
@@ -37,7 +35,6 @@ export default function PracticePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterOpen, setFilterOpen] = useState(false);
   const [searchParams] = useSearchParams();
   const skillFilter = searchParams.get("skill");
   const filterRef = useRef<HTMLDivElement>(null);
@@ -117,7 +114,6 @@ export default function PracticePage() {
 
   const handleSkillFilter = (skillId: string | null) => {
     setSelectedSkill(skillId);
-    setFilterOpen(false);
     if (skillId) {
       window.history.pushState({}, "", `/avatar/practice?skill=${skillId}`);
     } else {
@@ -132,141 +128,156 @@ export default function PracticePage() {
           <LoadingSpinner />
         </div>
       ) : (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
-          {/* Header - Compact on Mobile */}
-          <div className="space-y-4">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900" data-testid="text-page-title">
-                {selectedSkill && currentSkill ? currentSkill.name : "Practice Scenarios"}
-              </h1>
-              <p className="text-slate-500 text-sm mt-1 hidden sm:block" data-testid="text-page-subtitle">
-                Select a scenario to practice with an AI conversation partner.
+        <div className="min-h-screen bg-[#fbfbfc]">
+          <div className="bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] text-white">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-[#ee7e65] rounded-lg flex items-center justify-center">
+                      <Flame className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-[#ee7e65] text-sm font-semibold uppercase tracking-wide">Practice Lab</span>
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-bold" data-testid="text-page-title">
+                    {selectedSkill && currentSkill ? currentSkill.name : "Practice Scenarios"}
+                  </h1>
+                  <p className="text-white/70 mt-2 text-sm sm:text-base" data-testid="text-page-subtitle">
+                    Build confidence through AI-powered conversation practice
+                  </p>
+                </div>
+                <div className="flex items-center gap-6 bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-white">{scenarios.length}</p>
+                    <p className="text-white/60 text-xs">Scenarios</p>
+                  </div>
+                  <div className="w-px h-8 bg-white/20" />
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-[#ee7e65]">{skills.length}</p>
+                    <p className="text-white/60 text-xs">Skills</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 -mt-6">
+            <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-4 sm:p-6 border border-slate-100">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#768c9c]" />
+                  <Input
+                    type="text"
+                    placeholder="Search scenarios..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-12 h-12 bg-[#fbfbfc] rounded-xl border-slate-200 focus:border-[#ee7e65] focus:ring-[#ee7e65]/20 text-[#042c4c]"
+                    data-testid="input-search-scenarios"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 mt-4 overflow-x-auto pb-2 scrollbar-hide" ref={filterRef}>
+                <button
+                  onClick={() => handleSkillFilter(null)}
+                  className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+                    !selectedSkill 
+                      ? "bg-[#042c4c] text-white shadow-lg shadow-[#042c4c]/25" 
+                      : "bg-slate-100 text-[#6c8194] hover:bg-slate-200"
+                  }`}
+                >
+                  All Scenarios
+                </button>
+                {skills.map((skill) => (
+                  <button
+                    key={skill.id}
+                    onClick={() => handleSkillFilter(skill.id)}
+                    className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 whitespace-nowrap ${
+                      selectedSkill === skill.id 
+                        ? "bg-[#ee7e65] text-white shadow-lg shadow-[#ee7e65]/25" 
+                        : "bg-slate-100 text-[#6c8194] hover:bg-slate-200"
+                    }`}
+                  >
+                    {skill.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-[#6c8194] font-medium">
+                {filteredScenarios.length} scenario{filteredScenarios.length !== 1 ? 's' : ''} available
               </p>
             </div>
 
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-11 bg-white rounded-xl"
-                data-testid="input-search-scenarios"
-              />
-            </div>
-          </div>
-
-          {/* Filter Chips - Horizontal Scroll on Mobile */}
-          <div className="-mx-4 sm:mx-0">
-            <div className="flex items-center gap-2 px-4 sm:px-0 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide" ref={filterRef}>
-              <button
-                onClick={() => handleSkillFilter(null)}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  !selectedSkill 
-                    ? "bg-slate-900 text-white" 
-                    : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
-                }`}
-              >
-                All
-              </button>
-              {skills.map((skill) => (
-                <button
-                  key={skill.id}
-                  onClick={() => handleSkillFilter(skill.id)}
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
-                    selectedSkill === skill.id 
-                      ? "bg-slate-900 text-white" 
-                      : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
-                  }`}
+            {filteredScenarios.length === 0 ? (
+              <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center">
+                  <MessageSquare className="w-8 h-8 text-[#768c9c]" />
+                </div>
+                <h3 className="text-xl font-bold text-[#042c4c] mb-2">No scenarios found</h3>
+                <p className="text-[#6c8194] mb-6">Try adjusting your search or filters.</p>
+                <Button 
+                  onClick={() => { handleSkillFilter(null); setSearchQuery(""); }}
+                  className="bg-[#ee7e65] hover:bg-[#e06a50] text-white rounded-xl px-6"
                 >
-                  {skill.name}
-                </button>
-              ))}
-              <span className="flex-shrink-0 text-xs text-slate-400 pl-2">
-                {filteredScenarios.length} scenarios
-              </span>
-            </div>
-          </div>
-
-          {/* Scenarios Grid */}
-          {filteredScenarios.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
-              <div className="w-12 h-12 mx-auto mb-3 bg-slate-100 rounded-xl flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-slate-400" />
+                  Clear Filters
+                </Button>
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-1">No scenarios found</h3>
-              <p className="text-slate-500 text-sm mb-4">Try adjusting your search or filters.</p>
-              <Button variant="outline" size="sm" onClick={() => { handleSkillFilter(null); setSearchQuery(""); }}>
-                Clear Filters
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
-              {filteredScenarios.map((scenario, index) => {
-                const iconData = scenarioIcons[index % scenarioIcons.length];
-                const IconComponent = iconData.icon;
-                const difficultyConfig = getDifficultyConfig(scenario.difficulty);
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                {filteredScenarios.map((scenario, index) => {
+                  const iconData = scenarioIcons[index % scenarioIcons.length];
+                  const IconComponent = iconData.icon;
+                  const difficultyConfig = getDifficultyConfig(scenario.difficulty);
 
-                return (
-                  <Link
-                    key={scenario.id}
-                    to={`/avatar/practice/pre-session?scenarioId=${scenario.id}`}
-                    className="block"
-                  >
-                    {/* Mobile: Horizontal Card */}
-                    <div className="sm:hidden bg-white rounded-xl border border-slate-200 p-3 flex items-center gap-3 hover:border-slate-300 transition-colors">
-                      <div className={`w-10 h-10 ${iconData.bg} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                        <IconComponent className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-slate-900 text-sm truncate">
-                          {scenario.name}
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs text-slate-500">
-                          <span>{difficultyConfig.label}</span>
-                          <span>•</span>
-                          <span>5-10 min</span>
+                  return (
+                    <Link
+                      key={scenario.id}
+                      to={`/avatar/practice/pre-session?scenarioId=${scenario.id}`}
+                      className="block group"
+                    >
+                      <div className="h-full bg-white rounded-2xl border border-slate-200 p-5 hover:border-[#ee7e65]/40 hover:shadow-xl hover:shadow-[#ee7e65]/10 transition-all duration-300 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-slate-50 to-transparent rounded-bl-full opacity-50" />
+                        
+                        <div className="relative">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className={`w-12 h-12 ${iconData.bg} rounded-xl flex items-center justify-center shadow-lg ${iconData.glow}`}>
+                              <IconComponent className="w-6 h-6 text-white" />
+                            </div>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${difficultyConfig.color}`}>
+                              {difficultyConfig.label}
+                            </span>
+                          </div>
+
+                          <h3 className="font-bold text-[#042c4c] text-base mb-2 line-clamp-2 group-hover:text-[#ee7e65] transition-colors">
+                            {scenario.name}
+                          </h3>
+
+                          <p className="text-sm text-[#6c8194] line-clamp-2 mb-4">
+                            {scenario.description || "Practice this scenario with an AI avatar."}
+                          </p>
+
+                          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                            <div className="flex items-center gap-1.5 text-[#768c9c]">
+                              <Clock className="w-4 h-4" />
+                              <span className="text-xs font-medium">5-10 min</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[#ee7e65] font-semibold text-sm group-hover:gap-2.5 transition-all">
+                              <Play className="w-4 h-4" />
+                              <span>Start</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                    </div>
-
-                    {/* Desktop: Vertical Card */}
-                    <div className="hidden sm:block h-full bg-white border border-slate-200 rounded-xl p-4 hover:border-slate-300 hover:shadow-md transition-all group">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className={`w-10 h-10 ${iconData.bg} rounded-lg flex items-center justify-center`}>
-                          <IconComponent className="w-5 h-5 text-white" />
-                        </div>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${difficultyConfig.color}`}>
-                          {difficultyConfig.label}
-                        </span>
-                      </div>
-
-                      <h3 className="font-semibold text-slate-900 text-sm mb-1.5 line-clamp-2 group-hover:text-slate-700 transition-colors">
-                        {scenario.name}
-                      </h3>
-
-                      <p className="text-xs text-slate-500 line-clamp-2 mb-3">
-                        {scenario.description || "Practice this scenario with an AI avatar."}
-                      </p>
-
-                      <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                        <div className="flex items-center gap-1 text-xs text-slate-400">
-                          <Clock className="w-3 h-3" />
-                          <span>5-10 min</span>
-                        </div>
-                        <span className="text-xs font-medium text-slate-700 group-hover:underline">
-                          Start →
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </SidebarLayout>
