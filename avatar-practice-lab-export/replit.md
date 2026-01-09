@@ -44,31 +44,37 @@ avatar-practice-lab-export/
 ## UI Design System (January 2026)
 
 ### Design Philosophy
-Minimalist, professional aesthetic prioritizing simplicity and readability. Clean slate/white palette with flat solid colors.
+Vibrant, exciting, and motivating design that makes users feel energized to practice. Features colorful gradients, glassmorphism, and energetic visual elements inspired by modern SaaS platforms.
 
 ### Color Palette
-- **Primary/Text**: slate-900 (#0f172a) - Headings, primary buttons, key text
-- **Secondary Text**: slate-500 - Descriptions, helper text
-- **Borders**: slate-200 - Card borders, dividers
-- **Backgrounds**: White cards on slate-50 page backgrounds
+- **Primary Gradient**: violet-600 to indigo-600 (#7c3aed → #4f46e5) - Primary CTAs, active states
+- **Accent Gradients by Domain**:
+  - Software/Tech: violet → indigo
+  - Data/Analytics: blue → cyan
+  - Product: purple → pink
+  - Sales: orange → amber
+  - Marketing: emerald → teal
+- **Secondary Text**: gray-500, gray-600 - Descriptions, helper text
+- **Backgrounds**: Gradient from violet-50/gray-50 to white with floating blur elements
 - **Success**: emerald-500/600 - Positive indicators
 - **Warning**: amber-500/600 - Focus areas, caution states
-- **Semantic Accents**: Blue/emerald/red used sparingly for status badges and semantic cues
 
-### Gradient Policy
-- **Standard pages**: Use solid slate backgrounds only (no gradients)
-- **Immersive exercise sessions**: May use subtle `from-slate-900 via-slate-800 to-slate-900` gradients for depth in focused coding/case-study environments
-- **Legacy colors removed**: #042c4c, #ee7e65, #0a3d62, #e06a50, #768c9c, #6c8194 (no longer used)
+### Visual Effects
+- **Glassmorphism**: bg-white/80 backdrop-blur-xl with border-white/50
+- **Gradient Blobs**: Floating pink/violet/cyan blurred circles for depth
+- **Shadows**: shadow-lg shadow-violet-200 for elevated elements
+- **Hero Sections**: Dark purple/indigo gradients with subtle dot patterns
 
 ### Components
-- **Cards**: White background, slate-200 border, 8px (rounded-lg) radius
-- **Buttons**: Solid slate-900 background, white text, 8px radius, h-9 default
-- **Section Headers**: font-medium text-slate-900 text-sm in card headers
+- **Cards**: White/95 or glassmorphism, rounded-2xl, shadow-xl
+- **Buttons**: Gradient from-violet-600 to-indigo-600, white text, rounded-xl
+- **Badges**: Gradient backgrounds matching domain colors, rounded-full
 - **Spacing**: 4px grid system (gap-4 = 16px, space-y-6 = 24px)
 
 ### Sidebar
-- Dark background (#0f172a) with slate-400 icons/text
-- Active state: slate-800 background with white text
+- Gradient background from-violet-900 via-indigo-900 to-purple-900
+- Active state: bg-white/15 with shadow
+- Logo: Gradient violet-500 to indigo-600 with shadow
 - Width: 240px desktop, overlay on mobile
 
 ## Recent Changes (January 9, 2026)
