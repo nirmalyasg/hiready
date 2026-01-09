@@ -149,7 +149,7 @@ export default function ApplyPage() {
             </h2>
             <p className="text-gray-600 mb-6">{error || "This job listing doesn't exist or has been removed."}</p>
             <Link to="/">
-              <Button className="bg-slate-900 hover:bg-slate-800">
+              <Button className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700">
                 Go to Homepage
               </Button>
             </Link>
@@ -259,7 +259,7 @@ export default function ApplyPage() {
             size="lg"
             onClick={handleStartAssessment}
             disabled={isStarting}
-            className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-6 text-lg rounded-xl shadow-lg"
+            className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg"
           >
             {isStarting ? (
               <>

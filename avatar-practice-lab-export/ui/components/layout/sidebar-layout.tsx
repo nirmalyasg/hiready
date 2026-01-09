@@ -48,10 +48,10 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-violet-50/30">
       {/* Desktop Sidebar - Hidden on mobile */}
       <aside className={cn(
-        "hidden lg:block fixed top-0 left-0 h-full bg-slate-900 z-50 transition-all duration-300 ease-out",
+        "hidden lg:block fixed top-0 left-0 h-full bg-gradient-to-b from-violet-900 via-indigo-900 to-purple-900 z-50 transition-all duration-300 ease-out",
         collapsed ? "w-20" : "w-60"
       )}>
         <div className="flex flex-col h-full">
@@ -61,14 +61,14 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             collapsed && "justify-center px-0"
           )}>
             <Link to="/" className={cn("flex items-center gap-2.5", collapsed && "hidden")}>
-              <div className="w-8 h-8 bg-slate-700 rounded-lg flex items-center justify-center">
+              <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-900/30">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
-              <span className="text-white font-semibold tracking-tight">Hiready</span>
+              <span className="text-white font-bold tracking-tight">Hiready</span>
             </Link>
             {collapsed && (
               <Link to="/">
-                <div className="w-9 h-9 bg-slate-700 rounded-lg flex items-center justify-center">
+                <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-900/30">
                   <Sparkles className="w-4 h-4 text-white" />
                 </div>
               </Link>
@@ -86,10 +86,10 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                   key={item.href}
                   to={item.href}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
                     active 
-                      ? "bg-white/10 text-white" 
-                      : "text-slate-400 hover:text-white hover:bg-white/5",
+                      ? "bg-white/15 text-white shadow-lg shadow-violet-900/20" 
+                      : "text-violet-200 hover:text-white hover:bg-white/10",
                     collapsed && "justify-center px-0"
                   )}
                 >
@@ -117,8 +117,8 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
-                      <User className="w-4 h-4 text-slate-400" />
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                      <User className="w-4 h-4 text-white" />
                     </div>
                   )}
                   <div className={cn("flex-1 min-w-0", collapsed && "hidden")}>
@@ -133,7 +133,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                     window.location.href = '/';
                   }}
                   className={cn(
-                    "w-full flex items-center gap-2.5 px-3 py-2 text-slate-500 hover:text-slate-300 hover:bg-white/5 rounded-lg transition-colors text-sm",
+                    "w-full flex items-center gap-2.5 px-3 py-2 text-violet-300 hover:text-white hover:bg-white/10 rounded-xl transition-all text-sm",
                     collapsed && "justify-center px-0"
                   )}
                 >

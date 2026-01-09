@@ -110,7 +110,7 @@ export default function ReadycheckLaunchPage() {
           <p className="text-slate-600 mb-6">{error}</p>
           <Button 
             onClick={() => navigate("/readycheck")}
-            className="bg-slate-900 hover:bg-slate-800"
+            className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
           >
             Try Again
           </Button>

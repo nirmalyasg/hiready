@@ -224,7 +224,7 @@ export default function JobsPage() {
             if (!open) resetDialog();
           }}>
             <DialogTrigger asChild>
-              <Button className="h-9 px-4 gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-lg">
+              <Button className="h-9 px-4 gap-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-sm font-medium rounded-lg">
                 <Plus className="w-4 h-4" />
                 Add Job
               </Button>
@@ -381,7 +381,7 @@ export default function JobsPage() {
             <Button 
               onClick={handleParseUrl}
               disabled={isParsingUrl || !pastedUrl.trim()}
-              className="flex-1 h-9 text-sm bg-slate-900 hover:bg-slate-800"
+              className="flex-1 h-9 text-sm bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
             >
               {isParsingUrl ? "Importing..." : "Import"}
             </Button>
@@ -425,7 +425,7 @@ export default function JobsPage() {
           <Button 
             onClick={handleAddJob}
             disabled={isSubmitting || !newJob.roleTitle.trim()}
-            className="flex-1 h-9 text-sm bg-slate-900 hover:bg-slate-800"
+            className="flex-1 h-9 text-sm bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
           >
             {isSubmitting ? "Adding..." : "Add Job"}
           </Button>

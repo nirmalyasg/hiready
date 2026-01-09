@@ -297,7 +297,7 @@ export function PurchaseModal({
           <Button
             onClick={handlePurchase}
             disabled={loading}
-            className="flex-1 bg-slate-900 hover:bg-slate-800 text-white"
+            className="flex-1 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white"
           >
             {loading ? (
               <>
