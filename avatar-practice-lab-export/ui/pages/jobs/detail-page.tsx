@@ -347,7 +347,7 @@ export default function JobDetailPage() {
   if (isLoading) {
     return (
       <SidebarLayout>
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#042c4c] to-[#0a4a7a]">
+        <div className="flex items-center justify-center py-20">
           <LoadingSpinner />
         </div>
       </SidebarLayout>
@@ -357,7 +357,7 @@ export default function JobDetailPage() {
   if (!job) {
     return (
       <SidebarLayout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center justify-center py-20">
           <p className="text-slate-500">Job not found</p>
         </div>
       </SidebarLayout>
@@ -365,86 +365,55 @@ export default function JobDetailPage() {
   }
 
   const parsed = job.jdParsed;
-  const status = statusConfig[job.status] || statusConfig.saved;
 
   return (
     <SidebarLayout>
-      <div className="min-h-screen bg-slate-50">
-        <div className="bg-gradient-to-br from-[#042c4c] via-[#0a3d62] to-[#042c4c] text-white">
-          <div className="max-w-2xl mx-auto px-4 pt-4 pb-5">
-            <div className="flex items-center justify-between mb-3">
-              <button
-                onClick={() => navigate("/jobs")}
-                className="p-1.5 -ml-1.5 hover:bg-white/10 rounded-lg transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="p-1.5 hover:bg-white/10 rounded-lg transition-colors">
-                    <MoreVertical className="w-5 h-5" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleDelete} className="text-red-600">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete Job
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            
-            <h1 className="text-lg sm:text-xl font-bold leading-tight">{job.roleTitle}</h1>
-            
-            <div className="flex items-center gap-2 mt-2 text-sm text-white/70">
-              {job.companyName && (
-                <span className="flex items-center gap-1">
-                  <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
-                  <span className="truncate">{job.companyName}</span>
-                </span>
-              )}
-              {job.companyName && job.location && <span className="text-white/40">·</span>}
-              {job.location && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-                  <span className="truncate">{job.location}</span>
-                </span>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-1.5 mt-3">
-              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${status.bg} ${status.text}`}>
-                {status.label}
-              </span>
-              {job.roleFamily && (
-                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-violet-500/20 text-violet-200 capitalize">
-                  {job.roleFamily}
-                </span>
-              )}
-              {job.companyArchetype && (
-                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-white/15 text-white/90">
-                  {archetypeLabels[job.companyArchetype] || job.companyArchetype}
-                </span>
-              )}
+      <div className="max-w-3xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <button
+            onClick={() => navigate("/jobs")}
+            className="p-2 -ml-2 hover:bg-slate-100 rounded-lg transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-slate-600" />
+          </button>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-semibold text-slate-900 truncate">{job.roleTitle}</h1>
+            <div className="flex items-center gap-2 text-sm text-slate-500 mt-0.5">
+              {job.companyName && <span>{job.companyName}</span>}
+              {job.companyName && job.location && <span className="text-slate-300">·</span>}
+              {job.location && <span>{job.location}</span>}
             </div>
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                <MoreVertical className="w-5 h-5 text-slate-400" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Job
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
-        <div className="max-w-2xl mx-auto px-4 py-4 space-y-3">
+        {/* Content */}
+        <div className="space-y-4">
           {!job.jdParsed && job.jdText && (
-            <div className="bg-gradient-to-r from-[#ee7e65]/5 to-orange-50 rounded-xl border border-[#ee7e65]/20 p-4">
+            <div className="bg-white rounded-lg border border-slate-200 p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#ee7e65]/10 flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-5 h-5 text-[#ee7e65]" />
-                </div>
+                <Sparkles className="w-5 h-5 text-slate-400" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-[#042c4c] text-sm">Analyze with AI</p>
-                  <p className="text-xs text-slate-500">Get insights and recommendations</p>
+                  <p className="font-medium text-slate-900 text-sm">Analyze job description</p>
+                  <p className="text-xs text-slate-500">Extract skills and requirements</p>
                 </div>
                 <Button
                   onClick={handleParseJD}
                   size="sm"
-                  className="bg-[#ee7e65] hover:bg-[#e06a50] text-white shadow-sm"
+                  className="h-8 px-3 bg-slate-900 hover:bg-slate-800 text-white text-sm"
                   disabled={isParsing}
                 >
                   {isParsing ? "..." : "Analyze"}
@@ -453,13 +422,13 @@ export default function JobDetailPage() {
             </div>
           )}
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-              <h2 className="font-semibold text-[#042c4c] text-sm">Practice Role</h2>
+          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="font-medium text-slate-900 text-sm">Practice Role</h2>
               {job?.roleKitId && (
                 <button 
                   onClick={() => setShowRoleSelector(!showRoleSelector)}
-                  className="text-xs text-[#ee7e65] hover:text-[#e06a50] font-medium"
+                  className="text-xs text-slate-500 hover:text-slate-700 font-medium"
                 >
                   {showRoleSelector ? "Cancel" : "Change"}
                 </button>
@@ -477,8 +446,8 @@ export default function JobDetailPage() {
                         disabled={isSavingRole}
                         className={`p-2 text-left rounded-lg border text-sm transition-all ${
                           job?.roleKitId === kit.id
-                            ? "border-[#ee7e65] bg-[#ee7e65]/5 text-[#042c4c]"
-                            : "border-slate-200 hover:border-[#ee7e65]/50 hover:bg-slate-50 text-[#042c4c]"
+                            ? "border-slate-900 bg-slate-50 text-slate-900"
+                            : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-900"
                         }`}
                       >
                         <span className="font-medium block truncate">{kit.name}</span>
@@ -498,7 +467,7 @@ export default function JobDetailPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="font-medium text-[#042c4c] text-sm truncate">
+                      <p className="font-medium text-slate-900 text-sm truncate">
                         {job?.roleKitId 
                           ? roleKits.find(k => k.id === job.roleKitId)?.name || "Role Detected"
                           : "Role selection required"}
@@ -526,7 +495,7 @@ export default function JobDetailPage() {
                     <Button
                       onClick={() => setShowRoleSelector(true)}
                       size="sm"
-                      className="bg-[#ee7e65] hover:bg-[#e06a50] text-white text-xs"
+                      className="bg-slate-900 hover:bg-slate-800 text-white text-xs"
                     >
                       Select Role
                     </Button>
@@ -536,71 +505,31 @@ export default function JobDetailPage() {
             </div>
           </div>
 
-          {entitlements && (
-            <div className={`rounded-xl border p-3 ${
-              entitlements.accessType === "pro_subscription"
-                ? "bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200"
-                : entitlements.accessType === "role_pack"
-                  ? "bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200"
-                  : entitlements.accessType === "free_trial"
-                    ? "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200"
-                    : "bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200"
-            }`}>
+          {entitlements && !entitlements.canStartSession && (
+            <div className="bg-white rounded-lg border border-slate-200 p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                  entitlements.accessType === "pro_subscription"
-                    ? "bg-amber-100 text-amber-600"
-                    : entitlements.accessType === "role_pack"
-                      ? "bg-emerald-100 text-emerald-600"
-                      : entitlements.accessType === "free_trial"
-                        ? "bg-blue-100 text-blue-600"
-                        : "bg-slate-100 text-slate-600"
-                }`}>
-                  {entitlements.accessType === "pro_subscription" ? (
-                    <Crown className="w-4 h-4" />
-                  ) : entitlements.canStartSession ? (
-                    <Sparkles className="w-4 h-4" />
-                  ) : (
-                    <Lock className="w-4 h-4" />
-                  )}
+                <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
+                  <Lock className="w-4 h-4 text-slate-400" />
                 </div>
-                <div className="flex-1">
-                  <p className="font-medium text-sm text-[#042c4c]">
-                    {entitlements.accessType === "pro_subscription"
-                      ? "Pro Member"
-                      : entitlements.accessType === "role_pack"
-                        ? "Role Pack Active"
-                        : entitlements.accessType === "free_trial"
-                          ? "Free Trial"
-                          : "Unlock More Practice"}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    {entitlements.accessType === "pro_subscription"
-                      ? "Unlimited access to all roles"
-                      : entitlements.accessType === "role_pack"
-                        ? "Unlimited interviews for this role"
-                        : entitlements.accessType === "free_trial"
-                          ? "1 free interview available"
-                          : `Free trial used - upgrade to continue`}
-                  </p>
+                <div>
+                  <p className="font-medium text-sm text-slate-900">Unlock Practice</p>
+                  <p className="text-xs text-slate-500">Upgrade to continue practicing</p>
                 </div>
-                {!entitlements.canStartSession && (
-                  <Button
-                    onClick={() => setShowPurchaseModal(true)}
-                    size="sm"
-                    className="bg-[#ee7e65] hover:bg-[#e06a50] text-white text-xs"
-                  >
-                    Upgrade
-                  </Button>
-                )}
               </div>
+              <Button
+                onClick={() => setShowPurchaseModal(true)}
+                size="sm"
+                className="h-8 px-3 text-xs bg-slate-900 hover:bg-slate-800 text-white"
+              >
+                Upgrade
+              </Button>
             </div>
           )}
 
           {practiceOptions.length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
-                <h2 className="font-semibold text-[#042c4c] text-sm">Interview Stages</h2>
+            <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100">
+                <h2 className="font-medium text-slate-900 text-sm">Interview Stages</h2>
               </div>
               {companyData?.blueprintNotes && (
                 <div className="mx-3 mt-3 p-2.5 bg-amber-50 border border-amber-200/60 rounded-lg">
@@ -619,29 +548,19 @@ export default function JobDetailPage() {
                         {config.icon}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-[#042c4c] text-sm truncate">{option.label}</p>
+                        <p className="font-medium text-slate-900 text-sm truncate">{option.label}</p>
                         <p className="text-xs text-slate-500">{option.typicalDuration}</p>
                       </div>
                       <Button
                         onClick={() => handleStartPracticeOption(option)}
                         size="sm"
-                        className={`h-8 px-3 text-xs shadow-sm ${
+                        className={`h-8 px-3 text-xs ${
                           entitlements?.canStartSession
-                            ? "bg-gradient-to-r from-[#ee7e65] to-[#e06a50] hover:from-[#e06a50] hover:to-[#d55a40] text-white shadow-[#ee7e65]/20"
-                            : "bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200"
+                            ? "bg-slate-900 hover:bg-slate-800 text-white"
+                            : "bg-slate-100 hover:bg-slate-200 text-slate-600"
                         }`}
                       >
-                        {entitlements?.canStartSession ? (
-                          <>
-                            <Play className="w-3 h-3 mr-1" />
-                            Start
-                          </>
-                        ) : (
-                          <>
-                            <Lock className="w-3 h-3 mr-1" />
-                            Unlock
-                          </>
-                        )}
+                        {entitlements?.canStartSession ? "Start" : "Unlock"}
                       </Button>
                     </div>
                   );
@@ -651,15 +570,12 @@ export default function JobDetailPage() {
           )}
 
           {parsed && (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+            <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
               <button
                 onClick={() => setRequirementsExpanded(!requirementsExpanded)}
-                className="w-full px-4 py-3 flex items-center justify-between bg-slate-50/50 border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                className="w-full px-4 py-3 flex items-center justify-between border-b border-slate-100 hover:bg-slate-50 transition-colors"
               >
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#ee7e65]" />
-                  <span className="font-semibold text-[#042c4c] text-sm">AI Requirements</span>
-                </div>
+                <span className="font-medium text-slate-900 text-sm">Requirements</span>
                 {requirementsExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
               </button>
               
@@ -679,7 +595,7 @@ export default function JobDetailPage() {
                       <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1.5">Focus Areas</p>
                       <div className="flex flex-wrap gap-1.5">
                         {parsed.focusAreas.slice(0, 6).map((area, idx) => (
-                          <span key={idx} className="px-2 py-0.5 bg-[#ee7e65]/10 text-[#ee7e65] rounded-full text-xs font-medium">
+                          <span key={idx} className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-full text-xs font-medium">
                             {area}
                           </span>
                         ))}
@@ -747,7 +663,7 @@ export default function JobDetailPage() {
                       <ul className="space-y-1">
                         {parsed.interviewTopics.slice(0, 6).map((topic, idx) => (
                           <li key={idx} className="flex items-start gap-2 text-xs text-slate-600">
-                            <MessageCircle className="w-3.5 h-3.5 text-[#ee7e65] mt-0.5 flex-shrink-0" />
+                            <MessageCircle className="w-3.5 h-3.5 text-slate-400 mt-0.5 flex-shrink-0" />
                             <span className="leading-relaxed">{topic}</span>
                           </li>
                         ))}
@@ -760,26 +676,22 @@ export default function JobDetailPage() {
           )}
 
           {job.jdText && (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+            <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
               <button
                 onClick={() => setJdExpanded(!jdExpanded)}
                 className="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors"
               >
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-slate-400" />
-                  <span className="font-semibold text-[#042c4c] text-sm">Job Description</span>
-                </div>
-                <div className="flex items-center gap-2">
+                <span className="font-medium text-slate-900 text-sm">Job Description</span>
+                <div className="flex items-center gap-3">
                   {job.jobUrl && (
                     <a
                       href={job.jobUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="text-xs text-[#ee7e65] hover:underline flex items-center gap-1"
+                      className="text-xs text-slate-500 hover:text-slate-700"
                     >
-                      Original
-                      <ExternalLink className="w-3 h-3" />
+                      View original
                     </a>
                   )}
                   {jdExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -787,7 +699,7 @@ export default function JobDetailPage() {
               </button>
               {jdExpanded && (
                 <div className="px-4 pb-4 border-t border-slate-100">
-                  <pre className="whitespace-pre-wrap font-sans text-xs text-slate-600 mt-3 leading-relaxed max-h-64 overflow-y-auto">
+                  <pre className="whitespace-pre-wrap font-sans text-sm text-slate-600 mt-3 leading-relaxed max-h-64 overflow-y-auto">
                     {job.jdText}
                   </pre>
                 </div>

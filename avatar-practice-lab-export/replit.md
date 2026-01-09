@@ -41,15 +41,30 @@ avatar-practice-lab-export/
     └── schema.ts           # Drizzle ORM schema
 ```
 
-## Brand Colors (January 2026)
-- **Primary Coral**: #ee7e65 - CTAs, active states, accents
-- **Secondary Coral**: #e06a50 - Button hover states
-- **Dark Navy**: #042c4c - Sidebar, header backgrounds, dark text
-- **Navy Gradient**: #0a3d62 - Gradient secondary
-- **Gray-Blue**: #768c9c - Secondary elements, muted text
-- **Background**: #f8f9fb - Page backgrounds
-- **CTA Gradient Pattern**: from-[#ee7e65] to-[#e06a50]
-- **Dark Gradient Pattern**: from-[#042c4c] to-[#0a3d62]
+## UI Design System (January 2026)
+
+### Design Philosophy
+Minimalist, professional aesthetic prioritizing simplicity and readability. Clean slate/white palette with flat design, minimal gradients.
+
+### Color Palette
+- **Primary/Text**: slate-900 (#0f172a) - Headings, primary buttons, key text
+- **Secondary Text**: slate-500 - Descriptions, helper text
+- **Borders**: slate-200 - Card borders, dividers
+- **Backgrounds**: White cards on slate-50 page backgrounds
+- **Accent (limited use)**: #ee7e65 coral for critical actions only
+- **Success**: emerald-500/600 - Positive indicators
+- **Warning**: amber-500/600 - Focus areas, caution states
+
+### Components
+- **Cards**: White background, slate-200 border, 8px (rounded-lg) radius
+- **Buttons**: Solid slate-900 background, white text, 8px radius, h-9 default
+- **Section Headers**: font-medium text-slate-900 text-sm in card headers
+- **Spacing**: 4px grid system (gap-4 = 16px, space-y-6 = 24px)
+
+### Sidebar
+- Dark background (#0f172a) with slate-400 icons/text
+- Active state: slate-800 background with white text
+- Width: 240px desktop, overlay on mobile
 
 ## Recent Changes (January 9, 2026)
 

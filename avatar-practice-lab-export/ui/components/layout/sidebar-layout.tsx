@@ -48,35 +48,35 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb]">
+    <div className="min-h-screen bg-slate-50">
       {/* Desktop Sidebar - Hidden on mobile */}
       <aside className={cn(
-        "hidden lg:block fixed top-0 left-0 h-full bg-gradient-to-b from-[#042c4c] to-[#0a3d62] z-50 transition-all duration-300 ease-out",
-        collapsed ? "w-20" : "w-64"
+        "hidden lg:block fixed top-0 left-0 h-full bg-[#0f172a] z-50 transition-all duration-300 ease-out",
+        collapsed ? "w-20" : "w-60"
       )}>
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className={cn(
-            "h-20 flex items-center border-b border-white/10 px-5",
+            "h-16 flex items-center px-5",
             collapsed && "justify-center px-0"
           )}>
-            <Link to="/" className={cn("flex items-center gap-3", collapsed && "hidden")}>
-              <div className="w-9 h-9 bg-white/10 backdrop-blur rounded-xl flex items-center justify-center border border-white/20">
-                <Sparkles className="w-5 h-5 text-white" />
+            <Link to="/" className={cn("flex items-center gap-2.5", collapsed && "hidden")}>
+              <div className="w-8 h-8 bg-[#ee7e65] rounded-lg flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-white" />
               </div>
-              <span className="text-white font-bold text-lg">Hiready</span>
+              <span className="text-white font-semibold tracking-tight">Hiready</span>
             </Link>
             {collapsed && (
               <Link to="/">
-                <div className="w-10 h-10 bg-white/10 backdrop-blur rounded-xl flex items-center justify-center border border-white/20">
-                  <Sparkles className="w-5 h-5 text-white" />
+                <div className="w-9 h-9 bg-[#ee7e65] rounded-lg flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-white" />
                 </div>
               </Link>
             )}
           </div>
 
           {/* Nav Items */}
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
@@ -86,14 +86,14 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                   key={item.href}
                   to={item.href}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                     active 
-                      ? "bg-white text-[#042c4c] shadow-lg" 
-                      : "text-white/70 hover:text-white hover:bg-white/10",
+                      ? "bg-white/10 text-white" 
+                      : "text-slate-400 hover:text-white hover:bg-white/5",
                     collapsed && "justify-center px-0"
                   )}
                 >
-                  <Icon className={cn("w-5 h-5 flex-shrink-0", active && "text-[#ee7e65]")} />
+                  <Icon className="w-[18px] h-[18px] flex-shrink-0" />
                   <span className={cn(collapsed && "hidden")}>{item.label}</span>
                 </Link>
               );
@@ -101,31 +101,30 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
           </nav>
 
           {/* User Section */}
-          <div className="p-4 border-t border-white/10">
+          <div className="p-3 mt-auto">
             {isLoading ? (
-              <div className="h-12 bg-white/10 rounded-xl animate-pulse" />
+              <div className="h-10 bg-white/5 rounded-lg animate-pulse" />
             ) : isAuthenticated && user ? (
-              <div className={cn("space-y-3", collapsed && "space-y-2")}>
+              <div className={cn("space-y-2", collapsed && "space-y-2")}>
                 <div className={cn(
-                  "flex items-center gap-3 px-3 py-2",
+                  "flex items-center gap-2.5 px-2 py-1.5",
                   collapsed && "justify-center px-0"
                 )}>
                   {user.profileImageUrl ? (
                     <img
                       src={user.profileImageUrl}
                       alt={user.firstName || 'User'}
-                      className="w-9 h-9 rounded-full object-cover ring-2 ring-white/20"
+                      className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-9 h-9 rounded-full bg-[#ee7e65]/20 flex items-center justify-center">
-                      <User className="w-4 h-4 text-[#ee7e65]" />
+                    <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
+                      <User className="w-4 h-4 text-slate-400" />
                     </div>
                   )}
                   <div className={cn("flex-1 min-w-0", collapsed && "hidden")}>
                     <p className="text-sm font-medium text-white truncate">
                       {user.firstName || user.username || 'User'}
                     </p>
-                    <p className="text-xs text-white/50 truncate">{user.email || 'Active'}</p>
                   </div>
                 </div>
                 <button
@@ -134,7 +133,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                     window.location.href = '/';
                   }}
                   className={cn(
-                    "w-full flex items-center gap-3 px-4 py-2.5 text-white/60 hover:text-[#ee7e65] hover:bg-white/5 rounded-xl transition-colors text-sm",
+                    "w-full flex items-center gap-2.5 px-3 py-2 text-slate-500 hover:text-slate-300 hover:bg-white/5 rounded-lg transition-colors text-sm",
                     collapsed && "justify-center px-0"
                   )}
                 >
@@ -146,7 +145,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
               <Link
                 to="/login"
                 className={cn(
-                  "flex items-center justify-center gap-2 px-4 py-3 bg-[#ee7e65] text-white rounded-xl font-semibold hover:bg-[#e06a50] transition-colors",
+                  "flex items-center justify-center gap-2 px-4 py-2.5 bg-[#ee7e65] text-white rounded-lg text-sm font-medium hover:bg-[#e06a50] transition-colors",
                   collapsed && "px-3"
                 )}
               >
@@ -159,9 +158,9 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
           {/* Collapse Toggle */}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="flex items-center justify-center h-12 border-t border-white/10 text-white/50 hover:text-white hover:bg-white/5 transition-colors"
+            className="flex items-center justify-center h-10 border-t border-white/5 text-slate-500 hover:text-slate-300 transition-colors"
           >
-            <ChevronLeft className={cn("w-5 h-5 transition-transform", collapsed && "rotate-180")} />
+            <ChevronLeft className={cn("w-4 h-4 transition-transform", collapsed && "rotate-180")} />
           </button>
         </div>
       </aside>
@@ -169,8 +168,8 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       {/* Main Content */}
       <main className={cn(
         "min-h-screen transition-all duration-300",
-        collapsed ? "lg:pl-20" : "lg:pl-64",
-        "pb-20 lg:pb-0" // Bottom padding for mobile nav
+        collapsed ? "lg:pl-20" : "lg:pl-60",
+        "pb-20 lg:pb-0"
       )}>
         <div className="p-4 sm:p-6 lg:p-8">
           {children}
