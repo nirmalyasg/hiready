@@ -405,7 +405,20 @@ Respond in JSON format:
     });
 
     const result = JSON.parse(response.choices[0].message.content || "{}");
-    return (result.questions || []) as GeneratedJDQuestion[];
+    const questions = (result.questions || []) as GeneratedJDQuestion[];
+    
+    // Validate and normalize response - ensure skillsTested and difficulty are present
+    return questions.map(q => ({
+      ...q,
+      skillsTested: q.skillsTested && Array.isArray(q.skillsTested) && q.skillsTested.length > 0 
+        ? q.skillsTested 
+        : [q.assessmentDimension || q.topic || "general"],
+      difficulty: (["basic", "intermediate", "advanced"].includes(q.difficulty || "") 
+        ? q.difficulty 
+        : richContext?.complexityLevel === "basic" ? "basic" 
+          : richContext?.complexityLevel === "advanced" || richContext?.complexityLevel === "expert" ? "advanced" 
+          : "intermediate") as "basic" | "intermediate" | "advanced",
+    }));
   } catch (error) {
     console.error("Failed to generate JD-based questions:", error);
     return [];
@@ -2352,7 +2365,20 @@ Respond in JSON:
     });
 
     const result = JSON.parse(response.choices[0].message.content || "{}");
-    return (result.questions || []) as GeneratedJDQuestion[];
+    const questions = (result.questions || []) as GeneratedJDQuestion[];
+    
+    // Validate and normalize response - ensure skillsTested includes the missing skill
+    return questions.map((q, i) => ({
+      ...q,
+      skillsTested: q.skillsTested && Array.isArray(q.skillsTested) && q.skillsTested.length > 0 
+        ? q.skillsTested 
+        : [missingSkills[i] || q.topic || "general"],
+      difficulty: (["basic", "intermediate", "advanced"].includes(q.difficulty || "") 
+        ? q.difficulty 
+        : richContext.complexityLevel === "basic" ? "basic" 
+          : richContext.complexityLevel === "advanced" || richContext.complexityLevel === "expert" ? "advanced" 
+          : "intermediate") as "basic" | "intermediate" | "advanced",
+    }));
   } catch (error) {
     console.error("Failed to generate gap-filling questions:", error);
     return [];
@@ -2360,6 +2386,9 @@ Respond in JSON:
 }
 
 // Get questions with full skill coverage
+// Max 2 gap-filling rounds to prevent runaway API usage
+const MAX_GAP_FILL_ROUNDS = 2;
+
 export async function getQuestionsWithCoverage(
   context: {
     roleKitId?: number;
@@ -2392,9 +2421,12 @@ export async function getQuestionsWithCoverage(
     context.jdExtract?.mustHave || [];
   
   let coverage = buildSkillCoverageMatrix(mustHaveSkills, questions);
+  let gapFillRounds = 0;
   
-  if (coverage.missingSkills.length > 0 && coverage.coveragePercent < 80) {
-    console.log(`[Skill Coverage] Only ${coverage.coveragePercent}% coverage. Generating gap-filling questions for: ${coverage.missingSkills.join(", ")}`);
+  // Try to fill gaps with bounded retries
+  while (coverage.missingSkills.length > 0 && coverage.coveragePercent < 80 && gapFillRounds < MAX_GAP_FILL_ROUNDS) {
+    gapFillRounds++;
+    console.log(`[Skill Coverage] Round ${gapFillRounds}/${MAX_GAP_FILL_ROUNDS}: ${coverage.coveragePercent}% coverage. Generating gap-filling questions for: ${coverage.missingSkills.join(", ")}`);
     
     const gapQuestions = await generateGapFillingQuestions(
       coverage.missingSkills.slice(0, 3),
@@ -2403,19 +2435,31 @@ export async function getQuestionsWithCoverage(
       context.roleCategory
     );
     
-    if (gapQuestions.length > 0) {
-      const savedGap = await saveGeneratedQuestionsToBank(gapQuestions, {
-        roleKitId: context.roleKitId,
-        companyId: context.companyId,
-        interviewType: context.interviewType,
-        sourceJobTargetId: context.sourceJobTargetId,
-        jdSourceTopics: coverage.missingSkills,
-        richContext,
-      });
-      
-      questions.push(...savedGap);
-      coverage = buildSkillCoverageMatrix(mustHaveSkills, questions);
+    if (gapQuestions.length === 0) {
+      console.log(`[Skill Coverage] Gap-fill round ${gapFillRounds} returned no questions, stopping`);
+      break;
     }
+    
+    const savedGap = await saveGeneratedQuestionsToBank(gapQuestions, {
+      roleKitId: context.roleKitId,
+      companyId: context.companyId,
+      interviewType: context.interviewType,
+      sourceJobTargetId: context.sourceJobTargetId,
+      jdSourceTopics: coverage.missingSkills,
+      richContext,
+    });
+    
+    if (savedGap.length === 0) {
+      console.log(`[Skill Coverage] Gap-fill round ${gapFillRounds} failed to save questions, stopping`);
+      break;
+    }
+    
+    questions.push(...savedGap);
+    coverage = buildSkillCoverageMatrix(mustHaveSkills, questions);
+  }
+  
+  if (gapFillRounds >= MAX_GAP_FILL_ROUNDS && coverage.coveragePercent < 80) {
+    console.log(`[Skill Coverage] Reached max gap-fill rounds (${MAX_GAP_FILL_ROUNDS}) with ${coverage.coveragePercent}% coverage. Remaining gaps: ${coverage.missingSkills.join(", ")}`);
   }
   
   return { questions, coverage };

@@ -73,6 +73,23 @@ Interview questions now use comprehensive JD context for role-appropriate diffic
 - **Business Domain Context**: Questions framed in company's business context (e.g., "At Lexmark, how would you...")
 - **Location**: `generateQuestionsFromJDTopics()`, `extractJDRichContext()`, `researchCompanyDomain()` in `api/lib/interview-intelligence.ts`
 
+### Skill Coverage Matrix & Question Bank Enhancement
+Ensures all mustHave skills from JD get tested with appropriate questions:
+- **Database Migration 014**: Added `skills_tested` (JSONB), `difficulty_band` (text with basic/intermediate/advanced/expert), `role_context` (JSONB) to question_bank table
+- **Skill Coverage Matrix**: `buildSkillCoverageMatrix()` analyzes which required skills have questions and which are missing
+- **Gap-Filling Questions**: `generateGapFillingQuestions()` generates targeted questions for skills not yet covered
+- **Coverage-Aware Generation**: `getQuestionsWithCoverage()` ensures 80%+ skill coverage before completing plan generation
+- **Location**: `api/lib/interview-intelligence.ts`
+
+### Seniority-Calibrated Exercises & Avatar Prompts
+Coding problems, case studies, and avatar behavior now adjust to candidate seniority level:
+- **Coding Problem Complexity**: Entry→Easy (fundamentals), Mid→Medium (real-world), Senior→Hard (optimization), Staff→Expert (architectural)
+- **Case Study Complexity**: Entry→Simple (clear data), Mid→Multi-faceted (ambiguity), Senior→Complex (incomplete data), Staff→Executive (cross-functional)
+- **Company Context**: Problems framed in target company's business domain (e.g., e-commerce inventory, fintech transactions)
+- **Avatar Calibration**: `buildComplexityCalibrationSection()` provides detailed interviewer behavior rules per seniority level
+- **Knowledge Base**: Now includes company name, job title, key questions, and complexity calibration in avatar system prompt
+- **Location**: INTERVIEW_PLAN_GENERATOR_PROMPT, `buildInterviewKnowledgeBase()` in `api/routes/interview.ts`
+
 ## Recent Changes (January 8, 2026)
 
 ### JD-Specific Skill Dimension Mapping

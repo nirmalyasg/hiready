@@ -1912,6 +1912,14 @@ interviewRouter.get("/knowledge-base/:configId", requireAuth, async (req: Reques
       roleKitData = kit;
     }
     
+    let jobTargetData: { company?: string | null; roleTitle?: string | null } | null = null;
+    if (config.jobTargetId) {
+      const [job] = await db.select().from(jobTargets).where(eq(jobTargets.id, config.jobTargetId));
+      if (job) {
+        jobTargetData = { company: job.companyName, roleTitle: job.roleTitle };
+      }
+    }
+    
     const [latestPlan] = await db
       .select()
       .from(interviewPlans)
@@ -1926,6 +1934,7 @@ interviewRouter.get("/knowledge-base/:configId", requireAuth, async (req: Reques
       jdParsed,
       roleKit: roleKitData || null,
       plan: plan?.planJson,
+      jobTarget: jobTargetData,
     });
     
     res.json({ success: true, knowledgeBase });
@@ -1941,15 +1950,22 @@ function buildInterviewKnowledgeBase(data: {
   jdParsed: any;
   roleKit: RoleKit | null;
   plan: any;
+  jobTarget?: { company?: string | null; roleTitle?: string | null; } | null;
 }): string {
-  const { config, resumeParsed, jdParsed, roleKit, plan } = data;
+  const { config, resumeParsed, jdParsed, roleKit, plan, jobTarget } = data;
   
-  let kb = `You are an interviewer conducting a ${config.interviewType} interview.\n\n`;
+  const companyName = jobTarget?.company || jdParsed?.company || "the company";
+  const jobTitle = jobTarget?.roleTitle || jdParsed?.title || roleKit?.name || "the role";
+  
+  let kb = `You are a professional interviewer at ${companyName} conducting a ${config.interviewType} interview for a ${jobTitle} position.\n\n`;
   kb += `Interview Style: ${config.style}\n`;
-  kb += `Seniority Level: ${config.seniority}\n\n`;
+  kb += `Candidate Seniority Level: ${config.seniority}\n\n`;
+  
+  kb += buildComplexityCalibrationSection(config.seniority || "mid");
   
   if (roleKit) {
-    kb += `Role: ${roleKit.name}\n`;
+    kb += `\n=== ROLE CONTEXT ===\n`;
+    kb += `Position: ${jobTitle}\n`;
     kb += `Domain: ${roleKit.domain}\n`;
     if (roleKit.skillsFocus) {
       kb += `Key Skills to Assess: ${(roleKit.skillsFocus as string[]).join(", ")}\n`;
@@ -1979,7 +1995,9 @@ function buildInterviewKnowledgeBase(data: {
   if (jdParsed) {
     kb += "=== JOB REQUIREMENTS ===\n";
     if (jdParsed.title) kb += `Title: ${jdParsed.title}\n`;
-    if (jdParsed.requiredSkills) kb += `Required: ${jdParsed.requiredSkills.join(", ")}\n`;
+    if (jdParsed.company) kb += `Company: ${jdParsed.company}\n`;
+    if (jdParsed.requiredSkills) kb += `Required Skills: ${jdParsed.requiredSkills.join(", ")}\n`;
+    if (jdParsed.preferredSkills) kb += `Nice to Have: ${jdParsed.preferredSkills.join(", ")}\n`;
     if (jdParsed.responsibilities) {
       kb += "Responsibilities:\n";
       jdParsed.responsibilities.forEach((r: string) => {
@@ -2002,12 +2020,72 @@ function buildInterviewKnowledgeBase(data: {
     if (plan.focusAreas) {
       kb += `Focus Areas: ${plan.focusAreas.join(", ")}\n`;
     }
+    if (plan.keyQuestions && Array.isArray(plan.keyQuestions)) {
+      kb += `\nKey Questions to Cover:\n`;
+      plan.keyQuestions.slice(0, 5).forEach((q: string) => {
+        kb += `- ${q}\n`;
+      });
+    }
     kb += "\n";
   }
   
   kb += INTERVIEWER_BEHAVIOR_RULES;
   
   return kb;
+}
+
+function buildComplexityCalibrationSection(seniority: string): string {
+  const seniorityLower = seniority.toLowerCase();
+  
+  if (seniorityLower === "entry" || seniorityLower === "junior") {
+    return `=== COMPLEXITY CALIBRATION (JUNIOR LEVEL) ===
+This is a JUNIOR/ENTRY level interview. Calibrate your questions accordingly:
+- Ask about FUNDAMENTALS and BASICS - don't expect deep expertise
+- Give CLEAR, SPECIFIC prompts - avoid ambiguity
+- Be ENCOURAGING when they show effort, even if answers aren't perfect
+- Focus on LEARNING POTENTIAL and ATTITUDE over mastery
+- Accept TEXTBOOK answers - they may not have real-world experience yet
+- Probe for PROJECTS, COURSEWORK, or PERSONAL LEARNING
+- Don't expect system-level thinking or optimization strategies
+
+`;
+  } else if (seniorityLower === "senior") {
+    return `=== COMPLEXITY CALIBRATION (SENIOR LEVEL) ===
+This is a SENIOR level interview. Expect depth and expertise:
+- Ask about SYSTEM-LEVEL thinking and ARCHITECTURAL decisions
+- Probe for TRADE-OFF analysis and OPTIMIZATION strategies
+- Expect CONCRETE examples with MEASURABLE impact
+- Challenge with EDGE CASES and failure scenarios
+- Look for LEADERSHIP signals - mentoring, decision-making, influence
+- Ask "why" repeatedly to test depth of understanding
+- Expect them to identify problems you don't mention
+
+`;
+  } else if (seniorityLower === "staff" || seniorityLower === "principal" || seniorityLower === "director") {
+    return `=== COMPLEXITY CALIBRATION (STAFF/PRINCIPAL LEVEL) ===
+This is a STAFF/PRINCIPAL level interview. Expect exceptional depth:
+- Focus on CROSS-TEAM and CROSS-SYSTEM impact
+- Probe for ORGANIZATIONAL influence and TECHNICAL strategy
+- Expect INDUSTRY CONTEXT and awareness of external trends
+- Ask about MENTORING, CULTURE, and TECHNICAL DIRECTION
+- Look for ability to SIMPLIFY complex problems for others
+- Expect them to challenge assumptions and propose alternatives
+- Assess BUSINESS ACUMEN alongside technical depth
+
+`;
+  }
+  
+  return `=== COMPLEXITY CALIBRATION (MID LEVEL) ===
+This is a MID-LEVEL interview. Balance depth with practical experience:
+- Ask about REAL-WORLD scenarios and HOW they handled them
+- Expect PRACTICAL examples but not necessarily system-level design
+- Probe for COLLABORATION and TEAMWORK experiences
+- Look for OWNERSHIP - did they drive outcomes or just participate?
+- Test ability to handle AMBIGUITY with reasonable approaches
+- Expect awareness of TRADEOFFS even if not expert-level
+- Balance between technical depth and execution skills
+
+`;
 }
 
 // ===================================================================
@@ -2125,11 +2203,23 @@ CRITICAL CUSTOMIZATION RULES:
    - "neutral": Professional, balanced, standard interview pacing
    - "stress": Challenging, probing deeply, time pressure, pushback on answers
 
-6. JOB TARGET context:
+6. JOB TARGET & JD CONTEXT (CRITICAL for complexity calibration):
    - If jobTarget is provided, tailor ALL questions to that specific role and company
    - Reference the company name and role in warmup questions
    - Use job description requirements to create relevant scenario questions
    - Focus skills assessment on what the JD emphasizes
+   
+   SENIORITY-BASED COMPLEXITY (from seniority field):
+   - "entry"/"junior": Basic difficulty - test fundamentals, clear requirements, helpful hints
+   - "mid": Intermediate difficulty - real-world scenarios, some ambiguity, practical tradeoffs
+   - "senior": Advanced difficulty - system-level thinking, edge cases, optimization, architectural decisions
+   - "staff"/"principal": Expert difficulty - cross-system design, leadership signals, strategic thinking
+   
+   SKILL COVERAGE (from preGeneratedQuestions if provided):
+   - Use the preGeneratedQuestions as the PRIMARY source for interview questions
+   - These questions are calibrated to the JD's exact skills and seniority level
+   - Include skillsTested metadata from preGeneratedQuestions in focusAreas
+   - If skillCoverage shows missingSkills, note these as areas to probe during the interview
 
 7. CANDIDATE PROFILE:
    - If candidateProfile (resume) is provided, create specific questions about their experience
@@ -2205,12 +2295,25 @@ Generate a JSON interview plan with this structure:
    - For Frontend roles: DOM manipulation, React components
    - For Backend roles: API design, system problems
    
+   COMPLEXITY CALIBRATION FOR CODING (CRITICAL):
+   - Entry/Junior (seniority="entry"): Easy problems - single concept, clear requirements, 10-15 min solve time
+   - Mid-level (seniority="mid"): Medium problems - multiple concepts, edge cases, 15-20 min solve time
+   - Senior (seniority="senior"): Hard problems - optimization required, system thinking, 20-25 min solve time
+   - Staff/Principal: Expert problems - architectural decisions, tradeoffs, performance at scale
+   
+   COMPANY/DOMAIN CONTEXT:
+   - If jobTarget has company info, frame the problem in that company's business domain
+   - Example: For an e-commerce company, use shopping cart/inventory problems
+   - Example: For a fintech company, use transaction/payment processing problems
+   
    The codingProblem field should be:
    {
      "id": "unique-problem-id",
      "title": "Problem Title",
      "difficulty": "Easy|Medium|Hard",
      "description": "Full problem description with context. Be specific about what the function should do, inputs, and expected outputs.",
+     "skillsTested": ["skill1", "skill2"],
+     "companyContext": "How this problem relates to the target company's domain (optional)",
      "examples": [
        { "input": "example input", "output": "expected output", "explanation": "optional explanation" }
      ],
@@ -2226,19 +2329,35 @@ Generate a JSON interview plan with this structure:
    - If JD mentions "React", give a component optimization problem
    - If JD mentions "algorithms", give a classic DSA problem
    - If JD mentions "data processing", give a data transformation problem
+   - If JD mentions specific skills like "SQL", create a problem that tests SQL logic
 
    When exerciseCount > 1, populate the "codingProblems" array with multiple distinct problems:
-   - Each problem should test different skills (e.g., arrays, trees, strings, dynamic programming)
-   - Vary difficulty slightly across problems
-   - Ensure they are all relevant to the role
+   - Each problem should test different skills from the JD's mustHave list
+   - Vary difficulty slightly across problems but stay within the seniority band
+   - Ensure they are all relevant to the role and company domain
 
 6. CASE STUDIES (for case_problem_solving mode or case_study interview type):
    When interviewMode is "case_problem_solving" or interviewType is "case_study", you MUST include a case study:
+   
+   COMPLEXITY CALIBRATION FOR CASE STUDIES (CRITICAL):
+   - Entry/Junior (seniority="entry"): Simple case with clear data, single objective, structured approach expected
+   - Mid-level (seniority="mid"): Multi-faceted case, some ambiguity, requires prioritization
+   - Senior (seniority="senior"): Complex case with incomplete data, multiple stakeholders, strategic recommendations
+   - Staff/Principal: Executive-level case with organizational change, cross-functional impact, board-level decisions
+   
+   COMPANY/DOMAIN CONTEXT:
+   - If jobTarget has company info, set the case in that company's industry/domain
+   - Example: For a SaaS company, use subscription metrics and churn analysis
+   - Example: For a logistics company, use supply chain optimization
+   - Mention the actual company name if available (e.g., "You are a Product Manager at Acme Corp...")
+   
    {
      "id": "unique-case-id",
      "title": "Case Study Title",
      "category": "strategy|product|metrics|market_sizing|operations|financial",
      "difficulty": "Easy|Medium|Hard",
+     "skillsTested": ["skill1", "skill2"],
+     "companyContext": "How this case relates to the target company's domain",
      "scenario": "The full scenario description. Set up the business context clearly - company background, current situation, the challenge they face. Make it 2-3 paragraphs.",
      "prompt": "The specific question or task the candidate needs to address.",
      "timeLimit": 10,
@@ -2263,6 +2382,8 @@ Generate a JSON interview plan with this structure:
    - Operations roles: Process optimization, supply chain, capacity planning
 
    When exerciseCount > 1 for case studies, generate multiple distinct cases in a "caseStudies" array.
+   - Each case should test different skills from the JD's analysis dimensions
+   - Vary complexity within the seniority band
 
 7. PUZZLES AND BRAIN TEASERS (when includePuzzles is true):
    Include puzzles in the "puzzles" array:
