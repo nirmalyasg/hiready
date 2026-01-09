@@ -420,7 +420,7 @@ export default function ResultsPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-0 space-y-4 sm:space-y-6 pb-20 sm:pb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#042c4c]">Your Results</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Your Results</h1>
             <p className="text-sm sm:text-base text-slate-500 mt-1">
               {totalSessions} sessions, {Math.round(totalDuration / 60)} min practiced
               {activeJobs.length > 0 && ` for ${activeJobs.length} job${activeJobs.length !== 1 ? 's' : ''}`}
@@ -428,7 +428,7 @@ export default function ResultsPage() {
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
             <Link to="/interview" className="flex-1 sm:flex-none">
-              <Button className="gap-2 w-full bg-[#ee7e65] hover:bg-[#e06a50]">
+              <Button className="gap-2 w-full bg-slate-900 hover:bg-slate-800">
                 <Play className="w-4 h-4" />
                 Practice
               </Button>
@@ -440,23 +440,23 @@ export default function ResultsPage() {
         <div className="grid grid-cols-4 gap-2 sm:gap-4 lg:grid-cols-5">
           <div className="bg-white rounded-xl border border-slate-100 p-2.5 sm:p-4">
             <p className="text-[9px] sm:text-xs text-slate-500 font-medium uppercase">Sessions</p>
-            <p className="text-lg sm:text-2xl font-bold text-[#042c4c] mt-0.5">{totalSessions}</p>
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-0.5">{totalSessions}</p>
           </div>
-          <div className="bg-[#ee7e65]/10 rounded-xl border border-[#ee7e65]/20 p-2.5 sm:p-4">
-            <p className="text-[9px] sm:text-xs text-[#ee7e65] font-medium uppercase">Interviews</p>
-            <p className="text-lg sm:text-2xl font-bold text-[#ee7e65] mt-0.5">{totalInterviewSessions}</p>
+          <div className="bg-slate-100 rounded-xl border border-slate-200 p-2.5 sm:p-4">
+            <p className="text-[9px] sm:text-xs text-slate-700 font-medium uppercase">Interviews</p>
+            <p className="text-lg sm:text-2xl font-bold text-slate-700 mt-0.5">{totalInterviewSessions}</p>
           </div>
-          <div className="bg-[#042c4c]/10 rounded-xl border border-[#042c4c]/20 p-2.5 sm:p-4">
-            <p className="text-[9px] sm:text-xs text-[#042c4c] font-medium uppercase">Exercises</p>
-            <p className="text-lg sm:text-2xl font-bold text-[#042c4c] mt-0.5">{totalExerciseSessions}</p>
+          <div className="bg-slate-100 rounded-xl border border-slate-200 p-2.5 sm:p-4">
+            <p className="text-[9px] sm:text-xs text-slate-900 font-medium uppercase">Exercises</p>
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-0.5">{totalExerciseSessions}</p>
           </div>
           <div className="bg-white rounded-xl border border-slate-100 p-2.5 sm:p-4">
             <p className="text-[9px] sm:text-xs text-slate-500 font-medium uppercase">Time</p>
-            <p className="text-lg sm:text-2xl font-bold text-[#042c4c] mt-0.5">{Math.round(totalDuration / 60)}m</p>
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-0.5">{Math.round(totalDuration / 60)}m</p>
           </div>
           <div className="hidden lg:block bg-white rounded-xl border border-slate-100 p-2.5 sm:p-4">
             <p className="text-[9px] sm:text-xs text-slate-500 font-medium uppercase">Practice</p>
-            <p className="text-lg sm:text-2xl font-bold text-[#042c4c] mt-0.5">{totalConversationSessions}</p>
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-0.5">{totalConversationSessions}</p>
           </div>
         </div>
 
@@ -468,7 +468,7 @@ export default function ResultsPage() {
               onClick={() => setViewMode("sessions")}
               className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 viewMode === "sessions" 
-                  ? "bg-white text-[#042c4c] shadow-sm" 
+                  ? "bg-white text-slate-900 shadow-sm" 
                   : "text-slate-500 hover:text-slate-700"
               }`}
             >
@@ -478,7 +478,7 @@ export default function ResultsPage() {
               onClick={() => setViewMode("skills")}
               className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 viewMode === "skills" 
-                  ? "bg-white text-[#042c4c] shadow-sm" 
+                  ? "bg-white text-slate-900 shadow-sm" 
                   : "text-slate-500 hover:text-slate-700"
               }`}
             >
@@ -500,7 +500,7 @@ export default function ResultsPage() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-[#042c4c] min-w-[100px]"
+              className="px-3 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 min-w-[100px]"
             >
               <option value="all">All</option>
               <option value="interviews">Interviews</option>
@@ -527,10 +527,10 @@ export default function ResultsPage() {
                 return (
                   <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
                     <BarChart3 className="w-10 h-10 mx-auto text-slate-400 mb-3" />
-                    <h3 className="text-lg font-semibold text-[#042c4c] mb-2">No Interview Analysis Yet</h3>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">No Interview Analysis Yet</h3>
                     <p className="text-slate-500 text-sm mb-4">Complete interview practice sessions to see your performance across dimensions</p>
                     <Link to="/interview">
-                      <Button className="bg-[#ee7e65] hover:bg-[#e06a50]">Start Interview Practice</Button>
+                      <Button className="bg-slate-900 hover:bg-slate-800">Start Interview Practice</Button>
                     </Link>
                   </div>
                 );
@@ -595,7 +595,7 @@ export default function ResultsPage() {
               
               return (
                 <>
-                  <div className="bg-[#042c4c] rounded-2xl p-5">
+                  <div className="bg-slate-900 rounded-2xl p-5">
                     <div className="grid grid-cols-3 gap-4 text-center">
                       <div>
                         <p className="text-2xl sm:text-3xl font-bold text-white">{interviewsWithAnalysis.length}</p>
@@ -618,12 +618,12 @@ export default function ResultsPage() {
                     <div className="bg-white rounded-xl border border-slate-200 p-4">
                       <div className="flex items-center gap-2 mb-3">
                         <Trophy className="w-4 h-4 text-emerald-600" />
-                        <h3 className="font-semibold text-[#042c4c]">Strongest Areas</h3>
+                        <h3 className="font-semibold text-slate-900">Strongest Areas</h3>
                       </div>
                       <div className="space-y-2">
                         {strongest.map((dim) => (
                           <div key={dim.name} className="flex items-center justify-between p-2 bg-emerald-50 rounded-lg">
-                            <span className="text-sm text-[#042c4c] truncate">{dim.name}</span>
+                            <span className="text-sm text-slate-900 truncate">{dim.name}</span>
                             <span className="text-sm font-bold text-emerald-600">{dim.avgScore.toFixed(1)}/5</span>
                           </div>
                         ))}
@@ -632,14 +632,14 @@ export default function ResultsPage() {
                     
                     <div className="bg-white rounded-xl border border-slate-200 p-4">
                       <div className="flex items-center gap-2 mb-3">
-                        <AlertTriangle className="w-4 h-4 text-[#ee7e65]" />
-                        <h3 className="font-semibold text-[#042c4c]">Focus Areas</h3>
+                        <AlertTriangle className="w-4 h-4 text-slate-700" />
+                        <h3 className="font-semibold text-slate-900">Focus Areas</h3>
                       </div>
                       <div className="space-y-2">
                         {needsWork.map((dim) => (
-                          <div key={dim.name} className="flex items-center justify-between p-2 bg-[#ee7e65]/10 rounded-lg">
-                            <span className="text-sm text-[#042c4c] truncate">{dim.name}</span>
-                            <span className="text-sm font-bold text-[#ee7e65]">{dim.avgScore.toFixed(1)}/5</span>
+                          <div key={dim.name} className="flex items-center justify-between p-2 bg-slate-900/10 rounded-lg">
+                            <span className="text-sm text-slate-900 truncate">{dim.name}</span>
+                            <span className="text-sm font-bold text-slate-700">{dim.avgScore.toFixed(1)}/5</span>
                           </div>
                         ))}
                       </div>
@@ -647,17 +647,17 @@ export default function ResultsPage() {
                   </div>
                   
                   <div className="bg-white rounded-xl border border-slate-200 p-4">
-                    <h3 className="font-semibold text-[#042c4c] mb-4">All Dimensions</h3>
+                    <h3 className="font-semibold text-slate-900 mb-4">All Dimensions</h3>
                     <div className="space-y-3">
                       {dimensionList.map((dim) => {
                         const percentage = (dim.avgScore / 5) * 100;
                         return (
                           <div key={dim.name}>
                             <div className="flex items-center justify-between mb-1">
-                              <span className="text-sm text-[#042c4c]">{dim.name}</span>
+                              <span className="text-sm text-slate-900">{dim.name}</span>
                               <span className={`text-sm font-semibold ${
                                 dim.avgScore >= 4 ? 'text-emerald-600' : 
-                                dim.avgScore >= 3 ? 'text-[#042c4c]' : 'text-[#ee7e65]'
+                                dim.avgScore >= 3 ? 'text-slate-900' : 'text-slate-700'
                               }`}>
                                 {dim.avgScore.toFixed(1)}/5
                               </span>
@@ -666,7 +666,7 @@ export default function ResultsPage() {
                               <div 
                                 className={`h-full rounded-full transition-all ${
                                   dim.avgScore >= 4 ? 'bg-emerald-500' : 
-                                  dim.avgScore >= 3 ? 'bg-[#042c4c]' : 'bg-[#ee7e65]'
+                                  dim.avgScore >= 3 ? 'bg-slate-900' : 'bg-slate-900'
                                 }`}
                                 style={{ width: `${percentage}%` }}
                               />
@@ -680,17 +680,17 @@ export default function ResultsPage() {
                   
                   {roleList.length > 1 && (
                     <div className="bg-white rounded-xl border border-slate-200 p-4">
-                      <h3 className="font-semibold text-[#042c4c] mb-3">Performance by Role</h3>
+                      <h3 className="font-semibold text-slate-900 mb-3">Performance by Role</h3>
                       <div className="space-y-2">
                         {roleList.map((role) => (
                           <div key={role.name} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                             <div>
-                              <p className="text-sm font-medium text-[#042c4c]">{role.name}</p>
+                              <p className="text-sm font-medium text-slate-900">{role.name}</p>
                               <p className="text-xs text-slate-500">{role.sessions} session{role.sessions !== 1 ? 's' : ''}</p>
                             </div>
                             <span className={`text-lg font-bold ${
                               role.avgScore >= 4 ? 'text-emerald-600' : 
-                              role.avgScore >= 3 ? 'text-[#042c4c]' : 'text-[#ee7e65]'
+                              role.avgScore >= 3 ? 'text-slate-900' : 'text-slate-700'
                             }`}>
                               {role.avgScore.toFixed(1)}
                             </span>
@@ -734,7 +734,7 @@ export default function ResultsPage() {
                                   <Eye className="w-5 h-5 text-[#768c9c]" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <h3 className="font-medium text-[#042c4c] text-sm sm:text-base truncate">
+                                  <h3 className="font-medium text-slate-900 text-sm sm:text-base truncate">
                                     {pSession.presentation.topic || pSession.presentation.fileName}
                                   </h3>
                                   <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -769,13 +769,13 @@ export default function ResultsPage() {
                             to={`/interview/results?sessionId=${iSession.id}`}
                             className="block"
                           >
-                            <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 hover:border-[#ee7e65]/40 transition-colors">
+                            <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 hover:border-slate-300 transition-colors">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-[#ee7e65]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                                  <UserCheck className="w-5 h-5 text-[#ee7e65]" />
+                                <div className="w-10 h-10 bg-slate-900/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                  <UserCheck className="w-5 h-5 text-slate-700" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <h3 className="font-medium text-[#042c4c] text-sm sm:text-base truncate">
+                                  <h3 className="font-medium text-slate-900 text-sm sm:text-base truncate">
                                     {displayTitle}
                                   </h3>
                                   <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -820,9 +820,9 @@ export default function ResultsPage() {
                           : `/exercise-mode/case-study/results?sessionId=${eSession.id}`;
                         const typeLabel = eSession.exerciseType === 'coding_lab' ? 'Coding Lab' : 'Case Study';
                         const TypeIcon = eSession.exerciseType === 'coding_lab' ? Code : Briefcase;
-                        const typeBgColor = eSession.exerciseType === 'coding_lab' ? 'bg-[#042c4c]/10' : 'bg-emerald-100';
-                        const typeIconColor = eSession.exerciseType === 'coding_lab' ? 'text-[#042c4c]' : 'text-emerald-600';
-                        const typeBorderColor = eSession.exerciseType === 'coding_lab' ? 'hover:border-[#042c4c]/30' : 'hover:border-emerald-200';
+                        const typeBgColor = eSession.exerciseType === 'coding_lab' ? 'bg-slate-900/10' : 'bg-emerald-100';
+                        const typeIconColor = eSession.exerciseType === 'coding_lab' ? 'text-slate-900' : 'text-emerald-600';
+                        const typeBorderColor = eSession.exerciseType === 'coding_lab' ? 'hover:border-slate-300' : 'hover:border-emerald-200';
                         
                         return (
                           <Link
@@ -836,7 +836,7 @@ export default function ResultsPage() {
                                   <TypeIcon className={`w-5 h-5 ${typeIconColor}`} />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <h3 className="font-medium text-[#042c4c] text-sm sm:text-base truncate">
+                                  <h3 className="font-medium text-slate-900 text-sm sm:text-base truncate">
                                     {eSession.exerciseName || eSession.exerciseData?.name || typeLabel}
                                   </h3>
                                   <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -890,7 +890,7 @@ export default function ResultsPage() {
                                   <MessageCircle className="w-5 h-5 text-slate-500" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <h3 className="font-medium text-[#042c4c] text-sm sm:text-base truncate">
+                                  <h3 className="font-medium text-slate-900 text-sm sm:text-base truncate">
                                     {cSession.scenario_name || "Practice Session"}
                                   </h3>
                                   <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -920,7 +920,7 @@ export default function ResultsPage() {
             {allSessions.length === 0 && (
               <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
                 <Search className="w-10 h-10 mx-auto text-slate-400 mb-3" />
-                <h3 className="text-lg font-semibold text-[#042c4c] mb-2">No Sessions Found</h3>
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">No Sessions Found</h3>
                 <p className="text-slate-500 text-sm">Try adjusting your search or filters</p>
               </div>
             )}
@@ -929,7 +929,7 @@ export default function ResultsPage() {
 
         {/* Next Recommended Exercise CTA */}
         {activeJobs.length > 0 && (
-          <div className="mt-6 bg-gradient-to-r from-[#042c4c] to-[#0a4a7a] rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
+          <div className="mt-6 bg-slate-900 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
               <div>
                 <h3 className="text-base sm:text-lg font-bold mb-0.5">Continue practicing?</h3>
@@ -939,7 +939,7 @@ export default function ResultsPage() {
                 </p>
               </div>
               <Link to={`/jobs/${(activeJobs[0] as { id: string }).id}`} className="sm:flex-shrink-0">
-                <Button className="bg-[#ee7e65] hover:bg-[#e06a50] text-white gap-2 w-full sm:w-auto">
+                <Button className="bg-slate-900 hover:bg-slate-800 text-white gap-2 w-full sm:w-auto">
                   <Play className="w-4 h-4" />
                   Practice
                 </Button>

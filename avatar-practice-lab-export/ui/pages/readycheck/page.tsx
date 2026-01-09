@@ -79,19 +79,14 @@ export default function ReadycheckPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#042c4c] via-[#0a3d62] to-[#042c4c] flex flex-col relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#ee7e65]/20 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#768c9c]/20 rounded-full blur-3xl" />
-      
-      {/* Header */}
-      <header className="relative z-10 p-4 sm:p-6">
+    <div className="min-h-screen bg-slate-900 flex flex-col">
+      <header className="p-4 sm:p-6">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-white/10 backdrop-blur rounded-lg flex items-center justify-center border border-white/20">
+            <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-white text-lg">Hiready</span>
+            <span className="font-semibold text-white text-lg">Hiready</span>
           </Link>
           {isLoggedIn && (
             <Link to="/avatar/dashboard">
@@ -103,13 +98,11 @@ export default function ReadycheckPage() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-8">
+      <main className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-xl">
-          {/* Title */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur text-white/90 px-4 py-1.5 rounded-full text-sm font-medium mb-4 border border-white/10">
-              <Zap className="w-3.5 h-3.5 text-[#ee7e65]" />
+            <div className="inline-flex items-center gap-2 bg-white/10 text-white/90 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
+              <Zap className="w-3.5 h-3.5" />
               Free AI Interview Practice
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
@@ -120,8 +113,7 @@ export default function ReadycheckPage() {
             </p>
           </div>
 
-          {/* Input Card */}
-          <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 border border-white/20">
+          <div className="bg-white rounded-lg p-6 sm:p-8 border border-slate-200">
             <div className="relative">
               <textarea
                 value={inputValue}
@@ -130,16 +122,15 @@ export default function ReadycheckPage() {
                   setError("");
                 }}
                 placeholder="Paste job description or LinkedIn job URL here..."
-                className="w-full h-40 sm:h-48 p-4 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#ee7e65] focus:border-transparent text-gray-800 placeholder:text-gray-400"
+                className="w-full h-40 sm:h-48 p-4 border border-slate-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-slate-900/20 focus:border-slate-900 text-slate-800 placeholder:text-slate-400 text-sm"
               />
               
-              {/* Input type indicator */}
               {inputValue.trim() && (
-                <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
                   {inputType === "linkedin" ? (
                     <>
-                      <LinkIcon className="w-3 h-3 text-[#ee7e65]" />
-                      <span className="text-[#ee7e65]">LinkedIn URL detected</span>
+                      <LinkIcon className="w-3 h-3 text-slate-700" />
+                      <span className="text-slate-700">LinkedIn URL detected</span>
                     </>
                   ) : (
                     <>
@@ -158,7 +149,7 @@ export default function ReadycheckPage() {
             <Button
               onClick={handleStart}
               disabled={isProcessing}
-              className="w-full mt-4 h-12 bg-gradient-to-r from-[#ee7e65] to-[#e06a50] hover:from-[#e06a50] hover:to-[#d55a40] text-white text-base font-medium shadow-lg shadow-[#ee7e65]/25"
+              className="w-full mt-4 h-12 bg-slate-900 hover:bg-slate-800 text-white text-base font-medium"
             >
               {isProcessing ? (
                 <>
@@ -173,25 +164,23 @@ export default function ReadycheckPage() {
               )}
             </Button>
 
-            <p className="text-center text-sm text-gray-500 mt-4">
+            <p className="text-center text-sm text-slate-500 mt-4">
               <CheckCircle className="w-4 h-4 inline mr-1 text-emerald-500" />
               Free • No credit card required
             </p>
           </div>
 
-          {/* Benefits */}
           <div className="mt-8 flex flex-wrap justify-center gap-4 sm:gap-6">
             {benefits.map((b, i) => (
               <div key={i} className="flex items-center gap-2 text-white/70 text-sm">
                 <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center">
-                  <b.icon className="w-3.5 h-3.5 text-[#ee7e65]" />
+                  <b.icon className="w-3.5 h-3.5 text-white" />
                 </div>
                 <span>{b.text}</span>
               </div>
             ))}
           </div>
 
-          {/* How it works link */}
           <div className="text-center mt-8">
             <Link 
               to="/#how-it-works" 
@@ -203,8 +192,7 @@ export default function ReadycheckPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 p-4 text-center text-white/30 text-sm">
+      <footer className="p-4 text-center text-white/30 text-sm">
         © {new Date().getFullYear()} Hiready
       </footer>
     </div>

@@ -136,7 +136,7 @@ export default function PracticePage() {
           {/* Header - Compact on Mobile */}
           <div className="space-y-4">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-[#042c4c]" data-testid="text-page-title">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900" data-testid="text-page-title">
                 {selectedSkill && currentSkill ? currentSkill.name : "Practice Scenarios"}
               </h1>
               <p className="text-slate-500 text-sm mt-1 hidden sm:block" data-testid="text-page-subtitle">
@@ -165,7 +165,7 @@ export default function PracticePage() {
                 onClick={() => handleSkillFilter(null)}
                 className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   !selectedSkill 
-                    ? "bg-[#042c4c] text-white" 
+                    ? "bg-slate-900 text-white" 
                     : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
                 }`}
               >
@@ -177,7 +177,7 @@ export default function PracticePage() {
                   onClick={() => handleSkillFilter(skill.id)}
                   className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
                     selectedSkill === skill.id 
-                      ? "bg-[#042c4c] text-white" 
+                      ? "bg-slate-900 text-white" 
                       : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
                   }`}
                 >
@@ -196,7 +196,7 @@ export default function PracticePage() {
               <div className="w-12 h-12 mx-auto mb-3 bg-slate-100 rounded-xl flex items-center justify-center">
                 <MessageSquare className="w-6 h-6 text-slate-400" />
               </div>
-              <h3 className="text-lg font-semibold text-[#042c4c] mb-1">No scenarios found</h3>
+              <h3 className="text-lg font-semibold text-slate-900 mb-1">No scenarios found</h3>
               <p className="text-slate-500 text-sm mb-4">Try adjusting your search or filters.</p>
               <Button variant="outline" size="sm" onClick={() => { handleSkillFilter(null); setSearchQuery(""); }}>
                 Clear Filters
@@ -216,12 +216,12 @@ export default function PracticePage() {
                     className="block"
                   >
                     {/* Mobile: Horizontal Card */}
-                    <div className="sm:hidden bg-white rounded-xl border border-slate-200 p-3 flex items-center gap-3 hover:border-[#ee7e65]/30 transition-colors">
+                    <div className="sm:hidden bg-white rounded-xl border border-slate-200 p-3 flex items-center gap-3 hover:border-slate-300 transition-colors">
                       <div className={`w-10 h-10 ${iconData.bg} rounded-lg flex items-center justify-center flex-shrink-0`}>
                         <IconComponent className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-[#042c4c] text-sm truncate">
+                        <h3 className="font-medium text-slate-900 text-sm truncate">
                           {scenario.name}
                         </h3>
                         <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -234,7 +234,7 @@ export default function PracticePage() {
                     </div>
 
                     {/* Desktop: Vertical Card */}
-                    <div className="hidden sm:block h-full bg-white border border-slate-200 rounded-xl p-4 hover:border-[#ee7e65]/40 hover:shadow-md transition-all group">
+                    <div className="hidden sm:block h-full bg-white border border-slate-200 rounded-xl p-4 hover:border-slate-300 hover:shadow-md transition-all group">
                       <div className="flex items-start justify-between mb-3">
                         <div className={`w-10 h-10 ${iconData.bg} rounded-lg flex items-center justify-center`}>
                           <IconComponent className="w-5 h-5 text-white" />
@@ -244,7 +244,7 @@ export default function PracticePage() {
                         </span>
                       </div>
 
-                      <h3 className="font-semibold text-[#042c4c] text-sm mb-1.5 line-clamp-2 group-hover:text-[#ee7e65] transition-colors">
+                      <h3 className="font-semibold text-slate-900 text-sm mb-1.5 line-clamp-2 group-hover:text-slate-700 transition-colors">
                         {scenario.name}
                       </h3>
 
@@ -257,7 +257,7 @@ export default function PracticePage() {
                           <Clock className="w-3 h-3" />
                           <span>5-10 min</span>
                         </div>
-                        <span className="text-xs font-medium text-[#ee7e65] group-hover:underline">
+                        <span className="text-xs font-medium text-slate-700 group-hover:underline">
                           Start →
                         </span>
                       </div>

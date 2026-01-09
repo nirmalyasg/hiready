@@ -101,16 +101,16 @@ export default function ReadycheckLaunchPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg p-8 max-w-md w-full text-center border border-slate-200">
           <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="w-8 h-8 text-red-500" />
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Oops!</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <h2 className="text-xl font-semibold text-slate-900 mb-2">Oops!</h2>
+          <p className="text-slate-600 mb-6">{error}</p>
           <Button 
             onClick={() => navigate("/readycheck")}
-            className="bg-[#ee7e65] hover:bg-[#d96a52]"
+            className="bg-slate-900 hover:bg-slate-800"
           >
             Try Again
           </Button>
@@ -120,19 +120,14 @@ export default function ReadycheckLaunchPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
       <div className="text-center">
         <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-8">
-          <Target className="w-5 h-5 text-[#ee7e65]" />
-          <span className="text-white font-semibold">Hiready</span>
+          <Target className="w-5 h-5 text-white" />
+          <span className="text-white font-medium">Hiready</span>
         </div>
-        
-        <div className="mb-8">
-          <LoadingSpinner className="w-12 h-12 text-[#ee7e65] mx-auto" />
-        </div>
-        
-        <h2 className="text-xl font-semibold text-white mb-2">{status}</h2>
-        <p className="text-white/60">This will only take a moment</p>
+        <LoadingSpinner size="lg" />
+        <p className="text-white/70 mt-6 animate-pulse">{status}</p>
       </div>
     </div>
   );

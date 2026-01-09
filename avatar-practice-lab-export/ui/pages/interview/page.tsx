@@ -51,19 +51,19 @@ const domainIcons: Record<string, any> = {
 };
 
 const domainColors: Record<string, string> = {
-  software: "bg-[#042c4c]",
-  data: "bg-[#768c9c]",
-  product: "bg-[#ee7e65]",
-  design: "bg-[#6c8194]",
-  sales: "bg-[#042c4c]",
-  marketing: "bg-[#ee7e65]",
-  customer_success: "bg-[#768c9c]",
+  software: "bg-slate-700",
+  data: "bg-slate-600",
+  product: "bg-slate-800",
+  design: "bg-slate-500",
+  sales: "bg-slate-700",
+  marketing: "bg-slate-600",
+  customer_success: "bg-slate-500",
   operations: "bg-slate-500",
-  consulting: "bg-[#042c4c]",
-  finance: "bg-[#6c8194]",
-  hr: "bg-[#ee7e65]",
-  recruiting: "bg-[#768c9c]",
-  engineering_management: "bg-[#042c4c]",
+  consulting: "bg-slate-700",
+  finance: "bg-slate-600",
+  hr: "bg-slate-600",
+  recruiting: "bg-slate-500",
+  engineering_management: "bg-slate-700",
 };
 
 const interviewModeOptions = [
@@ -72,7 +72,7 @@ const interviewModeOptions = [
     label: "Coding & Technical Tasks", 
     description: "Solve, explain, debug, or modify technical problems",
     icon: Code,
-    color: "bg-[#042c4c]",
+    color: "bg-slate-800",
     interviewMode: "coding_technical",
     duration: "15 min",
     includes: ["Coding", "Debugging", "Code Review", "SQL", "ML Basics"],
@@ -83,7 +83,7 @@ const interviewModeOptions = [
     label: "Case & Problem Solving", 
     description: "Structured thinking for ambiguous problems",
     icon: Briefcase,
-    color: "bg-[#ee7e65]",
+    color: "bg-slate-700",
     interviewMode: "case_problem_solving",
     duration: "15 min",
     includes: ["Business Cases", "Product Cases", "Analytics Cases", "Strategy"],
@@ -94,7 +94,7 @@ const interviewModeOptions = [
     label: "Behavioral and Leadership", 
     description: "Past behavior, judgment, ownership and leadership",
     icon: MessageSquare,
-    color: "bg-[#768c9c]",
+    color: "bg-slate-600",
     interviewMode: "behavioral",
     duration: "15 min",
     includes: ["STAR Stories", "Conflict Handling", "Leadership", "Failure Stories"],
@@ -105,7 +105,7 @@ const interviewModeOptions = [
     label: "HR Interview", 
     description: "Role fit, motivation, culture and career alignment",
     icon: Users,
-    color: "bg-[#6c8194]",
+    color: "bg-slate-500",
     interviewMode: "hiring_manager",
     duration: "15 min",
     includes: ["Why This Role", "Culture Fit", "Career Goals", "Role Expectations"],
@@ -118,9 +118,9 @@ const getLevelConfig = (level: string) => {
     case "entry":
       return { label: "Entry", color: "bg-emerald-100 text-emerald-700" };
     case "mid":
-      return { label: "Mid-Level", color: "bg-[#ee7e65]/10 text-[#ee7e65]" };
+      return { label: "Mid-Level", color: "bg-slate-100 text-slate-700" };
     case "senior":
-      return { label: "Senior", color: "bg-[#042c4c]/10 text-[#042c4c]" };
+      return { label: "Senior", color: "bg-slate-200 text-slate-800" };
     default:
       return { label: level, color: "bg-slate-100 text-slate-600" };
   }
@@ -403,7 +403,7 @@ export default function InterviewPracticePage() {
     <SidebarLayout>
       <div className="max-w-5xl mx-auto px-4 sm:px-0 space-y-6 sm:space-y-8 pb-20 sm:pb-12">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#042c4c] mb-1">Interview Practice</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1">Interview Practice</h1>
           <p className="text-sm sm:text-base text-slate-500">AI-powered practice sessions to ace your interviews</p>
         </div>
 
@@ -435,25 +435,25 @@ export default function InterviewPracticePage() {
             {/* Practice by Role */}
             <button
               onClick={() => setSelectedPath("role")}
-              className="w-full group text-left bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:border-[#ee7e65] hover:shadow-lg transition-all"
+              className="w-full group text-left bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:border-slate-400 hover:shadow-lg transition-all"
             >
               <div className="flex sm:flex-col items-center sm:items-start gap-4 sm:gap-0">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center sm:mb-4 flex-shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center sm:mb-4 flex-shrink-0">
                   <Briefcase className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-base sm:text-lg font-bold text-[#042c4c] mb-0.5 sm:mb-2 group-hover:text-[#ee7e65] transition-colors">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-0.5 sm:mb-2 group-hover:text-slate-700 transition-colors">
                     Practice by Role
                   </h2>
                   <p className="text-slate-500 text-sm line-clamp-2 sm:line-clamp-none sm:mb-4">
                     {roleKits.length}+ role kits: Engineer, PM, Analyst...
                   </p>
-                  <div className="hidden sm:flex items-center gap-2 text-[#ee7e65] font-medium text-sm">
+                  <div className="hidden sm:flex items-center gap-2 text-slate-700 font-medium text-sm">
                     <span>Browse roles</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#ee7e65] sm:hidden" />
+                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-700 sm:hidden" />
               </div>
             </button>
 
@@ -467,7 +467,7 @@ export default function InterviewPracticePage() {
                   <Target className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-base sm:text-lg font-bold text-[#042c4c] mb-0.5 sm:mb-2 group-hover:text-purple-600 transition-colors">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-0.5 sm:mb-2 group-hover:text-purple-600 transition-colors">
                     Practice by Type
                   </h2>
                   <p className="text-slate-500 text-sm line-clamp-2 sm:line-clamp-none sm:mb-4">
@@ -492,7 +492,7 @@ export default function InterviewPracticePage() {
                   <Target className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-base sm:text-lg font-bold text-[#042c4c] mb-0.5 sm:mb-2 group-hover:text-emerald-600 transition-colors">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-0.5 sm:mb-2 group-hover:text-emerald-600 transition-colors">
                     Custom Interview
                   </h2>
                   <p className="text-slate-500 text-sm line-clamp-2 sm:line-clamp-none sm:mb-4">
@@ -531,7 +531,7 @@ export default function InterviewPracticePage() {
                   resetForm(); 
                 }
               }}
-              className="flex items-center gap-2 text-sm text-slate-500 hover:text-[#042c4c] mb-4 transition-colors"
+              className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 mb-4 transition-colors"
             >
               <ChevronRight className="w-4 h-4 rotate-180" />
               {customStep === "round" ? "Back to job details" : "Back to options"}
@@ -542,7 +542,7 @@ export default function InterviewPracticePage() {
                 <Target className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-[#042c4c]">Custom Interview</h2>
+                <h2 className="text-xl font-bold text-slate-900">Custom Interview</h2>
                 <p className="text-sm text-slate-500">
                   {customStep === "details" ? "Step 1: Enter job details" : "Step 2: Select interview round"}
                 </p>
@@ -558,7 +558,7 @@ export default function InterviewPracticePage() {
                       <Link2 className="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="font-medium text-[#042c4c]">Import from URL</p>
+                      <p className="font-medium text-slate-900">Import from URL</p>
                       <p className="text-xs text-slate-500">Paste a job link from LinkedIn, Indeed, Naukri, etc.</p>
                     </div>
                   </div>
@@ -619,7 +619,7 @@ export default function InterviewPracticePage() {
                 <div className="bg-white rounded-2xl border border-slate-200 p-5">
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-[#042c4c] mb-2">Job Title *</label>
+                      <label className="block text-sm font-medium text-slate-900 mb-2">Job Title *</label>
                       <Input
                         placeholder="e.g., Product Manager, Software Engineer"
                         value={title}
@@ -628,7 +628,7 @@ export default function InterviewPracticePage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#042c4c] mb-2">Company</label>
+                      <label className="block text-sm font-medium text-slate-900 mb-2">Company</label>
                       <Input
                         placeholder="e.g., Google, Amazon, Microsoft"
                         value={company}
@@ -637,7 +637,7 @@ export default function InterviewPracticePage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#042c4c] mb-2">Job Description (Optional)</label>
+                      <label className="block text-sm font-medium text-slate-900 mb-2">Job Description (Optional)</label>
                       <Textarea
                         placeholder="Paste the job description here for more tailored questions..."
                         value={pasteText}
@@ -660,10 +660,10 @@ export default function InterviewPracticePage() {
                 {savedJobs.length > 0 && (
                   <div className="bg-white rounded-2xl border border-slate-200 p-5">
                     <div className="flex items-center justify-between mb-4">
-                      <p className="text-sm font-medium text-[#042c4c]">YOUR SAVED JOBS ({savedJobs.length})</p>
+                      <p className="text-sm font-medium text-slate-900">YOUR SAVED JOBS ({savedJobs.length})</p>
                       <button
                         onClick={() => navigate("/jobs")}
-                        className="text-sm text-[#ee7e65] hover:underline font-medium"
+                        className="text-sm text-slate-700 hover:underline font-medium"
                       >
                         Manage all jobs →
                       </button>
@@ -673,18 +673,18 @@ export default function InterviewPracticePage() {
                         <button
                           key={job.id}
                           onClick={() => handleSelectJob(job)}
-                          className="text-left p-3 rounded-xl border border-slate-200 hover:border-[#ee7e65] hover:shadow-sm transition-all group flex items-center gap-3"
+                          className="text-left p-3 rounded-xl border border-slate-200 hover:border-slate-400 hover:shadow-sm transition-all group flex items-center gap-3"
                         >
-                          <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-[#ee7e65]/10 transition-colors">
-                            <Briefcase className="w-4 h-4 text-slate-500 group-hover:text-[#ee7e65]" />
+                          <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-slate-700/10 transition-colors">
+                            <Briefcase className="w-4 h-4 text-slate-500 group-hover:text-slate-700" />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="font-medium text-[#042c4c] truncate text-sm">{job.roleTitle}</p>
+                            <p className="font-medium text-slate-900 truncate text-sm">{job.roleTitle}</p>
                             {job.companyName && (
                               <p className="text-xs text-slate-400 truncate">{job.companyName}</p>
                             )}
                           </div>
-                          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#ee7e65] flex-shrink-0" />
+                          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-700 flex-shrink-0" />
                         </button>
                       ))}
                     </div>
@@ -697,14 +697,14 @@ export default function InterviewPracticePage() {
               <div className="space-y-4">
                 <div className="bg-slate-50 rounded-xl border border-slate-200 p-4">
                   <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Practicing for</p>
-                  <p className="font-semibold text-[#042c4c]">{customJobDetails.title}</p>
+                  <p className="font-semibold text-slate-900">{customJobDetails.title}</p>
                   {customJobDetails.company && (
                     <p className="text-sm text-slate-500">{customJobDetails.company}</p>
                   )}
                 </div>
 
                 <div className="bg-white rounded-2xl border border-slate-200 p-5">
-                  <label className="block text-sm font-medium text-[#042c4c] mb-4">Select Interview Round</label>
+                  <label className="block text-sm font-medium text-slate-900 mb-4">Select Interview Round</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {interviewModeOptions.map((mode) => {
                       const IconComponent = mode.icon;
@@ -723,7 +723,7 @@ export default function InterviewPracticePage() {
                               <IconComponent className="w-5 h-5 text-white" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-[#042c4c] text-sm">{mode.label}</p>
+                              <p className="font-medium text-slate-900 text-sm">{mode.label}</p>
                               <p className="text-xs text-slate-500 mt-0.5">{mode.description}</p>
                             </div>
                             {selectedCustomRound === mode.interviewMode && (
@@ -767,7 +767,7 @@ export default function InterviewPracticePage() {
               </p>
               <button
                 onClick={() => navigate("/jobs")}
-                className="text-xs text-[#ee7e65] hover:underline font-medium"
+                className="text-xs text-slate-700 hover:underline font-medium"
               >
                 Manage all jobs →
               </button>
@@ -777,18 +777,18 @@ export default function InterviewPracticePage() {
                 <button
                   key={job.id}
                   onClick={() => handleSelectJob(job)}
-                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#ee7e65] hover:bg-[#ee7e65]/5 transition-all group text-left"
+                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-slate-400 hover:bg-slate-700/5 transition-all group text-left"
                 >
-                  <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-[#ee7e65]/10 transition-colors">
-                    <Building2 className="w-4 h-4 text-slate-500 group-hover:text-[#ee7e65]" />
+                  <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-slate-700/10 transition-colors">
+                    <Building2 className="w-4 h-4 text-slate-500 group-hover:text-slate-700" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium text-[#042c4c] text-sm truncate">{job.roleTitle}</p>
+                    <p className="font-medium text-slate-900 text-sm truncate">{job.roleTitle}</p>
                     {job.companyName && (
                       <p className="text-xs text-slate-400 truncate">{job.companyName}</p>
                     )}
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#ee7e65] flex-shrink-0" />
+                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-700 flex-shrink-0" />
                 </button>
               ))}
             </div>
@@ -800,18 +800,18 @@ export default function InterviewPracticePage() {
           <section>
             <button
               onClick={() => setSelectedPath(null)}
-              className="flex items-center gap-2 text-sm text-slate-500 hover:text-[#042c4c] mb-4 transition-colors"
+              className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 mb-4 transition-colors"
             >
               <ChevronRight className="w-4 h-4 rotate-180" />
               Back
             </button>
 
             <div className="flex items-center gap-3 mb-5 sm:mb-6">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-900 flex items-center justify-center flex-shrink-0">
                 <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-lg sm:text-xl font-bold text-[#042c4c]">Practice by Role</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900">Practice by Role</h2>
                 <p className="text-xs sm:text-sm text-slate-500">Choose a role kit for your target position</p>
               </div>
             </div>
@@ -835,7 +835,7 @@ export default function InterviewPracticePage() {
                   onClick={() => setSelectedDomain(null)}
                   className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                     !selectedDomain
-                      ? "bg-[#042c4c] text-white"
+                      ? "bg-slate-900 text-white"
                       : "bg-white border border-slate-200 text-slate-600"
                   }`}
                 >
@@ -847,7 +847,7 @@ export default function InterviewPracticePage() {
                     onClick={() => setSelectedDomain(selectedDomain === domain ? null : domain)}
                     className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                       selectedDomain === domain
-                        ? "bg-[#ee7e65] text-white"
+                        ? "bg-slate-700 text-white"
                         : "bg-white border border-slate-200 text-slate-600"
                     }`}
                   >
@@ -869,11 +869,11 @@ export default function InterviewPracticePage() {
                             key={domain}
                             onClick={() => { setSelectedDomain(domain); setFilterOpen(false); }}
                             className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left hover:bg-slate-50 ${
-                              selectedDomain === domain ? "bg-[#ee7e65]/10 text-[#ee7e65] font-medium" : "text-slate-700"
+                              selectedDomain === domain ? "bg-slate-700/10 text-slate-700 font-medium" : "text-slate-700"
                             }`}
                           >
                             <span>{formatDomain(domain)}</span>
-                            {selectedDomain === domain && <Check className="w-4 h-4 text-[#ee7e65]" />}
+                            {selectedDomain === domain && <Check className="w-4 h-4 text-slate-700" />}
                           </button>
                         ))}
                       </div>
@@ -910,7 +910,7 @@ export default function InterviewPracticePage() {
                     <button
                       key={kit.id}
                       onClick={() => handleSelectRole(kit)}
-                      className="w-full group text-left bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:shadow-lg hover:border-[#ee7e65] transition-all"
+                      className="w-full group text-left bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:shadow-lg hover:border-slate-400 transition-all"
                     >
                       {/* Mobile: horizontal layout */}
                       <div className="flex sm:hidden items-center gap-3">
@@ -919,7 +919,7 @@ export default function InterviewPracticePage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-[#042c4c] truncate group-hover:text-[#ee7e65]">
+                            <h3 className="font-semibold text-slate-900 truncate group-hover:text-slate-700">
                               {kit.name}
                             </h3>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${levelConfig.color} flex-shrink-0`}>
@@ -928,7 +928,7 @@ export default function InterviewPracticePage() {
                           </div>
                           <p className="text-xs text-slate-500">{formatDomain(kit.domain)}</p>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#ee7e65] flex-shrink-0" />
+                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-700 flex-shrink-0" />
                       </div>
 
                       {/* Desktop: vertical card layout */}
@@ -942,7 +942,7 @@ export default function InterviewPracticePage() {
                           </span>
                         </div>
 
-                        <h3 className="font-semibold text-[#042c4c] mb-0.5 group-hover:text-[#ee7e65] transition-colors">
+                        <h3 className="font-semibold text-slate-900 mb-0.5 group-hover:text-slate-700 transition-colors">
                           {kit.name}
                         </h3>
                         <p className="text-xs text-slate-500 mb-3">
@@ -960,7 +960,7 @@ export default function InterviewPracticePage() {
                             <Clock className="w-3.5 h-3.5" />
                             <span>{kit.estimatedDuration || 30} min</span>
                           </div>
-                          <span className="inline-flex items-center gap-1 text-sm font-medium text-[#ee7e65] group-hover:gap-2 transition-all">
+                          <span className="inline-flex items-center gap-1 text-sm font-medium text-slate-700 group-hover:gap-2 transition-all">
                             Start
                             <ArrowRight className="w-4 h-4" />
                           </span>
@@ -979,7 +979,7 @@ export default function InterviewPracticePage() {
           <section>
             <button
               onClick={() => setSelectedPath(null)}
-              className="flex items-center gap-2 text-sm text-slate-500 hover:text-[#042c4c] mb-4 transition-colors"
+              className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 mb-4 transition-colors"
             >
               <ChevronRight className="w-4 h-4 rotate-180" />
               Back
@@ -990,7 +990,7 @@ export default function InterviewPracticePage() {
                 <Target className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-lg sm:text-xl font-bold text-[#042c4c]">Practice by Type</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900">Practice by Type</h2>
                 <p className="text-xs sm:text-sm text-slate-500">Choose the interview type to focus on</p>
               </div>
             </div>
@@ -1010,7 +1010,7 @@ export default function InterviewPracticePage() {
                         <IconComponent className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-[#042c4c] mb-0.5 group-hover:text-purple-700">
+                        <h3 className="font-semibold text-slate-900 mb-0.5 group-hover:text-purple-700">
                           {mode.label}
                         </h3>
                         <p className="text-xs text-slate-500 line-clamp-1">
@@ -1025,7 +1025,7 @@ export default function InterviewPracticePage() {
                       <div className={`w-12 h-12 ${mode.color} rounded-xl flex items-center justify-center mb-4`}>
                         <IconComponent className="w-6 h-6 text-white" />
                       </div>
-                      <h3 className="font-semibold text-[#042c4c] text-base mb-1 group-hover:text-purple-700 transition-colors">
+                      <h3 className="font-semibold text-slate-900 text-base mb-1 group-hover:text-purple-700 transition-colors">
                         {mode.label}
                       </h3>
                       <p className="text-sm text-slate-500 mb-3">

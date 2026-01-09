@@ -3,21 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --background: #fbfbfc;
-  --foreground: #042c4c;
+  --background: #f8fafc;
+  --foreground: #0f172a;
   --card-background: #ffffff;
-  --card-foreground: #042c4c;
-  --primary: #042c4c;
+  --card-foreground: #0f172a;
+  --primary: #0f172a;
   --primary-foreground: #ffffff;
-  --secondary: #768c9c;
+  --secondary: #64748b;
   --secondary-foreground: #ffffff;
-  --accent: #ee7e65;
+  --accent: #334155;
   --accent-foreground: #ffffff;
-  --accent-light: #f5a594;
-  --muted: #f5f6f7;
-  --muted-foreground: #6c8194;
-  --border: #e2e6ea;
-  --ring: #042c4c;
+  --accent-light: #94a3b8;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --ring: #0f172a;
   --success: #22c55e;
   --warning: #f59e0b;
   --error: #ef4444;
@@ -64,7 +64,6 @@ body {
   display: none;
 }
 
-/* Safe area insets for mobile devices with notches */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -73,14 +72,12 @@ body {
   padding-top: env(safe-area-inset-top, 0px);
 }
 
-/* Touch-friendly tap targets */
 @media (hover: none) and (pointer: coarse) {
   button, a, [role="button"] {
     min-height: 44px;
   }
 }
 
-/* Smooth scrolling for mobile */
 @media (max-width: 1024px) {
   html {
     scroll-behavior: smooth;

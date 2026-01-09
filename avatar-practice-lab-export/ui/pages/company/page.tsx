@@ -393,10 +393,10 @@ export default function CompanyDashboard() {
   if (companies.length === 0) {
     return (
       <div className="min-h-screen bg-[#f8f9fb]">
-        <header className="bg-[#042c4c] text-white py-4">
+        <header className="bg-slate-900 text-white py-4">
           <div className="container mx-auto px-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[#ee7e65] rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
                 <Building2 className="w-5 h-5" />
               </div>
               <span className="font-semibold text-lg">Hiready</span>
@@ -422,7 +422,7 @@ export default function CompanyDashboard() {
               <Button 
                 onClick={handleCreateCompany}
                 disabled={!newCompanyName.trim() || isCreatingCompany}
-                className="w-full bg-[#ee7e65] hover:bg-[#d96a52]"
+                className="w-full bg-slate-700 hover:bg-slate-600"
               >
                 {isCreatingCompany ? <LoadingSpinner className="w-4 h-4" /> : "Create Company"}
               </Button>
@@ -441,7 +441,7 @@ export default function CompanyDashboard() {
           {successMessage}
         </div>
       )}
-      <div className="bg-gradient-to-r from-[#042c4c] to-[#0a3d66] text-white">
+      <div className="bg-slate-900 text-white">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -490,7 +490,7 @@ export default function CompanyDashboard() {
                     <Button 
                       onClick={handleCreateJob}
                       disabled={!newJobTitle.trim() || isCreatingJob}
-                      className="w-full bg-[#ee7e65] hover:bg-[#d96a52]"
+                      className="w-full bg-slate-700 hover:bg-slate-600"
                     >
                       {isCreatingJob ? (
                         <span className="flex items-center gap-2">
@@ -529,7 +529,7 @@ export default function CompanyDashboard() {
                           key={job.id}
                           onClick={() => setSelectedJob(job)}
                           className={`w-full text-left p-4 hover:bg-gray-50 transition-colors ${
-                            selectedJob?.id === job.id ? "bg-[#ee7e65]/5 border-l-2 border-[#ee7e65]" : ""
+                            selectedJob?.id === job.id ? "bg-slate-100 border-l-2 border-slate-700" : ""
                           }`}
                         >
                           <div className="flex items-center justify-between">
@@ -596,7 +596,7 @@ export default function CompanyDashboard() {
                               {selectedJob.generatedInterviewPlan.interviewStyle || "Auto-generated from job description"}
                               {selectedJob.generatedInterviewPlan.roleArchetype?.name && (
                                 <span className="ml-2">
-                                  • Role: <span className="font-medium text-[#042c4c]">{selectedJob.generatedInterviewPlan.roleArchetype.name}</span>
+                                  • Role: <span className="font-medium text-slate-900">{selectedJob.generatedInterviewPlan.roleArchetype.name}</span>
                                 </span>
                               )}
                             </p>
@@ -695,8 +695,8 @@ export default function CompanyDashboard() {
                               <div key={candidate.id} className="p-4 hover:bg-gray-50">
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-[#042c4c]/10 flex items-center justify-center">
-                                      <span className="text-sm font-medium text-[#042c4c]">
+                                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
+                                      <span className="text-sm font-medium text-slate-900">
                                         {(candidate.user.name || candidate.user.email)[0].toUpperCase()}
                                       </span>
                                     </div>

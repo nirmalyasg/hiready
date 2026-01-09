@@ -42,10 +42,10 @@ export default function CompanyLoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 bg-[#042c4c] items-center justify-center p-12">
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 items-center justify-center p-12">
         <div className="max-w-md text-center">
           <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full mb-8">
-            <div className="w-8 h-8 bg-[#ee7e65] rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <span className="text-white font-semibold text-lg">Hiready</span>
@@ -53,7 +53,7 @@ export default function CompanyLoginPage() {
           <h1 className="text-4xl font-bold text-white mb-4">
             Employer Portal
           </h1>
-          <p className="text-[#768c9c] text-lg">
+          <p className="text-slate-400 text-lg">
             Manage your job postings, review candidate assessments, and build your dream team with AI-powered interview insights.
           </p>
         </div>
@@ -62,8 +62,8 @@ export default function CompanyLoginPage() {
       <div className="flex-1 flex items-center justify-center p-8 bg-[#f8f9fb]">
         <div className="w-full max-w-md">
           <div className="lg:hidden text-center mb-8">
-            <div className="inline-flex items-center gap-2 bg-[#042c4c] px-4 py-2 rounded-full">
-              <div className="w-6 h-6 bg-[#ee7e65] rounded-full flex items-center justify-center">
+            <div className="inline-flex items-center gap-2 bg-slate-900 px-4 py-2 rounded-full">
+              <div className="w-6 h-6 bg-slate-700 rounded-full flex items-center justify-center">
                 <Building2 className="w-4 h-4 text-white" />
               </div>
               <span className="text-white font-semibold">Hiready</span>
@@ -71,10 +71,10 @@ export default function CompanyLoginPage() {
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-2xl font-bold text-[#042c4c] mb-2">
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">
               Company Sign In
             </h2>
-            <p className="text-[#6c8194] mb-6">
+            <p className="text-slate-500 mb-6">
               Access your employer dashboard
             </p>
 
@@ -87,7 +87,7 @@ export default function CompanyLoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="username" className="text-[#042c4c]">
+                <Label htmlFor="username" className="text-slate-900">
                   Username
                 </Label>
                 <Input
@@ -102,7 +102,7 @@ export default function CompanyLoginPage() {
               </div>
 
               <div>
-                <Label htmlFor="password" className="text-[#042c4c]">
+                <Label htmlFor="password" className="text-slate-900">
                   Password
                 </Label>
                 <div className="relative mt-1">
@@ -127,15 +127,15 @@ export default function CompanyLoginPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-[#ee7e65] hover:bg-[#e06a4f] text-white py-6 text-lg"
+                className="w-full bg-slate-700 hover:bg-[#e06a4f] text-white py-6 text-lg"
               >
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
 
-            <p className="text-center text-sm text-[#6c8194] mt-6">
+            <p className="text-center text-sm text-slate-500 mt-6">
               Not an employer?{" "}
-              <a href="/readycheck" className="text-[#ee7e65] hover:underline">
+              <a href="/readycheck" className="text-slate-700 hover:underline">
                 Practice interviews
               </a>
             </p>
