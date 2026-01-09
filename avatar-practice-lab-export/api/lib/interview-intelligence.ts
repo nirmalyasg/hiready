@@ -2092,11 +2092,20 @@ export async function saveGeneratedQuestionsToBank(
     interviewType?: string;
     sourceJobTargetId?: string;
     jdSourceTopics?: string[];
+    richContext?: JDRichContext;
   }
 ): Promise<QuestionBankEntry[]> {
   if (questions.length === 0) return [];
 
   type QuestionType = "behavioral" | "technical" | "situational" | "scenario" | "probe" | "resume_claim" | "jd_requirement";
+  type DifficultyBand = "basic" | "intermediate" | "advanced" | "expert";
+  
+  const mapDifficultyToLegacy = (d?: string): "easy" | "medium" | "hard" => {
+    if (!d) return "medium";
+    if (d === "basic") return "easy";
+    if (d === "advanced" || d === "expert") return "hard";
+    return "medium";
+  };
   
   const entries = questions.map(q => ({
     roleKitId: context.roleKitId || null,
@@ -2109,7 +2118,15 @@ export async function saveGeneratedQuestionsToBank(
     followUps: q.followUps || null,
     assessmentDimension: q.assessmentDimension || null,
     jdSourceTopics: context.jdSourceTopics || null,
-    difficulty: "medium" as "easy" | "medium" | "hard",
+    difficulty: mapDifficultyToLegacy(q.difficulty),
+    skillsTested: q.skillsTested || [],
+    difficultyBand: (q.difficulty as DifficultyBand) || null,
+    roleContext: context.richContext ? {
+      companyName: context.richContext.companyName,
+      jobTitle: context.richContext.jobTitle,
+      seniority: context.richContext.seniorityLevel,
+      businessDomain: context.richContext.businessDomain,
+    } : {},
     sourceType: "generated" as "generated" | "curated" | "session_extracted",
     sourceJobTargetId: context.sourceJobTargetId || null,
   }));
@@ -2214,10 +2231,192 @@ export async function getOrGenerateQuestions(
         interviewType: context.interviewType,
         sourceJobTargetId: context.sourceJobTargetId,
         jdSourceTopics: context.jdExtract.interviewTopics,
+        richContext,
       });
       return [...existing, ...saved];
     }
   }
 
   return existing;
+}
+
+// Skill Coverage Matrix - ensures all mustHave skills get at least one question
+export interface SkillCoverageMatrix {
+  requiredSkills: string[];
+  coveredSkills: string[];
+  missingSkills: string[];
+  coveragePercent: number;
+  skillQuestionMap: Record<string, { questionId: string; question: string }[]>;
+}
+
+export function buildSkillCoverageMatrix(
+  mustHaveSkills: string[],
+  questions: { id?: string; question: string; skillsTested?: string[] | null }[]
+): SkillCoverageMatrix {
+  const normalizeSkill = (s: string) => s.toLowerCase().trim().replace(/\s+/g, " ");
+  const requiredSkills = mustHaveSkills.map(normalizeSkill);
+  const skillQuestionMap: Record<string, { questionId: string; question: string }[]> = {};
+  
+  for (const skill of requiredSkills) {
+    skillQuestionMap[skill] = [];
+  }
+  
+  for (const q of questions) {
+    const testedSkills = (q.skillsTested || []).map(normalizeSkill);
+    for (const skill of testedSkills) {
+      for (const required of requiredSkills) {
+        if (skill.includes(required) || required.includes(skill)) {
+          if (!skillQuestionMap[required]) skillQuestionMap[required] = [];
+          skillQuestionMap[required].push({ questionId: q.id || "", question: q.question });
+        }
+      }
+    }
+  }
+  
+  const coveredSkills = requiredSkills.filter(s => skillQuestionMap[s].length > 0);
+  const missingSkills = requiredSkills.filter(s => skillQuestionMap[s].length === 0);
+  const coveragePercent = requiredSkills.length > 0 
+    ? Math.round((coveredSkills.length / requiredSkills.length) * 100)
+    : 100;
+  
+  return {
+    requiredSkills,
+    coveredSkills,
+    missingSkills,
+    coveragePercent,
+    skillQuestionMap,
+  };
+}
+
+// Generate gap-filling questions for missing skills
+export async function generateGapFillingQuestions(
+  missingSkills: string[],
+  richContext: JDRichContext,
+  interviewType: string,
+  roleCategory: string
+): Promise<GeneratedJDQuestion[]> {
+  if (missingSkills.length === 0) return [];
+  
+  const openai = getOpenAI();
+  
+  const companyContext = richContext.companyName 
+    ? `at ${richContext.companyName}${richContext.businessDomain ? ` (${richContext.businessDomain})` : ""}`
+    : "";
+  
+  const complexityGuide = richContext.complexityLevel
+    ? `Difficulty should be ${richContext.complexityLevel.toUpperCase()} level.`
+    : "";
+  
+  const prompt = `Generate interview questions to cover these MISSING SKILLS that haven't been tested yet:
+
+ROLE: ${richContext.jobTitle || roleCategory} ${companyContext}
+SENIORITY: ${richContext.seniorityLevel || "mid-level"}
+${complexityGuide}
+
+MISSING SKILLS TO COVER (generate 1 question per skill):
+${missingSkills.map((s, i) => `${i + 1}. ${s}`).join("\n")}
+
+For each skill, generate:
+1. A focused interview question that directly tests that skill
+2. 2 follow-up probes
+3. The difficulty level matching the seniority
+
+${richContext.companyName ? `Frame questions in ${richContext.companyName}'s business context where relevant.` : ""}
+
+Respond in JSON:
+{
+  "questions": [
+    {
+      "topic": "skill name",
+      "question": "interview question",
+      "followUps": ["probe 1", "probe 2"],
+      "patternType": "technical",
+      "assessmentDimension": "skill name",
+      "skillsTested": ["skill1"],
+      "difficulty": "basic|intermediate|advanced"
+    }
+  ]
+}`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { 
+          role: "system", 
+          content: `You are an expert technical interviewer. Your job is to generate targeted questions that specifically test skills that are MISSING from an interview plan. Each question should directly assess the named skill.`
+        },
+        { role: "user", content: prompt },
+      ],
+      response_format: { type: "json_object" },
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || "{}");
+    return (result.questions || []) as GeneratedJDQuestion[];
+  } catch (error) {
+    console.error("Failed to generate gap-filling questions:", error);
+    return [];
+  }
+}
+
+// Get questions with full skill coverage
+export async function getQuestionsWithCoverage(
+  context: {
+    roleKitId?: number;
+    companyId?: string;
+    interviewType: string;
+    jdExtract?: JDExtract;
+    roleCategory: string;
+    sourceJobTargetId?: string;
+    jobTarget?: {
+      companyName?: string | null;
+      roleTitle?: string;
+      companyArchetype?: string | null;
+      jdParsed?: any;
+    };
+  },
+  count: number = 5
+): Promise<{ questions: QuestionBankEntry[]; coverage: SkillCoverageMatrix }> {
+  let richContext = extractJDRichContext(context.jobTarget, context.jdExtract);
+  
+  if (richContext.companyName && !richContext.businessDomain) {
+    const research = await researchCompanyDomain(richContext.companyName);
+    if (research) {
+      richContext = { ...richContext, ...research };
+    }
+  }
+  
+  const questions = await getOrGenerateQuestions(context, count);
+  
+  const mustHaveSkills = richContext.mustHaveSkills?.map(s => s.skill) || 
+    context.jdExtract?.mustHave || [];
+  
+  let coverage = buildSkillCoverageMatrix(mustHaveSkills, questions);
+  
+  if (coverage.missingSkills.length > 0 && coverage.coveragePercent < 80) {
+    console.log(`[Skill Coverage] Only ${coverage.coveragePercent}% coverage. Generating gap-filling questions for: ${coverage.missingSkills.join(", ")}`);
+    
+    const gapQuestions = await generateGapFillingQuestions(
+      coverage.missingSkills.slice(0, 3),
+      richContext,
+      context.interviewType,
+      context.roleCategory
+    );
+    
+    if (gapQuestions.length > 0) {
+      const savedGap = await saveGeneratedQuestionsToBank(gapQuestions, {
+        roleKitId: context.roleKitId,
+        companyId: context.companyId,
+        interviewType: context.interviewType,
+        sourceJobTargetId: context.sourceJobTargetId,
+        jdSourceTopics: coverage.missingSkills,
+        richContext,
+      });
+      
+      questions.push(...savedGap);
+      coverage = buildSkillCoverageMatrix(mustHaveSkills, questions);
+    }
+  }
+  
+  return { questions, coverage };
 }

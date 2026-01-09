@@ -1631,6 +1631,14 @@ export const questionBank = pgTable("question_bank", {
   assessmentDimension: text("assessment_dimension"),
   jdSourceTopics: jsonb("jd_source_topics").$type<string[]>(),
   difficulty: text("difficulty").$type<"easy" | "medium" | "hard">().default("medium"),
+  skillsTested: jsonb("skills_tested").$type<string[]>().default([]),
+  difficultyBand: text("difficulty_band").$type<"basic" | "intermediate" | "advanced" | "expert">(),
+  roleContext: jsonb("role_context").$type<{
+    companyName?: string;
+    jobTitle?: string;
+    seniority?: string;
+    businessDomain?: string;
+  }>().default({}),
   usageCount: integer("usage_count").default(0),
   avgRating: real("avg_rating"),
   sourceType: text("source_type").$type<"generated" | "curated" | "session_extracted">().default("generated"),

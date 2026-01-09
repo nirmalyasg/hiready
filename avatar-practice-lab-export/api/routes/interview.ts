@@ -60,13 +60,16 @@ import {
   generateAIPracticePlan,
   buildDynamicRubric,
   getOrGenerateQuestions,
+  getQuestionsWithCoverage,
   extractJDRichContext,
+  buildSkillCoverageMatrix,
   type InterviewContext,
   type JobTargetForReadiness,
   type ReadinessScore,
   type JDExtract,
   type JDRichContext,
   type DynamicEvaluationRubric,
+  type SkillCoverageMatrix,
 } from "../lib/interview-intelligence.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -925,11 +928,12 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
       senioritySignal: jdParsed.seniority || jdParsed.experienceLevel,
     } : undefined;
     
-    // Generate questions with rich JD context (company, role, complexity)
+    // Generate questions with rich JD context (company, role, complexity) and skill coverage
     let generatedQuestions: any[] = [];
-    if (jdExtractForQuestions?.interviewTopics?.length) {
+    let skillCoverage: SkillCoverageMatrix | null = null;
+    if (jdExtractForQuestions?.interviewTopics?.length || jdExtractForQuestions?.mustHave?.length) {
       try {
-        generatedQuestions = await getOrGenerateQuestions({
+        const result = await getQuestionsWithCoverage({
           roleKitId: config.roleKitId || undefined,
           interviewType: config.interviewType || 'behavioral',
           jdExtract: jdExtractForQuestions,
@@ -937,7 +941,13 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
           sourceJobTargetId: config.jobTargetId || undefined,
           jobTarget: jobTargetForRichContext,
         }, 5);
+        generatedQuestions = result.questions;
+        skillCoverage = result.coverage;
         console.log(`[Plan Generation] Generated ${generatedQuestions.length} JD-context questions for config ${configId}`);
+        console.log(`[Plan Generation] Skill coverage: ${skillCoverage.coveragePercent}% (${skillCoverage.coveredSkills.length}/${skillCoverage.requiredSkills.length})`);
+        if (skillCoverage.missingSkills.length > 0) {
+          console.log(`[Plan Generation] Missing skills: ${skillCoverage.missingSkills.join(", ")}`);
+        }
       } catch (error) {
         console.error("[Plan Generation] Question generation failed:", error);
       }
@@ -962,9 +972,15 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
         question: q.question,
         topic: q.topic || q.assessmentDimension,
         followUps: q.followUps || [],
-        difficulty: q.difficulty || 'intermediate',
+        difficulty: q.difficultyBand || q.difficulty || 'intermediate',
         skillsTested: q.skillsTested || [],
       })) : undefined,
+      // Skill coverage metadata
+      skillCoverage: skillCoverage ? {
+        coveragePercent: skillCoverage.coveragePercent,
+        coveredSkills: skillCoverage.coveredSkills,
+        missingSkills: skillCoverage.missingSkills,
+      } : undefined,
     };
     
     if (blueprintData.taskBlueprints.length > 0) {
