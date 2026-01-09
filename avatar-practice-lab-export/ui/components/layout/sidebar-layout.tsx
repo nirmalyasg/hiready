@@ -39,7 +39,6 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   const isActive = (href: string) => {
     const path = location.pathname;
     
-    // Special case: /interview/results should highlight Results, not Practice
     if (path.startsWith('/interview/results')) {
       return href === '/avatar/results';
     }
@@ -48,35 +47,32 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-violet-50/30">
-      {/* Desktop Sidebar - Hidden on mobile */}
+    <div className="min-h-screen bg-[#fbfbfc]">
       <aside className={cn(
-        "hidden lg:block fixed top-0 left-0 h-full bg-gradient-to-b from-violet-900 via-indigo-900 to-purple-900 z-50 transition-all duration-300 ease-out",
+        "hidden lg:block fixed top-0 left-0 h-full bg-[#042c4c] z-50 transition-all duration-300 ease-out",
         collapsed ? "w-20" : "w-60"
       )}>
         <div className="flex flex-col h-full">
-          {/* Logo */}
           <div className={cn(
             "h-16 flex items-center px-5",
             collapsed && "justify-center px-0"
           )}>
             <Link to="/" className={cn("flex items-center gap-2.5", collapsed && "hidden")}>
-              <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-900/30">
+              <div className="w-9 h-9 bg-[#ee7e65] rounded-xl flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <span className="text-white font-bold tracking-tight">Hiready</span>
             </Link>
             {collapsed && (
               <Link to="/">
-                <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-900/30">
+                <div className="w-9 h-9 bg-[#ee7e65] rounded-xl flex items-center justify-center">
                   <Sparkles className="w-4 h-4 text-white" />
                 </div>
               </Link>
             )}
           </div>
 
-          {/* Nav Items */}
-          <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
+          <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
@@ -88,8 +84,8 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
                     active 
-                      ? "bg-white/15 text-white shadow-lg shadow-violet-900/20" 
-                      : "text-violet-200 hover:text-white hover:bg-white/10",
+                      ? "bg-[#ee7e65] text-white shadow-lg shadow-[#ee7e65]/20" 
+                      : "text-[#768c9c] hover:text-white hover:bg-white/10",
                     collapsed && "justify-center px-0"
                   )}
                 >
@@ -100,7 +96,6 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             })}
           </nav>
 
-          {/* User Section */}
           <div className="p-3 mt-auto">
             {isLoading ? (
               <div className="h-10 bg-white/5 rounded-lg animate-pulse" />
@@ -117,7 +112,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                    <div className="w-8 h-8 rounded-full bg-[#768c9c] flex items-center justify-center">
                       <User className="w-4 h-4 text-white" />
                     </div>
                   )}
@@ -133,7 +128,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                     window.location.href = '/';
                   }}
                   className={cn(
-                    "w-full flex items-center gap-2.5 px-3 py-2 text-violet-300 hover:text-white hover:bg-white/10 rounded-xl transition-all text-sm",
+                    "w-full flex items-center gap-2.5 px-3 py-2 text-[#768c9c] hover:text-white hover:bg-white/10 rounded-xl transition-all text-sm",
                     collapsed && "justify-center px-0"
                   )}
                 >
@@ -145,7 +140,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
               <Link
                 to="/login"
                 className={cn(
-                  "flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-700 text-white rounded-lg text-sm font-medium hover:bg-slate-600 transition-colors",
+                  "flex items-center justify-center gap-2 px-4 py-2.5 bg-[#ee7e65] text-white rounded-xl text-sm font-medium hover:bg-[#e06a50] transition-colors",
                   collapsed && "px-3"
                 )}
               >
@@ -155,17 +150,15 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             )}
           </div>
 
-          {/* Collapse Toggle */}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="flex items-center justify-center h-10 border-t border-white/5 text-slate-500 hover:text-slate-300 transition-colors"
+            className="flex items-center justify-center h-10 border-t border-white/10 text-[#768c9c] hover:text-white transition-colors"
           >
             <ChevronLeft className={cn("w-4 h-4 transition-transform", collapsed && "rotate-180")} />
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className={cn(
         "min-h-screen transition-all duration-300",
         collapsed ? "lg:pl-20" : "lg:pl-60",
@@ -176,7 +169,6 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
     </div>
   );

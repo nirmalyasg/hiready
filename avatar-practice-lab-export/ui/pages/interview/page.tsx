@@ -51,19 +51,19 @@ const domainIcons: Record<string, any> = {
 };
 
 const domainColors: Record<string, string> = {
-  software: "bg-gradient-to-br from-violet-500 to-indigo-600",
-  data: "bg-gradient-to-br from-blue-500 to-cyan-500",
-  product: "bg-gradient-to-br from-purple-500 to-pink-500",
-  design: "bg-gradient-to-br from-pink-500 to-rose-500",
-  sales: "bg-gradient-to-br from-orange-500 to-amber-500",
-  marketing: "bg-gradient-to-br from-emerald-500 to-teal-500",
-  customer_success: "bg-gradient-to-br from-cyan-500 to-blue-500",
-  operations: "bg-gradient-to-br from-slate-600 to-slate-700",
-  consulting: "bg-gradient-to-br from-indigo-500 to-purple-600",
-  finance: "bg-gradient-to-br from-green-500 to-emerald-600",
-  hr: "bg-gradient-to-br from-rose-500 to-pink-500",
-  recruiting: "bg-gradient-to-br from-violet-500 to-purple-500",
-  engineering_management: "bg-gradient-to-br from-blue-600 to-indigo-700",
+  software: "bg-[#042c4c]",
+  data: "bg-[#768c9c]",
+  product: "bg-[#ee7e65]",
+  design: "bg-[#6c8194]",
+  sales: "bg-[#ee7e65]",
+  marketing: "bg-[#042c4c]",
+  customer_success: "bg-[#768c9c]",
+  operations: "bg-[#6c8194]",
+  consulting: "bg-[#042c4c]",
+  finance: "bg-[#768c9c]",
+  hr: "bg-[#ee7e65]",
+  recruiting: "bg-[#6c8194]",
+  engineering_management: "bg-[#042c4c]",
 };
 
 const interviewModeOptions = [
@@ -72,7 +72,7 @@ const interviewModeOptions = [
     label: "Coding & Technical Tasks", 
     description: "Solve, explain, debug, or modify technical problems",
     icon: Code,
-    color: "bg-gradient-to-br from-violet-500 to-indigo-600",
+    color: "bg-[#042c4c]",
     interviewMode: "coding_technical",
     duration: "15 min",
     includes: ["Coding", "Debugging", "Code Review", "SQL", "ML Basics"],
@@ -83,7 +83,7 @@ const interviewModeOptions = [
     label: "Case & Problem Solving", 
     description: "Structured thinking for ambiguous problems",
     icon: Briefcase,
-    color: "bg-gradient-to-br from-purple-500 to-pink-500",
+    color: "bg-[#768c9c]",
     interviewMode: "case_problem_solving",
     duration: "15 min",
     includes: ["Business Cases", "Product Cases", "Analytics Cases", "Strategy"],
@@ -94,7 +94,7 @@ const interviewModeOptions = [
     label: "Behavioral and Leadership", 
     description: "Past behavior, judgment, ownership and leadership",
     icon: MessageSquare,
-    color: "bg-gradient-to-br from-orange-500 to-amber-500",
+    color: "bg-[#ee7e65]",
     interviewMode: "behavioral",
     duration: "15 min",
     includes: ["STAR Stories", "Conflict Handling", "Leadership", "Failure Stories"],
@@ -105,7 +105,7 @@ const interviewModeOptions = [
     label: "HR Interview", 
     description: "Role fit, motivation, culture and career alignment",
     icon: Users,
-    color: "bg-gradient-to-br from-emerald-500 to-teal-500",
+    color: "bg-[#6c8194]",
     interviewMode: "hiring_manager",
     duration: "15 min",
     includes: ["Why This Role", "Culture Fit", "Career Goals", "Role Expectations"],
@@ -118,11 +118,11 @@ const getLevelConfig = (level: string) => {
     case "entry":
       return { label: "Entry", color: "bg-emerald-100 text-emerald-700" };
     case "mid":
-      return { label: "Mid-Level", color: "bg-violet-100 text-violet-700" };
+      return { label: "Mid-Level", color: "bg-[#ee7e65]/10 text-[#ee7e65]" };
     case "senior":
-      return { label: "Senior", color: "bg-slate-200 text-slate-800" };
+      return { label: "Senior", color: "bg-[#042c4c]/10 text-[#042c4c]" };
     default:
-      return { label: level, color: "bg-slate-100 text-slate-600" };
+      return { label: level, color: "bg-[#768c9c]/10 text-[#6c8194]" };
   }
 };
 

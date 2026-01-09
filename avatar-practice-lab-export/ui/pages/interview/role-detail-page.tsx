@@ -266,7 +266,7 @@ export default function RoleDetailPage() {
                       <div className="mt-3 pt-3 border-t border-slate-100">
                         <Button
                           onClick={() => handleStartPractice(option)}
-                          className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white h-9 text-sm font-medium shadow-sm"
+                          className="w-full bg-[#ee7e65] hover:bg-[#e06a50] text-white h-9 text-sm font-medium shadow-sm"
                         >
                           <Play className="w-3.5 h-3.5 mr-2" />
                           Start Practice

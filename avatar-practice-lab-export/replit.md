@@ -44,37 +44,35 @@ avatar-practice-lab-export/
 ## UI Design System (January 2026)
 
 ### Design Philosophy
-Vibrant, exciting, and motivating design that makes users feel energized to practice. Features colorful gradients, glassmorphism, and energetic visual elements inspired by modern SaaS platforms.
+Professional, trustworthy design using the official brand color palette. Clean layouts with clear visual hierarchy, ample white space, and strategic use of coral accents for calls-to-action.
 
-### Color Palette
-- **Primary Gradient**: violet-600 to indigo-600 (#7c3aed → #4f46e5) - Primary CTAs, active states
-- **Accent Gradients by Domain**:
-  - Software/Tech: violet → indigo
-  - Data/Analytics: blue → cyan
-  - Product: purple → pink
-  - Sales: orange → amber
-  - Marketing: emerald → teal
-- **Secondary Text**: gray-500, gray-600 - Descriptions, helper text
-- **Backgrounds**: Gradient from violet-50/gray-50 to white with floating blur elements
-- **Success**: emerald-500/600 - Positive indicators
-- **Warning**: amber-500/600 - Focus areas, caution states
+### Brand Color Palette
+- **Primary Dark**: #042c4c (deep navy blue) - Headers, sidebar, primary text, hero backgrounds
+- **Accent**: #ee7e65 (coral/salmon) - CTAs, buttons, highlights, active states
+- **Secondary**: #768c9c (slate blue) - Secondary elements, icons, supporting UI
+- **Muted**: #6c8194 (gray-blue) - Subtle text, borders, inactive states
+- **Background**: #fbfbfc (off-white) - Page backgrounds
 
-### Visual Effects
-- **Glassmorphism**: bg-white/80 backdrop-blur-xl with border-white/50
-- **Gradient Blobs**: Floating pink/violet/cyan blurred circles for depth
-- **Shadows**: shadow-lg shadow-violet-200 for elevated elements
-- **Hero Sections**: Dark purple/indigo gradients with subtle dot patterns
+### Color Usage
+- **Hero Sections**: Deep navy (#042c4c) background with coral (#ee7e65) accent text
+- **Primary Buttons**: Coral (#ee7e65) with hover darkening to #e06a50
+- **Secondary Buttons**: Navy (#042c4c) or ghost/outline variants
+- **Cards**: White background on off-white (#fbfbfc) page
+- **Text**: Navy for headings, gray-blue for descriptions
+- **Success**: emerald-500/600 for positive indicators
 
 ### Components
-- **Cards**: White/95 or glassmorphism, rounded-2xl, shadow-xl
-- **Buttons**: Gradient from-violet-600 to-indigo-600, white text, rounded-xl
-- **Badges**: Gradient backgrounds matching domain colors, rounded-full
+- **Cards**: White background, subtle gray-200 border, rounded-2xl, shadow-xl
+- **Buttons**: Coral background, white text, rounded-xl, shadow with coral glow
+- **Sidebar**: Deep navy (#042c4c) background, coral logo accent, coral active states
+- **Inputs**: Light background (#fbfbfc), gray-200 border, navy text
 - **Spacing**: 4px grid system (gap-4 = 16px, space-y-6 = 24px)
 
 ### Sidebar
-- Gradient background from-violet-900 via-indigo-900 to-purple-900
-- Active state: bg-white/15 with shadow
-- Logo: Gradient violet-500 to indigo-600 with shadow
+- Background: #042c4c (deep navy)
+- Logo: Coral (#ee7e65) rounded icon with white sparkle
+- Active state: Coral (#ee7e65) background with white text
+- Inactive: Slate blue (#768c9c) text, hover to white
 - Width: 240px desktop, overlay on mobile
 
 ## Recent Changes (January 9, 2026)

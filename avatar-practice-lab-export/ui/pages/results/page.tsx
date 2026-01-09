@@ -428,7 +428,7 @@ export default function ResultsPage() {
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
             <Link to="/interview" className="flex-1 sm:flex-none">
-              <Button className="gap-2 w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700">
+              <Button className="gap-2 w-full bg-[#ee7e65] hover:bg-[#e06a50]">
                 <Play className="w-4 h-4" />
                 Practice
               </Button>
@@ -530,7 +530,7 @@ export default function ResultsPage() {
                     <h3 className="text-lg font-semibold text-slate-900 mb-2">No Interview Analysis Yet</h3>
                     <p className="text-slate-500 text-sm mb-4">Complete interview practice sessions to see your performance across dimensions</p>
                     <Link to="/interview">
-                      <Button className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700">Start Interview Practice</Button>
+                      <Button className="bg-[#ee7e65] hover:bg-[#e06a50]">Start Interview Practice</Button>
                     </Link>
                   </div>
                 );
@@ -939,7 +939,7 @@ export default function ResultsPage() {
                 </p>
               </div>
               <Link to={`/jobs/${(activeJobs[0] as { id: string }).id}`} className="sm:flex-shrink-0">
-                <Button className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white gap-2 w-full sm:w-auto">
+                <Button className="bg-[#ee7e65] hover:bg-[#e06a50] text-white gap-2 w-full sm:w-auto">
                   <Play className="w-4 h-4" />
                   Practice
                 </Button>

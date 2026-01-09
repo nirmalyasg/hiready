@@ -153,7 +153,7 @@ export default function PublicResultsPage() {
             <h2 className="text-xl font-bold text-gray-900 mb-2">Results Not Found</h2>
             <p className="text-gray-600 mb-6">{error || "These results may have been removed or made private."}</p>
             <Link to="/">
-              <Button className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700">
+              <Button className="bg-[#ee7e65] hover:bg-[#e06a50]">
                 Practice Your Own Interview
               </Button>
             </Link>
@@ -334,7 +334,7 @@ export default function PublicResultsPage() {
                 Results generated via <span className="font-semibold text-slate-900">Hiready</span>
               </p>
               <Link to="/readycheck">
-                <Button className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700">
+                <Button className="bg-[#ee7e65] hover:bg-[#e06a50]">
                   Practice Your Own Interview
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>

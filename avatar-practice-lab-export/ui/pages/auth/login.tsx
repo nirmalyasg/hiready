@@ -48,24 +48,24 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-violet-50 via-white to-cyan-50" />
-      <div className="absolute top-20 left-10 w-72 h-72 bg-violet-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse" />
-      <div className="absolute bottom-20 right-10 w-72 h-72 bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse" style={{ animationDelay: '1s' }} />
+    <div className="min-h-screen flex items-center justify-center px-4 bg-[#fbfbfc] relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-b from-[#042c4c]/5 to-transparent" />
+      <div className="absolute top-20 right-20 w-64 h-64 bg-[#ee7e65]/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 left-20 w-64 h-64 bg-[#768c9c]/5 rounded-full blur-3xl" />
       
       <div className="w-full max-w-sm relative">
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-200">
+          <Link to="/" className="inline-flex items-center gap-2.5 mb-8">
+            <div className="w-11 h-11 bg-[#042c4c] rounded-xl flex items-center justify-center shadow-lg">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">Hiready</span>
+            <span className="text-2xl font-bold text-[#042c4c]">Hiready</span>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
-          <p className="text-gray-500 mt-1">Sign in to continue your journey</p>
+          <h1 className="text-2xl font-bold text-[#042c4c]">Welcome back</h1>
+          <p className="text-[#6c8194] mt-2">Sign in to continue your journey</p>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/50 shadow-xl shadow-violet-100 p-6">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-xl shadow-gray-100/50 p-7">
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm border border-red-100 flex items-center gap-2">
@@ -75,7 +75,7 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="username" className="block text-sm font-medium text-[#042c4c] mb-2">
                 Username
               </label>
               <input
@@ -83,14 +83,14 @@ export default function LoginPage() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-[#768c9c] focus:outline-none focus:ring-2 focus:ring-[#042c4c]/10 focus:border-[#042c4c] transition-all bg-[#fbfbfc]"
                 placeholder="Enter your username"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-[#042c4c] mb-2">
                 Password
               </label>
               <input
@@ -98,7 +98,7 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-[#768c9c] focus:outline-none focus:ring-2 focus:ring-[#042c4c]/10 focus:border-[#042c4c] transition-all bg-[#fbfbfc]"
                 placeholder="Enter your password"
                 required
               />
@@ -107,7 +107,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-violet-200"
+              className="w-full bg-[#ee7e65] hover:bg-[#e06a50] text-white py-3.5 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#ee7e65]/25"
             >
               {isLoading ? (
                 <>
@@ -121,14 +121,14 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-gray-500 mt-6">
+        <p className="text-center text-[#6c8194] mt-6">
           Don't have an account?{' '}
-          <Link to="/register" className="text-violet-600 hover:text-violet-700 font-semibold">
+          <Link to="/register" className="text-[#ee7e65] hover:text-[#e06a50] font-semibold">
             Create one
           </Link>
         </p>
 
-        <p className="text-center text-gray-400 text-xs mt-8">
+        <p className="text-center text-[#768c9c] text-xs mt-10">
           © {new Date().getFullYear()} Hiready
         </p>
       </div>

@@ -331,7 +331,7 @@ export default function AvatarSimulatorDashboard() {
             <p className="text-slate-500 text-sm mt-0.5">Your interview preparation at a glance</p>
           </div>
           <Link to="/readycheck">
-            <Button className="h-9 px-4 gap-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-sm font-medium rounded-lg">
+            <Button className="h-9 px-4 gap-1.5 bg-[#ee7e65] hover:bg-[#e06a50] text-white text-sm font-medium rounded-lg">
               <Play className="w-4 h-4" />
               Practice
             </Button>
@@ -375,7 +375,7 @@ export default function AvatarSimulatorDashboard() {
               </div>
             </div>
             <Link to="/pricing">
-              <Button size="sm" className="h-8 px-3 text-xs bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white">
+              <Button size="sm" className="h-8 px-3 text-xs bg-[#ee7e65] hover:bg-[#e06a50] text-white">
                 Upgrade
               </Button>
             </Link>
@@ -485,7 +485,7 @@ export default function AvatarSimulatorDashboard() {
               Complete your first interview practice to see your progress and get personalized recommendations.
             </p>
             <Link to="/readycheck">
-              <Button className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white">
+              <Button className="bg-[#ee7e65] hover:bg-[#e06a50] text-white">
                 Start Practice
               </Button>
             </Link>

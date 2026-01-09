@@ -413,7 +413,7 @@ export default function JobDetailPage() {
                 <Button
                   onClick={handleParseJD}
                   size="sm"
-                  className="h-8 px-3 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-sm"
+                  className="h-8 px-3 bg-[#ee7e65] hover:bg-[#e06a50] text-white text-sm"
                   disabled={isParsing}
                 >
                   {isParsing ? "..." : "Analyze"}
@@ -495,7 +495,7 @@ export default function JobDetailPage() {
                     <Button
                       onClick={() => setShowRoleSelector(true)}
                       size="sm"
-                      className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-xs"
+                      className="bg-[#ee7e65] hover:bg-[#e06a50] text-white text-xs"
                     >
                       Select Role
                     </Button>
@@ -519,7 +519,7 @@ export default function JobDetailPage() {
               <Button
                 onClick={() => setShowPurchaseModal(true)}
                 size="sm"
-                className="h-8 px-3 text-xs bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white"
+                className="h-8 px-3 text-xs bg-[#ee7e65] hover:bg-[#e06a50] text-white"
               >
                 Upgrade
               </Button>
@@ -556,7 +556,7 @@ export default function JobDetailPage() {
                         size="sm"
                         className={`h-8 px-3 text-xs ${
                           entitlements?.canStartSession
-                            ? "bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white"
+                            ? "bg-[#ee7e65] hover:bg-[#e06a50] text-white"
                             : "bg-slate-100 hover:bg-slate-200 text-slate-600"
                         }`}
                       >
