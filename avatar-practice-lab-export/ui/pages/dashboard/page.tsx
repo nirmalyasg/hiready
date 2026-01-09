@@ -16,7 +16,11 @@ import {
   Plus,
   Zap,
   Crown,
-  Lock
+  Lock,
+  Flame,
+  Calendar,
+  Award,
+  BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -70,7 +74,6 @@ interface JobTarget {
 export default function AvatarSimulatorDashboard() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [skillProgress, setSkillProgress] = useState<SkillProgressData[]>([]);
-  const [showInsights, setShowInsights] = useState(false);
   const [stats, setStats] = useState<DashboardStats>({
     totalTime: "0h 0m",
     completedScenarios: 0,
@@ -300,10 +303,21 @@ export default function AvatarSimulatorDashboard() {
     : 0;
 
   const getReadinessColor = (score: number | null) => {
-    if (score === null) return "text-slate-400";
-    if (score >= 80) return "text-emerald-600";
-    if (score >= 60) return "text-amber-600";
-    return "text-slate-500";
+    if (score === null) return "bg-slate-200";
+    if (score >= 70) return "bg-emerald-500";
+    if (score >= 40) return "bg-amber-500";
+    return "bg-red-400";
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch(status) {
+      case 'applied': return { label: 'Applied', bg: 'bg-[#768c9c]', text: 'text-white' };
+      case 'interview': return { label: 'Interviewing', bg: 'bg-[#ee7e65]', text: 'text-white' };
+      case 'offer': return { label: 'Offer', bg: 'bg-emerald-500', text: 'text-white' };
+      case 'rejected': return { label: 'Rejected', bg: 'bg-red-500', text: 'text-white' };
+      case 'saved': return { label: 'Saved', bg: 'bg-[#042c4c]', text: 'text-white' };
+      default: return { label: 'Active', bg: 'bg-slate-500', text: 'text-white' };
+    }
   };
 
   if (isLoading || skillsQuery.isLoading) {
@@ -317,187 +331,231 @@ export default function AvatarSimulatorDashboard() {
   }
 
   const hasActivity = practicedSkills.length > 0 || activeJobs.length > 0;
-  const primaryJob = activeJobs[0];
-  const readinessPercent = avgOverallScore > 0 ? Math.round(avgOverallScore * 20) : null;
+  const readinessPercent = avgOverallScore > 0 ? Math.round(avgOverallScore * 20) : 0;
 
   return (
     <SidebarLayout>
-      <div className="max-w-3xl mx-auto space-y-6 pb-8">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between">
+      <div className="min-h-screen bg-[#fbfbfc]">
+        <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+          
+          {/* Page Header */}
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Your interview preparation at a glance</p>
+            <h1 className="text-2xl font-bold text-[#042c4c]">Dashboard</h1>
+            <p className="text-[#6c8194] text-sm mt-1">Here's your interview readiness at a glance</p>
           </div>
-          <Link to="/readycheck">
-            <Button className="h-9 px-4 gap-1.5 bg-[#ee7e65] hover:bg-[#e06a50] text-white text-sm font-medium rounded-lg">
-              <Play className="w-4 h-4" />
-              Practice
-            </Button>
-          </Link>
-        </div>
 
-        {/* Stats Row */}
-        {hasActivity && (
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white rounded-lg border border-slate-200 p-4">
-              <p className="text-2xl font-semibold text-slate-900">
-                {readinessPercent !== null ? `${readinessPercent}%` : '—'}
-              </p>
-              <p className="text-sm text-slate-500 mt-0.5">Readiness</p>
-            </div>
-            <div className="bg-white rounded-lg border border-slate-200 p-4">
-              <p className="text-2xl font-semibold text-slate-900">{stats.totalTime}</p>
-              <p className="text-sm text-slate-500 mt-0.5">Practice time</p>
-            </div>
-            <div className="bg-white rounded-lg border border-slate-200 p-4">
-              <p className="text-2xl font-semibold text-slate-900">{activeJobs.length}</p>
-              <p className="text-sm text-slate-500 mt-0.5">Active jobs</p>
-            </div>
-          </div>
-        )}
-
-        {/* Subscription Status */}
-        {subscription && !subscription.hasPro && (
-          <div className="bg-white rounded-lg border border-slate-200 p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
-                {subscription.hasPro ? <Crown className="w-4 h-4 text-slate-600" /> : <Lock className="w-4 h-4 text-slate-400" />}
+          {/* Stats Hero Bar */}
+          <div className="bg-[#042c4c] rounded-2xl p-6 shadow-xl">
+            <div className="grid grid-cols-3 gap-6 text-center">
+              <div>
+                <p className="text-4xl font-bold text-[#ee7e65]">{readinessPercent}%</p>
+                <p className="text-white/70 text-sm mt-1">Readiness</p>
+              </div>
+              <div className="border-x border-white/20">
+                <p className="text-4xl font-bold text-white">{stats.totalTime}</p>
+                <p className="text-white/70 text-sm mt-1">Practice Time</p>
               </div>
               <div>
-                <p className="font-medium text-slate-900 text-sm">
-                  {subscription.hasPro ? "Pro Member" : "Free Plan"}
-                </p>
-                <p className="text-xs text-slate-500">
-                  {subscription.rolePacks?.length || 0} role pack(s)
-                </p>
+                <p className="text-4xl font-bold text-white">{activeJobs.length}</p>
+                <p className="text-white/70 text-sm mt-1">Active Jobs</p>
               </div>
             </div>
-            <Link to="/pricing">
-              <Button size="sm" className="h-8 px-3 text-xs bg-[#ee7e65] hover:bg-[#e06a50] text-white">
-                Upgrade
+          </div>
+
+          {/* Action Buttons */}
+          <div className="grid grid-cols-2 gap-4">
+            <Link to="/interview" className="block">
+              <Button className="w-full h-12 bg-[#ee7e65] hover:bg-[#e06a50] text-white font-semibold rounded-xl shadow-lg shadow-[#ee7e65]/25 gap-2">
+                <Play className="w-5 h-5" />
+                Practice Interview
+              </Button>
+            </Link>
+            <Link to="/jobs" className="block">
+              <Button variant="outline" className="w-full h-12 border-2 border-[#042c4c] text-[#042c4c] font-semibold rounded-xl hover:bg-[#042c4c]/5 gap-2">
+                <Plus className="w-5 h-5" />
+                Add Job Target
               </Button>
             </Link>
           </div>
-        )}
 
-        {/* Active Jobs */}
-        {activeJobs.length > 0 && (
-          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-              <h2 className="font-medium text-slate-900 text-sm">Your Jobs</h2>
-              <Link to="/jobs" className="text-xs text-slate-500 hover:text-slate-700">View all</Link>
+          {/* Recommended Practice Section */}
+          {activeJobs.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-4 h-4 text-[#ee7e65]" />
+                <h2 className="text-sm font-semibold text-[#6c8194] uppercase tracking-wide">Recommended Practice</h2>
+              </div>
+              <div className="space-y-3">
+                {activeJobs.slice(0, 3).map((job) => {
+                  const readiness = job.readinessScore || 0;
+                  const statusBadge = getStatusBadge(job.status);
+                  
+                  return (
+                    <Link key={job.id} to={`/jobs/${job.id}`}>
+                      <div className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-lg hover:border-[#ee7e65]/30 transition-all duration-200 group">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold ${statusBadge.bg} ${statusBadge.text} mb-2`}>
+                              {statusBadge.label}
+                            </span>
+                            <h3 className="font-semibold text-[#042c4c] group-hover:text-[#ee7e65] transition-colors">{job.roleTitle}</h3>
+                            <p className="text-sm text-[#6c8194]">{job.companyName || 'Company'}</p>
+                          </div>
+                          <div className="text-right flex items-center gap-3">
+                            <div>
+                              <p className="text-lg font-bold text-[#042c4c]">{readiness}%</p>
+                              <p className="text-xs text-[#6c8194]">ready</p>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-[#768c9c] group-hover:text-[#ee7e65] group-hover:translate-x-1 transition-all" />
+                          </div>
+                        </div>
+                        {/* Progress Bar */}
+                        <div className="mt-3">
+                          <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full transition-all duration-500 ${getReadinessColor(readiness)}`}
+                              style={{ width: `${readiness}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-            <div className="divide-y divide-slate-100">
-              {activeJobs.slice(0, 3).map((job) => {
-                const readiness = job.readinessScore || 0;
-                
-                return (
-                  <Link key={job.id} to={`/jobs/${job.id}`} className="block px-4 py-3 hover:bg-slate-50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-900 text-sm truncate">{job.roleTitle}</p>
-                        {job.companyName && (
-                          <p className="text-xs text-slate-500 truncate">{job.companyName}</p>
-                        )}
+          )}
+
+          {/* Your Skills Section */}
+          {(topSkill || lowestSkill) && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-[#042c4c]">Your Skills</h2>
+                <Link to="/avatar/results" className="text-sm text-[#ee7e65] hover:text-[#e06a50] font-medium flex items-center gap-1">
+                  View all <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {topSkill && topSkill.avgScore !== null && (
+                  <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl p-4 border border-emerald-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
+                        <Trophy className="w-3 h-3 text-white" />
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className={`text-sm font-medium ${getReadinessColor(job.readinessScore)}`}>
-                          {job.readinessScore !== null ? `${job.readinessScore}%` : '—'}
-                        </span>
-                        <ChevronRight className="w-4 h-4 text-slate-400" />
-                      </div>
+                      <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Strongest</span>
                     </div>
-                  </Link>
-                );
-              })}
+                    <h3 className="font-semibold text-[#042c4c] mb-1">{topSkill.skillName}</h3>
+                    <p className="text-2xl font-bold text-emerald-600">{topSkill.avgScore.toFixed(1)}/5</p>
+                  </div>
+                )}
+                {lowestSkill && lowestSkill.avgScore !== null && (
+                  <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-4 border border-red-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-[#ee7e65] flex items-center justify-center">
+                        <Target className="w-3 h-3 text-white" />
+                      </div>
+                      <span className="text-xs font-semibold text-[#ee7e65] uppercase tracking-wide">Focus Area</span>
+                    </div>
+                    <h3 className="font-semibold text-[#042c4c] mb-1">{lowestSkill.skillName}</h3>
+                    <p className="text-2xl font-bold text-[#ee7e65]">{lowestSkill.avgScore.toFixed(1)}/5</p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Skills Summary */}
-        {practicedSkills.length > 0 && (
-          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-              <h2 className="font-medium text-slate-900 text-sm">Skills</h2>
-              <Link to="/avatar/results" className="text-xs text-slate-500 hover:text-slate-700">View all</Link>
-            </div>
-            <div className="grid grid-cols-2 divide-x divide-slate-100">
-              {topSkill && topSkill.avgScore !== null && (
-                <div className="p-4">
-                  <p className="text-xs text-slate-500 mb-1">Strongest</p>
-                  <p className="font-medium text-slate-900 text-sm truncate">{topSkill.skillName}</p>
-                  <p className="text-lg font-semibold text-emerald-600 mt-1">{topSkill.avgScore.toFixed(1)}/5</p>
-                </div>
-              )}
-              {lowestSkill && lowestSkill.avgScore !== null && (
-                <div className="p-4">
-                  <p className="text-xs text-slate-500 mb-1">Focus area</p>
-                  <p className="font-medium text-slate-900 text-sm truncate">{lowestSkill.skillName}</p>
-                  <p className="text-lg font-semibold text-amber-600 mt-1">{lowestSkill.avgScore.toFixed(1)}/5</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* AI Insights */}
-        {aiInsights?.hasData && aiInsights.insights?.length > 0 && (
-          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-            <button
-              onClick={() => setShowInsights(!showInsights)}
-              className="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors"
-            >
-              <span className="font-medium text-slate-900 text-sm">AI Insights</span>
-              <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showInsights ? 'rotate-180' : ''}`} />
-            </button>
-            {showInsights && (
-              <div className="px-4 pb-4 space-y-2 border-t border-slate-100 pt-3">
-                {aiInsights.insights.slice(0, 3).map((insight: any, idx: number) => (
-                  <div key={idx} className="flex items-start gap-2 text-sm">
+          {/* AI Coaching Insights */}
+          {aiInsights?.hasData && aiInsights.insights?.length > 0 && (
+            <div className="bg-gradient-to-r from-[#042c4c] to-[#0a3d62] rounded-xl p-5 text-white">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-5 h-5 text-[#ee7e65]" />
+                <h3 className="font-semibold">AI Coaching Insights</h3>
+              </div>
+              <div className="space-y-3">
+                {aiInsights.insights.slice(0, 2).map((insight: any, idx: number) => (
+                  <div key={idx} className="flex items-start gap-3 bg-white/10 rounded-lg p-3">
                     {insight.type === "strength" ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                     ) : insight.type === "weakness" ? (
-                      <Target className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                      <Target className="w-5 h-5 text-[#ee7e65] flex-shrink-0" />
                     ) : (
-                      <TrendingUp className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
+                      <TrendingUp className="w-5 h-5 text-blue-400 flex-shrink-0" />
                     )}
                     <div>
-                      <p className="font-medium text-slate-900">{insight.title}</p>
-                      <p className="text-xs text-slate-500">{insight.description}</p>
+                      <p className="font-medium text-white">{insight.title}</p>
+                      <p className="text-sm text-white/70">{insight.description}</p>
                     </div>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!hasActivity && (
-          <div className="bg-white rounded-lg border border-slate-200 p-8 text-center">
-            <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <Play className="w-6 h-6 text-slate-400" />
             </div>
-            <h2 className="text-lg font-semibold text-slate-900 mb-2">Start Practicing</h2>
-            <p className="text-slate-500 text-sm mb-6 max-w-xs mx-auto">
-              Complete your first interview practice to see your progress and get personalized recommendations.
-            </p>
-            <Link to="/readycheck">
-              <Button className="bg-[#ee7e65] hover:bg-[#e06a50] text-white">
-                Start Practice
-              </Button>
-            </Link>
-          </div>
-        )}
+          )}
 
-        {/* Activity Footer */}
-        {hasActivity && (
-          <p className="text-xs text-slate-400 text-center">
-            Last session: {stats.lastSessionDate} · {stats.totalSessions} total sessions
-          </p>
-        )}
+          {/* Other Job Targets */}
+          {activeJobs.length > 3 && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-[#042c4c]">Other Job Targets</h2>
+                <Link to="/jobs" className="text-sm text-[#ee7e65] hover:text-[#e06a50] font-medium flex items-center gap-1">
+                  View all <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {activeJobs.slice(3, 7).map((job) => (
+                  <Link key={job.id} to={`/jobs/${job.id}`}>
+                    <div className="bg-white rounded-lg border border-slate-200 p-3 hover:shadow-md hover:border-[#ee7e65]/30 transition-all">
+                      <p className="font-medium text-[#042c4c] text-sm truncate">{job.roleTitle}</p>
+                      <p className="text-xs text-[#6c8194] truncate">{job.companyName}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!hasActivity && (
+            <div className="bg-white rounded-2xl border border-slate-200 p-10 text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-[#ee7e65] to-[#e06a50] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#ee7e65]/30">
+                <Play className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-[#042c4c] mb-3">Start Your Journey</h2>
+              <p className="text-[#6c8194] mb-8 max-w-md mx-auto">
+                Complete your first interview practice to see your progress and get personalized recommendations.
+              </p>
+              <div className="flex gap-4 justify-center">
+                <Link to="/interview">
+                  <Button className="bg-[#ee7e65] hover:bg-[#e06a50] text-white font-semibold px-8 h-12 rounded-xl shadow-lg shadow-[#ee7e65]/25 gap-2">
+                    <Play className="w-5 h-5" />
+                    Start Practice
+                  </Button>
+                </Link>
+                <Link to="/jobs">
+                  <Button variant="outline" className="border-2 border-[#042c4c] text-[#042c4c] font-semibold px-8 h-12 rounded-xl hover:bg-[#042c4c]/5 gap-2">
+                    <Plus className="w-5 h-5" />
+                    Add Job
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Activity Summary Footer */}
+          {hasActivity && (
+            <div className="flex items-center justify-center gap-4 text-sm text-[#6c8194] pt-4">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="w-4 h-4" />
+                <span>Last session: {stats.lastSessionDate}</span>
+              </div>
+              <span className="text-slate-300">•</span>
+              <div className="flex items-center gap-1.5">
+                <BarChart3 className="w-4 h-4" />
+                <span>{stats.totalSessions} total sessions</span>
+              </div>
+            </div>
+          )}
+
+        </div>
       </div>
     </SidebarLayout>
   );

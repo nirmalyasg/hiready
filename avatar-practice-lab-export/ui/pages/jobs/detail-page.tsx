@@ -366,39 +366,80 @@ export default function JobDetailPage() {
 
   const parsed = job.jdParsed;
 
+  const readiness = job.readinessScore || 0;
+  const status = statusConfig[job.status] || statusConfig.saved;
+
   return (
     <SidebarLayout>
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <button
-            onClick={() => navigate("/jobs")}
-            className="p-2 -ml-2 hover:bg-slate-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
-          </button>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-semibold text-slate-900 truncate">{job.roleTitle}</h1>
-            <div className="flex items-center gap-2 text-sm text-slate-500 mt-0.5">
-              {job.companyName && <span>{job.companyName}</span>}
-              {job.companyName && job.location && <span className="text-slate-300">·</span>}
-              {job.location && <span>{job.location}</span>}
+      <div className="min-h-screen bg-[#fbfbfc]">
+        <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+          
+          {/* Hero Header */}
+          <div className="bg-gradient-to-br from-[#042c4c] to-[#0a3d62] rounded-2xl p-6 shadow-xl text-white">
+            <div className="flex items-start justify-between mb-4">
+              <button
+                onClick={() => navigate("/jobs")}
+                className="p-2 -ml-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-white/80" />
+              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                    <MoreVertical className="w-5 h-5 text-white/60" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Job
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                <Building2 className="w-7 h-7 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold truncate">{job.roleTitle}</h1>
+                <div className="flex items-center gap-2 text-sm text-white/70 mt-1">
+                  {job.companyName && <span className="flex items-center gap-1"><Building2 className="w-3.5 h-3.5" />{job.companyName}</span>}
+                  {job.location && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{job.location}</span>}
+                </div>
+              </div>
+            </div>
+            
+            {/* Stats Bar */}
+            <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-white/10">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-[#ee7e65]">{readiness}%</p>
+                <p className="text-xs text-white/60">Readiness</p>
+              </div>
+              <div className="text-center border-x border-white/10">
+                <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${status.bg} ${status.text}`}>
+                  {status.label}
+                </div>
+                <p className="text-xs text-white/60 mt-1">Status</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-white">{practiceOptions.length}</p>
+                <p className="text-xs text-white/60">Rounds</p>
+              </div>
             </div>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                <MoreVertical className="w-5 h-5 text-slate-400" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleDelete} className="text-red-600">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Job
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+
+          {/* Quick Practice CTA */}
+          {practiceOptions.length > 0 && entitlements?.canStartSession && (
+            <Button
+              onClick={() => handleStartPracticeOption(practiceOptions[0])}
+              className="w-full h-14 bg-[#ee7e65] hover:bg-[#e06a50] text-white font-semibold rounded-xl shadow-lg shadow-[#ee7e65]/25 text-base gap-2"
+            >
+              <Play className="w-5 h-5" />
+              Start Practice Session
+            </Button>
+          )}
 
         {/* Content */}
         <div className="space-y-4">
@@ -706,6 +747,7 @@ export default function JobDetailPage() {
               )}
             </div>
           )}
+        </div>
         </div>
       </div>
 
