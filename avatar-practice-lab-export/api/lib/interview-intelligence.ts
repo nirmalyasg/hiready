@@ -1,6 +1,6 @@
 import { db } from "../db.js";
-import { questionPatterns, companies, companyRoleBlueprints, userSkillMemory } from "../../shared/schema.js";
-import { eq, and, inArray, sql } from "drizzle-orm";
+import { questionPatterns, companies, companyRoleBlueprints, userSkillMemory, questionBank, InsertQuestionBankEntry, QuestionBankEntry } from "../../shared/schema.js";
+import { eq, and, inArray, sql, desc, or, isNull } from "drizzle-orm";
 import { getOpenAI } from "../utils/openai-client.js";
 
 export interface InterviewContext {
@@ -40,6 +40,8 @@ export interface JDExtract {
   niceToHave?: string[];
   keywords?: string[];
   senioritySignal?: string;
+  analysisDimensions?: string[];
+  interviewTopics?: string[];
 }
 
 export interface JobTargetContext {
@@ -112,7 +114,8 @@ export interface ProbeDecision {
 export async function loadQuestionPatterns(
   roleCategory: string,
   interviewType: string,
-  patternTypes: string[]
+  patternTypes: string[],
+  jdExtract?: JDExtract
 ): Promise<LoadedPattern[]> {
   const validPatternTypes = patternTypes as Array<"resume_claim" | "jd_requirement" | "behavioral" | "scenario" | "probe" | "technical" | "situational">;
   
@@ -128,13 +131,100 @@ export async function loadQuestionPatterns(
     )
     .limit(50);
 
-  return patterns.map((p) => ({
+  let loadedPatterns = patterns.map((p) => ({
     id: p.id,
     patternType: p.patternType,
     template: p.template,
     probeTree: (p.probeTree as LoadedPattern["probeTree"]) || {},
     tags: (p.tags as string[]) || [],
   }));
+
+  if (jdExtract?.interviewTopics && jdExtract.interviewTopics.length > 0) {
+    const topicKeywords = jdExtract.interviewTopics
+      .map(t => t.toLowerCase().split(/\s+/))
+      .flat()
+      .filter(w => w.length > 3);
+
+    loadedPatterns = loadedPatterns.map(p => {
+      const templateLower = p.template.toLowerCase();
+      const tagsLower = p.tags.map(t => t.toLowerCase());
+      
+      const matchScore = topicKeywords.filter(kw => 
+        templateLower.includes(kw) || tagsLower.some(t => t.includes(kw))
+      ).length;
+      
+      return { ...p, jdRelevanceScore: matchScore };
+    }).sort((a, b) => (b as any).jdRelevanceScore - (a as any).jdRelevanceScore);
+  }
+
+  return loadedPatterns;
+}
+
+export interface GeneratedJDQuestion {
+  question: string;
+  topic: string;
+  patternType: string;
+  followUps: string[];
+  assessmentDimension: string;
+}
+
+export async function generateQuestionsFromJDTopics(
+  jdExtract: JDExtract,
+  roleCategory: string,
+  interviewType: string,
+  count: number = 5
+): Promise<GeneratedJDQuestion[]> {
+  if (!jdExtract.interviewTopics || jdExtract.interviewTopics.length === 0) {
+    return [];
+  }
+
+  const openai = getOpenAI();
+  const topics = jdExtract.interviewTopics.slice(0, Math.min(count, 8));
+  const skills = jdExtract.mustHave?.slice(0, 5) || [];
+  const responsibilities = jdExtract.responsibilities?.slice(0, 3) || [];
+
+  const prompt = `Generate ${topics.length} interview questions for a ${roleCategory} role (${interviewType} interview).
+
+TOPICS TO COVER:
+${topics.map((t, i) => `${i + 1}. ${t}`).join("\n")}
+
+REQUIRED SKILLS: ${skills.join(", ") || "General skills"}
+KEY RESPONSIBILITIES: ${responsibilities.join("; ") || "Various"}
+
+For each topic, generate:
+1. A direct interview question (open-ended, behavioral or situational)
+2. 2 follow-up probe questions
+3. The assessment dimension it measures
+
+Respond in JSON format:
+{
+  "questions": [
+    {
+      "topic": "the topic",
+      "question": "main interview question",
+      "followUps": ["follow-up 1", "follow-up 2"],
+      "patternType": "behavioral|technical|situational|scenario",
+      "assessmentDimension": "problem_solving|technical_depth|ownership_impact|clarity_structure|role_fit|behavioral_examples"
+    }
+  ]
+}`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "You are an expert interviewer who creates targeted questions based on job requirements." },
+        { role: "user", content: prompt },
+      ],
+      response_format: { type: "json_object" },
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || "{}");
+    return (result.questions || []) as GeneratedJDQuestion[];
+  } catch (error) {
+    console.error("Failed to generate JD-based questions:", error);
+    return [];
+  }
 }
 
 export async function getCompanyBlueprint(
@@ -833,6 +923,128 @@ const JD_CRITICAL_DIMENSIONS: Record<string, string[]> = {
   manager: ["behavioral_examples", "ownership_impact", "clarity_structure", "role_fit"],
   default: ["clarity_structure", "depth_evidence", "problem_solving", "role_fit"],
 };
+
+const JD_DIMENSION_MAPPING: Record<string, string> = {
+  "problem solving": "problem_solving",
+  "problem-solving": "problem_solving",
+  "analytical thinking": "problem_solving",
+  "critical thinking": "problem_solving",
+  "technical skills": "technical_depth",
+  "technical expertise": "technical_depth",
+  "coding ability": "technical_depth",
+  "communication": "clarity_structure",
+  "communication skills": "clarity_structure",
+  "verbal communication": "clarity_structure",
+  "written communication": "clarity_structure",
+  "leadership": "ownership_impact",
+  "team leadership": "ownership_impact",
+  "ownership": "ownership_impact",
+  "collaboration": "behavioral_examples",
+  "teamwork": "behavioral_examples",
+  "stakeholder management": "behavioral_examples",
+  "project management": "ownership_impact",
+  "attention to detail": "depth_evidence",
+  "data analysis": "technical_depth",
+  "customer focus": "role_fit",
+  "adaptability": "confidence_composure",
+  "initiative": "ownership_impact",
+  "creativity": "problem_solving",
+  "innovation": "problem_solving",
+  "time management": "clarity_structure",
+  "decision making": "problem_solving",
+};
+
+export interface DynamicRubricDimension {
+  key: string;
+  name: string;
+  description: string;
+  weight: number;
+  isFromJd: boolean;
+  jdSource?: string;
+}
+
+export interface DynamicEvaluationRubric {
+  dimensions: DynamicRubricDimension[];
+  totalWeight: number;
+  jdCriticalDimensions: string[];
+  evaluatorPrompt: string;
+}
+
+export function mapJdDimensionToRubric(jdDimension: string): string {
+  const normalized = jdDimension.toLowerCase().trim();
+  return JD_DIMENSION_MAPPING[normalized] || "role_fit";
+}
+
+export function buildDynamicRubric(
+  roleCategory: string,
+  jdExtract?: JDExtract
+): DynamicEvaluationRubric {
+  const baseDimensions: DynamicRubricDimension[] = [
+    { key: "clarity_structure", name: "Communication Clarity", description: "Structure, articulation, conciseness", weight: 12, isFromJd: false },
+    { key: "depth_evidence", name: "Depth & Evidence", description: "Specific details, metrics, concrete examples", weight: 15, isFromJd: false },
+    { key: "problem_solving", name: "Problem Solving", description: "Logical reasoning, framework usage, trade-off awareness", weight: 15, isFromJd: false },
+    { key: "role_fit", name: "Role Fit", description: "Match to job requirements and responsibilities", weight: 12, isFromJd: false },
+    { key: "confidence_composure", name: "Confidence & Presence", description: "Delivery, composure, handling of challenges", weight: 10, isFromJd: false },
+    { key: "ownership_impact", name: "Ownership & Impact", description: "Personal contribution, initiative, driving results", weight: 12, isFromJd: false },
+    { key: "behavioral_examples", name: "Behavioral Examples", description: "Use of real situations, STAR format responses", weight: 8, isFromJd: false },
+    { key: "technical_depth", name: "Technical Depth", description: "Domain knowledge, tools, implementation details", weight: 10, isFromJd: false },
+    { key: "consistency_honesty", name: "Consistency & Credibility", description: "Coherent narrative, honest self-assessment", weight: 6, isFromJd: false },
+  ];
+
+  const jdCriticalKeys: string[] = [];
+  
+  if (jdExtract?.analysisDimensions && jdExtract.analysisDimensions.length > 0) {
+    for (const jdDim of jdExtract.analysisDimensions) {
+      const mappedKey = mapJdDimensionToRubric(jdDim);
+      if (!jdCriticalKeys.includes(mappedKey)) {
+        jdCriticalKeys.push(mappedKey);
+      }
+      const dimension = baseDimensions.find(d => d.key === mappedKey);
+      if (dimension) {
+        dimension.isFromJd = true;
+        dimension.jdSource = jdDim;
+        dimension.weight = Math.min(dimension.weight + 3, 20);
+      }
+    }
+  } else {
+    const defaultCritical = JD_CRITICAL_DIMENSIONS[roleCategory] || JD_CRITICAL_DIMENSIONS.default;
+    jdCriticalKeys.push(...defaultCritical);
+  }
+
+  for (const criticalKey of jdCriticalKeys) {
+    const dimension = baseDimensions.find(d => d.key === criticalKey);
+    if (dimension && !dimension.isFromJd) {
+      dimension.weight = Math.min(dimension.weight + 2, 18);
+    }
+  }
+
+  const totalWeight = baseDimensions.reduce((sum, d) => sum + d.weight, 0);
+  const normalizedDimensions = baseDimensions.map(d => ({
+    ...d,
+    weight: Math.round((d.weight / totalWeight) * 100),
+  }));
+
+  const dimensionList = normalizedDimensions
+    .sort((a, b) => b.weight - a.weight)
+    .map((d, i) => {
+      const jdNote = d.isFromJd ? ` [JD Priority: ${d.jdSource}]` : "";
+      return `${i + 1}. ${d.name} (${d.weight}%) - ${d.description}${jdNote}`;
+    })
+    .join("\n");
+
+  const evaluatorPrompt = `EVALUATION RUBRIC (score each dimension 0-100, weighted as shown):
+${dimensionList}
+
+JD-CRITICAL DIMENSIONS (prioritize these): ${jdCriticalKeys.join(", ")}
+${jdExtract?.interviewTopics ? `\nINTERVIEW TOPICS TO PROBE: ${jdExtract.interviewTopics.slice(0, 5).join(", ")}` : ""}`;
+
+  return {
+    dimensions: normalizedDimensions,
+    totalWeight: 100,
+    jdCriticalDimensions: jdCriticalKeys,
+    evaluatorPrompt,
+  };
+}
 
 function getReadinessLevel(score: number): ReadinessScore["readinessLevel"] {
   if (score >= 85) return "strong";
@@ -1564,4 +1776,198 @@ RULES:
     console.error("AI practice plan generation failed, using template:", error);
     return generateSevenDayPlan(context);
   }
+}
+
+// =====================
+// Question Bank Management
+// =====================
+
+export interface QuestionBankFilters {
+  roleKitId?: number;
+  companyId?: string;
+  interviewType?: string;
+  questionType?: string;
+  topic?: string;
+  limit?: number;
+}
+
+export async function getQuestionsFromBank(
+  filters: QuestionBankFilters
+): Promise<QuestionBankEntry[]> {
+  const conditions = [eq(questionBank.isActive, true)];
+  
+  if (filters.roleKitId) {
+    conditions.push(or(
+      eq(questionBank.roleKitId, filters.roleKitId),
+      isNull(questionBank.roleKitId)
+    )!);
+  }
+  
+  if (filters.companyId) {
+    conditions.push(or(
+      eq(questionBank.companyId, filters.companyId),
+      isNull(questionBank.companyId)
+    )!);
+  }
+  
+  if (filters.interviewType) {
+    conditions.push(eq(questionBank.interviewType, filters.interviewType as any));
+  }
+  
+  if (filters.questionType) {
+    conditions.push(eq(questionBank.questionType, filters.questionType as any));
+  }
+
+  const questions = await db
+    .select()
+    .from(questionBank)
+    .where(and(...conditions))
+    .orderBy(desc(questionBank.usageCount), desc(questionBank.avgRating))
+    .limit(filters.limit || 20);
+
+  return questions;
+}
+
+type ValidQuestionType = "behavioral" | "technical" | "situational" | "scenario" | "probe" | "resume_claim" | "jd_requirement";
+type ValidDifficulty = "easy" | "medium" | "hard";
+type ValidInterviewType = "hr" | "hiring_manager" | "technical" | "behavioral" | "panel" | "case_study" | "coding";
+type ValidSourceType = "generated" | "curated" | "session_extracted";
+
+export async function saveQuestionToBank(
+  entry: {
+    question: string;
+    questionType: ValidQuestionType;
+    roleKitId?: number | null;
+    companyId?: string | null;
+    interviewType?: ValidInterviewType | null;
+    topic?: string | null;
+    followUps?: string[] | null;
+    assessmentDimension?: string | null;
+    jdSourceTopics?: string[] | null;
+    difficulty?: ValidDifficulty | null;
+    sourceType?: ValidSourceType | null;
+    sourceJobTargetId?: string | null;
+  }
+): Promise<QuestionBankEntry> {
+  const [saved] = await db
+    .insert(questionBank)
+    .values([entry])
+    .returning();
+  return saved;
+}
+
+export async function saveGeneratedQuestionsToBank(
+  questions: GeneratedJDQuestion[],
+  context: {
+    roleKitId?: number;
+    companyId?: string;
+    interviewType?: string;
+    sourceJobTargetId?: string;
+    jdSourceTopics?: string[];
+  }
+): Promise<QuestionBankEntry[]> {
+  if (questions.length === 0) return [];
+
+  type QuestionType = "behavioral" | "technical" | "situational" | "scenario" | "probe" | "resume_claim" | "jd_requirement";
+  
+  const entries = questions.map(q => ({
+    roleKitId: context.roleKitId || null,
+    companyId: context.companyId || null,
+    interviewType: (context.interviewType || null) as "hr" | "hiring_manager" | "technical" | "behavioral" | "panel" | "case_study" | "coding" | null,
+    question: q.question,
+    questionType: (["behavioral", "technical", "situational", "scenario", "probe", "resume_claim", "jd_requirement"].includes(q.patternType) 
+      ? q.patternType : "behavioral") as QuestionType,
+    topic: q.topic || null,
+    followUps: q.followUps || null,
+    assessmentDimension: q.assessmentDimension || null,
+    jdSourceTopics: context.jdSourceTopics || null,
+    difficulty: "medium" as "easy" | "medium" | "hard",
+    sourceType: "generated" as "generated" | "curated" | "session_extracted",
+    sourceJobTargetId: context.sourceJobTargetId || null,
+  }));
+
+  const saved = await db
+    .insert(questionBank)
+    .values(entries)
+    .returning();
+
+  return saved;
+}
+
+export async function incrementQuestionUsage(questionId: string): Promise<void> {
+  await db
+    .update(questionBank)
+    .set({
+      usageCount: sql`COALESCE(${questionBank.usageCount}, 0) + 1`,
+      updatedAt: new Date(),
+    })
+    .where(eq(questionBank.id, questionId));
+}
+
+export async function rateQuestion(
+  questionId: string,
+  rating: number
+): Promise<void> {
+  const [current] = await db
+    .select({ usageCount: questionBank.usageCount, avgRating: questionBank.avgRating })
+    .from(questionBank)
+    .where(eq(questionBank.id, questionId));
+
+  if (current) {
+    const currentAvg = current.avgRating || rating;
+    const count = current.usageCount || 1;
+    const newAvg = (currentAvg * count + rating) / (count + 1);
+    
+    await db
+      .update(questionBank)
+      .set({ avgRating: newAvg, updatedAt: new Date() })
+      .where(eq(questionBank.id, questionId));
+  }
+}
+
+export async function getOrGenerateQuestions(
+  context: {
+    roleKitId?: number;
+    companyId?: string;
+    interviewType: string;
+    jdExtract?: JDExtract;
+    roleCategory: string;
+    sourceJobTargetId?: string;
+  },
+  count: number = 5
+): Promise<QuestionBankEntry[]> {
+  const existing = await getQuestionsFromBank({
+    roleKitId: context.roleKitId,
+    companyId: context.companyId,
+    interviewType: context.interviewType,
+    limit: count,
+  });
+
+  if (existing.length >= count) {
+    return existing.slice(0, count);
+  }
+
+  const neededCount = count - existing.length;
+  
+  if (context.jdExtract?.interviewTopics && context.jdExtract.interviewTopics.length > 0) {
+    const generated = await generateQuestionsFromJDTopics(
+      context.jdExtract,
+      context.roleCategory,
+      context.interviewType,
+      neededCount
+    );
+
+    if (generated.length > 0) {
+      const saved = await saveGeneratedQuestionsToBank(generated, {
+        roleKitId: context.roleKitId,
+        companyId: context.companyId,
+        interviewType: context.interviewType,
+        sourceJobTargetId: context.sourceJobTargetId,
+        jdSourceTopics: context.jdExtract.interviewTopics,
+      });
+      return [...existing, ...saved];
+    }
+  }
+
+  return existing;
 }

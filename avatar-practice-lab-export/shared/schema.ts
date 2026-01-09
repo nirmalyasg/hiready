@@ -1615,6 +1615,36 @@ export const questionPatterns = pgTable("question_patterns", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Question Bank - stores generated questions for reuse
+export const questionBank = pgTable("question_bank", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  roleKitId: integer("role_kit_id").references(() => roleKits.id, { onDelete: "set null" }),
+  companyId: varchar("company_id").references(() => companies.id, { onDelete: "set null" }),
+  interviewType: text("interview_type")
+    .$type<"hr" | "hiring_manager" | "technical" | "behavioral" | "panel" | "case_study" | "coding">(),
+  question: text("question").notNull(),
+  questionType: text("question_type")
+    .$type<"behavioral" | "technical" | "situational" | "scenario" | "probe" | "resume_claim" | "jd_requirement">()
+    .notNull(),
+  topic: text("topic"),
+  followUps: jsonb("follow_ups").$type<string[]>(),
+  assessmentDimension: text("assessment_dimension"),
+  jdSourceTopics: jsonb("jd_source_topics").$type<string[]>(),
+  difficulty: text("difficulty").$type<"easy" | "medium" | "hard">().default("medium"),
+  usageCount: integer("usage_count").default(0),
+  avgRating: real("avg_rating"),
+  sourceType: text("source_type").$type<"generated" | "curated" | "session_extracted">().default("generated"),
+  sourceJobTargetId: varchar("source_job_target_id").references(() => jobTargets.id, { onDelete: "set null" }),
+  sourceSessionId: integer("source_session_id"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  roleKitIdx: index("question_bank_role_kit_idx").on(table.roleKitId),
+  companyIdx: index("question_bank_company_idx").on(table.companyId),
+  interviewTypeIdx: index("question_bank_interview_type_idx").on(table.interviewType),
+}));
+
 // Company Role Blueprints - company-specific interview configurations
 export const companyRoleBlueprints = pgTable("company_role_blueprints", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -1957,6 +1987,7 @@ export const hireadyRoleIndexRelations = relations(hireadyRoleIndex, ({ one }) =
 // Interview Intelligence Insert Schemas
 export const insertCompanySchema = createInsertSchema(companies).omit({ createdAt: true });
 export const insertQuestionPatternSchema = createInsertSchema(questionPatterns).omit({ createdAt: true });
+export const insertQuestionBankSchema = createInsertSchema(questionBank).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCompanyRoleBlueprintSchema = createInsertSchema(companyRoleBlueprints).omit({ updatedAt: true });
 export const insertJobPracticeLinkSchema = createInsertSchema(jobPracticeLinks).omit({ createdAt: true });
 export const insertUserSkillMemorySchema = createInsertSchema(userSkillMemory).omit({ updatedAt: true });
@@ -2118,6 +2149,8 @@ export type Company = typeof companies.$inferSelect;
 export type InsertCompany = z.infer<typeof insertCompanySchema>;
 export type QuestionPattern = typeof questionPatterns.$inferSelect;
 export type InsertQuestionPattern = z.infer<typeof insertQuestionPatternSchema>;
+export type QuestionBankEntry = typeof questionBank.$inferSelect;
+export type InsertQuestionBankEntry = z.infer<typeof insertQuestionBankSchema>;
 export type CompanyRoleBlueprint = typeof companyRoleBlueprints.$inferSelect;
 export type InsertCompanyRoleBlueprint = z.infer<typeof insertCompanyRoleBlueprintSchema>;
 export type JobPracticeLink = typeof jobPracticeLinks.$inferSelect;

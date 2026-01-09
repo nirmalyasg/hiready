@@ -40,6 +40,9 @@ interface JobTarget {
     redFlags?: string[];
     focusAreas?: string[];
     salaryRange?: string;
+    detectedRoleTitle?: string;
+    analysisDimensions?: string[];
+    interviewTopics?: string[];
   } | null;
   status: string;
   readinessScore: number | null;
@@ -51,6 +54,7 @@ interface JobTarget {
   roleArchetypeId?: string | null;
   roleFamily?: string | null;
   roleKitId?: number | null;
+  roleKitMatchConfidence?: "high" | "medium" | "low" | null;
 }
 
 interface RoleKit {
@@ -58,6 +62,15 @@ interface RoleKit {
   name: string;
   description: string | null;
   category: string | null;
+  domain?: string | null;
+}
+
+interface RoleKitMatchInfo {
+  roleKitId: number;
+  roleKitName: string;
+  confidence: "high" | "medium" | "low";
+  matchType: "exact" | "keyword" | "domain" | "none";
+  alternativeMatches?: { roleKitId: number; roleKitName: string; confidence: "medium" | "low" }[];
 }
 
 const archetypeLabels: Record<string, string> = {
@@ -443,12 +456,14 @@ export default function JobDetailPage() {
           <div className="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
               <h2 className="font-semibold text-[#042c4c] text-sm">Practice Role</h2>
-              <button 
-                onClick={() => setShowRoleSelector(!showRoleSelector)}
-                className="text-xs text-[#ee7e65] hover:text-[#e06a50] font-medium"
-              >
-                {showRoleSelector ? "Cancel" : "Change"}
-              </button>
+              {job?.roleKitId && (
+                <button 
+                  onClick={() => setShowRoleSelector(!showRoleSelector)}
+                  className="text-xs text-[#ee7e65] hover:text-[#e06a50] font-medium"
+                >
+                  {showRoleSelector ? "Cancel" : "Change"}
+                </button>
+              )}
             </div>
             <div className="p-3">
               {showRoleSelector ? (
@@ -482,11 +497,25 @@ export default function JobDetailPage() {
                     {job?.roleKitId ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-[#042c4c] text-sm truncate">
-                      {job?.roleKitId 
-                        ? roleKits.find(k => k.id === job.roleKitId)?.name || "Role Detected"
-                        : "Role selection required"}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-[#042c4c] text-sm truncate">
+                        {job?.roleKitId 
+                          ? roleKits.find(k => k.id === job.roleKitId)?.name || "Role Detected"
+                          : "Role selection required"}
+                      </p>
+                      {job?.roleKitId && job?.roleKitMatchConfidence && (
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                          job.roleKitMatchConfidence === "high" 
+                            ? "bg-emerald-100 text-emerald-700" 
+                            : job.roleKitMatchConfidence === "medium"
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-slate-100 text-slate-600"
+                        }`}>
+                          {job.roleKitMatchConfidence === "high" ? "Best Match" : 
+                           job.roleKitMatchConfidence === "medium" ? "Good Match" : "Suggested"}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-slate-500">
                       {job?.roleKitId 
                         ? "Auto-detected from your job description"
@@ -693,6 +722,33 @@ export default function JobDetailPage() {
                           <li key={idx} className="flex items-start gap-2 text-xs text-amber-700">
                             <AlertCircle className="w-3.5 h-3.5 text-amber-500 mt-0.5 flex-shrink-0" />
                             <span className="leading-relaxed">{flag}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {parsed.analysisDimensions && parsed.analysisDimensions.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1.5">Assessment Dimensions</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {parsed.analysisDimensions.map((dim, idx) => (
+                          <span key={idx} className="px-2 py-0.5 bg-violet-50 text-violet-700 rounded-full text-xs font-medium">
+                            {dim}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {parsed.interviewTopics && parsed.interviewTopics.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1.5">Interview Topics</p>
+                      <ul className="space-y-1">
+                        {parsed.interviewTopics.slice(0, 6).map((topic, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-xs text-slate-600">
+                            <MessageCircle className="w-3.5 h-3.5 text-[#ee7e65] mt-0.5 flex-shrink-0" />
+                            <span className="leading-relaxed">{topic}</span>
                           </li>
                         ))}
                       </ul>

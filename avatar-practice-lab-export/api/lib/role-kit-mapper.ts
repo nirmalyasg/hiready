@@ -7,6 +7,8 @@ interface RoleKitMatch {
   roleKitName: string;
   confidence: "high" | "medium" | "low";
   matchType: "exact" | "keyword" | "domain" | "none";
+  roleKitCategory?: string | null;
+  alternativeMatches?: { roleKitId: number; roleKitName: string; confidence: "medium" | "low" }[];
 }
 
 const ROLE_DOMAIN_MAP: Record<string, string[]> = {
@@ -76,11 +78,17 @@ export async function mapRoleTitleToRoleKit(
   for (const kit of allRoleKits) {
     const kitName = kit.name.toLowerCase();
     if (kitName.includes(normalizedTitle) || normalizedTitle.includes(kitName.split(" - ")[0])) {
+      const alternatives = allRoleKits
+        .filter(k => k.id !== kit.id && k.domain === kit.domain)
+        .slice(0, 3)
+        .map(k => ({ roleKitId: k.id, roleKitName: k.name, confidence: "medium" as const }));
       return {
         roleKitId: kit.id,
         roleKitName: kit.name,
         confidence: "high",
         matchType: "exact",
+        roleKitCategory: kit.roleCategory,
+        alternativeMatches: alternatives,
       };
     }
   }
@@ -129,11 +137,18 @@ export async function mapRoleTitleToRoleKit(
         selectedKit = entryLevel;
       }
       
+      const alternatives = matchingKits
+        .filter(k => k.id !== selectedKit.id)
+        .slice(0, 3)
+        .map(k => ({ roleKitId: k.id, roleKitName: k.name, confidence: "medium" as const }));
+      
       return {
         roleKitId: selectedKit.id,
         roleKitName: selectedKit.name,
         confidence: bestMatchScore >= 2 ? "high" : "medium",
         matchType: "domain",
+        roleKitCategory: selectedKit.roleCategory,
+        alternativeMatches: alternatives,
       };
     }
   }
@@ -160,23 +175,37 @@ export async function mapRoleTitleToRoleKit(
         const entryLevel = matchingKits.find(k => 
           k.name.toLowerCase().includes("entry") || k.name.toLowerCase().includes("associate")
         );
+        const selectedKit = entryLevel || matchingKits[0];
+        const alternatives = matchingKits
+          .filter(k => k.id !== selectedKit.id)
+          .slice(0, 3)
+          .map(k => ({ roleKitId: k.id, roleKitName: k.name, confidence: "medium" as const }));
         return {
-          roleKitId: (entryLevel || matchingKits[0]).id,
-          roleKitName: (entryLevel || matchingKits[0]).name,
+          roleKitId: selectedKit.id,
+          roleKitName: selectedKit.name,
           confidence: "medium",
           matchType: "domain",
+          roleKitCategory: selectedKit.roleCategory,
+          alternativeMatches: alternatives,
         };
       }
     }
   }
 
   const defaultKit = allRoleKits.find(k => k.domain === "software" && k.name.toLowerCase().includes("entry"));
+  const topAlternatives = allRoleKits
+    .filter(k => k.id !== (defaultKit?.id || allRoleKits[0].id))
+    .slice(0, 5)
+    .map(k => ({ roleKitId: k.id, roleKitName: k.name, confidence: "low" as const }));
+  
   if (defaultKit) {
     return {
       roleKitId: defaultKit.id,
       roleKitName: defaultKit.name,
       confidence: "low",
       matchType: "none",
+      roleKitCategory: defaultKit.roleCategory,
+      alternativeMatches: topAlternatives,
     };
   }
 
@@ -185,5 +214,7 @@ export async function mapRoleTitleToRoleKit(
     roleKitName: allRoleKits[0].name,
     confidence: "low",
     matchType: "none",
+    roleKitCategory: allRoleKits[0].roleCategory,
+    alternativeMatches: topAlternatives,
   };
 }

@@ -73,6 +73,9 @@ type JDParsedType = {
   redFlags?: string[];
   focusAreas?: string[];
   salaryRange?: string;
+  detectedRoleTitle?: string;
+  analysisDimensions?: string[];
+  interviewTopics?: string[];
 };
 
 async function findDuplicateJob(userId: string, options: { jobUrl?: string; roleTitle?: string; companyName?: string }) {
@@ -136,14 +139,17 @@ type JobWithPracticeStats = JobTarget & {
 const JD_PARSE_PROMPT = `You are an expert job description analyst. Analyze the given job description and extract structured information.
 
 Return a JSON object with the following fields:
+- detectedRoleTitle: the specific job title/role name extracted from the JD (e.g., "Senior Software Engineer", "Data Analyst", "Product Manager")
 - requiredSkills: array of specific required skills mentioned (be specific, include both technical and soft skills)
 - preferredSkills: array of nice-to-have or preferred skills
 - experienceLevel: one of "entry", "mid", "senior", "lead", or "executive"
 - responsibilities: array of key job responsibilities (max 8)
 - companyContext: brief summary of the company culture or context if mentioned
 - redFlags: any concerning aspects (unrealistic requirements, vague expectations, etc.)
-- focusAreas: top 3-5 areas the candidate should focus practice on
+- focusAreas: top 3-5 areas the candidate should focus practice on for interviews
 - salaryRange: salary range if mentioned, otherwise null
+- analysisDimensions: array of 4-6 key competency dimensions to assess the candidate on (e.g., "Technical Problem Solving", "Communication", "Leadership", "Domain Expertise", "Collaboration")
+- interviewTopics: array of 5-8 specific topics/questions areas to cover in practice interviews based on the JD requirements
 
 Be precise and extract only what is explicitly stated or strongly implied. If something is not mentioned, use an empty array or null.`;
 
@@ -200,7 +206,8 @@ jobsRouter.post("/", requireAuth, async (req: Request, res: Response) => {
       }
     }
 
-    const finalRoleTitle = parsedJd?.focusAreas?.[0] ? roleTitle.replace("Job from Paste", parsedJd.focusAreas[0]) : roleTitle;
+    const finalRoleTitle = parsedJd?.detectedRoleTitle || 
+      (parsedJd?.focusAreas?.[0] ? roleTitle.replace("Job from Paste", parsedJd.focusAreas[0]) : roleTitle);
     
     const roleKitMatch = await mapRoleTitleToRoleKit(finalRoleTitle, null, jdText);
 
@@ -304,7 +311,7 @@ jobsRouter.post("/import-linkedin", requireAuth, async (req: Request, res: Respo
       }
     }
 
-    const finalRoleTitle = scraped.title || "Untitled Role";
+    const finalRoleTitle = parsedJd?.detectedRoleTitle || scraped.title || "Untitled Role";
     const roleKitMatch = await mapRoleTitleToRoleKit(finalRoleTitle, null, scraped.description);
 
     const [newJob] = await db
