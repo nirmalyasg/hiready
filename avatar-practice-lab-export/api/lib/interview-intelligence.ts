@@ -975,68 +975,111 @@ export function mapJdDimensionToRubric(jdDimension: string): string {
   return JD_DIMENSION_MAPPING[normalized] || "role_fit";
 }
 
+function toSnakeCase(str: string): string {
+  return str.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+}
+
+function generateDimensionDescription(name: string): string {
+  const descriptions: Record<string, string> = {
+    "python": "Proficiency in Python programming, syntax, libraries, and best practices",
+    "sql": "Database querying skills, optimization, and data manipulation",
+    "data analysis": "Ability to analyze, interpret, and derive insights from data",
+    "leadership": "Leadership skills, team management, and influence",
+    "communication": "Clear, effective communication across stakeholders",
+    "problem solving": "Structured approach to solving complex problems",
+    "project management": "Planning, execution, and delivery of projects",
+    "stakeholder management": "Managing relationships with key stakeholders",
+    "technical skills": "Domain-specific technical knowledge and expertise",
+    "collaboration": "Working effectively with cross-functional teams",
+  };
+  const key = name.toLowerCase();
+  return descriptions[key] || `Demonstrated competence in ${name}`;
+}
+
 export function buildDynamicRubric(
   roleCategory: string,
   jdExtract?: JDExtract
 ): DynamicEvaluationRubric {
-  const baseDimensions: DynamicRubricDimension[] = [
-    { key: "clarity_structure", name: "Communication Clarity", description: "Structure, articulation, conciseness", weight: 12, isFromJd: false },
-    { key: "depth_evidence", name: "Depth & Evidence", description: "Specific details, metrics, concrete examples", weight: 15, isFromJd: false },
-    { key: "problem_solving", name: "Problem Solving", description: "Logical reasoning, framework usage, trade-off awareness", weight: 15, isFromJd: false },
-    { key: "role_fit", name: "Role Fit", description: "Match to job requirements and responsibilities", weight: 12, isFromJd: false },
-    { key: "confidence_composure", name: "Confidence & Presence", description: "Delivery, composure, handling of challenges", weight: 10, isFromJd: false },
-    { key: "ownership_impact", name: "Ownership & Impact", description: "Personal contribution, initiative, driving results", weight: 12, isFromJd: false },
-    { key: "behavioral_examples", name: "Behavioral Examples", description: "Use of real situations, STAR format responses", weight: 8, isFromJd: false },
-    { key: "technical_depth", name: "Technical Depth", description: "Domain knowledge, tools, implementation details", weight: 10, isFromJd: false },
-    { key: "consistency_honesty", name: "Consistency & Credibility", description: "Coherent narrative, honest self-assessment", weight: 6, isFromJd: false },
-  ];
-
+  const dimensions: DynamicRubricDimension[] = [];
   const jdCriticalKeys: string[] = [];
   
+  // Core base dimensions that should always be included (40% weight budget)
+  const coreDimensions: DynamicRubricDimension[] = [
+    { key: "communication_clarity", name: "Communication Clarity", description: "Structure, articulation, conciseness in responses", weight: 15, isFromJd: false },
+    { key: "ownership_impact", name: "Ownership & Impact", description: "Personal contribution, initiative, driving results", weight: 13, isFromJd: false },
+    { key: "role_fit", name: "Role Fit", description: "Overall match to job requirements and culture", weight: 12, isFromJd: false },
+  ];
+  
+  // If JD dimensions are provided, create dimensions directly from them (60% weight budget)
   if (jdExtract?.analysisDimensions && jdExtract.analysisDimensions.length > 0) {
-    for (const jdDim of jdExtract.analysisDimensions) {
-      const mappedKey = mapJdDimensionToRubric(jdDim);
-      if (!jdCriticalKeys.includes(mappedKey)) {
-        jdCriticalKeys.push(mappedKey);
-      }
-      const dimension = baseDimensions.find(d => d.key === mappedKey);
-      if (dimension) {
-        dimension.isFromJd = true;
-        dimension.jdSource = jdDim;
-        dimension.weight = Math.min(dimension.weight + 3, 20);
-      }
+    // Dedupe and limit to top 6 JD dimensions
+    const uniqueJdDims = [...new Set(jdExtract.analysisDimensions)].slice(0, 6);
+    const jdWeightBudget = 60;
+    const weightPerJdDim = Math.floor(jdWeightBudget / uniqueJdDims.length);
+    
+    for (const jdDim of uniqueJdDims) {
+      const key = toSnakeCase(jdDim);
+      jdCriticalKeys.push(key);
+      
+      dimensions.push({
+        key,
+        name: jdDim,
+        description: generateDimensionDescription(jdDim),
+        weight: weightPerJdDim,
+        isFromJd: true,
+        jdSource: jdDim,
+      });
     }
+    
+    // Add core dimensions with remaining weight
+    dimensions.push(...coreDimensions);
   } else {
+    // Fallback to full base dimensions when no JD dimensions
+    const baseDimensions: DynamicRubricDimension[] = [
+      { key: "clarity_structure", name: "Clarity & Structure", description: "Structure, articulation, conciseness", weight: 12, isFromJd: false },
+      { key: "depth_evidence", name: "Depth & Evidence", description: "Specific details, metrics, concrete examples", weight: 15, isFromJd: false },
+      { key: "problem_solving", name: "Problem Solving", description: "Logical reasoning, framework usage, trade-off awareness", weight: 15, isFromJd: false },
+      { key: "role_fit", name: "Role Fit", description: "Match to job requirements and responsibilities", weight: 12, isFromJd: false },
+      { key: "confidence_composure", name: "Confidence & Composure", description: "Delivery, composure, handling of challenges", weight: 10, isFromJd: false },
+      { key: "ownership_impact", name: "Ownership & Impact", description: "Personal contribution, initiative, driving results", weight: 12, isFromJd: false },
+      { key: "communication_hygiene", name: "Communication Hygiene", description: "Filler words, pacing, clarity of speech", weight: 8, isFromJd: false },
+      { key: "consistency_honesty", name: "Consistency & Honesty", description: "Coherent narrative, honest self-assessment", weight: 6, isFromJd: false },
+    ];
+    
     const defaultCritical = JD_CRITICAL_DIMENSIONS[roleCategory] || JD_CRITICAL_DIMENSIONS.default;
     jdCriticalKeys.push(...defaultCritical);
+    dimensions.push(...baseDimensions);
   }
 
-  for (const criticalKey of jdCriticalKeys) {
-    const dimension = baseDimensions.find(d => d.key === criticalKey);
-    if (dimension && !dimension.isFromJd) {
-      dimension.weight = Math.min(dimension.weight + 2, 18);
-    }
-  }
-
-  const totalWeight = baseDimensions.reduce((sum, d) => sum + d.weight, 0);
-  const normalizedDimensions = baseDimensions.map(d => ({
+  // Normalize weights to total 100
+  const totalWeight = dimensions.reduce((sum, d) => sum + d.weight, 0);
+  const normalizedDimensions = dimensions.map(d => ({
     ...d,
     weight: Math.round((d.weight / totalWeight) * 100),
   }));
 
-  const dimensionList = normalizedDimensions
-    .sort((a, b) => b.weight - a.weight)
-    .map((d, i) => {
-      const jdNote = d.isFromJd ? ` [JD Priority: ${d.jdSource}]` : "";
-      return `${i + 1}. ${d.name} (${d.weight}%) - ${d.description}${jdNote}`;
-    })
+  // Build evaluator prompt with JD dimensions prominently featured
+  const jdDimensionsList = normalizedDimensions
+    .filter(d => d.isFromJd)
+    .map((d, i) => `${i + 1}. ${d.name} (${d.weight}%) - ${d.description}`)
+    .join("\n");
+  
+  const coreDimensionsList = normalizedDimensions
+    .filter(d => !d.isFromJd)
+    .map((d, i) => `${i + 1}. ${d.name} (${d.weight}%) - ${d.description}`)
     .join("\n");
 
-  const evaluatorPrompt = `EVALUATION RUBRIC (score each dimension 0-100, weighted as shown):
-${dimensionList}
+  const evaluatorPrompt = jdDimensionsList 
+    ? `EVALUATION RUBRIC - JD-SPECIFIC DIMENSIONS (use these EXACT names in your output):
+${jdDimensionsList}
 
-JD-CRITICAL DIMENSIONS (prioritize these): ${jdCriticalKeys.join(", ")}
-${jdExtract?.interviewTopics ? `\nINTERVIEW TOPICS TO PROBE: ${jdExtract.interviewTopics.slice(0, 5).join(", ")}` : ""}`;
+CORE COMPETENCY DIMENSIONS:
+${coreDimensionsList}
+
+IMPORTANT: Your dimension_scores output MUST use the exact dimension names listed above.
+${jdExtract?.interviewTopics ? `\nINTERVIEW TOPICS TO PROBE: ${jdExtract.interviewTopics.slice(0, 5).join(", ")}` : ""}`
+    : `EVALUATION RUBRIC (score each dimension 1-5):
+${coreDimensionsList}`;
 
   return {
     dimensions: normalizedDimensions,

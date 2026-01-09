@@ -51,6 +51,17 @@ avatar-practice-lab-export/
 - **CTA Gradient Pattern**: from-[#ee7e65] to-[#e06a50]
 - **Dark Gradient Pattern**: from-[#042c4c] to-[#0a3d62]
 
+## Recent Changes (January 9, 2026)
+
+### Dynamic JD-Specific Assessment Dimensions
+Interview analysis now creates assessment dimensions directly from JD-extracted skills instead of mapping to fixed dimensions:
+- **JD-First Approach**: analysisDimensions from JD parsing become actual rubric dimensions (e.g., "Python", "SQL", "Data Analysis")
+- **Weight Distribution**: JD dimensions receive 60% of scoring weight, core competencies (Communication, Ownership, Role Fit) receive 40%
+- **Evaluator Prompt**: Explicit instructions to use exact JD dimension names in output
+- **Normalization**: Handles both string arrays and object arrays from JD parsing
+- **Fallback**: Uses standard 8-dimension rubric when no JD data available
+- **Location**: `buildDynamicRubric()` in `api/lib/interview-intelligence.ts`
+
 ## Recent Changes (January 8, 2026)
 
 ### JD-Specific Skill Dimension Mapping

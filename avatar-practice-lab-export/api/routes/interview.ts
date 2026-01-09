@@ -58,9 +58,12 @@ import {
   getJobReadinessSummary,
   generateSevenDayPlan,
   generateAIPracticePlan,
+  buildDynamicRubric,
   type InterviewContext,
   type JobTargetForReadiness,
   type ReadinessScore,
+  type JDExtract,
+  type DynamicEvaluationRubric,
 } from "../lib/interview-intelligence.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -1357,21 +1360,29 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
         }
       }
       
-      // Collect skills from multiple possible field names
+      // First priority: analysisDimensions from JD parsing (these are the key skills to assess)
+      const analysisDimensions = data.analysisDimensions || data.analysis_dimensions || [];
+      
+      // Second priority: interviewTopics from JD parsing
+      const interviewTopics = data.interviewTopics || data.interview_topics || [];
+      
+      // Third priority: traditional skill fields
       const requiredSkills = data.requiredSkills || data.required_skills || [];
       const preferredSkills = data.preferredSkills || data.preferred_skills || data.niceToHave || [];
       const technicalSkills = data.technicalSkills || data.technical_skills || [];
       const softSkills = data.softSkills || data.soft_skills || [];
       const genericSkills = data.skills || [];
       
-      // Combine all skills, prioritizing required skills first
-      const allSkills = [
-        ...requiredSkills, 
-        ...technicalSkills,
-        ...softSkills,
-        ...preferredSkills,
-        ...genericSkills
-      ];
+      // Prioritize analysisDimensions if available, otherwise fallback to traditional skills
+      const allSkills = analysisDimensions.length > 0 
+        ? [...analysisDimensions, ...interviewTopics]
+        : [
+            ...requiredSkills, 
+            ...technicalSkills,
+            ...softSkills,
+            ...preferredSkills,
+            ...genericSkills
+          ];
       
       // Remove duplicates and empty strings
       return [...new Set(allSkills.filter((s: any) => typeof s === 'string' && s.trim().length > 0))];
@@ -1385,11 +1396,24 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
       jdSkills = extractSkillsFromParsed(jdParsed);
     }
     
-    // If no skills from JD doc, try to get from jobTarget's parsedData
+    // If no skills from JD doc, try to get from jobTarget's parsedData and direct fields
     if (jdSkills.length === 0 && session.jobTargetId) {
       const [jobTarget] = await db.select().from(jobTargets).where(eq(jobTargets.id, session.jobTargetId));
-      if (jobTarget?.parsedData) {
-        jdSkills = extractSkillsFromParsed(jobTarget.parsedData);
+      if (jobTarget) {
+        // First check parsedData
+        if (jobTarget.parsedData) {
+          jdSkills = extractSkillsFromParsed(jobTarget.parsedData);
+        }
+        // Also check top-level analysisDimensions and interviewTopics
+        if (jdSkills.length === 0) {
+          const topLevelDimensions = (jobTarget as any).analysisDimensions || [];
+          const topLevelTopics = (jobTarget as any).interviewTopics || [];
+          if (topLevelDimensions.length > 0 || topLevelTopics.length > 0) {
+            jdSkills = [...topLevelDimensions, ...topLevelTopics].filter(
+              (s: any) => typeof s === 'string' && s.trim().length > 0
+            );
+          }
+        }
       }
     }
     
@@ -1400,10 +1424,76 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
         jdSkills = extractSkillsFromParsed(jdDoc.parsedJson);
       }
     }
+    
+    console.log(`[Interview Analysis] Session ${sessionId}: extracted jdSkills = ${JSON.stringify(jdSkills.slice(0, 10))}${jdSkills.length > 10 ? '...' : ''} (${jdSkills.length} total)`);
+
+    // Helper to normalize dimension values to strings
+    const normalizeDimensions = (dims: any): string[] => {
+      if (!dims || !Array.isArray(dims)) return [];
+      return dims.map((d: any) => {
+        if (typeof d === 'string') return d;
+        if (d && typeof d === 'object') {
+          return d.label || d.name || d.dimension || d.key || JSON.stringify(d);
+        }
+        return String(d);
+      }).filter((s: string) => s && s.trim().length > 0);
+    };
+
+    // Build JD extract for dynamic rubric generation - prioritize structured parsedData
+    let jdExtract: JDExtract | undefined;
+    let jobTargetParsedData: any = null;
+    
+    // First try to get structured JD extract from job target's parsed data
+    if (session.jobTargetId) {
+      const [jobTarget] = await db.select().from(jobTargets).where(eq(jobTargets.id, session.jobTargetId));
+      if (jobTarget) {
+        const parsedData = (jobTarget as any).parsedData;
+        if (parsedData) {
+          jobTargetParsedData = typeof parsedData === 'string' ? JSON.parse(parsedData) : parsedData;
+          
+          // Extract and normalize analysisDimensions from parsedData
+          const rawDimensions = jobTargetParsedData.analysisDimensions || jobTargetParsedData.analysis_dimensions;
+          const rawTopics = jobTargetParsedData.interviewTopics || jobTargetParsedData.interview_topics;
+          const normalizedDimensions = normalizeDimensions(rawDimensions);
+          const normalizedTopics = normalizeDimensions(rawTopics);
+          
+          if (normalizedDimensions.length > 0) {
+            jdExtract = {
+              analysisDimensions: normalizedDimensions,
+              interviewTopics: normalizedTopics,
+              mustHave: normalizeDimensions(jobTargetParsedData.requiredSkills || jobTargetParsedData.required_skills),
+              niceToHave: normalizeDimensions(jobTargetParsedData.preferredSkills || jobTargetParsedData.preferred_skills),
+              keywords: normalizeDimensions(jobTargetParsedData.keywords),
+              senioritySignal: jobTargetParsedData.seniority,
+            };
+            console.log(`[Interview Analysis] Session ${sessionId}: using structured JD with ${normalizedDimensions.length} analysisDimensions: ${normalizedDimensions.slice(0, 5).join(', ')}...`);
+          }
+        }
+      }
+    }
+    
+    // Fallback: build jdExtract from extracted jdSkills if no structured data
+    if (!jdExtract && jdSkills.length > 0) {
+      jdExtract = {
+        analysisDimensions: jdSkills,
+        interviewTopics: [],
+      };
+      console.log(`[Interview Analysis] Session ${sessionId}: using fallback jdSkills as analysisDimensions`);
+    }
+    
+    // Build dynamic rubric from JD if available
+    const roleCategory = roleKitData?.roleCategory || roleKitData?.domain || 'general';
+    let dynamicRubric: DynamicEvaluationRubric | null = null;
+    
+    if (jdExtract && jdExtract.analysisDimensions && jdExtract.analysisDimensions.length > 0) {
+      dynamicRubric = buildDynamicRubric(roleCategory, jdExtract);
+      console.log(`[Interview Analysis] Session ${sessionId}: built dynamic rubric with ${dynamicRubric.dimensions.length} dimensions, JD-critical: ${dynamicRubric.jdCriticalDimensions.join(', ')}`);
+    }
 
     const evaluatorContext = {
-      rubric: rubric?.dimensions,
+      rubric: dynamicRubric?.dimensions || rubric?.dimensions,
       scoringGuide: rubric?.scoringGuide,
+      dynamicRubricPrompt: dynamicRubric?.evaluatorPrompt,
       roleKit: roleKitData ? { 
         name: roleKitData.name, 
         domain: roleKitData.domain,
@@ -1412,6 +1502,7 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
       interviewType: config?.interviewType || session.interviewMode || 'general',
       interviewMode: config?.interviewMode || null,
       jdSkills,
+      jdCriticalDimensions: dynamicRubric?.jdCriticalDimensions || [],
       candidateProfile: resumeParsed,
       jobDescription: jdParsed,
       transcript,
@@ -1429,11 +1520,16 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
       } : null,
     };
     
+    // Combine base evaluator prompt with dynamic rubric prompt if available
+    const fullEvaluatorPrompt = dynamicRubric?.evaluatorPrompt 
+      ? `${EVALUATOR_PROMPT}\n\n${dynamicRubric.evaluatorPrompt}`
+      : EVALUATOR_PROMPT;
+    
     const openaiEval = getOpenAI();
     const evaluatorResponse = await openaiEval.chat.completions.create({
       model: "gpt-4o",
       messages: [
-        { role: "system", content: EVALUATOR_PROMPT },
+        { role: "system", content: fullEvaluatorPrompt },
         { role: "user", content: JSON.stringify(evaluatorContext) },
       ],
       response_format: { type: "json_object" },
@@ -2134,20 +2230,22 @@ GOAL
 Evaluate the candidate's interview based on the SPECIFIC ROLE, INTERVIEW TYPE, and JOB REQUIREMENTS. Your assessment dimensions MUST be relevant to what was being tested.
 
 INPUTS
-- rubric: if provided, use EXACTLY these dimensions for scoring
+- rubric: if provided with dimensions array, use EXACTLY these dimensions for scoring (highest priority)
+- dynamicRubricPrompt: additional rubric instructions with JD-specific weights and priorities
+- jdCriticalDimensions: array of dimension keys that are critical for this JD (prioritize these in scoring)
+- jdSkills: key skills extracted from the job description (for context)
 - roleKit: the specific job role (e.g., Software Engineer, Product Manager, Business Analyst)
 - interviewType: the type of interview (coding, case_study, behavioral, hr, technical)
-- jdSkills: key skills extracted from the job description
 - candidateProfile: their resume/background
 - transcript: what actually happened in the interview
 - codingChallenge/caseStudyChallenge: any exercises given
 - codeSubmission/caseStudyNotes: what the candidate produced
 
-DIMENSION SELECTION RULES (in priority order):
+DIMENSION SELECTION RULES (in strict priority order):
 
-1. IF jdSkills is provided (non-empty array): Create dimensions from the JD skills. For example, if jdSkills includes ["Python", "SQL", "Data Analysis", "Team Leadership"], create dimensions like "Python Proficiency", "SQL Skills", "Data Analysis Capability", "Team Leadership". Mix technical and soft skills as provided. Aim for 5-8 dimensions from the JD skills.
+1. IF rubric is provided with a dimensions array: Use EXACTLY those dimension names for scoring. The dimension names in your output MUST match the "name" field from each rubric dimension exactly. If dimensions have "isFromJd": true, they are JD-specific and should be scored more strictly.
 
-2. ELSE IF rubric is provided (non-null): Use EXACTLY those dimensions. Do not add or remove any.
+2. ELSE IF jdSkills is provided (non-empty array): Create dimensions from the JD skills. For example, if jdSkills includes ["Python", "SQL", "Data Analysis", "Team Leadership"], create dimensions like "Python Proficiency", "SQL Skills", "Data Analysis Capability", "Team Leadership". Mix technical and soft skills as provided. Aim for 5-8 dimensions from the JD skills.
 
 3. ELSE generate dimensions based on interviewType and roleKit:
 
