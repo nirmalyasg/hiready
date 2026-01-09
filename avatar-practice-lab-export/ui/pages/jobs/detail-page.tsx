@@ -305,7 +305,7 @@ export default function JobDetailPage() {
         method: "DELETE",
       });
       if (response.ok) {
-        navigate("/interview/custom");
+        navigate("/jobs");
       }
     } catch (error) {
       console.error("Error deleting job:", error);
@@ -374,7 +374,7 @@ export default function JobDetailPage() {
           <div className="max-w-2xl mx-auto px-4 pt-4 pb-5">
             <div className="flex items-center justify-between mb-3">
               <button
-                onClick={() => navigate("/interview/custom")}
+                onClick={() => navigate("/jobs")}
                 className="p-1.5 -ml-1.5 hover:bg-white/10 rounded-lg transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />

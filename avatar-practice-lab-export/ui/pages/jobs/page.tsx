@@ -61,19 +61,11 @@ const statusConfig: Record<string, { label: string; color: string; bgColor: stri
   archived: { label: "Archived", color: "text-gray-400", bgColor: "bg-gray-50", borderColor: "border-gray-200" },
 };
 
-const statusFilters = [
-  { value: "all", label: "All Jobs" },
-  { value: "saved", label: "Saved" },
-  { value: "applied", label: "Applied" },
-  { value: "interview", label: "Interviewing" },
-  { value: "offer", label: "Offers" },
-];
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState<JobTarget[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [addMode, setAddMode] = useState<"url" | "manual" | null>(null);
   const [pastedJD, setPastedJD] = useState("");
@@ -88,10 +80,7 @@ export default function JobsPage() {
   const fetchJobs = async () => {
     try {
       setIsLoading(true);
-      const params = new URLSearchParams();
-      if (statusFilter !== "all") params.set("status", statusFilter);
-      
-      const response = await fetch(`/api/jobs/job-targets?${params}`);
+      const response = await fetch("/api/jobs/job-targets");
       const data = await response.json();
       if (data.success) {
         setJobs(data.jobs);
@@ -105,7 +94,7 @@ export default function JobsPage() {
 
   useEffect(() => {
     fetchJobs();
-  }, [statusFilter]);
+  }, []);
 
   const filteredJobs = jobs.filter((job) => {
     if (!searchQuery.trim()) return true;
@@ -234,9 +223,8 @@ export default function JobsPage() {
           </p>
         </div>
 
-        {/* Search and Filter Row */}
-        <div className="flex flex-col gap-3 mb-6">
-          {/* Search */}
+        {/* Search */}
+        <div className="mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
@@ -246,23 +234,6 @@ export default function JobsPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-11 bg-white border-slate-200 rounded-xl"
             />
-          </div>
-          
-          {/* Filter chips - horizontal scroll on mobile */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
-            {statusFilters.map((filter) => (
-              <button
-                key={filter.value}
-                onClick={() => setStatusFilter(filter.value)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                  statusFilter === filter.value
-                    ? "bg-[#042c4c] text-white"
-                    : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300"
-                }`}
-              >
-                {filter.label}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -278,14 +249,14 @@ export default function JobsPage() {
               <Briefcase className="w-8 h-8 text-slate-400" />
             </div>
             <h3 className="text-lg font-semibold text-[#042c4c] mb-2">
-              {searchQuery || statusFilter !== "all" ? "No matching jobs" : "No jobs saved yet"}
+              {searchQuery ? "No matching jobs" : "No jobs saved yet"}
             </h3>
             <p className="text-slate-500 text-sm mb-6 max-w-sm mx-auto">
-              {searchQuery || statusFilter !== "all" 
-                ? "Try adjusting your search or filters" 
+              {searchQuery 
+                ? "Try adjusting your search" 
                 : "Add jobs you're targeting to track your preparation progress"}
             </p>
-            {!searchQuery && statusFilter === "all" && (
+            {!searchQuery && (
               <Dialog open={addDialogOpen} onOpenChange={(open) => { 
                 setAddDialogOpen(open); 
                 if (!open) resetDialog();
