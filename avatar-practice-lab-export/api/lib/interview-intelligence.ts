@@ -44,6 +44,33 @@ export interface JDExtract {
   interviewTopics?: string[];
 }
 
+// Rich context for question generation - captures company, role, and JD specifics
+export interface JDRichContext {
+  // Company context
+  companyName?: string;
+  companyArchetype?: "startup" | "enterprise" | "regulated" | "consumer" | "saas" | "fintech" | "edtech" | "services" | "industrial" | "it_services" | "big_tech" | "bfsi" | "fmcg" | "manufacturing" | "consulting" | "bpm" | "telecom" | "conglomerate";
+  businessDomain?: string; // e.g., "printing & imaging solutions", "cloud infrastructure", "financial trading"
+  companyDescription?: string; // Brief description of what the company does
+  
+  // Role context
+  jobTitle?: string;
+  seniorityLevel?: "junior" | "mid" | "senior" | "staff" | "principal" | "manager" | "director" | "executive";
+  experienceYears?: string; // e.g., "3-5 years", "5+ years"
+  
+  // Skills with proficiency levels
+  mustHaveSkills?: { skill: string; proficiency?: "basic" | "intermediate" | "advanced" | "expert" }[];
+  niceToHaveSkills?: string[];
+  
+  // JD specifics
+  responsibilities?: string[];
+  interviewTopics?: string[];
+  analysisDimensions?: string[];
+  
+  // Complexity calibration
+  complexityLevel?: "basic" | "intermediate" | "advanced" | "expert";
+  technicalDepth?: "shallow" | "moderate" | "deep";
+}
+
 export interface JobTargetContext {
   roleTitle: string;
   company?: string;
@@ -166,13 +193,138 @@ export interface GeneratedJDQuestion {
   patternType: string;
   followUps: string[];
   assessmentDimension: string;
+  skillsTested?: string[];
+  difficulty?: "basic" | "intermediate" | "advanced";
+}
+
+// Map seniority signals to complexity levels
+function mapSeniorityToComplexity(seniority?: string): "basic" | "intermediate" | "advanced" | "expert" {
+  if (!seniority) return "intermediate";
+  const s = seniority.toLowerCase();
+  if (s.includes("junior") || s.includes("entry") || s.includes("fresher") || s.includes("graduate")) return "basic";
+  if (s.includes("senior") || s.includes("lead") || s.includes("principal")) return "advanced";
+  if (s.includes("staff") || s.includes("director") || s.includes("vp") || s.includes("cxo") || s.includes("head")) return "expert";
+  return "intermediate";
+}
+
+// Parse experience years from JD text
+function parseExperienceYears(expText?: string): string | undefined {
+  if (!expText) return undefined;
+  const match = expText.match(/(\d+)\s*[-–to]+\s*(\d+)\s*years?/i) || expText.match(/(\d+)\+?\s*years?/i);
+  if (match) return match[0];
+  return expText;
+}
+
+// Extract rich context from jobTarget and JD parsed data
+export function extractJDRichContext(
+  jobTarget?: {
+    companyName?: string | null;
+    roleTitle?: string;
+    companyArchetype?: string | null;
+    jdParsed?: any;
+  },
+  jdExtract?: JDExtract
+): JDRichContext {
+  const jdParsed = jobTarget?.jdParsed || {};
+  
+  // Parse mustHave skills with proficiency detection
+  const mustHaveSkills = (jdExtract?.mustHave || jdParsed.requiredSkills || []).map((skill: string) => {
+    const s = skill.toLowerCase();
+    let proficiency: "basic" | "intermediate" | "advanced" | "expert" = "intermediate";
+    if (s.includes("advanced") || s.includes("expert") || s.includes("deep") || s.includes("strong")) proficiency = "advanced";
+    else if (s.includes("basic") || s.includes("fundamental") || s.includes("awareness")) proficiency = "basic";
+    return { skill: skill.replace(/(advanced|basic|expert|strong|deep|fundamental)\s*/gi, "").trim(), proficiency };
+  });
+
+  const senioritySignal = jdExtract?.senioritySignal || jdParsed.experienceLevel;
+  const complexityLevel = mapSeniorityToComplexity(senioritySignal);
+  
+  return {
+    companyName: jobTarget?.companyName || undefined,
+    companyArchetype: jobTarget?.companyArchetype as JDRichContext["companyArchetype"],
+    businessDomain: jdParsed.companyContext || jdParsed.businessDomain || undefined,
+    jobTitle: jobTarget?.roleTitle,
+    seniorityLevel: mapSeniorityToSeniorityLevel(senioritySignal),
+    experienceYears: parseExperienceYears(senioritySignal),
+    mustHaveSkills,
+    niceToHaveSkills: jdExtract?.niceToHave || jdParsed.preferredSkills || [],
+    responsibilities: jdExtract?.responsibilities || jdParsed.responsibilities || [],
+    interviewTopics: jdExtract?.interviewTopics || [],
+    analysisDimensions: jdExtract?.analysisDimensions || [],
+    complexityLevel,
+    technicalDepth: complexityLevel === "expert" || complexityLevel === "advanced" ? "deep" : complexityLevel === "basic" ? "shallow" : "moderate",
+  };
+}
+
+function mapSeniorityToSeniorityLevel(seniority?: string): JDRichContext["seniorityLevel"] {
+  if (!seniority) return undefined;
+  const s = seniority.toLowerCase();
+  if (s.includes("junior") || s.includes("entry") || s.includes("fresher")) return "junior";
+  if (s.includes("senior")) return "senior";
+  if (s.includes("staff")) return "staff";
+  if (s.includes("principal")) return "principal";
+  if (s.includes("manager")) return "manager";
+  if (s.includes("director")) return "director";
+  if (s.includes("vp") || s.includes("cxo") || s.includes("head")) return "executive";
+  return "mid";
+}
+
+// Research company business domain using web search (if not available in JD)
+export async function researchCompanyDomain(companyName: string): Promise<{ businessDomain?: string; companyDescription?: string } | null> {
+  if (!companyName) return null;
+  
+  try {
+    const { tavily } = await import("@tavily/core");
+    const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY || "" });
+    
+    const result = await tavilyClient.search(`${companyName} company business domain products services what does company do`, {
+      maxResults: 3,
+      searchDepth: "basic",
+    });
+    
+    if (result.results && result.results.length > 0) {
+      const content = result.results.map(r => r.content).join(" ");
+      // Extract a brief description
+      const firstSentences = content.split(/[.!?]/).slice(0, 2).join(". ") + ".";
+      return {
+        companyDescription: firstSentences.substring(0, 300),
+        businessDomain: extractDomainFromDescription(content),
+      };
+    }
+  } catch (error) {
+    console.error("Company research failed:", error);
+  }
+  return null;
+}
+
+function extractDomainFromDescription(text: string): string {
+  const domainKeywords: Record<string, string> = {
+    "printing": "printing & imaging solutions",
+    "software": "software development",
+    "finance": "financial services",
+    "banking": "banking & financial services",
+    "healthcare": "healthcare technology",
+    "ecommerce": "e-commerce & retail",
+    "cloud": "cloud infrastructure",
+    "saas": "SaaS platform",
+    "consulting": "professional consulting",
+    "manufacturing": "industrial manufacturing",
+    "telecom": "telecommunications",
+  };
+  
+  const lower = text.toLowerCase();
+  for (const [keyword, domain] of Object.entries(domainKeywords)) {
+    if (lower.includes(keyword)) return domain;
+  }
+  return "technology & services";
 }
 
 export async function generateQuestionsFromJDTopics(
   jdExtract: JDExtract,
   roleCategory: string,
   interviewType: string,
-  count: number = 5
+  count: number = 5,
+  richContext?: JDRichContext
 ): Promise<GeneratedJDQuestion[]> {
   if (!jdExtract.interviewTopics || jdExtract.interviewTopics.length === 0) {
     return [];
@@ -183,18 +335,46 @@ export async function generateQuestionsFromJDTopics(
   const skills = jdExtract.mustHave?.slice(0, 5) || [];
   const responsibilities = jdExtract.responsibilities?.slice(0, 3) || [];
 
-  const prompt = `Generate ${topics.length} interview questions for a ${roleCategory} role (${interviewType} interview).
+  // Build rich context sections
+  const companyContext = richContext?.companyName 
+    ? `\nCOMPANY: ${richContext.companyName}${richContext.businessDomain ? ` (${richContext.businessDomain})` : ""}${richContext.companyDescription ? `\nABOUT: ${richContext.companyDescription}` : ""}`
+    : "";
+  
+  const roleContext = richContext?.jobTitle
+    ? `\nEXACT JOB TITLE: ${richContext.jobTitle}${richContext.seniorityLevel ? ` (${richContext.seniorityLevel} level)` : ""}${richContext.experienceYears ? `\nEXPERIENCE REQUIRED: ${richContext.experienceYears}` : ""}`
+    : "";
+  
+  const complexityGuide = richContext?.complexityLevel
+    ? `\n\nCOMPLEXITY LEVEL: ${richContext.complexityLevel.toUpperCase()}
+- ${richContext.complexityLevel === "basic" ? "Ask foundational questions. Expect candidates to explain concepts clearly but don't require deep edge cases or optimization discussions." : ""}
+- ${richContext.complexityLevel === "intermediate" ? "Ask practical questions with moderate complexity. Expect real-world examples and some depth in problem-solving approaches." : ""}
+- ${richContext.complexityLevel === "advanced" ? "Ask challenging questions requiring deep expertise. Expect system-level thinking, edge case handling, and optimization strategies." : ""}
+- ${richContext.complexityLevel === "expert" ? "Ask highly complex questions requiring architectural insight. Expect trade-off analysis, cross-system considerations, and leadership in technical decisions." : ""}`
+    : "";
+
+  const skillsWithProficiency = richContext?.mustHaveSkills?.length 
+    ? `\nREQUIRED SKILLS (with expected proficiency):\n${richContext.mustHaveSkills.map(s => `- ${s.skill} (${s.proficiency || "intermediate"})`).join("\n")}`
+    : `\nREQUIRED SKILLS: ${skills.join(", ") || "General skills"}`;
+
+  const multiSkillNote = (richContext?.mustHaveSkills?.length || 0) > 2
+    ? `\n\nMULTI-SKILL COVERAGE: This role requires multiple technical skills. Generate at least 1-2 compound questions that test skill combinations (e.g., "How would you use [Skill A] to solve a problem involving [Skill B]?").`
+    : "";
+
+  const prompt = `Generate ${topics.length} interview questions for the following role:
+
+ROLE: ${roleCategory} (${interviewType} interview)${companyContext}${roleContext}${skillsWithProficiency}
+KEY RESPONSIBILITIES: ${responsibilities.join("; ") || "Various"}${complexityGuide}${multiSkillNote}
 
 TOPICS TO COVER:
 ${topics.map((t, i) => `${i + 1}. ${t}`).join("\n")}
 
-REQUIRED SKILLS: ${skills.join(", ") || "General skills"}
-KEY RESPONSIBILITIES: ${responsibilities.join("; ") || "Various"}
-
 For each topic, generate:
-1. A direct interview question (open-ended, behavioral or situational)
-2. 2 follow-up probe questions
-3. The assessment dimension it measures
+1. A direct interview question calibrated to the complexity level above
+2. 2 follow-up probe questions that dig deeper
+3. The skills this question tests
+4. The difficulty level (basic/intermediate/advanced)
+
+${richContext?.companyName ? `IMPORTANT: Frame questions in the context of ${richContext.companyName}'s business domain where relevant.` : ""}
 
 Respond in JSON format:
 {
@@ -204,16 +384,21 @@ Respond in JSON format:
       "question": "main interview question",
       "followUps": ["follow-up 1", "follow-up 2"],
       "patternType": "behavioral|technical|situational|scenario",
-      "assessmentDimension": "problem_solving|technical_depth|ownership_impact|clarity_structure|role_fit|behavioral_examples"
+      "assessmentDimension": "the skill or dimension being assessed",
+      "skillsTested": ["skill1", "skill2"],
+      "difficulty": "basic|intermediate|advanced"
     }
   ]
 }`;
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: [
-        { role: "system", content: "You are an expert interviewer who creates targeted questions based on job requirements." },
+        { 
+          role: "system", 
+          content: `You are an expert interviewer at ${richContext?.companyName || "a leading company"} who creates targeted, role-appropriate questions. You understand that question difficulty must match the seniority level - junior candidates need foundational questions while senior candidates need deep, challenging questions that test real expertise.` 
+        },
         { role: "user", content: prompt },
       ],
       response_format: { type: "json_object" },
@@ -1976,6 +2161,12 @@ export async function getOrGenerateQuestions(
     jdExtract?: JDExtract;
     roleCategory: string;
     sourceJobTargetId?: string;
+    jobTarget?: {
+      companyName?: string | null;
+      roleTitle?: string;
+      companyArchetype?: string | null;
+      jdParsed?: any;
+    };
   },
   count: number = 5
 ): Promise<QuestionBankEntry[]> {
@@ -1993,11 +2184,27 @@ export async function getOrGenerateQuestions(
   const neededCount = count - existing.length;
   
   if (context.jdExtract?.interviewTopics && context.jdExtract.interviewTopics.length > 0) {
+    // Build rich context for question generation
+    let richContext = extractJDRichContext(context.jobTarget, context.jdExtract);
+    
+    // If company name exists but no business domain, try to research it
+    if (richContext.companyName && !richContext.businessDomain) {
+      const research = await researchCompanyDomain(richContext.companyName);
+      if (research) {
+        richContext = {
+          ...richContext,
+          businessDomain: research.businessDomain,
+          companyDescription: research.companyDescription,
+        };
+      }
+    }
+    
     const generated = await generateQuestionsFromJDTopics(
       context.jdExtract,
       context.roleCategory,
       context.interviewType,
-      neededCount
+      neededCount,
+      richContext
     );
 
     if (generated.length > 0) {

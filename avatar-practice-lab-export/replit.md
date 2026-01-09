@@ -62,6 +62,17 @@ Interview analysis now creates assessment dimensions directly from JD-extracted 
 - **Fallback**: Uses standard 8-dimension rubric when no JD data available
 - **Location**: `buildDynamicRubric()` in `api/lib/interview-intelligence.ts`
 
+### JD-Rich Context Question Generation
+Interview questions now use comprehensive JD context for role-appropriate difficulty and business domain relevance:
+- **JDRichContext Interface**: Captures company, role, seniority, skills with proficiency, complexity level
+- **Context Extraction**: `extractJDRichContext()` pulls data from jobTarget and jdParsed
+- **Company Research**: `researchCompanyDomain()` uses Tavily to research company business domain when not in JD
+- **Complexity Calibration**: Maps seniority (junior/mid/senior/staff/executive) to question difficulty (basic/intermediate/advanced/expert)
+- **Skill Proficiency**: Detects "advanced SQL" vs "basic Python" for appropriate question depth
+- **Multi-Skill Coverage**: For roles with multiple technical requirements (e.g., Python + SQL + Data Analysis), prompts explicitly request compound questions testing skill combinations
+- **Business Domain Context**: Questions framed in company's business context (e.g., "At Lexmark, how would you...")
+- **Location**: `generateQuestionsFromJDTopics()`, `extractJDRichContext()`, `researchCompanyDomain()` in `api/lib/interview-intelligence.ts`
+
 ## Recent Changes (January 8, 2026)
 
 ### JD-Specific Skill Dimension Mapping
