@@ -15,16 +15,19 @@ import {
   Zap,
   TrendingUp,
   Award,
-  Play,
   Shield,
   Clock,
-  Briefcase
+  Briefcase,
+  Building2,
+  Calendar
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
+import dashboardImg from '@/assets/screenshots/dashboard.jpg';
+import practiceRolesImg from '@/assets/screenshots/practice-roles.jpg';
+import resultsImg from '@/assets/screenshots/results.jpg';
+import caseStudyImg from '@/assets/screenshots/case-study.jpg';
 
 export default function HomePage() {
-  const { user, isAuthenticated, isLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const stats = [
@@ -64,18 +67,16 @@ export default function HomePage() {
           </Link>
           
           <div className="hidden md:flex items-center gap-6">
-            <Link to="/employer/login" className="text-[#6c8194] hover:text-[#042c4c] text-sm font-medium transition-colors">
-              For Employers
+            <Link to="/enterprise" className="text-[#6c8194] hover:text-[#042c4c] text-sm font-medium transition-colors flex items-center gap-1.5">
+              <Building2 className="w-4 h-4" />
+              Enterprise
             </Link>
-            {isAuthenticated ? (
-              <Link to="/avatar/dashboard">
-                <Button variant="outline" size="sm" className="border-[#768c9c]/30 text-[#042c4c] hover:bg-[#042c4c]/5">Dashboard</Button>
-              </Link>
-            ) : (
-              <Link to="/login">
-                <Button variant="ghost" size="sm" className="text-[#6c8194] hover:text-[#042c4c]">Sign In</Button>
-              </Link>
-            )}
+            <a href="mailto:enterprise@hiready.in?subject=Book%20a%20Demo">
+              <Button variant="outline" size="sm" className="border-[#042c4c]/20 text-[#042c4c] hover:bg-[#042c4c]/5 gap-2">
+                <Calendar className="w-4 h-4" />
+                Book a Demo
+              </Button>
+            </a>
             <Link to="/readycheck">
               <Button size="sm" className="bg-[#ee7e65] hover:bg-[#e06a50] text-white shadow-lg shadow-[#ee7e65]/25 border-0 px-5">
                 Start Free
@@ -93,12 +94,14 @@ export default function HomePage() {
 
         {mobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-gray-100 p-4 space-y-3 shadow-lg">
-            <Link to="/employer/login" className="block py-2 text-[#6c8194]">For Employers</Link>
-            {isAuthenticated ? (
-              <Link to="/avatar/dashboard" className="block py-2 text-[#6c8194]">Dashboard</Link>
-            ) : (
-              <Link to="/login" className="block py-2 text-[#6c8194]">Sign In</Link>
-            )}
+            <Link to="/enterprise" className="flex items-center gap-2 py-2 text-[#6c8194]">
+              <Building2 className="w-4 h-4" />
+              Enterprise
+            </Link>
+            <a href="mailto:enterprise@hiready.in?subject=Book%20a%20Demo" className="flex items-center gap-2 py-2 text-[#6c8194]">
+              <Calendar className="w-4 h-4" />
+              Book a Demo
+            </a>
             <Link to="/readycheck">
               <Button className="w-full bg-[#ee7e65] hover:bg-[#e06a50] text-white shadow-lg">Start Free Interview</Button>
             </Link>
@@ -135,10 +138,12 @@ export default function HomePage() {
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-base bg-white/10 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm">
-              <Play className="w-4 h-4 mr-2" />
-              Watch Demo
-            </Button>
+            <a href="mailto:enterprise@hiready.in?subject=Book%20a%20Demo">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-base bg-white/10 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm gap-2">
+                <Calendar className="w-4 h-4" />
+                Book a Demo
+              </Button>
+            </a>
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
@@ -193,17 +198,71 @@ export default function HomePage() {
           </div>
           
           <div className="grid sm:grid-cols-2 gap-6">
-            {benefits.map((b, i) => (
-              <div key={i} className="bg-white rounded-2xl p-7 border border-gray-100 hover:border-[#042c4c]/20 transition-all duration-300 hover:shadow-xl group flex gap-5">
-                <div className="w-14 h-14 bg-[#042c4c] rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-[#ee7e65] transition-colors duration-300">
-                  <b.icon className="w-6 h-6 text-white" />
+            {benefits.map((b, i) => {
+              const Icon = b.icon;
+              return (
+                <div key={i} className="bg-white rounded-2xl p-7 border border-gray-100 hover:border-[#042c4c]/20 transition-all duration-300 hover:shadow-xl group flex gap-5">
+                  <div className="w-14 h-14 bg-[#042c4c] rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-[#ee7e65] transition-colors duration-300">
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-[#042c4c] text-lg mb-2">{b.title}</h3>
+                    <p className="text-[#6c8194] leading-relaxed">{b.desc}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-[#042c4c] text-lg mb-2">{b.title}</h3>
-                  <p className="text-[#6c8194] leading-relaxed">{b.desc}</p>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 px-4 sm:px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14">
+            <span className="inline-block text-[#ee7e65] text-sm font-semibold tracking-wider uppercase mb-3">Platform Preview</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#042c4c] mb-4">
+              See Hiready in Action
+            </h2>
+            <p className="text-[#6c8194] text-lg max-w-lg mx-auto">A comprehensive platform built for serious interview preparation</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="group relative overflow-hidden rounded-2xl border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#042c4c]/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex items-end p-6">
+                <div className="text-white">
+                  <h3 className="font-bold text-lg mb-1">Your Dashboard</h3>
+                  <p className="text-white/80 text-sm">Track readiness, practice time, and active jobs at a glance</p>
                 </div>
               </div>
-            ))}
+              <img src={dashboardImg} alt="Dashboard" className="w-full h-auto group-hover:scale-105 transition-transform duration-500" />
+            </div>
+            <div className="group relative overflow-hidden rounded-2xl border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#042c4c]/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex items-end p-6">
+                <div className="text-white">
+                  <h3 className="font-bold text-lg mb-1">Practice by Role</h3>
+                  <p className="text-white/80 text-sm">21+ role kits across Operations, Consulting, Data, Finance & more</p>
+                </div>
+              </div>
+              <img src={practiceRolesImg} alt="Practice by Role" className="w-full h-auto group-hover:scale-105 transition-transform duration-500" />
+            </div>
+            <div className="group relative overflow-hidden rounded-2xl border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#042c4c]/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex items-end p-6">
+                <div className="text-white">
+                  <h3 className="font-bold text-lg mb-1">Case Study Sessions</h3>
+                  <p className="text-white/80 text-sm">Realistic case interviews with AI avatar interviewers</p>
+                </div>
+              </div>
+              <img src={caseStudyImg} alt="Case Study Session" className="w-full h-auto group-hover:scale-105 transition-transform duration-500" />
+            </div>
+            <div className="group relative overflow-hidden rounded-2xl border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#042c4c]/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex items-end p-6">
+                <div className="text-white">
+                  <h3 className="font-bold text-lg mb-1">Detailed Results</h3>
+                  <p className="text-white/80 text-sm">8-dimension scoring with actionable feedback and improvement plans</p>
+                </div>
+              </div>
+              <img src={resultsImg} alt="Interview Results" className="w-full h-auto group-hover:scale-105 transition-transform duration-500" />
+            </div>
           </div>
         </div>
       </section>
@@ -325,7 +384,8 @@ export default function HomePage() {
             <span className="font-bold text-xl">Hiready</span>
           </div>
           <div className="flex gap-8 text-sm text-white/60">
-            <Link to="/employer/login" className="hover:text-white transition-colors">For Employers</Link>
+            <Link to="/enterprise" className="hover:text-white transition-colors">Enterprise</Link>
+            <a href="mailto:enterprise@hiready.in?subject=Book%20a%20Demo" className="hover:text-white transition-colors">Book a Demo</a>
             <a href="mailto:support@hiready.in" className="hover:text-white transition-colors">Contact</a>
           </div>
           <div className="text-sm text-white/40">
