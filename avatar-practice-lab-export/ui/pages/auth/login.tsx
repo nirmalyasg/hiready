@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Loader2, Sparkles, Zap, Target, TrendingUp, Users, Award } from 'lucide-react';
+import { Loader2, Zap, Target, TrendingUp, Award } from 'lucide-react';
+import logoImg from '@/assets/logo.png';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -55,16 +56,13 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] text-white p-12 flex-col justify-between relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#ee7e65]/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#768c9c]/10 rounded-full blur-3xl" />
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] text-white p-12 flex-col justify-between relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#cb6ce6]/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#24c4b8]/10 rounded-full blur-3xl" />
         
         <div className="relative">
           <Link to="/" className="inline-flex items-center gap-3">
-            <div className="w-12 h-12 bg-[#ee7e65] rounded-xl flex items-center justify-center shadow-lg shadow-[#ee7e65]/30">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold">Hiready</span>
+            <img src={logoImg} alt="Hiready" className="h-10 brightness-0 invert" />
           </Link>
         </div>
 
@@ -79,7 +77,7 @@ export default function LoginPage() {
               const Icon = feature.icon;
               return (
                 <div key={idx} className="flex items-start gap-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                  <div className="w-10 h-10 bg-[#ee7e65] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 bg-[#24c4b8] rounded-lg flex items-center justify-center flex-shrink-0">
                     <Icon className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -94,31 +92,28 @@ export default function LoginPage() {
 
         <div className="relative flex items-center gap-3">
           <div className="flex -space-x-2">
-            <div className="w-8 h-8 rounded-full bg-[#ee7e65] flex items-center justify-center text-xs font-bold ring-2 ring-[#042c4c]">JD</div>
-            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-xs font-bold ring-2 ring-[#042c4c]">MK</div>
-            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-xs font-bold ring-2 ring-[#042c4c]">AS</div>
+            <div className="w-8 h-8 rounded-full bg-[#24c4b8] flex items-center justify-center text-xs font-bold ring-2 ring-[#1a1a2e]">JD</div>
+            <div className="w-8 h-8 rounded-full bg-[#9b4dca] flex items-center justify-center text-xs font-bold ring-2 ring-[#1a1a2e]">MK</div>
+            <div className="w-8 h-8 rounded-full bg-[#6b1fad] flex items-center justify-center text-xs font-bold ring-2 ring-[#1a1a2e]">AS</div>
           </div>
           <p className="text-white/70 text-sm">Join 10,000+ candidates practicing daily</p>
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-6 bg-[#fbfbfc] relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-b from-[#042c4c]/5 to-transparent lg:hidden" />
-        <div className="absolute top-20 right-20 w-64 h-64 bg-[#ee7e65]/5 rounded-full blur-3xl" />
+      <div className="flex-1 flex items-center justify-center px-6 bg-[#f8f7fc] relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-b from-[#6b1fad]/5 to-transparent lg:hidden" />
+        <div className="absolute top-20 right-20 w-64 h-64 bg-[#cb6ce6]/5 rounded-full blur-3xl" />
         
         <div className="w-full max-w-sm relative">
           <div className="text-center mb-8 lg:hidden">
             <Link to="/" className="inline-flex items-center gap-2.5 mb-8">
-              <div className="w-11 h-11 bg-[#042c4c] rounded-xl flex items-center justify-center shadow-lg">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-[#042c4c]">Hiready</span>
+              <img src={logoImg} alt="Hiready" className="h-10" />
             </Link>
           </div>
           
           <div className="lg:mb-8">
-            <h1 className="text-2xl lg:text-3xl font-bold text-[#042c4c]">Sign in</h1>
-            <p className="text-[#6c8194] mt-2">Enter your credentials to continue</p>
+            <h1 className="text-2xl lg:text-3xl font-bold text-[#1a1a2e]">Sign in</h1>
+            <p className="text-gray-500 mt-2">Enter your credentials to continue</p>
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-200 shadow-xl shadow-gray-100/50 p-7 mt-6">
@@ -131,7 +126,7 @@ export default function LoginPage() {
               )}
 
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-[#042c4c] mb-2">
+                <label htmlFor="username" className="block text-sm font-medium text-[#1a1a2e] mb-2">
                   Username
                 </label>
                 <input
@@ -139,14 +134,14 @@ export default function LoginPage() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-[#768c9c] focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all bg-[#fbfbfc]"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc]"
                   placeholder="Enter your username"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-[#042c4c] mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-[#1a1a2e] mb-2">
                   Password
                 </label>
                 <input
@@ -154,7 +149,7 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-[#768c9c] focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all bg-[#fbfbfc]"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc]"
                   placeholder="Enter your password"
                   required
                 />
@@ -163,7 +158,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-[#ee7e65] hover:bg-[#e06a50] text-white py-3.5 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#ee7e65]/25"
+                className="w-full bg-[#24c4b8] hover:bg-[#1db0a5] text-white py-3.5 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#24c4b8]/25"
               >
                 {isLoading ? (
                   <>
@@ -177,9 +172,9 @@ export default function LoginPage() {
             </form>
           </div>
 
-          <p className="text-center text-[#6c8194] mt-6">
+          <p className="text-center text-gray-500 mt-6">
             Don't have an account?{' '}
-            <Link to="/register" className="text-[#ee7e65] hover:text-[#e06a50] font-semibold">
+            <Link to="/register" className="text-[#6b1fad] hover:text-[#5a1a91] font-semibold">
               Create one
             </Link>
           </p>

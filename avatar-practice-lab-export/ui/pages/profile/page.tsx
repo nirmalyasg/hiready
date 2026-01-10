@@ -84,7 +84,7 @@ export default function ProfilePage() {
     return (
       <SidebarLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="w-8 h-8 border-2 border-[#ee7e65] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-[#24c4b8] border-t-transparent rounded-full animate-spin" />
         </div>
       </SidebarLayout>
     );
@@ -109,7 +109,7 @@ export default function ProfilePage() {
   return (
     <SidebarLayout>
       <div className="min-h-screen bg-[#fbfbfc]">
-        <div className="bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] text-white">
+        <div className="bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] text-white">
           <div className="max-w-lg mx-auto px-4 py-10 text-center">
             <div className="relative inline-block mb-4">
               {user.profileImageUrl ? (
@@ -119,11 +119,11 @@ export default function ProfilePage() {
                   className="w-24 h-24 rounded-full object-cover ring-4 ring-white/20"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center ring-4 ring-white/20">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#24c4b8] to-[#1db0a5] flex items-center justify-center ring-4 ring-white/20">
                   <User className="w-12 h-12 text-white" />
                 </div>
               )}
-              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-[#ee7e65] rounded-full flex items-center justify-center border-2 border-[#042c4c]">
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-[#24c4b8] rounded-full flex items-center justify-center border-2 border-[#1a1a2e]">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
             </div>
@@ -142,8 +142,8 @@ export default function ProfilePage() {
         <div className="max-w-lg mx-auto px-4 -mt-6 pb-8 space-y-4">
           <div className="bg-white rounded-2xl p-5 shadow-xl shadow-slate-200/50 border border-slate-100">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-[#042c4c] flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#ee7e65] to-[#e06a50] rounded-lg flex items-center justify-center">
+              <h3 className="font-bold text-[#1a1a2e] flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#24c4b8] to-[#1db0a5] rounded-lg flex items-center justify-center">
                   <FileText className="w-4 h-4 text-white" />
                 </div>
                 My Resume
@@ -159,7 +159,7 @@ export default function ProfilePage() {
 
             {docsLoading ? (
               <div className="flex items-center justify-center py-6">
-                <Loader2 className="w-5 h-5 animate-spin text-[#768c9c]" />
+                <Loader2 className="w-5 h-5 animate-spin text-[#6b1fad]" />
               </div>
             ) : latestResume ? (
               <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl p-4 border border-slate-200">
@@ -168,8 +168,8 @@ export default function ProfilePage() {
                     <Check className="w-5 h-5 text-emerald-600" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-[#042c4c] truncate">{latestResume.fileName}</p>
-                    <p className="text-sm text-[#6c8194]">
+                    <p className="font-semibold text-[#1a1a2e] truncate">{latestResume.fileName}</p>
+                    <p className="text-sm text-gray-500">
                       Uploaded {formatDate(latestResume.createdAt)}
                     </p>
                   </div>
@@ -178,7 +178,7 @@ export default function ProfilePage() {
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#042c4c] bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#1a1a2e] bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50"
                   >
                     {isUploading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -203,15 +203,15 @@ export default function ProfilePage() {
             ) : (
               <div className="text-center py-8">
                 <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                  <FileText className="w-7 h-7 text-[#768c9c]" />
+                  <FileText className="w-7 h-7 text-[#6b1fad]" />
                 </div>
-                <p className="text-[#6c8194] mb-4">
+                <p className="text-gray-500 mb-4">
                   No resume uploaded yet
                 </p>
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
-                  className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-[#ee7e65] rounded-xl hover:bg-[#e06a50] transition-colors shadow-lg shadow-[#ee7e65]/25 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-[#24c4b8] rounded-xl hover:bg-[#1db0a5] transition-colors shadow-lg shadow-[#24c4b8]/25 disabled:opacity-50"
                 >
                   {isUploading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -220,7 +220,7 @@ export default function ProfilePage() {
                   )}
                   Upload Resume
                 </button>
-                <p className="text-xs text-[#768c9c] mt-3">
+                <p className="text-xs text-[#6b1fad] mt-3">
                   PDF, DOC, DOCX, or TXT
                 </p>
               </div>
@@ -237,14 +237,14 @@ export default function ProfilePage() {
                     index !== menuItems.length - 1 ? 'border-b border-slate-100' : ''
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center group-hover:from-[#042c4c]/10 group-hover:to-[#042c4c]/5 transition-colors">
-                    <Icon className="w-5 h-5 text-[#6c8194] group-hover:text-[#042c4c] transition-colors" />
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center group-hover:from-[#1a1a2e]/10 group-hover:to-[#1a1a2e]/5 transition-colors">
+                    <Icon className="w-5 h-5 text-gray-500 group-hover:text-[#1a1a2e] transition-colors" />
                   </div>
                   <div className="flex-1 text-left">
-                    <span className="font-semibold text-[#042c4c] block">{item.label}</span>
-                    <span className="text-sm text-[#6c8194]">{item.description}</span>
+                    <span className="font-semibold text-[#1a1a2e] block">{item.label}</span>
+                    <span className="text-sm text-gray-500">{item.description}</span>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-[#768c9c] group-hover:text-[#ee7e65] group-hover:translate-x-1 transition-all" />
+                  <ChevronRight className="w-5 h-5 text-[#6b1fad] group-hover:text-[#24c4b8] group-hover:translate-x-1 transition-all" />
                 </button>
               );
             })}

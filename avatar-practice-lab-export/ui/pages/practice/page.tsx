@@ -129,15 +129,15 @@ export default function PracticePage() {
         </div>
       ) : (
         <div className="min-h-screen bg-[#fbfbfc]">
-          <div className="bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] text-white">
+          <div className="bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] text-white">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 bg-[#ee7e65] rounded-lg flex items-center justify-center">
+                    <div className="w-8 h-8 bg-[#24c4b8] rounded-lg flex items-center justify-center">
                       <Flame className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-[#ee7e65] text-sm font-semibold uppercase tracking-wide">Practice Lab</span>
+                    <span className="text-[#24c4b8] text-sm font-semibold uppercase tracking-wide">Practice Lab</span>
                   </div>
                   <h1 className="text-2xl sm:text-3xl font-bold" data-testid="text-page-title">
                     {selectedSkill && currentSkill ? currentSkill.name : "Practice Scenarios"}
@@ -153,7 +153,7 @@ export default function PracticePage() {
                   </div>
                   <div className="w-px h-8 bg-white/20" />
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-[#ee7e65]">{skills.length}</p>
+                    <p className="text-2xl font-bold text-[#24c4b8]">{skills.length}</p>
                     <p className="text-white/60 text-xs">Skills</p>
                   </div>
                 </div>
@@ -165,13 +165,13 @@ export default function PracticePage() {
             <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-4 sm:p-6 border border-slate-100">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#768c9c]" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6b1fad]" />
                   <Input
                     type="text"
                     placeholder="Search scenarios..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-12 h-12 bg-[#fbfbfc] rounded-xl border-slate-200 focus:border-[#ee7e65] focus:ring-[#ee7e65]/20 text-[#042c4c]"
+                    className="pl-12 h-12 bg-[#fbfbfc] rounded-xl border-slate-200 focus:border-[#24c4b8] focus:ring-[#24c4b8]/20 text-[#1a1a2e]"
                     data-testid="input-search-scenarios"
                   />
                 </div>
@@ -182,8 +182,8 @@ export default function PracticePage() {
                   onClick={() => handleSkillFilter(null)}
                   className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
                     !selectedSkill 
-                      ? "bg-[#042c4c] text-white shadow-lg shadow-[#042c4c]/25" 
-                      : "bg-slate-100 text-[#6c8194] hover:bg-slate-200"
+                      ? "bg-[#1a1a2e] text-white shadow-lg shadow-[#1a1a2e]/25" 
+                      : "bg-slate-100 text-gray-500 hover:bg-slate-200"
                   }`}
                 >
                   All Scenarios
@@ -194,8 +194,8 @@ export default function PracticePage() {
                     onClick={() => handleSkillFilter(skill.id)}
                     className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 whitespace-nowrap ${
                       selectedSkill === skill.id 
-                        ? "bg-[#ee7e65] text-white shadow-lg shadow-[#ee7e65]/25" 
-                        : "bg-slate-100 text-[#6c8194] hover:bg-slate-200"
+                        ? "bg-[#24c4b8] text-white shadow-lg shadow-[#24c4b8]/25" 
+                        : "bg-slate-100 text-gray-500 hover:bg-slate-200"
                     }`}
                   >
                     {skill.name}
@@ -207,7 +207,7 @@ export default function PracticePage() {
 
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
             <div className="flex items-center justify-between mb-6">
-              <p className="text-[#6c8194] font-medium">
+              <p className="text-gray-500 font-medium">
                 {filteredScenarios.length} scenario{filteredScenarios.length !== 1 ? 's' : ''} available
               </p>
             </div>
@@ -215,13 +215,13 @@ export default function PracticePage() {
             {filteredScenarios.length === 0 ? (
               <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm">
                 <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center">
-                  <MessageSquare className="w-8 h-8 text-[#768c9c]" />
+                  <MessageSquare className="w-8 h-8 text-[#6b1fad]" />
                 </div>
-                <h3 className="text-xl font-bold text-[#042c4c] mb-2">No scenarios found</h3>
-                <p className="text-[#6c8194] mb-6">Try adjusting your search or filters.</p>
+                <h3 className="text-xl font-bold text-[#1a1a2e] mb-2">No scenarios found</h3>
+                <p className="text-gray-500 mb-6">Try adjusting your search or filters.</p>
                 <Button 
                   onClick={() => { handleSkillFilter(null); setSearchQuery(""); }}
-                  className="bg-[#ee7e65] hover:bg-[#e06a50] text-white rounded-xl px-6"
+                  className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white rounded-xl px-6"
                 >
                   Clear Filters
                 </Button>
@@ -239,7 +239,7 @@ export default function PracticePage() {
                       to={`/avatar/practice/pre-session?scenarioId=${scenario.id}`}
                       className="block group"
                     >
-                      <div className="h-full bg-white rounded-2xl border border-slate-200 p-5 hover:border-[#ee7e65]/40 hover:shadow-xl hover:shadow-[#ee7e65]/10 transition-all duration-300 relative overflow-hidden">
+                      <div className="h-full bg-white rounded-2xl border border-slate-200 p-5 hover:border-[#24c4b8]/40 hover:shadow-xl hover:shadow-[#24c4b8]/10 transition-all duration-300 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-slate-50 to-transparent rounded-bl-full opacity-50" />
                         
                         <div className="relative">
@@ -252,20 +252,20 @@ export default function PracticePage() {
                             </span>
                           </div>
 
-                          <h3 className="font-bold text-[#042c4c] text-base mb-2 line-clamp-2 group-hover:text-[#ee7e65] transition-colors">
+                          <h3 className="font-bold text-[#1a1a2e] text-base mb-2 line-clamp-2 group-hover:text-[#24c4b8] transition-colors">
                             {scenario.name}
                           </h3>
 
-                          <p className="text-sm text-[#6c8194] line-clamp-2 mb-4">
+                          <p className="text-sm text-gray-500 line-clamp-2 mb-4">
                             {scenario.description || "Practice this scenario with an AI avatar."}
                           </p>
 
                           <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                            <div className="flex items-center gap-1.5 text-[#768c9c]">
+                            <div className="flex items-center gap-1.5 text-[#6b1fad]">
                               <Clock className="w-4 h-4" />
                               <span className="text-xs font-medium">5-10 min</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-[#ee7e65] font-semibold text-sm group-hover:gap-2.5 transition-all">
+                            <div className="flex items-center gap-1.5 text-[#24c4b8] font-semibold text-sm group-hover:gap-2.5 transition-all">
                               <Play className="w-4 h-4" />
                               <span>Start</span>
                             </div>

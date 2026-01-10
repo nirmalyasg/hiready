@@ -399,17 +399,17 @@ export default function ResultsPage() {
     return (
       <SidebarLayout>
         <div className="min-h-screen bg-[#fbfbfc]">
-          <div className="bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] text-white py-16">
+          <div className="bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] text-white py-16">
             <div className="max-w-4xl mx-auto px-4 text-center">
               <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <BarChart3 className="w-8 h-8 text-[#ee7e65]" />
+                <BarChart3 className="w-8 h-8 text-[#24c4b8]" />
               </div>
               <h2 className="text-2xl font-bold mb-3">No Practice Sessions Yet</h2>
               <p className="text-white/70 mb-8 max-w-md mx-auto">
                 Start practicing to see your results and track progress over time.
               </p>
               <Link to="/interview">
-                <Button className="bg-[#ee7e65] hover:bg-[#e06a50] text-white px-8 py-3 rounded-xl shadow-lg shadow-[#ee7e65]/25">
+                <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white px-8 py-3 rounded-xl shadow-lg shadow-[#24c4b8]/25">
                   Start Your First Session
                 </Button>
               </Link>
@@ -423,15 +423,15 @@ export default function ResultsPage() {
   return (
     <SidebarLayout>
       <div className="min-h-screen bg-[#fbfbfc]">
-        <div className="bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] text-white">
+        <div className="bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] text-white">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-[#ee7e65] rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-[#24c4b8] rounded-lg flex items-center justify-center">
                     <TrendingUp className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-[#ee7e65] text-sm font-semibold uppercase tracking-wide">Analytics</span>
+                  <span className="text-[#24c4b8] text-sm font-semibold uppercase tracking-wide">Analytics</span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-bold">Your Results</h1>
                 <p className="text-white/70 mt-2">
@@ -440,7 +440,7 @@ export default function ResultsPage() {
                 </p>
               </div>
               <Link to="/interview">
-                <Button className="gap-2 bg-[#ee7e65] hover:bg-[#e06a50] text-white font-semibold rounded-xl px-6 py-3 shadow-lg shadow-[#ee7e65]/25">
+                <Button className="gap-2 bg-[#24c4b8] hover:bg-[#1db0a5] text-white font-semibold rounded-xl px-6 py-3 shadow-lg shadow-[#24c4b8]/25">
                   <Play className="w-4 h-4" />
                   Practice More
                 </Button>
@@ -453,7 +453,7 @@ export default function ResultsPage() {
                 <p className="text-white/60 text-xs sm:text-sm">Sessions</p>
               </div>
               <div className="text-center border-x border-white/20">
-                <p className="text-2xl sm:text-3xl font-bold text-[#ee7e65]">{totalInterviewSessions}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-[#24c4b8]">{totalInterviewSessions}</p>
                 <p className="text-white/60 text-xs sm:text-sm">Interviews</p>
               </div>
               <div className="text-center border-r border-white/20">
@@ -476,8 +476,8 @@ export default function ResultsPage() {
                   onClick={() => setViewMode("sessions")}
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                     viewMode === "sessions" 
-                      ? "bg-[#042c4c] text-white shadow-lg" 
-                      : "text-[#6c8194] hover:text-[#042c4c]"
+                      ? "bg-[#1a1a2e] text-white shadow-lg" 
+                      : "text-gray-500 hover:text-[#1a1a2e]"
                   }`}
                 >
                   Sessions
@@ -486,8 +486,8 @@ export default function ResultsPage() {
                   onClick={() => setViewMode("skills")}
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                     viewMode === "skills" 
-                      ? "bg-[#042c4c] text-white shadow-lg" 
-                      : "text-[#6c8194] hover:text-[#042c4c]"
+                      ? "bg-[#1a1a2e] text-white shadow-lg" 
+                      : "text-gray-500 hover:text-[#1a1a2e]"
                   }`}
                 >
                   Performance
@@ -496,18 +496,18 @@ export default function ResultsPage() {
               
               <div className="flex gap-3 flex-1">
                 <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#768c9c]" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#6b1fad]" />
                   <Input
                     placeholder="Search sessions..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-12 h-11 rounded-xl bg-[#fbfbfc] border-slate-200 focus:border-[#ee7e65] focus:ring-[#ee7e65]/20"
+                    className="pl-12 h-11 rounded-xl bg-[#fbfbfc] border-slate-200 focus:border-[#24c4b8] focus:ring-[#24c4b8]/20"
                   />
                 </div>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-[#042c4c] font-medium min-w-[120px] focus:border-[#ee7e65] focus:ring-[#ee7e65]/20"
+                  className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-[#1a1a2e] font-medium min-w-[120px] focus:border-[#24c4b8] focus:ring-[#24c4b8]/20"
                 >
                   <option value="all">All Types</option>
                   <option value="interviews">Interviews</option>
@@ -541,7 +541,7 @@ export default function ResultsPage() {
                     <h3 className="text-lg font-semibold text-slate-900 mb-2">No Interview Analysis Yet</h3>
                     <p className="text-slate-500 text-sm mb-4">Complete interview practice sessions to see your performance across dimensions</p>
                     <Link to="/interview">
-                      <Button className="bg-[#ee7e65] hover:bg-[#e06a50]">Start Interview Practice</Button>
+                      <Button className="bg-[#24c4b8] hover:bg-[#1db0a5]">Start Interview Practice</Button>
                     </Link>
                   </div>
                 );
@@ -940,7 +940,7 @@ export default function ResultsPage() {
 
         {/* Next Recommended Exercise CTA */}
         {activeJobs.length > 0 && (
-          <div className="bg-gradient-to-r from-[#042c4c] to-[#0a3d66] rounded-2xl p-5 sm:p-6 text-white shadow-xl">
+          <div className="bg-gradient-to-r from-[#1a1a2e] to-[#2d1b4e] rounded-2xl p-5 sm:p-6 text-white shadow-xl">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h3 className="text-lg font-bold mb-1">Continue practicing?</h3>
@@ -950,7 +950,7 @@ export default function ResultsPage() {
                 </p>
               </div>
               <Link to={`/jobs/${(activeJobs[0] as { id: string }).id}`} className="sm:flex-shrink-0">
-                <Button className="bg-[#ee7e65] hover:bg-[#e06a50] text-white gap-2 w-full sm:w-auto font-semibold rounded-xl shadow-lg shadow-[#ee7e65]/25">
+                <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white gap-2 w-full sm:w-auto font-semibold rounded-xl shadow-lg shadow-[#24c4b8]/25">
                   <Play className="w-4 h-4" />
                   Practice Now
                 </Button>

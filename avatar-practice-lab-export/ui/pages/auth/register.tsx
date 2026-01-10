@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Loader2, Sparkles, Zap, Rocket, CheckCircle, Star, Shield } from 'lucide-react';
+import { Loader2, Zap, Rocket, CheckCircle, Star, Shield } from 'lucide-react';
+import logoImg from '@/assets/logo.png';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -65,22 +66,19 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#042c4c] via-[#0a3d66] to-[#042c4c] text-white p-12 flex-col justify-between relative overflow-hidden">
-        <div className="absolute top-20 right-20 w-96 h-96 bg-[#ee7e65]/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-10 w-64 h-64 bg-[#768c9c]/10 rounded-full blur-3xl" />
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] text-white p-12 flex-col justify-between relative overflow-hidden">
+        <div className="absolute top-20 right-20 w-96 h-96 bg-[#cb6ce6]/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-10 w-64 h-64 bg-[#24c4b8]/10 rounded-full blur-3xl" />
         
         <div className="relative">
           <Link to="/" className="inline-flex items-center gap-3">
-            <div className="w-12 h-12 bg-[#ee7e65] rounded-xl flex items-center justify-center shadow-lg shadow-[#ee7e65]/30">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold">Hiready</span>
+            <img src={logoImg} alt="Hiready" className="h-10 brightness-0 invert" />
           </Link>
         </div>
 
         <div className="relative space-y-8">
           <div>
-            <div className="inline-flex items-center gap-2 bg-[#ee7e65]/20 text-[#ee7e65] px-4 py-2 rounded-full text-sm font-semibold mb-6">
+            <div className="inline-flex items-center gap-2 bg-[#24c4b8]/20 text-[#24c4b8] px-4 py-2 rounded-full text-sm font-semibold mb-6">
               <Rocket className="w-4 h-4" />
               Start for free
             </div>
@@ -93,8 +91,8 @@ export default function RegisterPage() {
               const Icon = benefit.icon;
               return (
                 <div key={idx} className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                    <Icon className="w-4 h-4 text-emerald-400" />
+                  <div className="w-8 h-8 bg-[#24c4b8]/20 rounded-lg flex items-center justify-center">
+                    <Icon className="w-4 h-4 text-[#24c4b8]" />
                   </div>
                   <span className="text-white/80">{benefit.text}</span>
                 </div>
@@ -104,7 +102,7 @@ export default function RegisterPage() {
 
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#ee7e65] to-[#e06a50] flex items-center justify-center text-lg font-bold">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#24c4b8] to-[#1db0a5] flex items-center justify-center text-lg font-bold">
                 SK
               </div>
               <div>
@@ -115,7 +113,7 @@ export default function RegisterPage() {
             <p className="text-white/80 italic">"Hiready helped me prepare for my dream job. The AI feedback was incredibly detailed and actionable."</p>
             <div className="flex gap-1 mt-4">
               {[1,2,3,4,5].map(i => (
-                <Star key={i} className="w-4 h-4 fill-[#ee7e65] text-[#ee7e65]" />
+                <Star key={i} className="w-4 h-4 fill-[#24c4b8] text-[#24c4b8]" />
               ))}
             </div>
           </div>
@@ -126,27 +124,24 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-6 bg-[#fbfbfc] relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-b from-[#042c4c]/5 to-transparent lg:hidden" />
-        <div className="absolute top-40 left-20 w-64 h-64 bg-[#ee7e65]/5 rounded-full blur-3xl" />
+      <div className="flex-1 flex items-center justify-center px-6 bg-[#f8f7fc] relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-b from-[#6b1fad]/5 to-transparent lg:hidden" />
+        <div className="absolute top-40 left-20 w-64 h-64 bg-[#cb6ce6]/5 rounded-full blur-3xl" />
         
         <div className="w-full max-w-sm relative">
           <div className="text-center mb-6 lg:hidden">
             <Link to="/" className="inline-flex items-center gap-2.5 mb-6">
-              <div className="w-11 h-11 bg-[#042c4c] rounded-xl flex items-center justify-center shadow-lg">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-[#042c4c]">Hiready</span>
+              <img src={logoImg} alt="Hiready" className="h-10" />
             </Link>
-            <div className="inline-flex items-center gap-2 bg-[#ee7e65]/10 text-[#ee7e65] px-4 py-1.5 rounded-full text-xs font-semibold mb-4 border border-[#ee7e65]/20">
+            <div className="inline-flex items-center gap-2 bg-[#24c4b8]/10 text-[#24c4b8] px-4 py-1.5 rounded-full text-xs font-semibold mb-4 border border-[#24c4b8]/20">
               <Rocket className="w-3.5 h-3.5" />
               Start your journey
             </div>
           </div>
           
           <div className="lg:mb-6">
-            <h1 className="text-2xl lg:text-3xl font-bold text-[#042c4c]">Create account</h1>
-            <p className="text-[#6c8194] mt-2">Get started in less than a minute</p>
+            <h1 className="text-2xl lg:text-3xl font-bold text-[#1a1a2e]">Create account</h1>
+            <p className="text-gray-500 mt-2">Get started in less than a minute</p>
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-200 shadow-xl shadow-gray-100/50 p-7 mt-6">
@@ -159,7 +154,7 @@ export default function RegisterPage() {
               )}
 
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-[#042c4c] mb-2">
+                <label htmlFor="username" className="block text-sm font-medium text-[#1a1a2e] mb-2">
                   Username
                 </label>
                 <input
@@ -167,28 +162,28 @@ export default function RegisterPage() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-[#768c9c] focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all bg-[#fbfbfc]"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc]"
                   placeholder="Choose a username"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-[#042c4c] mb-2">
-                  Email <span className="text-[#768c9c]">(optional)</span>
+                <label htmlFor="email" className="block text-sm font-medium text-[#1a1a2e] mb-2">
+                  Email <span className="text-gray-400">(optional)</span>
                 </label>
                 <input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-[#768c9c] focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all bg-[#fbfbfc]"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc]"
                   placeholder="your@email.com"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-[#042c4c] mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-[#1a1a2e] mb-2">
                   Password
                 </label>
                 <input
@@ -196,14 +191,14 @@ export default function RegisterPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-[#768c9c] focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all bg-[#fbfbfc]"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc]"
                   placeholder="At least 6 characters"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#042c4c] mb-2">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#1a1a2e] mb-2">
                   Confirm Password
                 </label>
                 <input
@@ -211,7 +206,7 @@ export default function RegisterPage() {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#042c4c] placeholder:text-[#768c9c] focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all bg-[#fbfbfc]"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc]"
                   placeholder="Confirm your password"
                   required
                 />
@@ -220,7 +215,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-[#ee7e65] hover:bg-[#e06a50] text-white py-3.5 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#ee7e65]/25 mt-2"
+                className="w-full bg-[#24c4b8] hover:bg-[#1db0a5] text-white py-3.5 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#24c4b8]/25 mt-2"
               >
                 {isLoading ? (
                   <>
@@ -234,9 +229,9 @@ export default function RegisterPage() {
             </form>
           </div>
 
-          <p className="text-center text-[#6c8194] mt-6">
+          <p className="text-center text-gray-500 mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-[#ee7e65] hover:text-[#e06a50] font-semibold">
+            <Link to="/login" className="text-[#6b1fad] hover:text-[#5a1a91] font-semibold">
               Sign in
             </Link>
           </p>

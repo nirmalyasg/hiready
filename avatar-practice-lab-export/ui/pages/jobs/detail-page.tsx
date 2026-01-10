@@ -147,37 +147,37 @@ interface CompanyData {
 
 const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
   saved: { label: "Saved", bg: "bg-slate-100", text: "text-slate-600" },
-  applied: { label: "Applied", bg: "bg-[#768c9c]/20", text: "text-[#042c4c]" },
-  interview: { label: "Interviewing", bg: "bg-[#ee7e65]/10", text: "text-[#ee7e65]" },
+  applied: { label: "Applied", bg: "bg-[#6b1fad]/20", text: "text-[#1a1a2e]" },
+  interview: { label: "Interviewing", bg: "bg-[#24c4b8]/10", text: "text-[#24c4b8]" },
   offer: { label: "Offer", bg: "bg-emerald-100", text: "text-emerald-700" },
   rejected: { label: "Rejected", bg: "bg-red-100", text: "text-red-700" },
   archived: { label: "Archived", bg: "bg-gray-100", text: "text-gray-500" },
 };
 
 const categoryConfig: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
-  hr_screening: { icon: <Phone className="w-4 h-4" />, color: "text-[#6c8194]", bg: "bg-[#6c8194]/10" },
-  hr: { icon: <Phone className="w-4 h-4" />, color: "text-[#6c8194]", bg: "bg-[#6c8194]/10" },
-  hiring_manager: { icon: <User className="w-4 h-4" />, color: "text-[#768c9c]", bg: "bg-[#768c9c]/10" },
-  technical_interview: { icon: <Code className="w-4 h-4" />, color: "text-[#042c4c]", bg: "bg-[#042c4c]/10" },
-  technical: { icon: <Code className="w-4 h-4" />, color: "text-[#042c4c]", bg: "bg-[#042c4c]/10" },
-  coding: { icon: <Code className="w-4 h-4" />, color: "text-[#042c4c]", bg: "bg-[#042c4c]/10" },
-  coding_assessment: { icon: <Code className="w-4 h-4" />, color: "text-[#042c4c]", bg: "bg-[#042c4c]/10" },
-  system_design: { icon: <Code className="w-4 h-4" />, color: "text-[#768c9c]", bg: "bg-[#768c9c]/10" },
-  sql: { icon: <Code className="w-4 h-4" />, color: "text-[#6c8194]", bg: "bg-[#6c8194]/10" },
-  analytics: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#768c9c]", bg: "bg-[#768c9c]/10" },
-  ml: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#042c4c]", bg: "bg-[#042c4c]/10" },
-  case_study: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
-  case: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
-  product: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
-  portfolio: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#768c9c]", bg: "bg-[#768c9c]/10" },
-  sales_roleplay: { icon: <User className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
-  behavioral: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
-  culture_values: { icon: <Heart className="w-4 h-4" />, color: "text-[#6c8194]", bg: "bg-[#6c8194]/10" },
-  bar_raiser: { icon: <TrendingUp className="w-4 h-4" />, color: "text-[#042c4c]", bg: "bg-[#042c4c]/10" },
-  aptitude_assessment: { icon: <TrendingUp className="w-4 h-4" />, color: "text-[#6c8194]", bg: "bg-[#6c8194]/10" },
-  aptitude: { icon: <TrendingUp className="w-4 h-4" />, color: "text-[#6c8194]", bg: "bg-[#6c8194]/10" },
-  group_discussion: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#768c9c]", bg: "bg-[#768c9c]/10" },
-  group: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#768c9c]", bg: "bg-[#768c9c]/10" },
+  hr_screening: { icon: <Phone className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
+  hr: { icon: <Phone className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
+  hiring_manager: { icon: <User className="w-4 h-4" />, color: "text-[#6b1fad]", bg: "bg-[#6b1fad]/10" },
+  technical_interview: { icon: <Code className="w-4 h-4" />, color: "text-[#1a1a2e]", bg: "bg-[#1a1a2e]/10" },
+  technical: { icon: <Code className="w-4 h-4" />, color: "text-[#1a1a2e]", bg: "bg-[#1a1a2e]/10" },
+  coding: { icon: <Code className="w-4 h-4" />, color: "text-[#1a1a2e]", bg: "bg-[#1a1a2e]/10" },
+  coding_assessment: { icon: <Code className="w-4 h-4" />, color: "text-[#1a1a2e]", bg: "bg-[#1a1a2e]/10" },
+  system_design: { icon: <Code className="w-4 h-4" />, color: "text-[#6b1fad]", bg: "bg-[#6b1fad]/10" },
+  sql: { icon: <Code className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
+  analytics: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#6b1fad]", bg: "bg-[#6b1fad]/10" },
+  ml: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#1a1a2e]", bg: "bg-[#1a1a2e]/10" },
+  case_study: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
+  case: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
+  product: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
+  portfolio: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#6b1fad]", bg: "bg-[#6b1fad]/10" },
+  sales_roleplay: { icon: <User className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
+  behavioral: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
+  culture_values: { icon: <Heart className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
+  bar_raiser: { icon: <TrendingUp className="w-4 h-4" />, color: "text-[#1a1a2e]", bg: "bg-[#1a1a2e]/10" },
+  aptitude_assessment: { icon: <TrendingUp className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
+  aptitude: { icon: <TrendingUp className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
+  group_discussion: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#6b1fad]", bg: "bg-[#6b1fad]/10" },
+  group: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#6b1fad]", bg: "bg-[#6b1fad]/10" },
 };
 
 export default function JobDetailPage() {
@@ -375,7 +375,7 @@ export default function JobDetailPage() {
         <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
           
           {/* Hero Header */}
-          <div className="bg-gradient-to-br from-[#042c4c] to-[#0a3d62] rounded-2xl p-6 shadow-xl text-white">
+          <div className="bg-gradient-to-br from-[#1a1a2e] to-[#2d1b4e] rounded-2xl p-6 shadow-xl text-white">
             <div className="flex items-start justify-between mb-4">
               <button
                 onClick={() => navigate("/jobs")}
@@ -414,7 +414,7 @@ export default function JobDetailPage() {
             {/* Stats Bar */}
             <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-white/10">
               <div className="text-center">
-                <p className="text-2xl font-bold text-[#ee7e65]">{readiness}%</p>
+                <p className="text-2xl font-bold text-[#24c4b8]">{readiness}%</p>
                 <p className="text-xs text-white/60">Readiness</p>
               </div>
               <div className="text-center border-x border-white/10">
@@ -434,7 +434,7 @@ export default function JobDetailPage() {
           {practiceOptions.length > 0 && entitlements?.canStartSession && (
             <Button
               onClick={() => handleStartPracticeOption(practiceOptions[0])}
-              className="w-full h-14 bg-[#ee7e65] hover:bg-[#e06a50] text-white font-semibold rounded-xl shadow-lg shadow-[#ee7e65]/25 text-base gap-2"
+              className="w-full h-14 bg-[#24c4b8] hover:bg-[#1db0a5] text-white font-semibold rounded-xl shadow-lg shadow-[#24c4b8]/25 text-base gap-2"
             >
               <Play className="w-5 h-5" />
               Start Practice Session
@@ -454,7 +454,7 @@ export default function JobDetailPage() {
                 <Button
                   onClick={handleParseJD}
                   size="sm"
-                  className="h-8 px-3 bg-[#ee7e65] hover:bg-[#e06a50] text-white text-sm"
+                  className="h-8 px-3 bg-[#24c4b8] hover:bg-[#1db0a5] text-white text-sm"
                   disabled={isParsing}
                 >
                   {isParsing ? "..." : "Analyze"}
@@ -536,7 +536,7 @@ export default function JobDetailPage() {
                     <Button
                       onClick={() => setShowRoleSelector(true)}
                       size="sm"
-                      className="bg-[#ee7e65] hover:bg-[#e06a50] text-white text-xs"
+                      className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white text-xs"
                     >
                       Select Role
                     </Button>
@@ -560,7 +560,7 @@ export default function JobDetailPage() {
               <Button
                 onClick={() => setShowPurchaseModal(true)}
                 size="sm"
-                className="h-8 px-3 text-xs bg-[#ee7e65] hover:bg-[#e06a50] text-white"
+                className="h-8 px-3 text-xs bg-[#24c4b8] hover:bg-[#1db0a5] text-white"
               >
                 Upgrade
               </Button>
@@ -597,7 +597,7 @@ export default function JobDetailPage() {
                         size="sm"
                         className={`h-8 px-3 text-xs ${
                           entitlements?.canStartSession
-                            ? "bg-[#ee7e65] hover:bg-[#e06a50] text-white"
+                            ? "bg-[#24c4b8] hover:bg-[#1db0a5] text-white"
                             : "bg-slate-100 hover:bg-slate-200 text-slate-600"
                         }`}
                       >
