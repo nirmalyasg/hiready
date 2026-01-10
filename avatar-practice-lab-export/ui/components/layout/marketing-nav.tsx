@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sparkles, Menu, X, Calendar } from 'lucide-react';
+import { Menu, X, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import logoImg from '@/assets/logo.png';
 
 export default function MarketingNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -31,11 +32,8 @@ export default function MarketingNav() {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b transition-shadow duration-200 ${scrolled ? 'shadow-md border-gray-200' : 'shadow-sm border-gray-100'}`}>
       <div className="max-w-6xl mx-auto px-6 sm:px-8 h-[72px] flex justify-between items-center">
-        <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-10 h-10 bg-[#042c4c] rounded-xl flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-bold text-[#042c4c] text-xl tracking-tight">Hiready</span>
+        <Link to="/" className="flex items-center gap-2">
+          <img src={logoImg} alt="Hiready" className="h-9" />
         </Link>
         
         <div className="hidden md:flex items-center gap-6">
@@ -45,8 +43,8 @@ export default function MarketingNav() {
               to={link.to}
               className={`text-sm font-medium transition-colors ${
                 isActive(link.to)
-                  ? 'text-[#042c4c]'
-                  : 'text-[#6c8194] hover:text-[#042c4c]'
+                  ? 'text-[#6b1fad]'
+                  : 'text-gray-600 hover:text-[#6b1fad]'
               }`}
             >
               {link.label}
@@ -56,25 +54,25 @@ export default function MarketingNav() {
 
         <div className="hidden md:flex items-center gap-3">
           <Link to="/demo">
-            <Button variant="outline" size="sm" className="border-[#042c4c]/20 text-[#042c4c] hover:bg-[#042c4c]/5 gap-2 h-10 px-4">
+            <Button variant="outline" size="sm" className="border-[#6b1fad]/20 text-[#6b1fad] hover:bg-[#6b1fad]/5 gap-2 h-10 px-4">
               <Calendar className="w-4 h-4" />
               Book a Demo
             </Button>
           </Link>
           <Link to="/login">
-            <Button variant="ghost" size="sm" className="text-[#6c8194] hover:text-[#042c4c] h-10 px-4">
+            <Button variant="ghost" size="sm" className="text-gray-600 hover:text-[#6b1fad] h-10 px-4">
               Sign In
             </Button>
           </Link>
           <Link to="/readycheck">
-            <Button size="sm" className="bg-[#ee7e65] hover:bg-[#e06a50] text-white shadow-lg shadow-[#ee7e65]/25 border-0 h-10 px-5 font-semibold">
+            <Button size="sm" className="bg-[#cb6ce6] hover:bg-[#b85fd4] text-white shadow-lg shadow-[#cb6ce6]/25 border-0 h-10 px-5 font-semibold">
               Start Preparing
             </Button>
           </Link>
         </div>
 
         <button 
-          className="md:hidden p-2 text-[#042c4c] hover:bg-gray-100 rounded-lg transition-colors"
+          className="md:hidden p-2 text-[#6b1fad] hover:bg-gray-100 rounded-lg transition-colors"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
         >
@@ -96,8 +94,8 @@ export default function MarketingNav() {
                   to={link.to}
                   className={`block py-3 px-4 rounded-xl text-base font-medium transition-colors ${
                     isActive(link.to)
-                      ? 'bg-[#042c4c]/5 text-[#042c4c]'
-                      : 'text-[#042c4c] hover:bg-gray-50'
+                      ? 'bg-[#6b1fad]/5 text-[#6b1fad]'
+                      : 'text-[#6b1fad] hover:bg-gray-50'
                   }`}
                 >
                   {link.label}
@@ -105,20 +103,20 @@ export default function MarketingNav() {
               ))}
               <Link
                 to="/demo"
-                className="block py-3 px-4 rounded-xl text-base font-medium text-[#042c4c] hover:bg-gray-50"
+                className="block py-3 px-4 rounded-xl text-base font-medium text-[#6b1fad] hover:bg-gray-50"
               >
                 Book a Demo
               </Link>
               <Link
                 to="/login"
-                className="block py-3 px-4 rounded-xl text-base text-[#6c8194] hover:bg-gray-50"
+                className="block py-3 px-4 rounded-xl text-base text-gray-600 hover:bg-gray-50"
               >
                 Sign In
               </Link>
             </div>
             <div className="p-6 border-t border-gray-100">
               <Link to="/readycheck">
-                <Button className="w-full h-12 bg-[#ee7e65] hover:bg-[#e06a50] text-white shadow-lg font-semibold text-base">
+                <Button className="w-full h-12 bg-[#cb6ce6] hover:bg-[#b85fd4] text-white shadow-lg font-semibold text-base">
                   Start Preparing
                 </Button>
               </Link>

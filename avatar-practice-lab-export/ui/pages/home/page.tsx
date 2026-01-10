@@ -11,11 +11,9 @@ import {
   Award,
   Shield,
   Briefcase,
-  Sparkles,
   Play,
   GraduationCap,
   Building2,
-  Users,
   Clock,
   Brain,
   ChevronRight
@@ -23,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import MarketingNav from '@/components/layout/marketing-nav';
 import dashboardImg from '@/assets/screenshots/dashboard.jpg';
+import logoImg from '@/assets/logo.png';
 
 export default function HomePage() {
   const companies = ['Google', 'Microsoft', 'Amazon', 'Meta', 'Apple', 'Netflix', 'Uber', 'Airbnb'];
@@ -38,19 +37,19 @@ export default function HomePage() {
       icon: GraduationCap, 
       title: 'Students & Fresh Grads', 
       desc: 'Nail your first job interview with AI-powered practice',
-      color: 'from-blue-500 to-indigo-600'
+      color: 'from-[#cb6ce6] to-[#6b1fad]'
     },
     { 
       icon: Briefcase, 
       title: 'Career Switchers', 
       desc: 'Transition confidently with role-specific preparation',
-      color: 'from-emerald-500 to-teal-600'
+      color: 'from-[#9b4dca] to-[#6b1fad]'
     },
     { 
       icon: Building2, 
       title: 'Enterprise Teams', 
       desc: 'Scale interview prep across your entire organization',
-      color: 'from-orange-500 to-rose-600'
+      color: 'from-[#cb6ce6] to-[#9b4dca]'
     },
   ];
 
@@ -141,23 +140,23 @@ export default function HomePage() {
 
       {/* Hero Section - Split Layout */}
       <section className="pt-[100px] lg:pt-[120px] pb-0 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#042c4c] via-[#0a3d62] to-[#042c4c]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(238,126,101,0.15),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(118,140,156,0.1),transparent_50%)]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#6b1fad] via-[#8b35c7] to-[#6b1fad]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(203,108,230,0.25),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(155,77,202,0.15),transparent_50%)]" />
         
         <div className="max-w-7xl mx-auto px-6 lg:px-8 relative">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center py-16 lg:py-20">
             {/* Left: Content */}
             <div className="text-center lg:text-left">
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/90 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-white/20">
-                <Zap className="w-4 h-4 text-[#ee7e65]" />
+                <Zap className="w-4 h-4 text-[#cb6ce6]" />
                 AI-Powered Interview Practice
               </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] mb-6 text-white tracking-tight">
                 Practice interviews.
                 <br />
-                <span className="text-[#ee7e65]">Land the job.</span>
+                <span className="text-[#cb6ce6]">Land the job.</span>
               </h1>
               
               <p className="text-lg lg:text-xl text-white/70 mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
@@ -166,7 +165,7 @@ export default function HomePage() {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
                 <Link to="/readycheck">
-                  <Button size="lg" className="w-full sm:w-auto bg-[#ee7e65] hover:bg-[#e06a50] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 border-0 group">
+                  <Button size="lg" className="w-full sm:w-auto bg-[#cb6ce6] hover:bg-[#b85fd4] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#cb6ce6]/30 border-0 group">
                     Start Free Practice
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
@@ -199,7 +198,7 @@ export default function HomePage() {
             <div className="relative hidden lg:block">
               <div className="relative">
                 {/* Glow effect */}
-                <div className="absolute -inset-4 bg-gradient-to-r from-[#ee7e65]/20 to-[#768c9c]/20 rounded-3xl blur-2xl" />
+                <div className="absolute -inset-4 bg-gradient-to-r from-[#cb6ce6]/20 to-[#9b4dca]/20 rounded-3xl blur-2xl" />
                 
                 {/* Main image container */}
                 <div className="relative bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-3 shadow-2xl">
@@ -212,12 +211,12 @@ export default function HomePage() {
                   {/* Floating score card */}
                   <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl p-4 shadow-2xl border border-gray-100">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-[#ee7e65] to-[#e06a50] rounded-xl flex items-center justify-center">
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#cb6ce6] to-[#6b1fad] rounded-xl flex items-center justify-center">
                         <TrendingUp className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <div className="text-2xl font-bold text-[#042c4c]">78</div>
-                        <div className="text-xs text-[#6c8194]">Readiness Score</div>
+                        <div className="text-2xl font-bold text-[#6b1fad]">78</div>
+                        <div className="text-xs text-gray-500">Readiness Score</div>
                       </div>
                     </div>
                   </div>
@@ -240,12 +239,12 @@ export default function HomePage() {
       {/* Social Proof - Companies */}
       <section className="py-12 bg-white border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6">
-          <p className="text-center text-sm text-[#6c8194] mb-8 font-medium">
+          <p className="text-center text-sm text-gray-500 mb-8 font-medium">
             Candidates practicing for interviews at top companies
           </p>
           <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-6">
             {companies.map((company) => (
-              <span key={company} className="text-xl font-semibold text-[#042c4c]/30 hover:text-[#042c4c]/50 transition-colors">
+              <span key={company} className="text-xl font-semibold text-[#6b1fad]/30 hover:text-[#6b1fad]/50 transition-colors">
                 {company}
               </span>
             ))}
@@ -261,11 +260,11 @@ export default function HomePage() {
               const Icon = metric.icon;
               return (
                 <div key={i} className="text-center">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-[#042c4c]/5 rounded-xl mb-4">
-                    <Icon className="w-6 h-6 text-[#042c4c]" />
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-[#6b1fad]/10 rounded-xl mb-4">
+                    <Icon className="w-6 h-6 text-[#6b1fad]" />
                   </div>
-                  <div className="text-4xl font-bold text-[#042c4c] mb-1">{metric.value}</div>
-                  <div className="text-[#6c8194]">{metric.label}</div>
+                  <div className="text-4xl font-bold text-[#6b1fad] mb-1">{metric.value}</div>
+                  <div className="text-gray-500">{metric.label}</div>
                 </div>
               );
             })}
@@ -277,10 +276,10 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#042c4c] mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#6b1fad] mb-4">
               Built for everyone preparing for interviews
             </h2>
-            <p className="text-lg text-[#6c8194] max-w-2xl mx-auto">
+            <p className="text-lg text-gray-500 max-w-2xl mx-auto">
               Whether you're just starting out or leading a team, Hiready adapts to your needs
             </p>
           </div>
@@ -294,9 +293,9 @@ export default function HomePage() {
                   <div className={`w-14 h-14 bg-gradient-to-br ${persona.color} rounded-2xl flex items-center justify-center mb-5 shadow-lg`}>
                     <Icon className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-[#042c4c] mb-2">{persona.title}</h3>
-                  <p className="text-[#6c8194]">{persona.desc}</p>
-                  <ChevronRight className="w-5 h-5 text-[#6c8194] absolute bottom-8 right-8 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                  <h3 className="text-xl font-bold text-[#6b1fad] mb-2">{persona.title}</h3>
+                  <p className="text-gray-500">{persona.desc}</p>
+                  <ChevronRight className="w-5 h-5 text-gray-400 absolute bottom-8 right-8 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                 </div>
               );
             })}
@@ -308,30 +307,30 @@ export default function HomePage() {
       <section className="py-20 bg-[#fbfbfc]">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block text-[#ee7e65] text-sm font-semibold tracking-wider uppercase mb-3">How It Works</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#042c4c] mb-4">
+            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">How It Works</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#6b1fad] mb-4">
               Ready in 3 simple steps
             </h2>
-            <p className="text-lg text-[#6c8194]">No signup required. Start practicing in under a minute.</p>
+            <p className="text-lg text-gray-500">No signup required. Start practicing in under a minute.</p>
           </div>
           
           <div className="relative">
             {/* Connection line */}
-            <div className="hidden md:block absolute top-1/2 left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-[#042c4c]/20 via-[#042c4c]/20 to-[#042c4c]/20 -translate-y-1/2" />
+            <div className="hidden md:block absolute top-1/2 left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-[#6b1fad]/20 via-[#cb6ce6]/20 to-[#6b1fad]/20 -translate-y-1/2" />
             
             <div className="grid md:grid-cols-3 gap-8 relative">
               {steps.map((step, i) => {
                 const Icon = step.icon;
                 return (
                   <div key={i} className="relative text-center group">
-                    <div className="relative inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-xl shadow-[#042c4c]/5 mb-6 group-hover:shadow-2xl group-hover:shadow-[#ee7e65]/10 transition-all duration-300">
-                      <Icon className="w-9 h-9 text-[#042c4c] group-hover:text-[#ee7e65] transition-colors" />
-                      <div className="absolute -top-2 -right-2 w-7 h-7 bg-[#ee7e65] rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                    <div className="relative inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-xl shadow-[#6b1fad]/5 mb-6 group-hover:shadow-2xl group-hover:shadow-[#cb6ce6]/10 transition-all duration-300">
+                      <Icon className="w-9 h-9 text-[#6b1fad] group-hover:text-[#cb6ce6] transition-colors" />
+                      <div className="absolute -top-2 -right-2 w-7 h-7 bg-[#cb6ce6] rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg">
                         {step.num.replace('0', '')}
                       </div>
                     </div>
-                    <h3 className="text-xl font-bold text-[#042c4c] mb-2">{step.title}</h3>
-                    <p className="text-[#6c8194]">{step.desc}</p>
+                    <h3 className="text-xl font-bold text-[#6b1fad] mb-2">{step.title}</h3>
+                    <p className="text-gray-500">{step.desc}</p>
                   </div>
                 );
               })}
@@ -340,7 +339,7 @@ export default function HomePage() {
           
           <div className="text-center mt-12">
             <Link to="/readycheck">
-              <Button size="lg" className="bg-[#042c4c] hover:bg-[#0a3d62] text-white px-8 h-14 text-base font-semibold shadow-xl group">
+              <Button size="lg" className="bg-[#6b1fad] hover:bg-[#5a1a91] text-white px-8 h-14 text-base font-semibold shadow-xl group">
                 Try It Now — It's Free
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -353,8 +352,8 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block text-[#ee7e65] text-sm font-semibold tracking-wider uppercase mb-3">Features</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#042c4c] mb-4">
+            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">Features</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#6b1fad] mb-4">
               Everything you need to ace interviews
             </h2>
           </div>
@@ -363,12 +362,12 @@ export default function HomePage() {
             {features.map((feature, i) => {
               const Icon = feature.icon;
               return (
-                <div key={i} className="group bg-[#fbfbfc] rounded-2xl p-7 border border-gray-100 hover:bg-white hover:border-[#ee7e65]/20 hover:shadow-xl transition-all duration-300">
-                  <div className="w-12 h-12 bg-[#042c4c] rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#ee7e65] transition-colors duration-300">
+                <div key={i} className="group bg-[#fbfbfc] rounded-2xl p-7 border border-gray-100 hover:bg-white hover:border-[#cb6ce6]/20 hover:shadow-xl transition-all duration-300">
+                  <div className="w-12 h-12 bg-[#6b1fad] rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#cb6ce6] transition-colors duration-300">
                     <Icon className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-lg font-bold text-[#042c4c] mb-2">{feature.title}</h3>
-                  <p className="text-[#6c8194] leading-relaxed">{feature.desc}</p>
+                  <h3 className="text-lg font-bold text-[#6b1fad] mb-2">{feature.title}</h3>
+                  <p className="text-gray-500 leading-relaxed">{feature.desc}</p>
                 </div>
               );
             })}
@@ -377,15 +376,15 @@ export default function HomePage() {
       </section>
 
       {/* Readiness Score Showcase */}
-      <section className="py-24 bg-gradient-to-br from-[#042c4c] via-[#0a3d62] to-[#042c4c] relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(238,126,101,0.1),transparent_70%)]" />
+      <section className="py-24 bg-gradient-to-br from-[#6b1fad] via-[#8b35c7] to-[#6b1fad] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(203,108,230,0.15),transparent_70%)]" />
         
         <div className="max-w-5xl mx-auto px-6 relative">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur text-white/90 px-4 py-2 rounded-full text-sm font-semibold mb-6 border border-white/20">
-                <BarChart3 className="w-4 h-4 text-[#ee7e65]" />
-                HIREADY INDEX™
+                <BarChart3 className="w-4 h-4 text-[#cb6ce6]" />
+                HIREADY INDEX
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-5 leading-tight">
                 Know exactly how ready you are
@@ -402,7 +401,7 @@ export default function HomePage() {
                   'Communication Style'
                 ].map((skill, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#ee7e65]" />
+                    <CheckCircle2 className="w-5 h-5 text-[#cb6ce6]" />
                     <span className="text-white/80">{skill}</span>
                   </div>
                 ))}
@@ -412,8 +411,8 @@ export default function HomePage() {
             <div className="relative">
               <div className="bg-white rounded-3xl p-8 shadow-2xl max-w-sm mx-auto">
                 <div className="text-center mb-6">
-                  <div className="text-6xl font-bold text-[#042c4c] mb-1">78</div>
-                  <div className="text-[#6c8194] font-medium">Nearly Interview Ready</div>
+                  <div className="text-6xl font-bold text-[#6b1fad] mb-1">78</div>
+                  <div className="text-gray-500 font-medium">Nearly Interview Ready</div>
                 </div>
                 
                 <div className="space-y-4">
@@ -425,12 +424,12 @@ export default function HomePage() {
                   ].map((item, i) => (
                     <div key={i}>
                       <div className="flex justify-between text-sm mb-1.5">
-                        <span className="text-[#6c8194] font-medium">{item.skill}</span>
-                        <span className="text-[#042c4c] font-bold">{item.value}</span>
+                        <span className="text-gray-500 font-medium">{item.skill}</span>
+                        <span className="text-[#6b1fad] font-bold">{item.value}</span>
                       </div>
                       <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div 
-                          className="h-2 bg-gradient-to-r from-[#042c4c] to-[#ee7e65] rounded-full" 
+                          className="h-2 bg-gradient-to-r from-[#6b1fad] to-[#cb6ce6] rounded-full" 
                           style={{ width: `${item.value}%` }}
                         />
                       </div>
@@ -440,7 +439,7 @@ export default function HomePage() {
                 
                 <div className="mt-6 pt-6 border-t border-gray-100">
                   <Link to="/readycheck" className="block">
-                    <Button className="w-full bg-[#ee7e65] hover:bg-[#e06a50] text-white h-12 font-semibold shadow-lg shadow-[#ee7e65]/25">
+                    <Button className="w-full bg-[#cb6ce6] hover:bg-[#b85fd4] text-white h-12 font-semibold shadow-lg shadow-[#cb6ce6]/25">
                       Get Your Score
                     </Button>
                   </Link>
@@ -448,8 +447,8 @@ export default function HomePage() {
               </div>
               
               {/* Decorative elements */}
-              <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#ee7e65]/20 rounded-full blur-2xl" />
-              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-[#768c9c]/20 rounded-full blur-2xl" />
+              <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#cb6ce6]/20 rounded-full blur-2xl" />
+              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-[#9b4dca]/20 rounded-full blur-2xl" />
             </div>
           </div>
         </div>
@@ -459,8 +458,8 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block text-[#ee7e65] text-sm font-semibold tracking-wider uppercase mb-3">Success Stories</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#042c4c] mb-4">
+            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">Success Stories</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#6b1fad] mb-4">
               Real results from real candidates
             </h2>
           </div>
@@ -473,14 +472,14 @@ export default function HomePage() {
                     <Star key={j} className="w-5 h-5 text-amber-400 fill-amber-400" />
                   ))}
                 </div>
-                <p className="text-[#042c4c] mb-6 leading-relaxed text-lg">"{t.quote}"</p>
+                <p className="text-[#6b1fad] mb-6 leading-relaxed text-lg">"{t.quote}"</p>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#042c4c] to-[#768c9c] rounded-full flex items-center justify-center text-white font-bold">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#6b1fad] to-[#cb6ce6] rounded-full flex items-center justify-center text-white font-bold">
                     {t.avatar}
                   </div>
                   <div>
-                    <div className="font-semibold text-[#042c4c]">{t.name}</div>
-                    <div className="text-[#6c8194] text-sm">{t.role} at {t.company}</div>
+                    <div className="font-semibold text-[#6b1fad]">{t.name}</div>
+                    <div className="text-gray-500 text-sm">{t.role} at {t.company}</div>
                   </div>
                 </div>
               </div>
@@ -492,22 +491,22 @@ export default function HomePage() {
       {/* Final CTA */}
       <section className="py-24 bg-gradient-to-b from-[#fbfbfc] to-white">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#ee7e65] to-[#e06a50] rounded-2xl mb-6 shadow-xl shadow-[#ee7e65]/30">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#cb6ce6] to-[#6b1fad] rounded-2xl mb-6 shadow-xl shadow-[#cb6ce6]/30">
             <Award className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[#042c4c] mb-5">
-            Your next interview could be <span className="text-[#ee7e65]">the one.</span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#6b1fad] mb-5">
+            Your next interview could be <span className="text-[#cb6ce6]">the one.</span>
           </h2>
-          <p className="text-[#6c8194] mb-10 text-lg max-w-lg mx-auto">
+          <p className="text-gray-500 mb-10 text-lg max-w-lg mx-auto">
             Start practicing now — it only takes 10 minutes to see where you stand.
           </p>
           <Link to="/readycheck">
-            <Button size="lg" className="bg-[#042c4c] hover:bg-[#0a3d62] text-white px-12 h-16 text-lg font-semibold shadow-xl shadow-[#042c4c]/20 group">
+            <Button size="lg" className="bg-[#6b1fad] hover:bg-[#5a1a91] text-white px-12 h-16 text-lg font-semibold shadow-xl shadow-[#6b1fad]/20 group">
               Start Free Practice
               <ArrowRight className="w-6 h-6 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
-          <p className="text-sm text-[#6c8194] mt-8 flex items-center justify-center gap-6">
+          <p className="text-sm text-gray-500 mt-8 flex items-center justify-center gap-6">
             <span className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500" />
               No credit card
@@ -525,23 +524,20 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#042c4c] text-white py-12 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-bold text-xl">Hiready</span>
+      <footer className="bg-[#6b1fad] text-white py-12 px-6">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2">
+            <img src={logoImg} alt="Hiready" className="h-8 brightness-0 invert" />
           </div>
           <div className="flex gap-6 text-sm text-white/60">
             <Link to="/features" className="hover:text-white transition-colors">Features</Link>
             <Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link>
             <Link to="/enterprise" className="hover:text-white transition-colors">Enterprise</Link>
-            <Link to="/demo" className="hover:text-white transition-colors">Book a Demo</Link>
+            <Link to="/demo" className="hover:text-white transition-colors">Contact</Link>
           </div>
-          <div className="text-sm text-white/40">
-            © {new Date().getFullYear()} Hiready
-          </div>
+          <p className="text-sm text-white/40">
+            2025 Hiready. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>
