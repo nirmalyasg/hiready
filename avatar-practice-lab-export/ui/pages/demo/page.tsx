@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Send, CheckCircle, Building2, Mail, Phone, User, MessageSquare, ArrowLeft } from 'lucide-react';
+import { Sparkles, Send, CheckCircle, Building2, Mail, Phone, User, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useMutation } from '@tanstack/react-query';
+import MarketingNav from '@/components/layout/marketing-nav';
 
 export default function DemoPage() {
   const [formData, setFormData] = useState({
@@ -45,20 +46,23 @@ export default function DemoPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#fbfbfc] flex items-center justify-center px-4">
-        <div className="max-w-md text-center">
-          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-10 h-10 text-emerald-600" />
+      <div className="min-h-screen bg-[#fbfbfc]">
+        <MarketingNav />
+        <div className="pt-[120px] flex items-center justify-center px-4 min-h-screen">
+          <div className="max-w-md text-center">
+            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-10 h-10 text-emerald-600" />
+            </div>
+            <h1 className="text-3xl font-bold text-[#042c4c] mb-4">Thank You!</h1>
+            <p className="text-[#6c8194] mb-8">
+              We've received your demo request. Our team will reach out within 24 hours to schedule a personalized demo.
+            </p>
+            <Link to="/">
+              <Button className="bg-[#042c4c] hover:bg-[#0a3d62] text-white">
+                Back to Home
+              </Button>
+            </Link>
           </div>
-          <h1 className="text-3xl font-bold text-[#042c4c] mb-4">Thank You!</h1>
-          <p className="text-[#6c8194] mb-8">
-            We've received your demo request. Our team will reach out within 24 hours to schedule a personalized demo.
-          </p>
-          <Link to="/">
-            <Button className="bg-[#042c4c] hover:bg-[#0a3d62] text-white">
-              Back to Home
-            </Button>
-          </Link>
         </div>
       </div>
     );
@@ -66,25 +70,12 @@ export default function DemoPage() {
 
   return (
     <div className="min-h-screen bg-[#fbfbfc]">
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-10 h-10 bg-[#042c4c] rounded-xl flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-bold text-[#042c4c] text-xl tracking-tight">Hiready</span>
-          </Link>
-          <Link to="/" className="text-[#6c8194] hover:text-[#042c4c] text-sm font-medium flex items-center gap-2">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Link>
-        </div>
-      </nav>
+      <MarketingNav />
 
-      <div className="pt-24 pb-16 px-4 sm:px-6">
+      <div className="pt-[120px] pb-16 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-start">
-            <div className="lg:sticky lg:top-24">
+            <div className="lg:sticky lg:top-[120px]">
               <span className="inline-flex items-center gap-2 bg-[#ee7e65]/10 text-[#ee7e65] px-4 py-2 rounded-full text-sm font-semibold mb-6">
                 <Building2 className="w-4 h-4" />
                 Enterprise Solutions
@@ -248,6 +239,25 @@ export default function DemoPage() {
           </div>
         </div>
       </div>
+
+      <footer className="bg-[#042c4c] text-white py-8 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-bold">Hiready</span>
+          </div>
+          <div className="flex gap-6 text-sm text-white/60">
+            <Link to="/features" className="hover:text-white">Features</Link>
+            <Link to="/pricing" className="hover:text-white">Pricing</Link>
+            <Link to="/enterprise" className="hover:text-white">Enterprise</Link>
+          </div>
+          <div className="text-sm text-white/40">
+            © {new Date().getFullYear()} Hiready
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

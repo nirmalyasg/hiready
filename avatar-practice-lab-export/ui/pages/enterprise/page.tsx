@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import { 
   Sparkles, ArrowRight, Building2, Users, Shield, BarChart3, 
-  Zap, Target, CheckCircle, Calendar, Briefcase, Award, TrendingUp
+  Zap, Target, Briefcase, Award, TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import MarketingNav from '@/components/layout/marketing-nav';
 
 export default function EnterprisePage() {
   const features = [
@@ -41,31 +42,9 @@ export default function EnterprisePage() {
 
   return (
     <div className="min-h-screen bg-[#fbfbfc]">
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-10 h-10 bg-[#042c4c] rounded-xl flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-bold text-[#042c4c] text-xl tracking-tight">Hiready</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link to="/demo">
-              <Button variant="outline" size="sm" className="border-[#042c4c]/20 text-[#042c4c] hover:bg-[#042c4c]/5 gap-2">
-                <Calendar className="w-4 h-4" />
-                Book a Demo
-              </Button>
-            </Link>
-            <Link to="/login">
-              <Button size="sm" className="bg-[#ee7e65] hover:bg-[#e06a50] text-white">
-                Sign In
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <MarketingNav />
 
-      <section className="pt-32 pb-20 px-4 sm:px-6 relative overflow-hidden">
+      <section className="pt-[120px] pb-20 px-4 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#042c4c] via-[#042c4c] to-[#0a3d62]" />
         <div className="absolute top-20 right-10 w-80 h-80 bg-[#ee7e65]/10 rounded-full blur-3xl" />
         
@@ -190,6 +169,11 @@ export default function EnterprisePage() {
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold">Hiready</span>
+          </div>
+          <div className="flex gap-6 text-sm text-white/60">
+            <Link to="/features" className="hover:text-white">Features</Link>
+            <Link to="/pricing" className="hover:text-white">Pricing</Link>
+            <Link to="/enterprise" className="hover:text-white">Enterprise</Link>
           </div>
           <div className="text-sm text-white/40">
             © {new Date().getFullYear()} Hiready. All rights reserved.
