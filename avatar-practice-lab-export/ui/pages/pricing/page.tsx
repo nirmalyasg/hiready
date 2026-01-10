@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Sparkles, ArrowRight, Check, Calendar, Zap, Crown, Building2 } from 'lucide-react';
+import { Sparkles, ArrowRight, Check, Calendar, Zap, Crown, Building2, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MarketingNav from '@/components/layout/marketing-nav';
 
@@ -80,27 +80,65 @@ export default function PricingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#fbfbfc]">
+    <div className="min-h-screen bg-white">
       <MarketingNav />
 
-      <section className="pt-[120px] pb-20 px-4 sm:px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#042c4c] via-[#042c4c] to-[#0a3d62]" />
-        <div className="absolute top-20 right-10 w-80 h-80 bg-[#ee7e65]/10 rounded-full blur-3xl" />
+      {/* Hero Section */}
+      <section className="pt-[100px] lg:pt-[120px] pb-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#042c4c] via-[#0a3d62] to-[#042c4c]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(238,126,101,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(118,140,156,0.1),transparent_50%)]" />
         
-        <div className="max-w-4xl mx-auto text-center relative">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-white">
+        <div className="max-w-4xl mx-auto text-center relative px-6">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/90 px-4 py-2 rounded-full text-sm font-medium mb-8 border border-white/20">
+            <Crown className="w-4 h-4 text-[#ee7e65]" />
+            Pricing Plans
+          </div>
+          
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-white tracking-tight">
             Simple, transparent
             <br />
             <span className="text-[#ee7e65]">pricing</span>
           </h1>
           
-          <p className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto leading-relaxed mb-10">
             Choose the plan that works for you. Start free and upgrade when you're ready.
           </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            <Link to="/readycheck">
+              <Button size="lg" className="w-full sm:w-auto bg-[#ee7e65] hover:bg-[#e06a50] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 group">
+                Start Free
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+            <Link to="/demo">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-base bg-white/5 border-white/20 text-white hover:bg-white/10 gap-2">
+                <Calendar className="w-4 h-4" />
+                Contact Sales
+              </Button>
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-6 justify-center text-white/60 text-sm">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>No hidden fees</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>Cancel anytime</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>Student discounts</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="py-16 px-4 sm:px-6 bg-white -mt-8 rounded-t-[2rem]">
+      {/* Pricing Cards */}
+      <section className="py-16 px-6 bg-[#fbfbfc]">
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-3 gap-6">
             {plans.map((plan, i) => {
@@ -108,10 +146,10 @@ export default function PricingPage() {
               return (
                 <div 
                   key={i} 
-                  className={`rounded-2xl p-8 border-2 transition-all relative ${
+                  className={`rounded-2xl p-8 border-2 transition-all hover:shadow-xl hover:-translate-y-1 relative bg-white ${
                     plan.popular 
-                      ? 'border-[#ee7e65] bg-white shadow-xl shadow-[#ee7e65]/10' 
-                      : 'border-gray-200 bg-white hover:border-gray-300'
+                      ? 'border-[#ee7e65] shadow-xl shadow-[#ee7e65]/10' 
+                      : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
                   {plan.popular && (
@@ -149,14 +187,14 @@ export default function PricingPage() {
                   
                   <Link to={plan.ctaLink}>
                     <Button 
-                      className={`w-full h-12 font-semibold ${
+                      className={`w-full h-12 font-semibold group ${
                         plan.popular 
                           ? 'bg-[#ee7e65] hover:bg-[#e06a50] text-white shadow-lg shadow-[#ee7e65]/25' 
                           : 'bg-[#042c4c] hover:bg-[#0a3d62] text-white'
                       }`}
                     >
                       {plan.cta}
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
                 </div>
@@ -166,17 +204,19 @@ export default function PricingPage() {
         </div>
       </section>
 
-      <section className="py-20 px-4 sm:px-6 bg-[#fbfbfc]">
+      {/* FAQ Section */}
+      <section className="py-20 px-6 bg-white">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-[#042c4c] mb-4">
+            <span className="inline-block text-[#ee7e65] text-sm font-semibold tracking-wider uppercase mb-3">FAQ</span>
+            <h2 className="text-3xl font-bold text-[#042c4c]">
               Frequently Asked Questions
             </h2>
           </div>
           
           <div className="space-y-4">
             {faqs.map((faq, i) => (
-              <div key={i} className="bg-white rounded-xl p-6 border border-gray-100">
+              <div key={i} className="bg-[#fbfbfc] rounded-2xl p-6 border border-gray-100 hover:border-[#ee7e65]/30 transition-all">
                 <h3 className="font-semibold text-[#042c4c] mb-2">{faq.q}</h3>
                 <p className="text-[#6c8194]">{faq.a}</p>
               </div>
@@ -185,8 +225,12 @@ export default function PricingPage() {
         </div>
       </section>
 
-      <section className="py-24 px-4 sm:px-6 bg-[#042c4c]">
-        <div className="max-w-3xl mx-auto text-center">
+      {/* CTA Section */}
+      <section className="py-24 px-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#042c4c] via-[#0a3d62] to-[#042c4c]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(238,126,101,0.1),transparent_60%)]" />
+        
+        <div className="max-w-3xl mx-auto text-center relative">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-5">
             Need a custom solution?
           </h2>
@@ -194,15 +238,17 @@ export default function PricingPage() {
             Contact our team for enterprise pricing and custom packages.
           </p>
           <Link to="/demo">
-            <Button size="lg" className="bg-[#ee7e65] hover:bg-[#e06a50] text-white px-10 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 gap-2">
+            <Button size="lg" className="bg-[#ee7e65] hover:bg-[#e06a50] text-white px-10 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 gap-2 group">
               <Calendar className="w-4 h-4" />
               Book a Demo
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
         </div>
       </section>
 
-      <footer className="bg-[#042c4c] border-t border-white/10 text-white py-8 px-4 sm:px-6">
+      {/* Footer */}
+      <footer className="bg-[#042c4c] border-t border-white/10 text-white py-8 px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
@@ -211,9 +257,9 @@ export default function PricingPage() {
             <span className="font-bold">Hiready</span>
           </div>
           <div className="flex gap-6 text-sm text-white/60">
-            <Link to="/features" className="hover:text-white">Features</Link>
-            <Link to="/pricing" className="hover:text-white">Pricing</Link>
-            <Link to="/enterprise" className="hover:text-white">Enterprise</Link>
+            <Link to="/features" className="hover:text-white transition-colors">Features</Link>
+            <Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link>
+            <Link to="/enterprise" className="hover:text-white transition-colors">Enterprise</Link>
           </div>
           <div className="text-sm text-white/40">
             © {new Date().getFullYear()} Hiready

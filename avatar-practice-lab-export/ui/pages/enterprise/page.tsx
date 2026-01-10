@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { 
   Sparkles, ArrowRight, Building2, Users, Shield, BarChart3, 
-  Zap, Target, Briefcase, Award, TrendingUp
+  Zap, Target, Briefcase, Award, TrendingUp, CheckCircle2, Calendar, Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MarketingNav from '@/components/layout/marketing-nav';
@@ -20,17 +20,20 @@ export default function EnterprisePage() {
     { 
       title: 'Campus Recruiting', 
       desc: 'Prepare candidates at scale before they interview with your company',
-      icon: Award
+      icon: Award,
+      color: 'from-blue-500 to-indigo-600'
     },
     { 
       title: 'Internal Mobility', 
       desc: 'Help employees prepare for internal role transitions',
-      icon: TrendingUp
+      icon: TrendingUp,
+      color: 'from-emerald-500 to-teal-600'
     },
     { 
       title: 'L&D Programs', 
       desc: 'Integrate interview practice into your learning curriculum',
-      icon: Target
+      icon: Target,
+      color: 'from-orange-500 to-rose-600'
     },
   ];
 
@@ -40,21 +43,25 @@ export default function EnterprisePage() {
     { value: '3x', label: 'More practice sessions completed' },
   ];
 
+  const logos = ['Deloitte', 'Accenture', 'McKinsey', 'BCG', 'Infosys', 'TCS', 'Wipro', 'Cognizant'];
+
   return (
-    <div className="min-h-screen bg-[#fbfbfc]">
+    <div className="min-h-screen bg-white">
       <MarketingNav />
 
-      <section className="pt-[120px] pb-20 px-4 sm:px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#042c4c] via-[#042c4c] to-[#0a3d62]" />
-        <div className="absolute top-20 right-10 w-80 h-80 bg-[#ee7e65]/10 rounded-full blur-3xl" />
+      {/* Hero Section */}
+      <section className="pt-[100px] lg:pt-[120px] pb-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#042c4c] via-[#0a3d62] to-[#042c4c]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(238,126,101,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(118,140,156,0.1),transparent_50%)]" />
         
-        <div className="max-w-4xl mx-auto text-center relative">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium mb-8 border border-white/20">
+        <div className="max-w-5xl mx-auto text-center relative px-6">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/90 px-4 py-2 rounded-full text-sm font-medium mb-8 border border-white/20">
             <Building2 className="w-4 h-4 text-[#ee7e65]" />
             Enterprise Solutions
           </div>
           
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-white">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-white tracking-tight">
             Interview prep at
             <br />
             <span className="text-[#ee7e65]">enterprise scale</span>
@@ -64,7 +71,7 @@ export default function EnterprisePage() {
             Empower your entire organization with AI-powered interview practice. Custom solutions for L&D, recruiting, and talent development teams.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Link to="/demo">
               <Button size="lg" className="w-full sm:w-auto bg-[#ee7e65] hover:bg-[#e06a50] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 group">
                 Book a Demo
@@ -72,20 +79,37 @@ export default function EnterprisePage() {
               </Button>
             </Link>
             <Link to="/pricing">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-base bg-white/10 border-white/30 text-white hover:bg-white/20">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-base bg-white/5 border-white/20 text-white hover:bg-white/10 gap-2">
+                <Play className="w-4 h-4" />
                 View Pricing
               </Button>
             </Link>
           </div>
+
+          <div className="flex items-center gap-6 justify-center text-white/60 text-sm">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>Custom implementation</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>Dedicated support</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>SLA guaranteed</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="py-16 px-4 sm:px-6 bg-white -mt-8 rounded-t-[2rem] relative">
+      {/* Stats Section */}
+      <section className="py-16 px-6 bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-3 gap-8">
             {stats.map((stat, i) => (
               <div key={i} className="text-center">
-                <div className="text-4xl font-bold text-[#042c4c] mb-2">{stat.value}</div>
+                <div className="text-4xl sm:text-5xl font-bold text-[#042c4c] mb-2">{stat.value}</div>
                 <div className="text-[#6c8194]">{stat.label}</div>
               </div>
             ))}
@@ -93,7 +117,20 @@ export default function EnterprisePage() {
         </div>
       </section>
 
-      <section className="py-20 px-4 sm:px-6 bg-white">
+      {/* Trusted By */}
+      <section className="py-12 px-6 bg-[#fbfbfc] border-b border-gray-100">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-center text-[#6c8194] text-sm mb-6">Trusted by leading organizations</p>
+          <div className="flex flex-wrap justify-center gap-8 items-center">
+            {logos.map((logo, i) => (
+              <div key={i} className="text-[#042c4c]/30 font-bold text-lg">{logo}</div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-20 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <span className="inline-block text-[#ee7e65] text-sm font-semibold tracking-wider uppercase mb-3">Features</span>
@@ -106,7 +143,7 @@ export default function EnterprisePage() {
             {features.map((feature, i) => {
               const Icon = feature.icon;
               return (
-                <div key={i} className="bg-[#fbfbfc] rounded-2xl p-6 border border-gray-100 hover:border-[#ee7e65]/30 transition-all hover:shadow-lg group">
+                <div key={i} className="bg-[#fbfbfc] rounded-2xl p-6 border border-gray-100 hover:border-[#ee7e65]/30 hover:shadow-xl hover:-translate-y-1 transition-all group">
                   <div className="w-12 h-12 bg-[#042c4c] rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#ee7e65] transition-colors">
                     <Icon className="w-6 h-6 text-white" />
                   </div>
@@ -119,7 +156,8 @@ export default function EnterprisePage() {
         </div>
       </section>
 
-      <section className="py-20 px-4 sm:px-6 bg-[#fbfbfc]">
+      {/* Use Cases */}
+      <section className="py-20 px-6 bg-[#fbfbfc]">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <span className="inline-block text-[#ee7e65] text-sm font-semibold tracking-wider uppercase mb-3">Use Cases</span>
@@ -132,8 +170,8 @@ export default function EnterprisePage() {
             {useCases.map((useCase, i) => {
               const Icon = useCase.icon;
               return (
-                <div key={i} className="bg-white rounded-2xl p-8 border border-gray-100 text-center hover:shadow-xl transition-all">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#042c4c] to-[#0a3d62] rounded-2xl flex items-center justify-center mx-auto mb-5">
+                <div key={i} className="bg-white rounded-2xl p-8 border border-gray-100 text-center hover:shadow-xl hover:-translate-y-1 transition-all">
+                  <div className={`w-16 h-16 bg-gradient-to-br ${useCase.color} rounded-2xl flex items-center justify-center mx-auto mb-5`}>
                     <Icon className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="font-bold text-[#042c4c] text-xl mb-3">{useCase.title}</h3>
@@ -145,24 +183,37 @@ export default function EnterprisePage() {
         </div>
       </section>
 
-      <section className="py-24 px-4 sm:px-6 bg-[#042c4c]">
-        <div className="max-w-3xl mx-auto text-center">
+      {/* CTA Section */}
+      <section className="py-24 px-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#042c4c] via-[#0a3d62] to-[#042c4c]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(238,126,101,0.1),transparent_60%)]" />
+        
+        <div className="max-w-3xl mx-auto text-center relative">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-5">
             Ready to transform your organization?
           </h2>
           <p className="text-white/70 mb-10 text-lg">
             Get a personalized demo and see how Hiready can help your team.
           </p>
-          <Link to="/demo">
-            <Button size="lg" className="bg-[#ee7e65] hover:bg-[#e06a50] text-white px-10 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 group">
-              Book a Demo
-              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/demo">
+              <Button size="lg" className="w-full sm:w-auto bg-[#ee7e65] hover:bg-[#e06a50] text-white px-10 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 group">
+                Book a Demo
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+            <Link to="/pricing">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-base bg-white/10 border-white/30 text-white hover:bg-white/20 gap-2">
+                <Calendar className="w-4 h-4" />
+                View Pricing
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
-      <footer className="bg-[#042c4c] border-t border-white/10 text-white py-8 px-4 sm:px-6">
+      {/* Footer */}
+      <footer className="bg-[#042c4c] border-t border-white/10 text-white py-8 px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
@@ -171,12 +222,12 @@ export default function EnterprisePage() {
             <span className="font-bold">Hiready</span>
           </div>
           <div className="flex gap-6 text-sm text-white/60">
-            <Link to="/features" className="hover:text-white">Features</Link>
-            <Link to="/pricing" className="hover:text-white">Pricing</Link>
-            <Link to="/enterprise" className="hover:text-white">Enterprise</Link>
+            <Link to="/features" className="hover:text-white transition-colors">Features</Link>
+            <Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link>
+            <Link to="/enterprise" className="hover:text-white transition-colors">Enterprise</Link>
           </div>
           <div className="text-sm text-white/40">
-            © {new Date().getFullYear()} Hiready. All rights reserved.
+            © {new Date().getFullYear()} Hiready
           </div>
         </div>
       </footer>

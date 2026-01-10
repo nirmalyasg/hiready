@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { 
   Sparkles, ArrowRight, Target, MessageSquare, BarChart3, 
-  Zap, Video, Brain, FileText, Clock, Globe, Calendar
+  Zap, Video, Brain, FileText, Clock, Globe, Calendar, CheckCircle2,
+  Play, TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MarketingNav from '@/components/layout/marketing-nav';
@@ -54,28 +55,36 @@ export default function FeaturesPage() {
   ];
 
   const interviewTypes = [
-    { name: 'Behavioral', desc: 'STAR format questions about past experiences', color: 'bg-blue-500' },
-    { name: 'Technical', desc: 'Role-specific technical knowledge assessment', color: 'bg-purple-500' },
-    { name: 'Case Study', desc: 'Business problem-solving and strategy', color: 'bg-amber-500' },
-    { name: 'HR Interview', desc: 'Culture fit, motivation, and career goals', color: 'bg-emerald-500' },
-    { name: 'Coding', desc: 'Live coding with AI code review', color: 'bg-rose-500' },
+    { name: 'Behavioral', desc: 'STAR format questions about past experiences', color: 'from-blue-500 to-indigo-600' },
+    { name: 'Technical', desc: 'Role-specific technical knowledge assessment', color: 'from-purple-500 to-violet-600' },
+    { name: 'Case Study', desc: 'Business problem-solving and strategy', color: 'from-amber-500 to-orange-600' },
+    { name: 'HR Interview', desc: 'Culture fit, motivation, and career goals', color: 'from-emerald-500 to-teal-600' },
+    { name: 'Coding', desc: 'Live coding with AI code review', color: 'from-rose-500 to-pink-600' },
+  ];
+
+  const stats = [
+    { value: '15+', label: 'Role Kits', icon: Target },
+    { value: '8', label: 'Scoring Dimensions', icon: BarChart3 },
+    { value: '22', label: 'Languages Supported', icon: Globe },
   ];
 
   return (
-    <div className="min-h-screen bg-[#fbfbfc]">
+    <div className="min-h-screen bg-white">
       <MarketingNav />
 
-      <section className="pt-[120px] pb-20 px-4 sm:px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#042c4c] via-[#042c4c] to-[#0a3d62]" />
-        <div className="absolute top-20 left-10 w-80 h-80 bg-[#ee7e65]/10 rounded-full blur-3xl" />
+      {/* Hero Section */}
+      <section className="pt-[100px] lg:pt-[120px] pb-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#042c4c] via-[#0a3d62] to-[#042c4c]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(238,126,101,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(118,140,156,0.1),transparent_50%)]" />
         
-        <div className="max-w-4xl mx-auto text-center relative">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium mb-8 border border-white/20">
+        <div className="max-w-5xl mx-auto px-6 text-center relative">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/90 px-4 py-2 rounded-full text-sm font-medium mb-8 border border-white/20">
             <Zap className="w-4 h-4 text-[#ee7e65]" />
             Platform Features
           </div>
           
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-white">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-white tracking-tight">
             Everything you need to
             <br />
             <span className="text-[#ee7e65]">ace your interviews</span>
@@ -85,16 +94,56 @@ export default function FeaturesPage() {
             AI-powered interview practice with realistic scenarios, detailed feedback, and personalized improvement plans.
           </p>
           
-          <Link to="/readycheck">
-            <Button size="lg" className="bg-[#ee7e65] hover:bg-[#e06a50] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 group">
-              Start Preparing
-              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            <Link to="/readycheck">
+              <Button size="lg" className="w-full sm:w-auto bg-[#ee7e65] hover:bg-[#e06a50] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 group">
+                Start Preparing
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+            <Link to="/demo">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-base bg-white/5 border-white/20 text-white hover:bg-white/10 gap-2">
+                <Play className="w-4 h-4" />
+                Watch Demo
+              </Button>
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-6 justify-center text-white/60 text-sm">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>No credit card required</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>3 free sessions</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="py-20 px-4 sm:px-6 bg-white -mt-8 rounded-t-[2rem]">
+      {/* Stats Band */}
+      <section className="py-12 px-6 bg-white border-b border-gray-100">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-3 gap-8">
+            {stats.map((stat, i) => {
+              const Icon = stat.icon;
+              return (
+                <div key={i} className="text-center">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-[#042c4c]/5 rounded-xl mb-3">
+                    <Icon className="w-6 h-6 text-[#ee7e65]" />
+                  </div>
+                  <div className="text-3xl font-bold text-[#042c4c] mb-1">{stat.value}</div>
+                  <div className="text-[#6c8194] text-sm">{stat.label}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Core Features */}
+      <section className="py-20 px-6 bg-[#fbfbfc]">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <span className="inline-block text-[#ee7e65] text-sm font-semibold tracking-wider uppercase mb-3">Core Features</span>
@@ -109,10 +158,10 @@ export default function FeaturesPage() {
               return (
                 <div 
                   key={i} 
-                  className={`rounded-2xl p-6 border transition-all hover:shadow-xl group ${
+                  className={`rounded-2xl p-6 border transition-all hover:shadow-xl hover:-translate-y-1 group ${
                     feature.highlight 
                       ? 'bg-[#042c4c] text-white border-[#042c4c]' 
-                      : 'bg-[#fbfbfc] border-gray-100 hover:border-[#ee7e65]/30'
+                      : 'bg-white border-gray-100 hover:border-[#ee7e65]/30'
                   }`}
                 >
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors ${
@@ -135,7 +184,8 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      <section className="py-20 px-4 sm:px-6 bg-[#fbfbfc]">
+      {/* Interview Types */}
+      <section className="py-20 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <span className="inline-block text-[#ee7e65] text-sm font-semibold tracking-wider uppercase mb-3">Interview Types</span>
@@ -144,10 +194,12 @@ export default function FeaturesPage() {
             </h2>
           </div>
           
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {interviewTypes.map((type, i) => (
-              <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 text-center min-w-[200px] hover:shadow-lg transition-all">
-                <div className={`w-3 h-3 ${type.color} rounded-full mx-auto mb-4`} />
+              <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 text-center hover:shadow-xl hover:-translate-y-1 transition-all group">
+                <div className={`w-12 h-12 bg-gradient-to-br ${type.color} rounded-xl mx-auto mb-4 flex items-center justify-center`}>
+                  <div className="w-3 h-3 bg-white rounded-full" />
+                </div>
                 <h3 className="font-bold text-[#042c4c] mb-2">{type.name}</h3>
                 <p className="text-[#6c8194] text-sm">{type.desc}</p>
               </div>
@@ -156,8 +208,12 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      <section className="py-24 px-4 sm:px-6 bg-[#042c4c]">
-        <div className="max-w-3xl mx-auto text-center">
+      {/* CTA Section */}
+      <section className="py-24 px-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#042c4c] via-[#0a3d62] to-[#042c4c]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(238,126,101,0.1),transparent_60%)]" />
+        
+        <div className="max-w-3xl mx-auto text-center relative">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-5">
             Start practicing today
           </h2>
@@ -166,13 +222,13 @@ export default function FeaturesPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/readycheck">
-              <Button size="lg" className="bg-[#ee7e65] hover:bg-[#e06a50] text-white px-10 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 group">
+              <Button size="lg" className="w-full sm:w-auto bg-[#ee7e65] hover:bg-[#e06a50] text-white px-10 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 group">
                 Start Preparing
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
             <Link to="/demo">
-              <Button size="lg" variant="outline" className="h-14 text-base bg-white/10 border-white/30 text-white hover:bg-white/20 gap-2">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-base bg-white/10 border-white/30 text-white hover:bg-white/20 gap-2">
                 <Calendar className="w-4 h-4" />
                 Book a Demo
               </Button>
@@ -181,7 +237,8 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      <footer className="bg-[#042c4c] border-t border-white/10 text-white py-8 px-4 sm:px-6">
+      {/* Footer */}
+      <footer className="bg-[#042c4c] border-t border-white/10 text-white py-8 px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
@@ -190,9 +247,9 @@ export default function FeaturesPage() {
             <span className="font-bold">Hiready</span>
           </div>
           <div className="flex gap-6 text-sm text-white/60">
-            <Link to="/features" className="hover:text-white">Features</Link>
-            <Link to="/pricing" className="hover:text-white">Pricing</Link>
-            <Link to="/enterprise" className="hover:text-white">Enterprise</Link>
+            <Link to="/features" className="hover:text-white transition-colors">Features</Link>
+            <Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link>
+            <Link to="/enterprise" className="hover:text-white transition-colors">Enterprise</Link>
           </div>
           <div className="text-sm text-white/40">
             © {new Date().getFullYear()} Hiready
