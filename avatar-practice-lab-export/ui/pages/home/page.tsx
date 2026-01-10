@@ -339,7 +339,7 @@ export default function HomePage() {
           
           <div className="text-center mt-12">
             <Link to="/readycheck">
-              <Button size="lg" className="bg-[#6b1fad] hover:bg-[#5a1a91] text-white px-8 h-14 text-base font-semibold shadow-xl group">
+              <Button size="lg" className="bg-[#9b4dca] hover:bg-[#8a3db8] text-white px-8 h-14 text-base font-semibold shadow-xl group">
                 Try It Now — It's Free
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -502,7 +502,7 @@ export default function HomePage() {
             Start practicing now — it only takes 10 minutes to see where you stand.
           </p>
           <Link to="/readycheck">
-            <Button size="lg" className="bg-[#6b1fad] hover:bg-[#5a1a91] text-white px-12 h-16 text-lg font-semibold shadow-xl shadow-[#6b1fad]/20 group">
+            <Button size="lg" className="bg-[#9b4dca] hover:bg-[#8a3db8] text-white px-12 h-16 text-lg font-semibold shadow-xl shadow-[#9b4dca]/20 group">
               Start Free Practice
               <ArrowRight className="w-6 h-6 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
