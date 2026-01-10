@@ -66,20 +66,30 @@ export default function HomePage() {
             <span className="font-bold text-[#042c4c] text-xl tracking-tight">Hiready</span>
           </Link>
           
-          <div className="hidden md:flex items-center gap-6">
-            <Link to="/enterprise" className="text-[#6c8194] hover:text-[#042c4c] text-sm font-medium transition-colors flex items-center gap-1.5">
-              <Building2 className="w-4 h-4" />
+          <div className="hidden md:flex items-center gap-5">
+            <Link to="/features" className="text-[#6c8194] hover:text-[#042c4c] text-sm font-medium transition-colors">
+              Features
+            </Link>
+            <Link to="/pricing" className="text-[#6c8194] hover:text-[#042c4c] text-sm font-medium transition-colors">
+              Pricing
+            </Link>
+            <Link to="/enterprise" className="text-[#6c8194] hover:text-[#042c4c] text-sm font-medium transition-colors">
               Enterprise
             </Link>
-            <a href="mailto:enterprise@hiready.in?subject=Book%20a%20Demo">
+            <Link to="/demo">
               <Button variant="outline" size="sm" className="border-[#042c4c]/20 text-[#042c4c] hover:bg-[#042c4c]/5 gap-2">
                 <Calendar className="w-4 h-4" />
                 Book a Demo
               </Button>
-            </a>
+            </Link>
+            <Link to="/login">
+              <Button variant="ghost" size="sm" className="text-[#6c8194] hover:text-[#042c4c]">
+                Sign In
+              </Button>
+            </Link>
             <Link to="/readycheck">
               <Button size="sm" className="bg-[#ee7e65] hover:bg-[#e06a50] text-white shadow-lg shadow-[#ee7e65]/25 border-0 px-5">
-                Start Free
+                Start Preparing
               </Button>
             </Link>
           </div>
@@ -93,18 +103,17 @@ export default function HomePage() {
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-100 p-4 space-y-3 shadow-lg">
-            <Link to="/enterprise" className="flex items-center gap-2 py-2 text-[#6c8194]">
-              <Building2 className="w-4 h-4" />
-              Enterprise
-            </Link>
-            <a href="mailto:enterprise@hiready.in?subject=Book%20a%20Demo" className="flex items-center gap-2 py-2 text-[#6c8194]">
-              <Calendar className="w-4 h-4" />
-              Book a Demo
-            </a>
-            <Link to="/readycheck">
-              <Button className="w-full bg-[#ee7e65] hover:bg-[#e06a50] text-white shadow-lg">Start Free Interview</Button>
-            </Link>
+          <div className="md:hidden bg-white border-t border-gray-100 p-4 space-y-2 shadow-lg">
+            <Link to="/features" className="block py-2.5 text-[#042c4c] font-medium">Features</Link>
+            <Link to="/pricing" className="block py-2.5 text-[#042c4c] font-medium">Pricing</Link>
+            <Link to="/enterprise" className="block py-2.5 text-[#042c4c] font-medium">Enterprise</Link>
+            <Link to="/demo" className="block py-2.5 text-[#042c4c] font-medium">Book a Demo</Link>
+            <Link to="/login" className="block py-2.5 text-[#6c8194]">Sign In</Link>
+            <div className="pt-2">
+              <Link to="/readycheck">
+                <Button className="w-full bg-[#ee7e65] hover:bg-[#e06a50] text-white shadow-lg">Start Preparing</Button>
+              </Link>
+            </div>
           </div>
         )}
       </nav>
@@ -134,16 +143,15 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
             <Link to="/readycheck">
               <Button size="lg" className="w-full sm:w-auto bg-[#ee7e65] hover:bg-[#e06a50] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 border-0 group">
-                Start Free Interview
+                Start Preparing
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-            <a href="mailto:enterprise@hiready.in?subject=Book%20a%20Demo">
+            <Link to="/login">
               <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-base bg-white/10 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm gap-2">
-                <Calendar className="w-4 h-4" />
-                Book a Demo
+                Sign In
               </Button>
-            </a>
+            </Link>
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
@@ -383,10 +391,11 @@ export default function HomePage() {
             </div>
             <span className="font-bold text-xl">Hiready</span>
           </div>
-          <div className="flex gap-8 text-sm text-white/60">
+          <div className="flex gap-6 text-sm text-white/60">
+            <Link to="/features" className="hover:text-white transition-colors">Features</Link>
+            <Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link>
             <Link to="/enterprise" className="hover:text-white transition-colors">Enterprise</Link>
-            <a href="mailto:enterprise@hiready.in?subject=Book%20a%20Demo" className="hover:text-white transition-colors">Book a Demo</a>
-            <a href="mailto:support@hiready.in" className="hover:text-white transition-colors">Contact</a>
+            <Link to="/demo" className="hover:text-white transition-colors">Book a Demo</Link>
           </div>
           <div className="text-sm text-white/40">
             © {new Date().getFullYear()} Hiready

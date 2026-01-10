@@ -11,6 +11,7 @@ import employerRouter from "./routes/employer.js";
 import paymentsRouter from "./routes/payments.js";
 import employerAuthRouter from "./routes/employer-auth.js";
 import { readycheckRouter } from "./routes/readycheck.js";
+import leadsRouter from "./routes/leads.js";
 import { setupAuth } from "./replitAuth.js";
 import dotenv from "dotenv";
 
@@ -128,6 +129,9 @@ async function startServer() {
 
   // Mount readycheck routes
   app.use("/api/readycheck", readycheckRouter);
+
+  // Mount leads routes (public - no auth required)
+  app.use("/api/leads", leadsRouter);
 
   // Health check
   app.get("/health", (req, res) => {

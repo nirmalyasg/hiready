@@ -6,6 +6,10 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import HomePage from './pages/home/page';
 import LoginPage from './pages/auth/login';
 import RegisterPage from './pages/auth/register';
+import DemoPage from './pages/demo/page';
+import EnterprisePage from './pages/enterprise/page';
+import FeaturesPage from './pages/features/page';
+import PricingPage from './pages/pricing/page';
 import DashboardPage from './pages/dashboard/page';
 import PracticePage from './pages/practice/page';
 import IntentEntryPage from './pages/practice/intent-entry/page';
@@ -62,6 +66,10 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/demo" element={<DemoPage />} />
+        <Route path="/enterprise" element={<EnterprisePage />} />
+        <Route path="/features" element={<FeaturesPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
         <Route path="/avatar/dashboard" element={<DashboardPage />} />
         <Route path="/avatar/start" element={<ProtectedRoute><IntentEntryPage /></ProtectedRoute>} />
         <Route path="/avatar/practice" element={<ProtectedRoute><PracticePage /></ProtectedRoute>} />
