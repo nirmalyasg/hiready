@@ -65,7 +65,7 @@ export default function MarketingNav() {
             </Button>
           </Link>
           <Link to="/readycheck">
-            <Button size="sm" className="bg-[#cb6ce6] hover:bg-[#b85fd4] text-white shadow-lg shadow-[#cb6ce6]/25 border-0 h-10 px-5 font-semibold">
+            <Button size="sm" className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white shadow-lg shadow-[#24c4b8]/25 border-0 h-10 px-5 font-semibold">
               Start Preparing
             </Button>
           </Link>
@@ -116,7 +116,7 @@ export default function MarketingNav() {
             </div>
             <div className="p-6 border-t border-gray-100">
               <Link to="/readycheck">
-                <Button className="w-full h-12 bg-[#cb6ce6] hover:bg-[#b85fd4] text-white shadow-lg font-semibold text-base">
+                <Button className="w-full h-12 bg-[#24c4b8] hover:bg-[#1db0a5] text-white shadow-lg font-semibold text-base">
                   Start Preparing
                 </Button>
               </Link>

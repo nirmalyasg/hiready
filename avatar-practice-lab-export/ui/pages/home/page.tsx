@@ -43,13 +43,13 @@ export default function HomePage() {
       icon: Briefcase, 
       title: 'Career Switchers', 
       desc: 'Transition confidently with role-specific preparation',
-      color: 'from-[#9b4dca] to-[#6b1fad]'
+      color: 'from-[#24c4b8] to-[#1a9e94]'
     },
     { 
       icon: Building2, 
       title: 'Enterprise Teams', 
       desc: 'Scale interview prep across your entire organization',
-      color: 'from-[#cb6ce6] to-[#9b4dca]'
+      color: 'from-[#6b1fad] to-[#4a1578]'
     },
   ];
 
@@ -140,23 +140,23 @@ export default function HomePage() {
 
       {/* Hero Section - Split Layout */}
       <section className="pt-[100px] lg:pt-[120px] pb-0 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#6b1fad] via-[#8b35c7] to-[#6b1fad]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(203,108,230,0.25),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(155,77,202,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(203,108,230,0.2),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(36,196,184,0.1),transparent_50%)]" />
         
         <div className="max-w-7xl mx-auto px-6 lg:px-8 relative">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center py-16 lg:py-20">
             {/* Left: Content */}
             <div className="text-center lg:text-left">
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/90 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-white/20">
-                <Zap className="w-4 h-4 text-[#cb6ce6]" />
+                <Zap className="w-4 h-4 text-[#24c4b8]" />
                 AI-Powered Interview Practice
               </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] mb-6 text-white tracking-tight">
                 Practice interviews.
                 <br />
-                <span className="text-[#cb6ce6]">Land the job.</span>
+                <span className="text-[#24c4b8]">Land the job.</span>
               </h1>
               
               <p className="text-lg lg:text-xl text-white/70 mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
@@ -165,7 +165,7 @@ export default function HomePage() {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
                 <Link to="/readycheck">
-                  <Button size="lg" className="w-full sm:w-auto bg-[#cb6ce6] hover:bg-[#b85fd4] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#cb6ce6]/30 border-0 group">
+                  <Button size="lg" className="w-full sm:w-auto bg-[#24c4b8] hover:bg-[#1db0a5] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#24c4b8]/30 border-0 group">
                     Start Free Practice
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
@@ -180,15 +180,15 @@ export default function HomePage() {
               
               <div className="flex items-center gap-4 justify-center lg:justify-start text-white/60 text-sm">
                 <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
                   <span>No credit card</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
                   <span>3 free sessions</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
                   <span>Setup in 60 seconds</span>
                 </div>
               </div>
@@ -198,7 +198,7 @@ export default function HomePage() {
             <div className="relative hidden lg:block">
               <div className="relative">
                 {/* Glow effect */}
-                <div className="absolute -inset-4 bg-gradient-to-r from-[#cb6ce6]/20 to-[#9b4dca]/20 rounded-3xl blur-2xl" />
+                <div className="absolute -inset-4 bg-gradient-to-r from-[#cb6ce6]/20 to-[#24c4b8]/20 rounded-3xl blur-2xl" />
                 
                 {/* Main image container */}
                 <div className="relative bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-3 shadow-2xl">
@@ -215,14 +215,14 @@ export default function HomePage() {
                         <TrendingUp className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <div className="text-2xl font-bold text-[#6b1fad]">78</div>
+                        <div className="text-2xl font-bold text-[#1a1a2e]">78</div>
                         <div className="text-xs text-gray-500">Readiness Score</div>
                       </div>
                     </div>
                   </div>
                   
                   {/* Floating badge */}
-                  <div className="absolute -top-3 -right-3 bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
+                  <div className="absolute -top-3 -right-3 bg-[#24c4b8] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" />
                     Live Practice
                   </div>
@@ -244,7 +244,7 @@ export default function HomePage() {
           </p>
           <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-6">
             {companies.map((company) => (
-              <span key={company} className="text-xl font-semibold text-[#6b1fad]/30 hover:text-[#6b1fad]/50 transition-colors">
+              <span key={company} className="text-xl font-semibold text-[#1a1a2e]/25 hover:text-[#6b1fad]/60 transition-colors">
                 {company}
               </span>
             ))}
@@ -253,7 +253,7 @@ export default function HomePage() {
       </section>
 
       {/* Metrics Band */}
-      <section className="py-16 bg-[#fbfbfc]">
+      <section className="py-16 bg-[#f8f7fc]">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid md:grid-cols-3 gap-8">
             {metrics.map((metric, i) => {
@@ -263,7 +263,7 @@ export default function HomePage() {
                   <div className="inline-flex items-center justify-center w-12 h-12 bg-[#6b1fad]/10 rounded-xl mb-4">
                     <Icon className="w-6 h-6 text-[#6b1fad]" />
                   </div>
-                  <div className="text-4xl font-bold text-[#6b1fad] mb-1">{metric.value}</div>
+                  <div className="text-4xl font-bold text-[#1a1a2e] mb-1">{metric.value}</div>
                   <div className="text-gray-500">{metric.label}</div>
                 </div>
               );
@@ -276,7 +276,7 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#6b1fad] mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e] mb-4">
               Built for everyone preparing for interviews
             </h2>
             <p className="text-lg text-gray-500 max-w-2xl mx-auto">
@@ -293,7 +293,7 @@ export default function HomePage() {
                   <div className={`w-14 h-14 bg-gradient-to-br ${persona.color} rounded-2xl flex items-center justify-center mb-5 shadow-lg`}>
                     <Icon className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-[#6b1fad] mb-2">{persona.title}</h3>
+                  <h3 className="text-xl font-bold text-[#1a1a2e] mb-2">{persona.title}</h3>
                   <p className="text-gray-500">{persona.desc}</p>
                   <ChevronRight className="w-5 h-5 text-gray-400 absolute bottom-8 right-8 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                 </div>
@@ -304,11 +304,11 @@ export default function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-20 bg-[#fbfbfc]">
+      <section className="py-20 bg-[#f8f7fc]">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">How It Works</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#6b1fad] mb-4">
+            <span className="inline-block text-[#6b1fad] text-sm font-semibold tracking-wider uppercase mb-3">How It Works</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e] mb-4">
               Ready in 3 simple steps
             </h2>
             <p className="text-lg text-gray-500">No signup required. Start practicing in under a minute.</p>
@@ -316,20 +316,20 @@ export default function HomePage() {
           
           <div className="relative">
             {/* Connection line */}
-            <div className="hidden md:block absolute top-1/2 left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-[#6b1fad]/20 via-[#cb6ce6]/20 to-[#6b1fad]/20 -translate-y-1/2" />
+            <div className="hidden md:block absolute top-1/2 left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-[#6b1fad]/20 via-[#cb6ce6]/20 to-[#24c4b8]/20 -translate-y-1/2" />
             
             <div className="grid md:grid-cols-3 gap-8 relative">
               {steps.map((step, i) => {
                 const Icon = step.icon;
                 return (
                   <div key={i} className="relative text-center group">
-                    <div className="relative inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-xl shadow-[#6b1fad]/5 mb-6 group-hover:shadow-2xl group-hover:shadow-[#cb6ce6]/10 transition-all duration-300">
-                      <Icon className="w-9 h-9 text-[#6b1fad] group-hover:text-[#cb6ce6] transition-colors" />
-                      <div className="absolute -top-2 -right-2 w-7 h-7 bg-[#cb6ce6] rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                    <div className="relative inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-xl shadow-[#6b1fad]/5 mb-6 group-hover:shadow-2xl group-hover:shadow-[#24c4b8]/10 transition-all duration-300">
+                      <Icon className="w-9 h-9 text-[#6b1fad] group-hover:text-[#24c4b8] transition-colors" />
+                      <div className="absolute -top-2 -right-2 w-7 h-7 bg-[#24c4b8] rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg">
                         {step.num.replace('0', '')}
                       </div>
                     </div>
-                    <h3 className="text-xl font-bold text-[#6b1fad] mb-2">{step.title}</h3>
+                    <h3 className="text-xl font-bold text-[#1a1a2e] mb-2">{step.title}</h3>
                     <p className="text-gray-500">{step.desc}</p>
                   </div>
                 );
@@ -352,8 +352,8 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">Features</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#6b1fad] mb-4">
+            <span className="inline-block text-[#6b1fad] text-sm font-semibold tracking-wider uppercase mb-3">Features</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e] mb-4">
               Everything you need to ace interviews
             </h2>
           </div>
@@ -362,11 +362,11 @@ export default function HomePage() {
             {features.map((feature, i) => {
               const Icon = feature.icon;
               return (
-                <div key={i} className="group bg-[#fbfbfc] rounded-2xl p-7 border border-gray-100 hover:bg-white hover:border-[#cb6ce6]/20 hover:shadow-xl transition-all duration-300">
-                  <div className="w-12 h-12 bg-[#6b1fad] rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#cb6ce6] transition-colors duration-300">
+                <div key={i} className="group bg-[#f8f7fc] rounded-2xl p-7 border border-gray-100 hover:bg-white hover:border-[#6b1fad]/20 hover:shadow-xl transition-all duration-300">
+                  <div className="w-12 h-12 bg-[#6b1fad] rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#24c4b8] transition-colors duration-300">
                     <Icon className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-lg font-bold text-[#6b1fad] mb-2">{feature.title}</h3>
+                  <h3 className="text-lg font-bold text-[#1a1a2e] mb-2">{feature.title}</h3>
                   <p className="text-gray-500 leading-relaxed">{feature.desc}</p>
                 </div>
               );
@@ -376,14 +376,15 @@ export default function HomePage() {
       </section>
 
       {/* Readiness Score Showcase */}
-      <section className="py-24 bg-gradient-to-br from-[#6b1fad] via-[#8b35c7] to-[#6b1fad] relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(203,108,230,0.15),transparent_70%)]" />
+      <section className="py-24 bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(203,108,230,0.1),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(36,196,184,0.08),transparent_50%)]" />
         
         <div className="max-w-5xl mx-auto px-6 relative">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur text-white/90 px-4 py-2 rounded-full text-sm font-semibold mb-6 border border-white/20">
-                <BarChart3 className="w-4 h-4 text-[#cb6ce6]" />
+                <BarChart3 className="w-4 h-4 text-[#24c4b8]" />
                 HIREADY INDEX
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-5 leading-tight">
@@ -401,7 +402,7 @@ export default function HomePage() {
                   'Communication Style'
                 ].map((skill, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#cb6ce6]" />
+                    <CheckCircle2 className="w-5 h-5 text-[#24c4b8]" />
                     <span className="text-white/80">{skill}</span>
                   </div>
                 ))}
@@ -411,7 +412,7 @@ export default function HomePage() {
             <div className="relative">
               <div className="bg-white rounded-3xl p-8 shadow-2xl max-w-sm mx-auto">
                 <div className="text-center mb-6">
-                  <div className="text-6xl font-bold text-[#6b1fad] mb-1">78</div>
+                  <div className="text-6xl font-bold text-[#1a1a2e] mb-1">78</div>
                   <div className="text-gray-500 font-medium">Nearly Interview Ready</div>
                 </div>
                 
@@ -429,7 +430,7 @@ export default function HomePage() {
                       </div>
                       <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div 
-                          className="h-2 bg-gradient-to-r from-[#6b1fad] to-[#cb6ce6] rounded-full" 
+                          className="h-2 bg-gradient-to-r from-[#6b1fad] to-[#24c4b8] rounded-full" 
                           style={{ width: `${item.value}%` }}
                         />
                       </div>
@@ -439,7 +440,7 @@ export default function HomePage() {
                 
                 <div className="mt-6 pt-6 border-t border-gray-100">
                   <Link to="/readycheck" className="block">
-                    <Button className="w-full bg-[#cb6ce6] hover:bg-[#b85fd4] text-white h-12 font-semibold shadow-lg shadow-[#cb6ce6]/25">
+                    <Button className="w-full bg-[#24c4b8] hover:bg-[#1db0a5] text-white h-12 font-semibold shadow-lg shadow-[#24c4b8]/25">
                       Get Your Score
                     </Button>
                   </Link>
@@ -448,7 +449,7 @@ export default function HomePage() {
               
               {/* Decorative elements */}
               <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#cb6ce6]/20 rounded-full blur-2xl" />
-              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-[#9b4dca]/20 rounded-full blur-2xl" />
+              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-[#24c4b8]/20 rounded-full blur-2xl" />
             </div>
           </div>
         </div>
@@ -458,27 +459,27 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">Success Stories</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#6b1fad] mb-4">
+            <span className="inline-block text-[#6b1fad] text-sm font-semibold tracking-wider uppercase mb-3">Success Stories</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e] mb-4">
               Real results from real candidates
             </h2>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((t, i) => (
-              <div key={i} className="bg-[#fbfbfc] rounded-2xl p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
+              <div key={i} className="bg-[#f8f7fc] rounded-2xl p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
                 <div className="flex gap-1 mb-4">
                   {[...Array(t.rating)].map((_, j) => (
                     <Star key={j} className="w-5 h-5 text-amber-400 fill-amber-400" />
                   ))}
                 </div>
-                <p className="text-[#6b1fad] mb-6 leading-relaxed text-lg">"{t.quote}"</p>
+                <p className="text-[#1a1a2e] mb-6 leading-relaxed text-lg">"{t.quote}"</p>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-[#6b1fad] to-[#cb6ce6] rounded-full flex items-center justify-center text-white font-bold">
                     {t.avatar}
                   </div>
                   <div>
-                    <div className="font-semibold text-[#6b1fad]">{t.name}</div>
+                    <div className="font-semibold text-[#1a1a2e]">{t.name}</div>
                     <div className="text-gray-500 text-sm">{t.role} at {t.company}</div>
                   </div>
                 </div>
@@ -489,13 +490,13 @@ export default function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-24 bg-gradient-to-b from-[#fbfbfc] to-white">
+      <section className="py-24 bg-gradient-to-b from-[#f8f7fc] to-white">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#cb6ce6] to-[#6b1fad] rounded-2xl mb-6 shadow-xl shadow-[#cb6ce6]/30">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#24c4b8] to-[#1a9e94] rounded-2xl mb-6 shadow-xl shadow-[#24c4b8]/30">
             <Award className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[#6b1fad] mb-5">
-            Your next interview could be <span className="text-[#cb6ce6]">the one.</span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e] mb-5">
+            Your next interview could be <span className="text-[#24c4b8]">the one.</span>
           </h2>
           <p className="text-gray-500 mb-10 text-lg max-w-lg mx-auto">
             Start practicing now — it only takes 10 minutes to see where you stand.
@@ -508,15 +509,15 @@ export default function HomePage() {
           </Link>
           <p className="text-sm text-gray-500 mt-8 flex items-center justify-center gap-6">
             <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
               No credit card
             </span>
             <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
               3 free sessions
             </span>
             <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
               Cancel anytime
             </span>
           </p>
@@ -524,7 +525,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#6b1fad] text-white py-12 px-6">
+      <footer className="bg-[#1a1a2e] text-white py-12 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
             <img src={logoImg} alt="Hiready" className="h-8 brightness-0 invert" />
