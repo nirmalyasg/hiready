@@ -7,9 +7,9 @@ import { openai } from "../utils/openai-client.js";
 import multer from "multer";
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
-import { s3Client, uploadAudioFileToS3 } from "../utils/s3.js";
+import { s3Client, uploadFileToS3, uploadAudioFileToS3, getPresignedUrl, extractS3KeyFromUrl, bucketName, bucketPrefix } from "../utils/s3.js";
 import * as storage from "../storage.js";
-import { ListObjectsV2Command, PutObjectCommand } from "@aws-sdk/client-s3";
+import { ListObjectsV2Command, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { avatars, scenarios, roleplaySession, aiSessionAnalysis, transcriptMessages, transcripts, scenarioSkills, tones, personas, } from "../../shared/schema.js";
 import { getCulturalPresetById, getDefaultCulturalPreset, getAllCulturalPresets, } from "../../shared/cultural-presets.js";
 import { eq, sql, and, isNotNull } from "drizzle-orm";
@@ -18,14 +18,18 @@ import { fileURLToPath } from "url";
 import { mapCustomScenarioToSkills, getSkillMappingsForCustomScenario } from "../lib/scenario-skill-mapper.js";
 import { performSkillAssessmentForSession, getSkillAssessmentsForSession } from "../lib/skill-dimension-assessment.js";
 import { suggestRolesFromContext, analyzeScenarioContext } from "../lib/role-suggestion.js";
+import { trackHeygenUsage } from "../utils/api-usage-tracker.js";
 dotenv.config();
 // Recreate __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // Set up disk storage with multer
+// Use /tmp for production compatibility (autoscale deployments have ephemeral filesystems)
 const mutlterStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadDir = path.join(__dirname, "../uploads");
+        const uploadDir = process.env.NODE_ENV === 'production'
+            ? '/tmp/uploads'
+            : path.join(__dirname, "../uploads");
         if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
         }
@@ -120,6 +124,293 @@ avatarSimulator.get("/cultural-presets/default", async (req, res) => {
             success: false,
             error: "Failed to get default cultural preset",
             details: error.message,
+        });
+    }
+});
+// =====================
+// Topic Suggestions API (for Think it through coaching)
+// =====================
+const DISCUSSION_CATEGORIES = {
+    "current-affairs": {
+        name: "Current Affairs",
+        context: "politics, global events, news, social issues, and current debates happening in the world",
+        fallbackTopics: [
+            "Should governments regulate social media more strictly?",
+            "Is remote work changing society for better or worse?",
+            "Are we doing enough about climate change?",
+            "Should voting be mandatory?",
+            "Is globalization benefiting everyone equally?"
+        ],
+    },
+    "technology": {
+        name: "Technology",
+        context: "AI, innovation, digital ethics, tech industry trends, and the impact of technology on society",
+        fallbackTopics: [
+            "Should AI be allowed to create art?",
+            "Is social media making us less social?",
+            "Should there be limits on data collection?",
+            "Will AI take more jobs than it creates?",
+            "Is our dependence on technology healthy?"
+        ],
+    },
+    "business": {
+        name: "Business",
+        context: "entrepreneurship, markets, business strategy, startup ideas, and economic trends",
+        fallbackTopics: [
+            "Is the gig economy sustainable long-term?",
+            "Should companies prioritize profit or purpose?",
+            "Is work-life balance a myth in startups?",
+            "Are traditional business degrees still worth it?",
+            "Should CEOs be paid less during hard times?"
+        ],
+    },
+    "career": {
+        name: "Career",
+        context: "professional growth, workplace dynamics, career decisions, and work culture",
+        fallbackTopics: [
+            "Is job-hopping better than company loyalty?",
+            "Should you follow passion or practicality?",
+            "Is hustle culture toxic or necessary?",
+            "Are soft skills more important than hard skills?",
+            "Should you work for a cause or a paycheck?"
+        ],
+    },
+    "wellness": {
+        name: "Personal Wellness",
+        context: "health, mental wellness, relationships, self-improvement, and lifestyle choices",
+        fallbackTopics: [
+            "Is self-care becoming too commercialized?",
+            "Are we too obsessed with productivity?",
+            "Should mental health days be mandatory?",
+            "Is social comparison inevitable in the digital age?",
+            "Can you have it all - career, family, and health?"
+        ],
+    },
+    "sports": {
+        name: "Sports",
+        context: "athletic competitions, team dynamics, sports culture, and debates in the sports world",
+        fallbackTopics: [
+            "Should college athletes be paid?",
+            "Is sports gambling changing how we watch games?",
+            "Are esports real sports?",
+            "Should there be salary caps in professional sports?",
+            "Is sports specialization at young ages harmful?"
+        ],
+    },
+};
+avatarSimulator.post("/suggest-topics", async (req, res) => {
+    try {
+        const { categoryId } = req.body;
+        if (!categoryId) {
+            return res.status(400).json({ success: false, error: "Category ID required" });
+        }
+        const category = DISCUSSION_CATEGORIES[categoryId];
+        if (!category) {
+            return res.status(400).json({ success: false, error: "Invalid category" });
+        }
+        const prompt = `You are a topic curator for a discussion and debate platform. Generate 5 trending, thought-provoking discussion topics about ${category.context}.
+
+IMPORTANT REQUIREMENTS:
+1. Topics should be based on CURRENT news, trends, and social media discussions (as of late 2024/2025)
+2. Frame each topic as a debate question or discussion point that invites different perspectives
+3. Topics should be suitable for reflection, not just information sharing
+4. Make them conversational and engaging - something people would want to discuss over coffee
+5. Keep each topic concise (5-12 words)
+6. Avoid yes/no questions - make them open for nuanced discussion
+
+Examples of good topic formats:
+- "Should X do Y?" 
+- "Is X really worth it?"
+- "The case for/against X"
+- "Why is X becoming so controversial?"
+- "What the X debate tells us about society"
+
+Return ONLY a valid JSON array of exactly 5 topic strings. No explanations.
+Example: ["Topic one", "Topic two", "Topic three", "Topic four", "Topic five"]`;
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.9,
+            max_tokens: 300,
+        });
+        const content = response.choices[0]?.message?.content || "";
+        let topics = [];
+        try {
+            const jsonMatch = content.match(/\[[\s\S]*\]/);
+            if (jsonMatch) {
+                topics = JSON.parse(jsonMatch[0]);
+            }
+        }
+        catch {
+            const matches = content.match(/["']([^"']+)["']/g);
+            if (matches) {
+                topics = matches.map(m => m.replace(/["']/g, ''));
+            }
+        }
+        if (topics.length < 3) {
+            topics = category.fallbackTopics;
+        }
+        res.json({ success: true, topics: topics.slice(0, 5), category: categoryId });
+    }
+    catch (error) {
+        console.error("Error generating topic suggestions:", error);
+        const category = DISCUSSION_CATEGORIES[req.body.categoryId];
+        res.json({
+            success: true,
+            topics: category?.fallbackTopics || [
+                "What makes a good leader in today's world?",
+                "Is balance achievable or just a myth?",
+                "Should we always follow our passion?",
+                "What does success really mean?",
+                "How do we make better decisions?"
+            ],
+            category: req.body.categoryId
+        });
+    }
+});
+avatarSimulator.post("/research-topic", async (req, res) => {
+    try {
+        const { topic, category, searchDepth = "basic", conversationMode, userObjective } = req.body;
+        console.log("[Research] Request received:", { topic, category, searchDepth, conversationMode });
+        if (!topic) {
+            return res.status(400).json({ success: false, error: "Topic required" });
+        }
+        const { searchTopic, shouldResearchTopic, formatResearchForPrompt, getResearchQualityScore } = await import("../utils/search-service.js");
+        const needsResearch = shouldResearchTopic(topic, category);
+        console.log("[Research] Needs research:", needsResearch);
+        if (!needsResearch) {
+            console.log("[Research] Skipping research for topic:", topic);
+            return res.json({
+                success: true,
+                research: null,
+                message: "Topic does not require real-time research",
+                promptAddition: "",
+                quality: { score: 0, reason: "research not needed", isUsable: false }
+            });
+        }
+        // Enhance search query for better results
+        const isNewsCategory = category === "current-affairs" || category === "news";
+        const enhancedQuery = isNewsCategory
+            ? `latest news: ${topic} ${new Date().getFullYear()}`
+            : topic;
+        console.log("[Research] Searching Tavily for:", enhancedQuery);
+        const research = await searchTopic(enhancedQuery, {
+            searchDepth: searchDepth,
+            maxResults: 5,
+            includeAnswer: true,
+            topic: isNewsCategory ? "news" : "general",
+            days: isNewsCategory ? 14 : 30, // Extend news window to 14 days
+        });
+        // Get quality score for the research
+        const quality = getResearchQualityScore(research);
+        console.log("[Research] Tavily returned:", {
+            hasAnswer: !!research.answer,
+            sourcesCount: research.sources.length,
+            hasReliableInfo: research.hasReliableInfo,
+            qualityScore: quality.score,
+            qualityReason: quality.reason,
+            answerPreview: research.answer?.substring(0, 200)
+        });
+        // Pass conversation style to format function for mode-specific prompts
+        const promptAddition = formatResearchForPrompt(research, {
+            mode: conversationMode,
+            objective: userObjective
+        });
+        console.log("[Research] Prompt addition length:", promptAddition.length, "chars (mode: " + conversationMode + ")");
+        res.json({
+            success: true,
+            research,
+            promptAddition,
+            hasReliableInfo: research.hasReliableInfo,
+            quality
+        });
+    }
+    catch (error) {
+        console.error("[Research] Error:", error);
+        res.json({
+            success: true,
+            research: null,
+            promptAddition: "",
+            hasReliableInfo: false,
+            error: "Research service unavailable"
+        });
+    }
+});
+avatarSimulator.post("/categorize-topic", async (req, res) => {
+    try {
+        const { topic } = req.body;
+        if (!topic || topic.trim().length === 0) {
+            return res.status(400).json({ success: false, error: "Topic required" });
+        }
+        console.log("[Categorize] Analyzing topic:", topic);
+        const categoryPrompt = `You are a topic classifier. Analyze this topic and classify it into ONE of these categories:
+
+Categories:
+- current-affairs: News, politics, global events, societal debates, elections, government policy
+- technology: Tech industry, AI, startups, gadgets, software, innovation
+- business: Corporate strategy, markets, entrepreneurship, leadership, finance, economics
+- sports: Athletes, teams, matches, tournaments, sporting events, fitness competitions
+- career: Job hunting, professional development, workplace challenges, promotions, interviews
+- wellness: Health, mental health, work-life balance, self-improvement, relationships
+
+Topic to classify: "${topic}"
+
+Respond with ONLY the category ID (one of: current-affairs, technology, business, sports, career, wellness). No explanation, just the category.`;
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [{ role: "user", content: categoryPrompt }],
+            max_tokens: 20,
+            temperature: 0,
+        });
+        const rawCategory = response.choices[0]?.message?.content?.trim().toLowerCase() || "";
+        const validCategories = ["current-affairs", "technology", "business", "sports", "career", "wellness"];
+        const category = validCategories.includes(rawCategory) ? rawCategory : "current-affairs";
+        console.log("[Categorize] Detected category:", category, "(raw:", rawCategory, ")");
+        res.json({
+            success: true,
+            category,
+            topic: topic.trim()
+        });
+    }
+    catch (error) {
+        console.error("[Categorize] Error:", error);
+        res.json({
+            success: true,
+            category: "current-affairs",
+            topic: req.body.topic?.trim() || "",
+            error: "Classification failed, using default"
+        });
+    }
+});
+// Generate topic insights for post-session knowledge enrichment
+avatarSimulator.post("/topic-insights", async (req, res) => {
+    try {
+        const { topic } = req.body;
+        if (!topic || topic.trim().length === 0) {
+            return res.status(400).json({ success: false, error: "Topic required" });
+        }
+        console.log("[TopicInsights] Generating insights for:", topic);
+        const { generateTopicInsights } = await import("../utils/search-service.js");
+        const insights = await generateTopicInsights(topic.trim());
+        if (!insights) {
+            return res.json({
+                success: true,
+                insights: null,
+                message: "Could not generate topic insights"
+            });
+        }
+        console.log("[TopicInsights] Successfully generated insights with", insights.keyFacts.length, "key facts");
+        res.json({
+            success: true,
+            insights
+        });
+    }
+    catch (error) {
+        console.error("[TopicInsights] Error:", error);
+        res.status(500).json({
+            success: false,
+            insights: null,
+            error: "Failed to generate topic insights"
         });
     }
 });
@@ -556,6 +847,16 @@ avatarSimulator.post("/session/end", async (req, res) => {
         // Update our database
         const endedSession = await storage.endHeygenSession(session.id, reason || "user_ended");
         console.log(`[HeyGen Session] Ended session ${session.id}, reason: ${reason || "user_ended"}`);
+        // Track HeyGen usage
+        if (endedSession.actualDurationSec && endedSession.actualDurationSec > 0) {
+            const authUserId = req.user?.id;
+            await trackHeygenUsage("streaming_session", endedSession.actualDurationSec * 1000, // convert to ms
+            {
+                authUserId,
+                avatarId: session.avatarId || undefined,
+                sessionId: session.id
+            });
+        }
         // Check if anyone is waiting in queue and notify
         const nextInQueue = await storage.getNextInHeygenQueue();
         res.json({
@@ -829,7 +1130,11 @@ avatarSimulator.get("/get-scenarios", async (req, res) => {
         scenarios.avatar_name AS "avatarName",
         scenarios.description, 
         scenarios.context, 
-        scenarios.instructions, 
+        scenarios.instructions,
+        scenarios.opening_scene AS "openingScene",
+        scenarios.tags,
+        scenarios.counter_persona AS "counterPersona",
+        scenarios.persona_overlays AS "personaOverlays",
         scenarios.difficulty, 
         skills.name AS "skillName",            
         COALESCE(
@@ -872,7 +1177,7 @@ avatarSimulator.get("/get-scenarios", async (req, res) => {
         }
         query += `
       GROUP BY 
-        scenarios.id, scenarios.skill_id, skills.name
+        scenarios.id, scenarios.skill_id, skills.name, scenarios.opening_scene, scenarios.tags, scenarios.counter_persona, scenarios.persona_overlays
       ORDER BY scenarios.id desc
     `;
         const result = await pool.query(query, params);
@@ -1798,19 +2103,19 @@ avatarSimulator.get("/get-transcript", async (req, res) => {
 });
 avatarSimulator.get("/get-transcripts", async (req, res) => {
     try {
-        let userId = 1; // Default to demo user
-        // If authenticated, get the legacy user ID linked to this auth user
-        if (req.user?.id) {
-            const legacyUser = await storage.getLegacyUserByAuthUserId(req.user.id);
-            if (legacyUser) {
-                userId = legacyUser.id;
-            }
+        // Require authentication - no more defaulting to demo user
+        if (!req.user?.id) {
+            return res.json({ success: true, transcripts: [], source: "no-auth" });
         }
-        else if (req.query.userId) {
-            const parsed = parseInt(req.query.userId, 10);
-            if (!isNaN(parsed))
-                userId = parsed;
+        // Get or create legacy user for this authenticated user
+        let legacyUser = await storage.getLegacyUserByAuthUserId(req.user.id);
+        if (!legacyUser && req.user.username) {
+            legacyUser = await storage.getOrCreateLegacyUser(req.user.id, req.user.username);
         }
+        if (!legacyUser) {
+            return res.json({ success: true, transcripts: [], source: "no-legacy-user" });
+        }
+        const userId = legacyUser.id;
         const result = await getAllTranscripts(userId);
         if (!result) {
             console.error("No result returned from getTranscriptById");
@@ -1844,19 +2149,19 @@ avatarSimulator.get("/get-transcripts", async (req, res) => {
 });
 avatarSimulator.get("/skill-progress", async (req, res) => {
     try {
-        let userId = 1; // Default to demo user
-        // If authenticated, get the legacy user ID linked to this auth user
-        if (req.user?.id) {
-            const legacyUser = await storage.getLegacyUserByAuthUserId(req.user.id);
-            if (legacyUser) {
-                userId = legacyUser.id;
-            }
+        // Require authentication - no more defaulting to demo user
+        if (!req.user?.id) {
+            return res.json({ success: true, skillProgress: [] });
         }
-        else if (req.query.userId) {
-            const parsed = parseInt(req.query.userId, 10);
-            if (!isNaN(parsed))
-                userId = parsed;
+        // Get or create legacy user for this authenticated user
+        let legacyUser = await storage.getLegacyUserByAuthUserId(req.user.id);
+        if (!legacyUser && req.user.username) {
+            legacyUser = await storage.getOrCreateLegacyUser(req.user.id, req.user.username);
         }
+        if (!legacyUser) {
+            return res.json({ success: true, skillProgress: [] });
+        }
+        const userId = legacyUser.id;
         // Get skill progress with average scores per skill for this user
         // Join with roleplay_session (where skill assessments are stored)
         const result = await pool.query(`
@@ -2091,6 +2396,7 @@ avatarSimulator.post("/save-transcript", async (req, res) => {
             scenarioId: data.scenarioId || null,
             customScenarioId: data.customScenarioId || null,
             sessionType: data?.sessionType,
+            sessionConfig: data.sessionConfig || null,
         };
         // Log message structure for first message (if exists)
         if (normalizedData.messages.length > 0) {
@@ -2299,11 +2605,14 @@ avatarSimulator.post("/session-analysis", async (req, res) => {
                             .join("\n");
                         const customScenarioId = transcript.customScenarioId || null;
                         const scenarioId = transcript.scenarioId || null;
-                        console.log(`Generating skill assessments with scenarioId: ${scenarioId}, customScenarioId: ${customScenarioId}`);
-                        const generatedAssessments = await performSkillAssessmentForSession(pool, sessionIdForAssessment, scenarioId, conversationText, customScenarioId);
-                        if (generatedAssessments.length > 0) {
-                            console.log(`Generated ${generatedAssessments.length} skill assessments for existing session`);
-                            // Re-fetch the saved assessments to return properly formatted data
+                        const isImpromptuSession = !scenarioId && !customScenarioId && !!transcript.context;
+                        // Extract persona overlay from session_config if available
+                        const sessionConfig = transcript.session_config || transcript.sessionConfig;
+                        const personaOverlay = sessionConfig?.personaOverlay || null;
+                        console.log(`Generating skill assessments with scenarioId: ${scenarioId}, customScenarioId: ${customScenarioId}, isImpromptu: ${isImpromptuSession}, personaLevel: ${sessionConfig?.personaLevel || 'none'}`);
+                        const generatedResult = await performSkillAssessmentForSession(pool, sessionIdForAssessment, scenarioId, conversationText, customScenarioId, isImpromptuSession, personaOverlay);
+                        if (generatedResult.skillAssessments.length > 0) {
+                            console.log(`Generated ${generatedResult.skillAssessments.length} skill assessments for existing session`);
                             skillAssessments = await getSkillAssessmentsForSession(pool, sessionIdForAssessment);
                         }
                     }
@@ -2374,14 +2683,18 @@ avatarSimulator.post("/session-analysis", async (req, res) => {
             pronunciationSuggestions: analysisResult.feedback.pronunciation.suggestions,
         })
             .returning();
-        // 6. Perform skill dimension assessment if scenario has skills with frameworks
-        let skillAssessments = [];
+        let skillAssessments = { skillAssessments: [], personaFit: undefined };
         try {
             const conversationText = transcriptMessagesResult.messages
                 .map((m) => `${m.speaker}: ${m.text}`)
                 .join("\n");
-            skillAssessments = await performSkillAssessmentForSession(pool, roleplaySessionId, transcript.scenarioId || null, conversationText, transcript.customScenarioId || null);
-            console.log(`Completed skill dimension assessment: ${skillAssessments.length} skills assessed`);
+            const isImpromptuSession = !transcript.scenarioId && !transcript.customScenarioId && !!transcript.context;
+            // Extract persona overlay from session_config if available
+            const sessionConfig = transcript.session_config || transcript.sessionConfig;
+            const personaOverlay = sessionConfig?.personaOverlay || null;
+            console.log(`Session analysis - scenarioId: ${transcript.scenarioId}, customScenarioId: ${transcript.customScenarioId}, context: ${!!transcript.context}, isImpromptu: ${isImpromptuSession}, personaLevel: ${sessionConfig?.personaLevel || 'none'}`);
+            skillAssessments = await performSkillAssessmentForSession(pool, roleplaySessionId, transcript.scenarioId || null, conversationText, transcript.customScenarioId || null, isImpromptuSession, personaOverlay);
+            console.log(`Completed skill dimension assessment: ${skillAssessments.skillAssessments.length} skills assessed`);
         }
         catch (skillError) {
             console.error("Error during skill dimension assessment:", skillError);
@@ -2484,18 +2797,23 @@ avatarSimulator.post("/save-roleplay-session", async (req, res) => {
         const { avatarId, knowledgeId, transcriptId, startTime, endTime, duration, audioUrl, } = req.body;
         // Get auth user ID from session (this is the UUID from auth_users table)
         const authUserId = req.user?.id;
+        // Require authentication - no more defaulting to demo user
+        if (!authUserId) {
+            return res.status(401).json({ success: false, error: "Authentication required" });
+        }
         // Convert auth user ID (UUID) to legacy user ID (integer)
-        let legacyUserId = 1; // Default to demo user
-        if (authUserId) {
-            const legacyUser = await storage.getLegacyUserByAuthUserId(authUserId);
-            if (legacyUser) {
-                legacyUserId = legacyUser.id;
-            }
-            else if (req.user?.username) {
-                // Create legacy user if authenticated but not linked
-                const created = await storage.getOrCreateLegacyUser(authUserId, req.user.username);
-                legacyUserId = created.id;
-            }
+        let legacyUserId;
+        const legacyUser = await storage.getLegacyUserByAuthUserId(authUserId);
+        if (legacyUser) {
+            legacyUserId = legacyUser.id;
+        }
+        else if (req.user?.username) {
+            // Create legacy user if authenticated but not linked
+            const created = await storage.getOrCreateLegacyUser(authUserId, req.user.username);
+            legacyUserId = created.id;
+        }
+        else {
+            return res.status(401).json({ success: false, error: "User not found" });
         }
         // Insert row
         const [newSession] = await db
@@ -2788,14 +3106,20 @@ avatarSimulator.post("/pull-heygen-avatars", async (req, res) => {
         const result = await db
             .insert(avatars)
             .values(mappedAvatars)
-            .onConflictDoNothing()
+            .onConflictDoUpdate({
+            target: avatars.id,
+            set: {
+                imageUrl: sql `EXCLUDED.image_url`,
+                updatedAt: new Date(),
+            },
+        })
             .returning({
             id: avatars.id,
         });
         return res.json({
-            message: "Insert complete",
+            message: "Insert/Update complete",
             count: mappedAvatars.length,
-            inserted: result?.length,
+            upserted: result?.length,
             heygenCount: data?.data?.length,
         });
     }
@@ -2943,17 +3267,21 @@ avatarSimulator.post("/analyse-session", async (req, res) => {
             transcriptId,
         })
             .returning();
-        // Perform skill dimension assessment for this session
-        let skillAssessments = [];
+        let skillAssessments = { skillAssessments: [], personaFit: undefined };
         try {
             const conversationText = transcript
                 .map((item) => `${item.speaker}: ${item.text}`)
                 .join("\n");
-            const transcriptRecord = await pool.query(`SELECT scenario_id, custom_scenario_id FROM transcripts WHERE id = $1`, [transcriptId]);
+            const transcriptRecord = await pool.query(`SELECT scenario_id, custom_scenario_id, context, session_config FROM transcripts WHERE id = $1`, [transcriptId]);
             const scenarioId = transcriptRecord.rows[0]?.scenario_id || null;
             const customScenarioId = transcriptRecord.rows[0]?.custom_scenario_id || null;
-            skillAssessments = await performSkillAssessmentForSession(pool, sessionId, scenarioId, conversationText, customScenarioId);
-            console.log(`Completed skill dimension assessment: ${skillAssessments.length} skills assessed`);
+            const hasContext = !!transcriptRecord.rows[0]?.context;
+            const isImpromptuSession = !scenarioId && !customScenarioId && hasContext;
+            // Extract persona overlay from session_config if available
+            const sessionConfig = transcriptRecord.rows[0]?.session_config;
+            const personaOverlay = sessionConfig?.personaOverlay || null;
+            skillAssessments = await performSkillAssessmentForSession(pool, sessionId, scenarioId, conversationText, customScenarioId, isImpromptuSession, personaOverlay);
+            console.log(`Completed skill dimension assessment: ${skillAssessments.skillAssessments.length} skills assessed, personaLevel: ${sessionConfig?.personaLevel || 'none'}`);
         }
         catch (skillError) {
             console.error("Error during skill dimension assessment:", skillError);
@@ -3400,7 +3728,7 @@ export async function getTranscript(transcriptId) {
     }
     const query = `
     SELECT id, session_id, avatar_id, knowledge_id, context, instructions,
-           scenario, skill, duration,scenario_id, created_at, updated_at
+           scenario, skill, duration, scenario_id, custom_scenario_id, session_config, created_at, updated_at
     FROM transcripts
     WHERE id = $1
   `;
@@ -3494,8 +3822,40 @@ async function saveTranscriptToDatabase(transcript) {
         else {
             // Create new transcript record
             console.log(`📝 Creating new transcript with ID: ${transcriptId}`);
-            await pool.query(`INSERT INTO transcripts (id, session_id, avatar_id, knowledge_id, context, instructions, duration, user_id, skill_id, scenario_id, custom_scenario_id, session_type)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+            // Lookup skill and scenario names for analytics
+            let skillName = null;
+            let scenarioName = null;
+            if (transcript.skillId) {
+                try {
+                    const skillResult = await pool.query('SELECT name FROM skills WHERE id = $1', [transcript.skillId]);
+                    if (skillResult.rows.length > 0) {
+                        skillName = skillResult.rows[0].name;
+                    }
+                }
+                catch (e) {
+                    console.warn("Warning looking up skill name:", e);
+                }
+            }
+            if (transcript.scenarioId) {
+                try {
+                    const scenarioResult = await pool.query('SELECT name, skill_id FROM scenarios WHERE id = $1', [transcript.scenarioId]);
+                    if (scenarioResult.rows.length > 0) {
+                        scenarioName = scenarioResult.rows[0].name;
+                        // Also get skill name from scenario if not already set
+                        if (!skillName && scenarioResult.rows[0].skill_id) {
+                            const skillResult = await pool.query('SELECT name FROM skills WHERE id = $1', [scenarioResult.rows[0].skill_id]);
+                            if (skillResult.rows.length > 0) {
+                                skillName = skillResult.rows[0].name;
+                            }
+                        }
+                    }
+                }
+                catch (e) {
+                    console.warn("Warning looking up scenario name:", e);
+                }
+            }
+            await pool.query(`INSERT INTO transcripts (id, session_id, avatar_id, knowledge_id, context, instructions, duration, user_id, skill_id, scenario_id, custom_scenario_id, session_type, skill, scenario, session_config)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
          ON CONFLICT (id) DO UPDATE
          SET session_id = EXCLUDED.session_id,
              avatar_id = EXCLUDED.avatar_id,
@@ -3506,7 +3866,10 @@ async function saveTranscriptToDatabase(transcript) {
              user_id = EXCLUDED.user_id,
              skill_id = EXCLUDED.skill_id,
              scenario_id = EXCLUDED.scenario_id,
-             custom_scenario_id = EXCLUDED.custom_scenario_id`, [
+             custom_scenario_id = EXCLUDED.custom_scenario_id,
+             skill = EXCLUDED.skill,
+             scenario = EXCLUDED.scenario,
+             session_config = EXCLUDED.session_config`, [
                 transcriptId,
                 roleplaySessionId, // Use the integer roleplay session ID
                 transcript.avatarId,
@@ -3519,6 +3882,9 @@ async function saveTranscriptToDatabase(transcript) {
                 transcript.scenarioId,
                 transcript.customScenarioId,
                 transcript.sessionType,
+                skillName,
+                scenarioName,
+                transcript.sessionConfig ? JSON.stringify(transcript.sessionConfig) : null,
             ]);
             finalTranscriptId = transcriptId;
         }
@@ -3963,5 +4329,1767 @@ avatarSimulator.post("/custom-scenarios/analyze", async (req, res) => {
     catch (error) {
         console.error("Error analyzing scenario:", error);
         res.status(500).json({ error: "Failed to analyze scenario" });
+    }
+});
+// =====================
+// Presentation Practice Routes
+// =====================
+import { parsePresentation, generatePresentationContext } from "../lib/ppt-parser.js";
+import { generatePresentationFeedback, generatePresentationSkillAssessment, generateDocumentAnalysis } from "../lib/presentation-assessment.js";
+import { presentationScenarios, presentationSessions, presentationFeedback as presentationFeedbackTable } from "../../shared/schema.js";
+avatarSimulator.get("/presentation/feedback/:sessionId", async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ error: "Authentication required" });
+        }
+        const sessionId = parseInt(req.params.sessionId);
+        const [feedback] = await db
+            .select()
+            .from(presentationFeedbackTable)
+            .where(eq(presentationFeedbackTable.sessionId, sessionId));
+        if (!feedback) {
+            return res.status(404).json({ error: "Feedback not found" });
+        }
+        res.json({
+            id: feedback.id,
+            sessionId: feedback.sessionId,
+            presentationScenarioId: feedback.presentationScenarioId,
+            overallScore: feedback.overallScore,
+            communicationScore: feedback.communicationScore,
+            communicationFeedback: feedback.communicationFeedback,
+            deliveryScore: feedback.deliveryScore,
+            deliveryFeedback: feedback.deliveryFeedback,
+            subjectMatterScore: feedback.subjectMatterScore,
+            subjectMatterFeedback: feedback.subjectMatterFeedback,
+            slideCoverage: feedback.slideCoverage,
+            strengths: feedback.strengths,
+            improvements: feedback.improvements,
+            summary: feedback.summary,
+        });
+    }
+    catch (error) {
+        console.error("Error fetching presentation feedback:", error);
+        res.status(500).json({ error: "Failed to fetch feedback" });
+    }
+});
+avatarSimulator.get("/presentation/scenarios/:id", async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ error: "Authentication required" });
+        }
+        const presentationId = parseInt(req.params.id);
+        const [presentation] = await db
+            .select({
+            id: presentationScenarios.id,
+            title: presentationScenarios.title,
+            topic: presentationScenarios.topic,
+            fileName: presentationScenarios.fileName,
+            totalSlides: presentationScenarios.totalSlides,
+        })
+            .from(presentationScenarios)
+            .where(and(eq(presentationScenarios.id, presentationId), eq(presentationScenarios.userId, userId)));
+        if (!presentation) {
+            return res.status(404).json({ error: "Presentation not found" });
+        }
+        res.json(presentation);
+    }
+    catch (error) {
+        console.error("Error fetching presentation scenario:", error);
+        res.status(500).json({ error: "Failed to fetch presentation" });
+    }
+});
+avatarSimulator.get("/presentation/file/:id", async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ error: "Authentication required" });
+        }
+        const presentationId = parseInt(req.params.id);
+        const [presentation] = await db
+            .select({
+            id: presentationScenarios.id,
+            fileUrl: presentationScenarios.fileUrl,
+            fileType: presentationScenarios.fileType,
+        })
+            .from(presentationScenarios)
+            .where(and(eq(presentationScenarios.id, presentationId), eq(presentationScenarios.userId, userId)));
+        if (!presentation) {
+            return res.status(404).json({ error: "Presentation not found" });
+        }
+        if (!presentation.fileUrl) {
+            return res.status(404).json({ error: "No file available for this presentation" });
+        }
+        const s3Key = extractS3KeyFromUrl(presentation.fileUrl);
+        if (!s3Key) {
+            return res.status(500).json({ error: "Invalid file URL" });
+        }
+        const signedUrl = await getPresignedUrl(s3Key, 3600);
+        res.json({ success: true, signedUrl, fileType: presentation.fileType });
+    }
+    catch (error) {
+        console.error("Error getting presentation file:", error);
+        res.status(500).json({ error: "Failed to get file" });
+    }
+});
+avatarSimulator.get("/presentation/view/:id", async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ error: "Authentication required" });
+        }
+        const presentationId = parseInt(req.params.id);
+        const [presentation] = await db
+            .select({
+            id: presentationScenarios.id,
+            fileUrl: presentationScenarios.fileUrl,
+            fileType: presentationScenarios.fileType,
+        })
+            .from(presentationScenarios)
+            .where(and(eq(presentationScenarios.id, presentationId), eq(presentationScenarios.userId, userId)));
+        if (!presentation) {
+            return res.status(404).json({ error: "Presentation not found" });
+        }
+        if (!presentation.fileUrl) {
+            return res.status(404).json({ error: "No file available" });
+        }
+        const s3Key = extractS3KeyFromUrl(presentation.fileUrl);
+        console.log("Presentation view - fileUrl:", presentation.fileUrl, "extracted s3Key:", s3Key);
+        if (!s3Key) {
+            console.error("Failed to extract S3 key from URL:", presentation.fileUrl);
+            return res.status(500).json({ error: "Invalid file URL" });
+        }
+        const { getFileFromS3 } = await import("../utils/s3.js");
+        const { body, contentType } = await getFileFromS3(s3Key);
+        res.setHeader("Content-Type", contentType || "application/pdf");
+        res.setHeader("Content-Disposition", "inline");
+        body.pipe(res);
+    }
+    catch (error) {
+        console.error("Error streaming presentation file:", error?.message || error, "Code:", error?.Code || error?.$metadata?.httpStatusCode);
+        res.status(500).json({ error: "Failed to stream file", details: error?.message });
+    }
+});
+avatarSimulator.post("/presentation/upload", upload.single("file"), async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ error: "Authentication required" });
+        }
+        if (!req.file) {
+            return res.status(400).json({ error: "No file uploaded" });
+        }
+        const { topic, context } = req.body;
+        if (!topic || typeof topic !== "string") {
+            return res.status(400).json({ error: "Topic is required" });
+        }
+        const presentationContext = context && typeof context === "string" ? context.trim() : null;
+        const fileBuffer = fs.readFileSync(req.file.path);
+        const fileName = req.file.originalname;
+        if (!fileName.toLowerCase().endsWith(".pdf")) {
+            fs.unlinkSync(req.file.path);
+            return res.status(400).json({ error: "Only PDF files are supported" });
+        }
+        const fileType = "pdf";
+        const contentType = "application/pdf";
+        const s3Key = `presentations/${userId}/${Date.now()}-${fileName}`;
+        const fileUrl = await uploadFileToS3(fileBuffer, s3Key, contentType);
+        let presentationData;
+        try {
+            presentationData = await parsePresentation(fileBuffer, fileName);
+        }
+        catch (parseError) {
+            console.error("Error parsing presentation content:", parseError);
+            presentationData = {
+                fileName,
+                totalSlides: 1,
+                slides: [{ slideNumber: 1, title: topic, bulletPoints: [], speakerNotes: "", rawText: "" }],
+                extractedText: topic,
+                fileType,
+            };
+        }
+        fs.unlinkSync(req.file.path);
+        const [created] = await db
+            .insert(presentationScenarios)
+            .values({
+            userId,
+            title: topic,
+            topic,
+            context: presentationContext,
+            fileName,
+            fileUrl,
+            fileType,
+            totalSlides: presentationData.totalSlides,
+            slidesData: presentationData.slides,
+            extractedText: presentationData.extractedText,
+        })
+            .returning();
+        // Run document analysis in background (fire-and-forget)
+        // This pre-computes the analysis so it's ready when the session ends
+        (async () => {
+            try {
+                console.log(`[Background Analysis] Starting document analysis for presentation ${created.id}`);
+                const docAnalysis = await generateDocumentAnalysis(presentationData, topic);
+                if (docAnalysis) {
+                    await db
+                        .update(presentationScenarios)
+                        .set({ documentAnalysis: docAnalysis })
+                        .where(eq(presentationScenarios.id, created.id));
+                    console.log(`[Background Analysis] Document analysis saved for presentation ${created.id}`);
+                }
+            }
+            catch (err) {
+                console.error(`[Background Analysis] Failed for presentation ${created.id}:`, err);
+            }
+        })();
+        res.json({
+            success: true,
+            presentation: {
+                id: created.id,
+                fileName: created.fileName,
+                fileUrl: created.fileUrl,
+                fileType: created.fileType,
+                totalSlides: created.totalSlides,
+                slides: presentationData.slides.map(s => ({
+                    slideNumber: s.slideNumber,
+                    title: s.title,
+                    bulletPoints: s.bulletPoints,
+                })),
+                topic: created.topic,
+                context: created.context,
+            },
+        });
+    }
+    catch (error) {
+        console.error("Error uploading presentation:", error);
+        if (req.file?.path) {
+            try {
+                fs.unlinkSync(req.file.path);
+            }
+            catch (e) { }
+        }
+        res.status(500).json({ error: "Failed to process presentation" });
+    }
+});
+avatarSimulator.get("/presentation/:id", async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ error: "Authentication required" });
+        }
+        const presentationId = parseInt(req.params.id);
+        const [presentation] = await db
+            .select()
+            .from(presentationScenarios)
+            .where(and(eq(presentationScenarios.id, presentationId), eq(presentationScenarios.userId, userId)));
+        if (!presentation) {
+            return res.status(404).json({ error: "Presentation not found" });
+        }
+        res.json({
+            success: true,
+            presentation: {
+                id: presentation.id,
+                topic: presentation.topic,
+                context: presentation.context,
+                fileName: presentation.fileName,
+                fileUrl: presentation.fileUrl,
+                fileType: presentation.fileType,
+                totalSlides: presentation.totalSlides,
+                slides: presentation.slidesData,
+                extractedText: presentation.extractedText,
+            },
+        });
+    }
+    catch (error) {
+        console.error("Error fetching presentation:", error);
+        res.status(500).json({ error: "Failed to fetch presentation" });
+    }
+});
+avatarSimulator.get("/presentation/:id/context", async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ error: "Authentication required" });
+        }
+        const presentationId = parseInt(req.params.id);
+        const [presentation] = await db
+            .select()
+            .from(presentationScenarios)
+            .where(and(eq(presentationScenarios.id, presentationId), eq(presentationScenarios.userId, userId)));
+        if (!presentation) {
+            return res.status(404).json({ error: "Presentation not found" });
+        }
+        const context = generatePresentationContext({
+            fileName: presentation.fileName,
+            totalSlides: presentation.totalSlides,
+            slides: presentation.slidesData,
+            extractedText: presentation.extractedText,
+            fileType: presentation.fileType || "pdf",
+        }, presentation.topic, presentation.context);
+        res.json({
+            success: true,
+            context,
+            topic: presentation.topic,
+            situationContext: presentation.context,
+        });
+    }
+    catch (error) {
+        console.error("Error generating presentation context:", error);
+        res.status(500).json({ error: "Failed to generate context" });
+    }
+});
+avatarSimulator.post("/presentation/:id/reparse", async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ error: "Authentication required" });
+        }
+        const presentationId = parseInt(req.params.id);
+        const [presentation] = await db
+            .select()
+            .from(presentationScenarios)
+            .where(and(eq(presentationScenarios.id, presentationId), eq(presentationScenarios.userId, userId)));
+        if (!presentation) {
+            return res.status(404).json({ error: "Presentation not found" });
+        }
+        const s3Key = extractS3KeyFromUrl(presentation.fileUrl);
+        if (!s3Key) {
+            return res.status(400).json({ error: "Invalid file URL" });
+        }
+        const fullKey = bucketPrefix ? `${bucketPrefix}/${s3Key}` : s3Key;
+        const command = new GetObjectCommand({
+            Bucket: bucketName,
+            Key: fullKey,
+        });
+        const s3Response = await s3Client.send(command);
+        const chunks = [];
+        for await (const chunk of s3Response.Body) {
+            chunks.push(chunk);
+        }
+        const buffer = Buffer.concat(chunks);
+        const presentationData = await parsePresentation(buffer, presentation.fileName);
+        console.log(`[Re-parse] Parsed ${presentationData.totalSlides} slides for presentation ${presentationId}`);
+        await db
+            .update(presentationScenarios)
+            .set({
+            totalSlides: presentationData.totalSlides,
+            slidesData: presentationData.slides,
+            extractedText: presentationData.extractedText,
+        })
+            .where(eq(presentationScenarios.id, presentationId));
+        res.json({
+            success: true,
+            presentation: {
+                id: presentation.id,
+                topic: presentation.topic,
+                context: presentation.context,
+                fileName: presentation.fileName,
+                fileUrl: presentation.fileUrl,
+                fileType: presentation.fileType,
+                totalSlides: presentationData.totalSlides,
+                slides: presentationData.slides.map(s => ({
+                    slideNumber: s.slideNumber,
+                    title: s.title,
+                    bulletPoints: s.bulletPoints,
+                    rawText: s.rawText,
+                    speakerNotes: s.speakerNotes,
+                })),
+                extractedText: presentationData.extractedText,
+            },
+        });
+    }
+    catch (error) {
+        console.error("Error re-parsing presentation:", error);
+        res.status(500).json({ error: "Failed to re-parse presentation" });
+    }
+});
+avatarSimulator.post("/presentation/:id/feedback", async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        console.log("[Feedback] Request received for user:", userId);
+        if (!userId) {
+            return res.status(401).json({ error: "Authentication required" });
+        }
+        const presentationId = parseInt(req.params.id);
+        const { transcript, sessionId, duration, slidesCovered, totalSlides } = req.body;
+        console.log("[Feedback] presentationId:", presentationId, "sessionId:", sessionId);
+        console.log("[Feedback] transcript length:", transcript?.length || 0);
+        if (!sessionId) {
+            console.log("[Feedback] Missing sessionId");
+            return res.status(400).json({ error: "sessionId is required" });
+        }
+        const [presentation] = await db
+            .select()
+            .from(presentationScenarios)
+            .where(and(eq(presentationScenarios.id, presentationId), eq(presentationScenarios.userId, userId)));
+        if (!presentation) {
+            console.log("[Feedback] Presentation not found");
+            return res.status(404).json({ error: "Presentation not found" });
+        }
+        console.log("[Feedback] Found presentation:", presentation.topic);
+        // Create the presentation session first
+        const [createdSession] = await db
+            .insert(presentationSessions)
+            .values({
+            userId,
+            presentationScenarioId: presentationId,
+            sessionUid: sessionId,
+            duration: duration || 0,
+            slidesCovered: slidesCovered || 0,
+            totalSlides: totalSlides || presentation.totalSlides,
+            transcript: transcript || null,
+        })
+            .returning();
+        console.log("[Feedback] Created session:", createdSession.id);
+        console.log("[Feedback] Generating feedback with OpenAI...");
+        const presentationData = {
+            fileName: presentation.fileName,
+            totalSlides: presentation.totalSlides,
+            slides: presentation.slidesData,
+            extractedText: presentation.extractedText,
+            fileType: presentation.fileType || "pdf",
+        };
+        // Check if pre-computed document analysis is available
+        const preComputedDocAnalysis = presentation.documentAnalysis;
+        console.log("[Feedback] Pre-computed document analysis available:", !!preComputedDocAnalysis);
+        // Run transcript-based assessments in parallel
+        // Only generate document analysis if not pre-computed
+        const [feedback, skillAssessment, documentAnalysis] = await Promise.all([
+            generatePresentationFeedback(transcript || "No transcript available", presentationData, presentation.topic),
+            generatePresentationSkillAssessment(transcript || "No transcript available", presentationData, presentation.topic),
+            preComputedDocAnalysis
+                ? Promise.resolve(preComputedDocAnalysis) // Use pre-computed analysis
+                : generateDocumentAnalysis(presentationData, presentation.topic) // Generate on-the-fly if not available
+        ]);
+        console.log("[Feedback] Feedback generated:", !!feedback);
+        console.log("[Feedback] Skill assessment generated:", !!skillAssessment);
+        console.log("[Feedback] Document analysis:", preComputedDocAnalysis ? "used pre-computed" : "generated on-the-fly");
+        if (!feedback) {
+            return res.status(500).json({ error: "Failed to generate feedback" });
+        }
+        // Save feedback to database
+        const [savedFeedback] = await db
+            .insert(presentationFeedbackTable)
+            .values({
+            presentationSessionId: createdSession.id,
+            presentationScenarioId: presentationId,
+            overallScore: feedback.overallScore,
+            communicationScore: feedback.communication.score,
+            communicationFeedback: feedback.communication.feedback,
+            deliveryScore: feedback.delivery.score,
+            deliveryFeedback: feedback.delivery.feedback,
+            subjectMatterScore: feedback.subjectMatter.score,
+            subjectMatterFeedback: feedback.subjectMatter.feedback,
+            slideCoverage: feedback.slideCoverage,
+            strengths: feedback.strengths,
+            improvements: feedback.improvements,
+            summary: feedback.summary,
+            skillAssessment: skillAssessment,
+            documentAnalysis: documentAnalysis,
+        })
+            .returning();
+        console.log("[Feedback] Saved feedback to database:", savedFeedback.id);
+        res.json({
+            success: true,
+            feedback,
+            skillAssessment,
+            documentAnalysis,
+            sessionId,
+            presentationId,
+            dbSessionId: createdSession.id,
+        });
+    }
+    catch (error) {
+        console.error("Error generating presentation feedback:", error);
+        res.status(500).json({ error: "Failed to generate feedback" });
+    }
+});
+avatarSimulator.get("/presentations", async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ error: "Authentication required" });
+        }
+        const presentations = await db
+            .select({
+            id: presentationScenarios.id,
+            topic: presentationScenarios.topic,
+            fileName: presentationScenarios.fileName,
+            totalSlides: presentationScenarios.totalSlides,
+            createdAt: presentationScenarios.createdAt,
+        })
+            .from(presentationScenarios)
+            .where(eq(presentationScenarios.userId, userId))
+            .orderBy(sql `${presentationScenarios.createdAt} DESC`);
+        res.json({ success: true, presentations });
+    }
+    catch (error) {
+        console.error("Error fetching presentations:", error);
+        res.status(500).json({ error: "Failed to fetch presentations" });
+    }
+});
+// Get presentation practice sessions with feedback for results page
+avatarSimulator.get("/presentation-results", async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ error: "Authentication required" });
+        }
+        const sessions = await db
+            .select({
+            sessionId: presentationSessions.id,
+            sessionUid: presentationSessions.sessionUid,
+            duration: presentationSessions.duration,
+            slidesCovered: presentationSessions.slidesCovered,
+            totalSlides: presentationSessions.totalSlides,
+            createdAt: presentationSessions.createdAt,
+            presentationId: presentationScenarios.id,
+            topic: presentationScenarios.topic,
+            fileName: presentationScenarios.fileName,
+            overallScore: presentationFeedbackTable.overallScore,
+            communicationScore: presentationFeedbackTable.communicationScore,
+            deliveryScore: presentationFeedbackTable.deliveryScore,
+            subjectMatterScore: presentationFeedbackTable.subjectMatterScore,
+            summary: presentationFeedbackTable.summary,
+        })
+            .from(presentationSessions)
+            .innerJoin(presentationScenarios, eq(presentationSessions.presentationScenarioId, presentationScenarios.id))
+            .leftJoin(presentationFeedbackTable, eq(presentationFeedbackTable.presentationSessionId, presentationSessions.id))
+            .where(eq(presentationSessions.userId, userId))
+            .orderBy(sql `${presentationSessions.createdAt} DESC`);
+        res.json({
+            success: true,
+            sessions: sessions.map(s => ({
+                id: s.sessionId,
+                sessionUid: s.sessionUid,
+                duration: s.duration,
+                slidesCovered: s.slidesCovered,
+                totalSlides: s.totalSlides,
+                createdAt: s.createdAt,
+                presentation: {
+                    id: s.presentationId,
+                    topic: s.topic,
+                    fileName: s.fileName,
+                },
+                feedback: s.overallScore ? {
+                    overallScore: s.overallScore,
+                    communicationScore: s.communicationScore,
+                    deliveryScore: s.deliveryScore,
+                    subjectMatterScore: s.subjectMatterScore,
+                    summary: s.summary,
+                } : null,
+            }))
+        });
+    }
+    catch (error) {
+        console.error("Error fetching presentation results:", error);
+        res.status(500).json({ error: "Failed to fetch presentation results" });
+    }
+});
+// Get feedback for a specific session by session UID
+avatarSimulator.get("/presentation-feedback/:sessionUid", async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ error: "Authentication required" });
+        }
+        const { sessionUid } = req.params;
+        const [session] = await db
+            .select({
+            sessionId: presentationSessions.id,
+            sessionUid: presentationSessions.sessionUid,
+            duration: presentationSessions.duration,
+            slidesCovered: presentationSessions.slidesCovered,
+            totalSlides: presentationSessions.totalSlides,
+            createdAt: presentationSessions.createdAt,
+            presentationId: presentationScenarios.id,
+            topic: presentationScenarios.topic,
+            fileName: presentationScenarios.fileName,
+            overallScore: presentationFeedbackTable.overallScore,
+            communicationScore: presentationFeedbackTable.communicationScore,
+            communicationFeedback: presentationFeedbackTable.communicationFeedback,
+            deliveryScore: presentationFeedbackTable.deliveryScore,
+            deliveryFeedback: presentationFeedbackTable.deliveryFeedback,
+            subjectMatterScore: presentationFeedbackTable.subjectMatterScore,
+            subjectMatterFeedback: presentationFeedbackTable.subjectMatterFeedback,
+            summary: presentationFeedbackTable.summary,
+            strengths: presentationFeedbackTable.strengths,
+            improvements: presentationFeedbackTable.improvements,
+            skillAssessment: presentationFeedbackTable.skillAssessment,
+            documentAnalysis: presentationFeedbackTable.documentAnalysis,
+        })
+            .from(presentationSessions)
+            .innerJoin(presentationScenarios, eq(presentationSessions.presentationScenarioId, presentationScenarios.id))
+            .leftJoin(presentationFeedbackTable, eq(presentationFeedbackTable.presentationSessionId, presentationSessions.id))
+            .where(and(eq(presentationSessions.sessionUid, sessionUid), eq(presentationSessions.userId, userId)))
+            .limit(1);
+        if (!session) {
+            return res.status(404).json({ error: "Session not found" });
+        }
+        res.json({
+            success: true,
+            feedback: session.overallScore ? {
+                overallScore: session.overallScore,
+                communication: {
+                    score: session.communicationScore,
+                    feedback: session.communicationFeedback,
+                },
+                delivery: {
+                    score: session.deliveryScore,
+                    feedback: session.deliveryFeedback,
+                },
+                subjectMatter: {
+                    score: session.subjectMatterScore,
+                    feedback: session.subjectMatterFeedback,
+                },
+                summary: session.summary,
+                strengths: session.strengths,
+                improvements: session.improvements,
+            } : null,
+            skillAssessment: session.skillAssessment,
+            documentAnalysis: session.documentAnalysis,
+            sessionId: session.sessionUid,
+            presentationId: session.presentationId,
+            duration: session.duration,
+            slidesCovered: session.slidesCovered,
+            totalSlides: session.totalSlides,
+            presentationTopic: session.topic,
+        });
+    }
+    catch (error) {
+        console.error("Error fetching presentation feedback:", error);
+        res.status(500).json({ error: "Failed to fetch feedback" });
+    }
+});
+// =====================
+// Admin Endpoints
+// =====================
+// Run SQL migrations on development database
+avatarSimulator.post("/admin/run-sql-migrations", async (req, res) => {
+    try {
+        const { adminKey } = req.body;
+        if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+            return res.status(401).json({ success: false, message: "Invalid admin key" });
+        }
+        const fs = await import("fs");
+        const path = await import("path");
+        const migrationsDir = path.join(process.cwd(), "database", "migrations");
+        const migrationFiles = fs.readdirSync(migrationsDir)
+            .filter((file) => file.endsWith(".sql"))
+            .sort();
+        const details = [];
+        const errors = [];
+        for (const file of migrationFiles) {
+            const filePath = path.join(migrationsDir, file);
+            const sql = fs.readFileSync(filePath, "utf8");
+            try {
+                await pool.query(sql);
+                details.push(`✓ ${file}`);
+            }
+            catch (err) {
+                if (err.message.includes("already exists") || err.message.includes("does not exist")) {
+                    details.push(`⚠ ${file} - Objects already exist`);
+                }
+                else {
+                    errors.push(`✗ ${file}: ${err.message}`);
+                }
+            }
+        }
+        res.json({
+            success: errors.length === 0,
+            message: errors.length === 0 ? "SQL migrations completed successfully" : "Some migrations had errors",
+            details,
+            errors
+        });
+    }
+    catch (error) {
+        console.error("Error running SQL migrations:", error);
+        res.status(500).json({ success: false, message: "Failed to run SQL migrations", details: [error.message] });
+    }
+});
+// Run seed files on development database
+avatarSimulator.post("/admin/run-sql-seeds", async (req, res) => {
+    try {
+        const { adminKey } = req.body;
+        if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+            return res.status(401).json({ success: false, message: "Invalid admin key" });
+        }
+        const fs = await import("fs");
+        const path = await import("path");
+        const seedsDir = path.join(process.cwd(), "database", "seeds");
+        const seedFiles = ["init.sql", "cultural_presets.sql", "avatars.sql", "personas.sql", "tones.sql", "scenarios.sql"];
+        const details = [];
+        const errors = [];
+        for (const file of seedFiles) {
+            const filePath = path.join(seedsDir, file);
+            if (!fs.existsSync(filePath)) {
+                details.push(`⚠ ${file} not found`);
+                continue;
+            }
+            const sql = fs.readFileSync(filePath, "utf8");
+            try {
+                await pool.query(sql);
+                details.push(`✓ ${file}`);
+            }
+            catch (err) {
+                if (err.message.includes("duplicate key") || err.message.includes("already exists")) {
+                    details.push(`⚠ ${file} - Data already exists`);
+                }
+                else {
+                    errors.push(`✗ ${file}: ${err.message}`);
+                }
+            }
+        }
+        res.json({
+            success: errors.length === 0,
+            message: errors.length === 0 ? "Seeds completed successfully" : "Some seeds had errors",
+            details,
+            errors
+        });
+    }
+    catch (error) {
+        console.error("Error running seeds:", error);
+        res.status(500).json({ success: false, message: "Failed to run seeds", details: [error.message] });
+    }
+});
+// Run full setup (migrations + seeds) on development database
+avatarSimulator.post("/admin/run-full-setup", async (req, res) => {
+    try {
+        const { adminKey } = req.body;
+        if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+            return res.status(401).json({ success: false, message: "Invalid admin key" });
+        }
+        const fs = await import("fs");
+        const path = await import("path");
+        const details = [];
+        const errors = [];
+        // Run migrations
+        details.push("=== Running Migrations ===");
+        const migrationsDir = path.join(process.cwd(), "database", "migrations");
+        const migrationFiles = fs.readdirSync(migrationsDir)
+            .filter((file) => file.endsWith(".sql"))
+            .sort();
+        for (const file of migrationFiles) {
+            const filePath = path.join(migrationsDir, file);
+            const sql = fs.readFileSync(filePath, "utf8");
+            try {
+                await pool.query(sql);
+                details.push(`✓ ${file}`);
+            }
+            catch (err) {
+                if (err.message.includes("already exists") || err.message.includes("does not exist")) {
+                    details.push(`⚠ ${file} - Objects already exist`);
+                }
+                else {
+                    errors.push(`✗ ${file}: ${err.message}`);
+                }
+            }
+        }
+        // Run seeds
+        details.push("");
+        details.push("=== Running Seeds ===");
+        const seedsDir = path.join(process.cwd(), "database", "seeds");
+        const seedFiles = ["init.sql", "cultural_presets.sql", "avatars.sql", "personas.sql", "tones.sql", "scenarios.sql"];
+        for (const file of seedFiles) {
+            const filePath = path.join(seedsDir, file);
+            if (!fs.existsSync(filePath)) {
+                details.push(`⚠ ${file} not found`);
+                continue;
+            }
+            const sql = fs.readFileSync(filePath, "utf8");
+            try {
+                await pool.query(sql);
+                details.push(`✓ ${file}`);
+            }
+            catch (err) {
+                if (err.message.includes("duplicate key") || err.message.includes("already exists")) {
+                    details.push(`⚠ ${file} - Data already exists`);
+                }
+                else {
+                    errors.push(`✗ ${file}: ${err.message}`);
+                }
+            }
+        }
+        res.json({
+            success: errors.length === 0,
+            message: errors.length === 0 ? "Full setup completed successfully" : "Setup completed with some errors",
+            details,
+            errors
+        });
+    }
+    catch (error) {
+        console.error("Error running full setup:", error);
+        res.status(500).json({ success: false, message: "Failed to run full setup", details: [error.message] });
+    }
+});
+avatarSimulator.post("/admin/seed-production", async (req, res) => {
+    try {
+        const { adminKey, includeTransactionalData } = req.body;
+        console.log("[Admin Seed] Request received, includeTransactionalData:", includeTransactionalData);
+        if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+            console.log("[Admin Seed] Invalid admin key");
+            return res.status(401).json({ success: false, message: "Invalid admin key" });
+        }
+        const PRODUCTION_DATABASE_URL = process.env.PRODUCTION_DATABASE_URL;
+        if (!PRODUCTION_DATABASE_URL) {
+            console.log("[Admin Seed] PRODUCTION_DATABASE_URL not configured");
+            return res.status(500).json({ success: false, message: "PRODUCTION_DATABASE_URL not configured" });
+        }
+        console.log("[Admin Seed] Connecting to production database...");
+        const fs = await import("fs");
+        const path = await import("path");
+        const { Pool, neonConfig } = await import("@neondatabase/serverless");
+        const ws = await import("ws");
+        neonConfig.webSocketConstructor = ws.default;
+        const prodPool = new Pool({ connectionString: PRODUCTION_DATABASE_URL });
+        const details = [];
+        const errors = [];
+        console.log("[Admin Seed] Starting seed operations...");
+        // Run seed SQL files (uses ON CONFLICT to preserve existing data)
+        details.push("=== Running Seed Files ===");
+        const seedsDir = path.join(process.cwd(), "database", "seeds");
+        const seedFiles = ["init.sql", "cultural_presets.sql", "avatars.sql", "personas.sql", "tones.sql", "scenarios.sql"];
+        for (const file of seedFiles) {
+            const filePath = path.join(seedsDir, file);
+            if (!fs.existsSync(filePath)) {
+                details.push(`⚠ ${file} not found`);
+                continue;
+            }
+            const sql = fs.readFileSync(filePath, "utf8");
+            try {
+                await prodPool.query(sql);
+                details.push(`✓ ${file}`);
+            }
+            catch (err) {
+                if (err.message.includes("duplicate key") || err.message.includes("already exists")) {
+                    details.push(`⚠ ${file} - Data already exists (skipped duplicates)`);
+                }
+                else {
+                    errors.push(`✗ ${file}: ${err.message}`);
+                }
+            }
+        }
+        // If includeTransactionalData is true, copy transactional data from dev to prod
+        if (includeTransactionalData) {
+            details.push("");
+            details.push("=== Migrating Transactional Data from Development ===");
+            const transactionalTables = [
+                "auth_users", "users", "user_roles",
+                "sessions", "ai_sessions", "streaming_sessions", "heygen_sessions",
+                "transcripts", "transcript_messages",
+                "analysis_results", "ai_session_analysis", "skill_assessment_summary",
+                "presentation_scenarios", "presentation_sessions", "presentation_feedback",
+                "custom_scenarios", "custom_scenario_skill_mappings",
+                "api_usage_events", "api_cost_daily_rollup",
+                "user_login_events", "session_journey_events",
+                "budget_alerts", "heygen_queue", "user_media_preferences"
+            ];
+            for (const tableName of transactionalTables) {
+                try {
+                    // Get data from development
+                    const devResult = await pool.query(`SELECT * FROM ${tableName}`);
+                    if (devResult.rows.length === 0) {
+                        details.push(`○ ${tableName} - No data in development`);
+                        continue;
+                    }
+                    // Get column names from the first row
+                    const columns = Object.keys(devResult.rows[0]);
+                    const columnsList = columns.join(", ");
+                    let insertedCount = 0;
+                    let skippedCount = 0;
+                    for (const row of devResult.rows) {
+                        const values = columns.map((_, i) => `$${i + 1}`).join(", ");
+                        const rowValues = columns.map(col => row[col]);
+                        // Use ON CONFLICT DO NOTHING to preserve existing data
+                        const insertSQL = `INSERT INTO ${tableName} (${columnsList}) VALUES (${values}) ON CONFLICT DO NOTHING`;
+                        try {
+                            const result = await prodPool.query(insertSQL, rowValues);
+                            if (result.rowCount && result.rowCount > 0) {
+                                insertedCount++;
+                            }
+                            else {
+                                skippedCount++;
+                            }
+                        }
+                        catch (rowErr) {
+                            // Skip individual row errors silently
+                            skippedCount++;
+                        }
+                    }
+                    details.push(`✓ ${tableName} - ${insertedCount} inserted, ${skippedCount} skipped (existing)`);
+                }
+                catch (err) {
+                    if (err.message.includes("does not exist")) {
+                        details.push(`⚠ ${tableName} - Table does not exist`);
+                    }
+                    else {
+                        errors.push(`✗ ${tableName}: ${err.message}`);
+                    }
+                }
+            }
+        }
+        await prodPool.end();
+        res.json({
+            success: errors.length === 0,
+            message: errors.length === 0 ? "Production database seeded successfully" : "Seeding completed with some errors",
+            details,
+            errors
+        });
+    }
+    catch (error) {
+        console.error("Error seeding production:", error);
+        res.status(500).json({ success: false, message: "Failed to seed production database", details: [error.message] });
+    }
+});
+avatarSimulator.post("/admin/migrate-production", async (req, res) => {
+    try {
+        const { adminKey } = req.body;
+        if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+            return res.status(401).json({ success: false, message: "Invalid admin key" });
+        }
+        const PRODUCTION_DATABASE_URL = process.env.PRODUCTION_DATABASE_URL;
+        if (!PRODUCTION_DATABASE_URL) {
+            return res.status(500).json({ success: false, message: "PRODUCTION_DATABASE_URL not configured" });
+        }
+        const fs = await import("fs");
+        const path = await import("path");
+        const { Pool, neonConfig } = await import("@neondatabase/serverless");
+        const ws = await import("ws");
+        neonConfig.webSocketConstructor = ws.default;
+        const prodPool = new Pool({ connectionString: PRODUCTION_DATABASE_URL });
+        const migrationsDir = path.join(process.cwd(), "database", "migrations");
+        const migrationFiles = fs.readdirSync(migrationsDir)
+            .filter((file) => file.endsWith(".sql"))
+            .sort();
+        const details = [];
+        const errors = [];
+        for (const file of migrationFiles) {
+            const filePath = path.join(migrationsDir, file);
+            const sql = fs.readFileSync(filePath, "utf8");
+            try {
+                await prodPool.query(sql);
+                details.push(`✓ ${file}`);
+            }
+            catch (err) {
+                if (err.message.includes("already exists") || err.message.includes("does not exist")) {
+                    details.push(`⚠ ${file} - Objects already exist`);
+                }
+                else {
+                    errors.push(`✗ ${file}: ${err.message}`);
+                }
+            }
+        }
+        await prodPool.end();
+        res.json({
+            success: errors.length === 0,
+            message: errors.length === 0 ? "Production schema migration completed" : "Migration completed with some errors",
+            details,
+            errors
+        });
+    }
+    catch (error) {
+        console.error("Error migrating production:", error);
+        res.status(500).json({ success: false, message: "Failed to migrate production database", details: [error.message] });
+    }
+});
+avatarSimulator.post("/admin/full-data-migration", async (req, res) => {
+    try {
+        const { adminKey } = req.body;
+        console.log("[Full Migration] Request received");
+        if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+            console.log("[Full Migration] Invalid admin key");
+            return res.status(401).json({ success: false, message: "Invalid admin key" });
+        }
+        const PRODUCTION_DATABASE_URL = process.env.PRODUCTION_DATABASE_URL;
+        if (!PRODUCTION_DATABASE_URL) {
+            console.log("[Full Migration] PRODUCTION_DATABASE_URL not configured");
+            return res.status(500).json({ success: false, message: "PRODUCTION_DATABASE_URL not configured" });
+        }
+        const { Pool, neonConfig } = await import("@neondatabase/serverless");
+        const ws = await import("ws");
+        neonConfig.webSocketConstructor = ws.default;
+        const prodPool = new Pool({ connectionString: PRODUCTION_DATABASE_URL });
+        const prodClient = await prodPool.connect();
+        const devClient = await pool.connect();
+        const details = [];
+        const errors = [];
+        console.log("[Full Migration] Step 1: Creating missing tables in production...");
+        const createTablesSQL = `
+      -- Ensure all required tables exist with proper structure
+      
+      -- Sessions table (for auth)
+      CREATE TABLE IF NOT EXISTS sessions (
+        sid VARCHAR PRIMARY KEY,
+        sess JSONB NOT NULL,
+        expire TIMESTAMP NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON sessions(expire);
+      
+      -- Auth users table
+      CREATE TABLE IF NOT EXISTS auth_users (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        username VARCHAR NOT NULL UNIQUE,
+        email VARCHAR UNIQUE,
+        password_hash VARCHAR NOT NULL,
+        first_name VARCHAR,
+        last_name VARCHAR,
+        profile_image_url VARCHAR,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Legacy users table
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        email TEXT NOT NULL UNIQUE,
+        display_name TEXT,
+        is_active BOOLEAN NOT NULL DEFAULT true,
+        auth_user_id VARCHAR REFERENCES auth_users(id),
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP
+      );
+      
+      -- Skills table
+      CREATE TABLE IF NOT EXISTS skills (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL,
+        definition TEXT NOT NULL,
+        level INTEGER NOT NULL,
+        parent_skill_id INTEGER,
+        category TEXT DEFAULT 'General',
+        is_active BOOLEAN NOT NULL DEFAULT true,
+        framework_mapping TEXT,
+        reference_source TEXT,
+        assessment_dimensions TEXT,
+        scoring_model_logic TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP
+      );
+      
+      -- Avatars table
+      CREATE TABLE IF NOT EXISTS avatars (
+        id VARCHAR PRIMARY KEY,
+        name VARCHAR,
+        look VARCHAR,
+        ethnicity VARCHAR,
+        gender VARCHAR,
+        role VARCHAR,
+        image_url TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Tones table
+      CREATE TABLE IF NOT EXISTS tones (
+        id SERIAL PRIMARY KEY,
+        tone VARCHAR NOT NULL,
+        description TEXT
+      );
+      
+      -- Personas table
+      CREATE TABLE IF NOT EXISTS personas (
+        id SERIAL PRIMARY KEY,
+        persona VARCHAR NOT NULL,
+        description TEXT
+      );
+      
+      -- Scenarios table
+      CREATE TABLE IF NOT EXISTS scenarios (
+        id SERIAL PRIMARY KEY,
+        skill_id INTEGER REFERENCES skills(id),
+        name VARCHAR NOT NULL,
+        description TEXT,
+        context TEXT,
+        instructions TEXT,
+        avatar_name VARCHAR,
+        avatar_role VARCHAR,
+        difficulty TEXT,
+        duration NUMERIC
+      );
+      
+      -- Scenario skills junction table
+      CREATE TABLE IF NOT EXISTS scenario_skills (
+        scenario_id INTEGER REFERENCES scenarios(id) ON DELETE CASCADE NOT NULL,
+        skill_id INTEGER REFERENCES skills(id) ON DELETE CASCADE NOT NULL,
+        PRIMARY KEY (scenario_id, skill_id)
+      );
+      
+      -- Cultural style presets
+      CREATE TABLE IF NOT EXISTS cultural_style_presets (
+        id VARCHAR PRIMARY KEY,
+        name VARCHAR NOT NULL,
+        user_facing_description TEXT,
+        globesmart_profile JSONB,
+        behavior_rules JSONB,
+        typical_user_learnings JSONB,
+        accent_guidance JSONB,
+        is_default BOOLEAN DEFAULT false,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Roleplay session table
+      CREATE TABLE IF NOT EXISTS roleplay_session (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        avatar_id VARCHAR NOT NULL REFERENCES avatars(id),
+        knowledge_id VARCHAR,
+        transcript_id VARCHAR,
+        cultural_preset_id VARCHAR,
+        start_time TIMESTAMP DEFAULT NOW() NOT NULL,
+        end_time TIMESTAMP DEFAULT NOW(),
+        duration INTEGER,
+        audio_url VARCHAR,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- AI sessions table
+      CREATE TABLE IF NOT EXISTS ai_sessions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        session_type TEXT NOT NULL,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE,
+        avatar_id VARCHAR,
+        knowledge_id VARCHAR,
+        start_time TIMESTAMP DEFAULT NOW() NOT NULL,
+        end_time TIMESTAMP,
+        duration INTEGER,
+        audio_url TEXT,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
+      
+      -- Custom scenarios table
+      CREATE TABLE IF NOT EXISTS custom_scenarios (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR NOT NULL REFERENCES auth_users(id) ON DELETE CASCADE,
+        title TEXT NOT NULL,
+        user_description TEXT NOT NULL,
+        blueprint JSONB NOT NULL,
+        user_role TEXT,
+        avatar_role TEXT,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
+      
+      -- Transcripts table
+      CREATE TABLE IF NOT EXISTS transcripts (
+        id VARCHAR PRIMARY KEY,
+        avatar_id VARCHAR NOT NULL,
+        knowledge_id VARCHAR,
+        context TEXT,
+        instructions TEXT,
+        scenario TEXT,
+        skill TEXT,
+        duration INTEGER,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW(),
+        user_id INTEGER NOT NULL REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE,
+        session_id INTEGER NOT NULL REFERENCES roleplay_session(id) ON DELETE CASCADE,
+        ai_session_id UUID REFERENCES ai_sessions(id) ON UPDATE CASCADE ON DELETE CASCADE,
+        skill_id INTEGER,
+        scenario_id INTEGER REFERENCES scenarios(id) ON DELETE SET NULL,
+        session_type VARCHAR DEFAULT 'streaming_avatar',
+        custom_scenario_id INTEGER REFERENCES custom_scenarios(id) ON DELETE SET NULL,
+        cultural_preset_id VARCHAR
+      );
+      
+      -- Transcript messages table
+      CREATE TABLE IF NOT EXISTS transcript_messages (
+        id TEXT PRIMARY KEY,
+        transcript_id TEXT NOT NULL REFERENCES transcripts(id),
+        messages JSONB NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
+      
+      -- AI session analysis table
+      CREATE TABLE IF NOT EXISTS ai_session_analysis (
+        id SERIAL PRIMARY KEY,
+        session_id INTEGER NOT NULL REFERENCES roleplay_session(id),
+        session_type TEXT DEFAULT 'audio_roleplay' NOT NULL,
+        transcript_id VARCHAR REFERENCES transcripts(id),
+        overall_score INTEGER NOT NULL,
+        user_talk_time REAL NOT NULL,
+        other_talk_time REAL NOT NULL,
+        user_talk_percentage REAL NOT NULL,
+        filler_words JSONB NOT NULL,
+        weak_words JSONB NOT NULL,
+        sentence_openers JSONB NOT NULL,
+        active_listening BOOLEAN NOT NULL,
+        engagement_level INTEGER NOT NULL,
+        questions_asked INTEGER NOT NULL,
+        acknowledgments INTEGER NOT NULL,
+        interruptions INTEGER NOT NULL,
+        average_pacing REAL NOT NULL,
+        pacing_variation JSONB NOT NULL,
+        tone JSONB NOT NULL,
+        pause_count INTEGER NOT NULL,
+        average_pause_length REAL NOT NULL,
+        strengths JSONB NOT NULL,
+        growth_areas JSONB NOT NULL,
+        follow_up_questions JSONB NOT NULL,
+        summary TEXT NOT NULL,
+        pronunciation_issues JSONB NOT NULL,
+        pronunciation_suggestions JSONB NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
+      
+      -- Skill dimension assessments table
+      CREATE TABLE IF NOT EXISTS skill_dimension_assessments (
+        id SERIAL PRIMARY KEY,
+        session_id INTEGER NOT NULL REFERENCES roleplay_session(id) ON DELETE CASCADE,
+        skill_id INTEGER NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
+        dimension_name TEXT NOT NULL,
+        score REAL NOT NULL,
+        max_score REAL NOT NULL DEFAULT 5,
+        evidence TEXT,
+        framework_reference TEXT,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
+      
+      -- Skill assessment summary table
+      CREATE TABLE IF NOT EXISTS skill_assessment_summary (
+        id SERIAL PRIMARY KEY,
+        session_id INTEGER NOT NULL REFERENCES roleplay_session(id) ON DELETE CASCADE,
+        skill_id INTEGER NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
+        overall_skill_score REAL NOT NULL,
+        framework_used TEXT,
+        assessment_notes TEXT,
+        strength_dimensions JSONB,
+        improvement_dimensions JSONB,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
+      
+      -- HeyGen sessions table
+      CREATE TABLE IF NOT EXISTS heygen_sessions (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        scenario_id INTEGER REFERENCES scenarios(id) ON DELETE SET NULL,
+        avatar_id VARCHAR REFERENCES avatars(id),
+        heygen_session_id VARCHAR,
+        cultural_preset_id VARCHAR,
+        status TEXT NOT NULL DEFAULT 'active',
+        mode TEXT NOT NULL DEFAULT 'voice',
+        quality TEXT DEFAULT 'low',
+        started_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        ended_at TIMESTAMP,
+        last_seen_at TIMESTAMP DEFAULT NOW(),
+        session_duration_sec INTEGER DEFAULT 360,
+        actual_duration_sec INTEGER,
+        end_reason TEXT,
+        metadata JSONB,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- HeyGen queue table
+      CREATE TABLE IF NOT EXISTS heygen_queue (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        scenario_id INTEGER REFERENCES scenarios(id) ON DELETE SET NULL,
+        avatar_id VARCHAR REFERENCES avatars(id),
+        status TEXT NOT NULL DEFAULT 'queued',
+        mode TEXT NOT NULL DEFAULT 'voice',
+        priority SMALLINT DEFAULT 0,
+        queued_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        assigned_at TIMESTAMP,
+        expires_at TIMESTAMP,
+        assigned_session_id INTEGER REFERENCES heygen_sessions(id) ON DELETE SET NULL,
+        estimated_wait_sec INTEGER,
+        metadata JSONB,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Custom scenario skill mappings table
+      CREATE TABLE IF NOT EXISTS custom_scenario_skill_mappings (
+        id SERIAL PRIMARY KEY,
+        custom_scenario_id INTEGER NOT NULL REFERENCES custom_scenarios(id) ON DELETE CASCADE,
+        skill_id INTEGER NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
+        confidence_score REAL NOT NULL DEFAULT 0,
+        ai_rationale TEXT,
+        is_confirmed BOOLEAN NOT NULL DEFAULT false,
+        confirmed_by_user_id VARCHAR REFERENCES auth_users(id) ON DELETE SET NULL,
+        dimension_weights JSONB,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
+      
+      -- Presentation scenarios table
+      CREATE TABLE IF NOT EXISTS presentation_scenarios (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR NOT NULL REFERENCES auth_users(id) ON DELETE CASCADE,
+        title TEXT NOT NULL,
+        topic TEXT NOT NULL,
+        context TEXT,
+        file_name TEXT NOT NULL,
+        file_url TEXT,
+        file_type TEXT,
+        total_slides INTEGER NOT NULL,
+        slides_data JSONB NOT NULL,
+        extracted_text TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
+      
+      -- Presentation sessions table
+      CREATE TABLE IF NOT EXISTS presentation_sessions (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR NOT NULL REFERENCES auth_users(id) ON DELETE CASCADE,
+        presentation_scenario_id INTEGER NOT NULL REFERENCES presentation_scenarios(id) ON DELETE CASCADE,
+        session_uid TEXT NOT NULL UNIQUE,
+        duration INTEGER DEFAULT 0,
+        slides_covered INTEGER DEFAULT 0,
+        total_slides INTEGER DEFAULT 0,
+        transcript TEXT,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
+      
+      -- Presentation feedback table
+      CREATE TABLE IF NOT EXISTS presentation_feedback (
+        id SERIAL PRIMARY KEY,
+        presentation_session_id INTEGER NOT NULL REFERENCES presentation_sessions(id) ON DELETE CASCADE,
+        presentation_scenario_id INTEGER NOT NULL REFERENCES presentation_scenarios(id) ON DELETE CASCADE,
+        overall_score REAL NOT NULL,
+        communication_score REAL NOT NULL,
+        communication_feedback TEXT,
+        delivery_score REAL NOT NULL,
+        delivery_feedback TEXT,
+        subject_matter_score REAL NOT NULL,
+        subject_matter_feedback TEXT,
+        slide_coverage JSONB,
+        strengths JSONB,
+        improvements JSONB,
+        summary TEXT,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
+      
+      -- Admin settings table
+      CREATE TABLE IF NOT EXISTS admin_settings (
+        id SERIAL PRIMARY KEY,
+        setting_key TEXT NOT NULL UNIQUE,
+        setting_value TEXT,
+        setting_type TEXT DEFAULT 'string',
+        description TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Budget guards table
+      CREATE TABLE IF NOT EXISTS budget_guards (
+        id SERIAL PRIMARY KEY,
+        guard_name TEXT NOT NULL,
+        description TEXT,
+        daily_limit NUMERIC,
+        monthly_limit NUMERIC,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Role kits table
+      CREATE TABLE IF NOT EXISTS role_kits (
+        id SERIAL PRIMARY KEY,
+        role_name TEXT NOT NULL,
+        role_category TEXT,
+        description TEXT,
+        key_skills JSONB,
+        typical_questions JSONB,
+        evaluation_criteria JSONB,
+        difficulty_level TEXT,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Interview rubrics table
+      CREATE TABLE IF NOT EXISTS interview_rubrics (
+        id SERIAL PRIMARY KEY,
+        dimension_name TEXT NOT NULL,
+        dimension_key TEXT NOT NULL UNIQUE,
+        description TEXT,
+        scoring_criteria JSONB,
+        weight REAL DEFAULT 1.0,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Role archetypes table
+      CREATE TABLE IF NOT EXISTS role_archetypes (
+        id SERIAL PRIMARY KEY,
+        archetype_key TEXT NOT NULL UNIQUE,
+        display_name TEXT NOT NULL,
+        description TEXT,
+        category TEXT,
+        key_traits JSONB,
+        interview_focus JSONB,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Coding exercises table
+      CREATE TABLE IF NOT EXISTS coding_exercises (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT,
+        difficulty TEXT,
+        category TEXT,
+        language TEXT,
+        starter_code TEXT,
+        solution TEXT,
+        test_cases JSONB,
+        hints JSONB,
+        time_limit INTEGER,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Case templates table
+      CREATE TABLE IF NOT EXISTS case_templates (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT,
+        category TEXT,
+        difficulty TEXT,
+        scenario TEXT,
+        expected_approach JSONB,
+        evaluation_criteria JSONB,
+        hints JSONB,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Exercise rubrics table
+      CREATE TABLE IF NOT EXISTS exercise_rubrics (
+        id SERIAL PRIMARY KEY,
+        exercise_type TEXT NOT NULL,
+        dimension_name TEXT NOT NULL,
+        description TEXT,
+        scoring_criteria JSONB,
+        weight REAL DEFAULT 1.0,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Companies table
+      CREATE TABLE IF NOT EXISTS companies (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        industry TEXT,
+        size TEXT,
+        description TEXT,
+        culture JSONB,
+        interview_style JSONB,
+        typical_questions JSONB,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Job targets table
+      CREATE TABLE IF NOT EXISTS job_targets (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR REFERENCES auth_users(id) ON DELETE CASCADE,
+        company_id INTEGER REFERENCES companies(id) ON DELETE SET NULL,
+        role_title TEXT,
+        job_description TEXT,
+        requirements JSONB,
+        status TEXT DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Question patterns table
+      CREATE TABLE IF NOT EXISTS question_patterns (
+        id SERIAL PRIMARY KEY,
+        pattern_type TEXT NOT NULL,
+        category TEXT,
+        question_template TEXT NOT NULL,
+        follow_up_templates JSONB,
+        evaluation_focus JSONB,
+        difficulty TEXT,
+        role_relevance JSONB,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Role interview structure defaults table
+      CREATE TABLE IF NOT EXISTS role_interview_structure_defaults (
+        id SERIAL PRIMARY KEY,
+        role_archetype_id INTEGER REFERENCES role_archetypes(id) ON DELETE CASCADE,
+        round_number INTEGER NOT NULL,
+        round_type TEXT NOT NULL,
+        duration_minutes INTEGER,
+        focus_areas JSONB,
+        typical_questions JSONB,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Role task blueprints table
+      CREATE TABLE IF NOT EXISTS role_task_blueprints (
+        id SERIAL PRIMARY KEY,
+        role_archetype_id INTEGER REFERENCES role_archetypes(id) ON DELETE CASCADE,
+        task_type TEXT NOT NULL,
+        description TEXT,
+        evaluation_criteria JSONB,
+        time_allocation INTEGER,
+        priority INTEGER DEFAULT 1,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Company role blueprints table
+      CREATE TABLE IF NOT EXISTS company_role_blueprints (
+        id SERIAL PRIMARY KEY,
+        company_id INTEGER REFERENCES companies(id) ON DELETE CASCADE,
+        role_archetype_id INTEGER REFERENCES role_archetypes(id) ON DELETE CASCADE,
+        custom_requirements JSONB,
+        interview_format JSONB,
+        evaluation_weights JSONB,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- User documents table
+      CREATE TABLE IF NOT EXISTS user_documents (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR NOT NULL REFERENCES auth_users(id) ON DELETE CASCADE,
+        document_type TEXT NOT NULL,
+        file_name TEXT,
+        file_url TEXT,
+        extracted_text TEXT,
+        parsed_data JSONB,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- User profile extracted table
+      CREATE TABLE IF NOT EXISTS user_profile_extracted (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR NOT NULL REFERENCES auth_users(id) ON DELETE CASCADE,
+        profile_data JSONB,
+        skills JSONB,
+        experience JSONB,
+        education JSONB,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Interview configs table
+      CREATE TABLE IF NOT EXISTS interview_configs (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR NOT NULL REFERENCES auth_users(id) ON DELETE CASCADE,
+        role_kit_id INTEGER REFERENCES role_kits(id) ON DELETE SET NULL,
+        company_id INTEGER REFERENCES companies(id) ON DELETE SET NULL,
+        config_data JSONB,
+        status TEXT DEFAULT 'draft',
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Interview plans table
+      CREATE TABLE IF NOT EXISTS interview_plans (
+        id SERIAL PRIMARY KEY,
+        interview_config_id INTEGER REFERENCES interview_configs(id) ON DELETE CASCADE,
+        plan_data JSONB NOT NULL,
+        questions JSONB,
+        focus_areas JSONB,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Interview sessions table
+      CREATE TABLE IF NOT EXISTS interview_sessions (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR NOT NULL REFERENCES auth_users(id) ON DELETE CASCADE,
+        interview_plan_id INTEGER REFERENCES interview_plans(id) ON DELETE SET NULL,
+        session_uid TEXT UNIQUE,
+        duration INTEGER,
+        transcript TEXT,
+        status TEXT DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Interview analysis table
+      CREATE TABLE IF NOT EXISTS interview_analysis (
+        id SERIAL PRIMARY KEY,
+        interview_session_id INTEGER NOT NULL REFERENCES interview_sessions(id) ON DELETE CASCADE,
+        overall_score REAL,
+        dimension_scores JSONB,
+        feedback JSONB,
+        strengths JSONB,
+        improvements JSONB,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      
+      -- Interview artifacts table
+      CREATE TABLE IF NOT EXISTS interview_artifacts (
+        id SERIAL PRIMARY KEY,
+        interview_session_id INTEGER NOT NULL REFERENCES interview_sessions(id) ON DELETE CASCADE,
+        artifact_type TEXT NOT NULL,
+        artifact_data JSONB,
+        file_url TEXT,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `;
+        try {
+            await prodClient.query(createTablesSQL);
+            details.push("All tables created/verified in production");
+            console.log("[Full Migration] Tables created successfully");
+        }
+        catch (tableError) {
+            errors.push(`Table creation error: ${tableError.message}`);
+            console.error("[Full Migration] Table creation error:", tableError);
+        }
+        console.log("[Full Migration] Step 2: Migrating data from development to production...");
+        const migrationOrder = [
+            { table: "auth_users", pk: "id", isSerial: false },
+            { table: "users", pk: "id", isSerial: true },
+            { table: "skills", pk: "id", isSerial: true },
+            { table: "avatars", pk: "id", isSerial: false },
+            { table: "tones", pk: "id", isSerial: true },
+            { table: "personas", pk: "id", isSerial: true },
+            { table: "scenarios", pk: "id", isSerial: true },
+            { table: "scenario_skills", pk: null, isSerial: false },
+            { table: "cultural_style_presets", pk: "id", isSerial: false },
+            { table: "roleplay_session", pk: "id", isSerial: true },
+            { table: "ai_sessions", pk: "id", isSerial: false },
+            { table: "custom_scenarios", pk: "id", isSerial: true },
+            { table: "transcripts", pk: "id", isSerial: false },
+            { table: "transcript_messages", pk: "id", isSerial: false },
+            { table: "ai_session_analysis", pk: "id", isSerial: true },
+            { table: "skill_dimension_assessments", pk: "id", isSerial: true },
+            { table: "skill_assessment_summary", pk: "id", isSerial: true },
+            { table: "heygen_sessions", pk: "id", isSerial: true },
+            { table: "heygen_queue", pk: "id", isSerial: true },
+            { table: "custom_scenario_skill_mappings", pk: "id", isSerial: true },
+            { table: "presentation_scenarios", pk: "id", isSerial: true },
+            { table: "presentation_sessions", pk: "id", isSerial: true },
+            { table: "presentation_feedback", pk: "id", isSerial: true },
+            { table: "admin_settings", pk: "id", isSerial: true },
+            { table: "budget_guards", pk: "id", isSerial: true },
+            { table: "role_kits", pk: "id", isSerial: true },
+            { table: "interview_rubrics", pk: "id", isSerial: true },
+            { table: "role_archetypes", pk: "id", isSerial: true },
+            { table: "coding_exercises", pk: "id", isSerial: true },
+            { table: "case_templates", pk: "id", isSerial: true },
+            { table: "exercise_rubrics", pk: "id", isSerial: true },
+            { table: "companies", pk: "id", isSerial: true },
+            { table: "job_targets", pk: "id", isSerial: true },
+            { table: "question_patterns", pk: "id", isSerial: true },
+            { table: "role_interview_structure_defaults", pk: "id", isSerial: true },
+            { table: "role_task_blueprints", pk: "id", isSerial: true },
+            { table: "company_role_blueprints", pk: "id", isSerial: true },
+            { table: "user_documents", pk: "id", isSerial: true },
+            { table: "user_profile_extracted", pk: "id", isSerial: true },
+            { table: "interview_configs", pk: "id", isSerial: true },
+            { table: "interview_plans", pk: "id", isSerial: true },
+            { table: "interview_sessions", pk: "id", isSerial: true },
+            { table: "interview_analysis", pk: "id", isSerial: true },
+            { table: "interview_artifacts", pk: "id", isSerial: true },
+        ];
+        for (const { table, pk, isSerial } of migrationOrder) {
+            try {
+                const checkTableResult = await devClient.query(`SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = $1)`, [table]);
+                if (!checkTableResult.rows[0].exists) {
+                    details.push(`${table}: skipped (table not in dev)`);
+                    continue;
+                }
+                const devDataResult = await devClient.query(`SELECT * FROM "${table}"`);
+                const rows = devDataResult.rows;
+                if (rows.length === 0) {
+                    details.push(`${table}: 0 rows (empty)`);
+                    continue;
+                }
+                const columns = Object.keys(rows[0]);
+                const colNames = columns.map(c => `"${c}"`).join(", ");
+                let insertedCount = 0;
+                let updatedCount = 0;
+                for (const row of rows) {
+                    const values = columns.map((_, i) => `$${i + 1}`).join(", ");
+                    const rowValues = columns.map(c => {
+                        const val = row[c];
+                        if (val !== null && typeof val === 'object' && !(val instanceof Date)) {
+                            return JSON.stringify(val);
+                        }
+                        return val;
+                    });
+                    if (pk) {
+                        const updateSet = columns
+                            .filter(c => c !== pk)
+                            .map(c => `"${c}" = EXCLUDED."${c}"`)
+                            .join(", ");
+                        const upsertQuery = `
+              INSERT INTO "${table}" (${colNames})
+              VALUES (${values})
+              ON CONFLICT ("${pk}") DO UPDATE SET ${updateSet}
+              RETURNING (xmax = 0) AS inserted
+            `;
+                        try {
+                            const result = await prodClient.query(upsertQuery, rowValues);
+                            if (result.rows[0]?.inserted) {
+                                insertedCount++;
+                            }
+                            else {
+                                updatedCount++;
+                            }
+                        }
+                        catch (rowError) {
+                            if (!rowError.message.includes("duplicate key")) {
+                                console.error(`[Full Migration] Row error in ${table}:`, rowError.message);
+                            }
+                        }
+                    }
+                    else {
+                        try {
+                            await prodClient.query(`INSERT INTO "${table}" (${colNames}) VALUES (${values}) ON CONFLICT DO NOTHING`, rowValues);
+                            insertedCount++;
+                        }
+                        catch (rowError) {
+                            if (!rowError.message.includes("duplicate key")) {
+                                console.error(`[Full Migration] Row error in ${table}:`, rowError.message);
+                            }
+                        }
+                    }
+                }
+                if (isSerial && pk) {
+                    try {
+                        await prodClient.query(`
+              SELECT setval(pg_get_serial_sequence('"${table}"', '${pk}'), 
+                COALESCE((SELECT MAX("${pk}") FROM "${table}"), 0) + 1, false)
+            `);
+                    }
+                    catch (seqError) {
+                        // Ignore sequence errors
+                    }
+                }
+                details.push(`${table}: ${insertedCount} inserted, ${updatedCount} updated (${rows.length} total)`);
+                console.log(`[Full Migration] ${table}: ${insertedCount} inserted, ${updatedCount} updated`);
+            }
+            catch (tableError) {
+                errors.push(`${table}: ${tableError.message}`);
+                console.error(`[Full Migration] Error migrating ${table}:`, tableError);
+            }
+        }
+        devClient.release();
+        prodClient.release();
+        await prodPool.end();
+        console.log("[Full Migration] Complete!");
+        res.json({
+            success: errors.length === 0,
+            message: errors.length === 0
+                ? "Full data migration completed successfully"
+                : "Migration completed with some errors",
+            details,
+            errors: errors.length > 0 ? errors : undefined
+        });
+    }
+    catch (error) {
+        console.error("[Full Migration] Critical error:", error);
+        res.status(500).json({ success: false, message: "Failed to complete migration", details: [error.message] });
     }
 });

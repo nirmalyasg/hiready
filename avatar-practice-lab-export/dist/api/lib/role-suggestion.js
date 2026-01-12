@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { trackOpenAIUsage } from "../utils/api-usage-tracker.js";
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export async function suggestRolesFromContext(scenarioDescription) {
     try {
@@ -31,6 +32,11 @@ Respond in JSON format:
             temperature: 0.3,
             max_tokens: 300,
         });
+        // Track OpenAI usage
+        const usage = response.usage;
+        if (usage) {
+            await trackOpenAIUsage("role_suggestion", "gpt-4o", usage.prompt_tokens || 0, usage.completion_tokens || 0);
+        }
         const content = response.choices[0]?.message?.content;
         if (!content) {
             throw new Error("No response from OpenAI");
@@ -102,6 +108,11 @@ Respond in JSON format:
             temperature: 0.4,
             max_tokens: 800,
         });
+        // Track OpenAI usage
+        const usage = response.usage;
+        if (usage) {
+            await trackOpenAIUsage("scenario_analysis", "gpt-4o", usage.prompt_tokens || 0, usage.completion_tokens || 0);
+        }
         const content = response.choices[0]?.message?.content;
         if (!content) {
             throw new Error("No response from OpenAI");

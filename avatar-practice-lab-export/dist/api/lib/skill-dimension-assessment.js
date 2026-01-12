@@ -1,5 +1,6 @@
 import OpenAI from "openai";
-import { getSkillsForScenario, getSkillsForCustomScenario } from "./skill-framework-import.js";
+import { getSkillsForScenario, getSkillsForCustomScenario, getSkillWithFramework } from "./skill-framework-import.js";
+import { trackOpenAIUsage } from "../utils/api-usage-tracker.js";
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const SkillDimensionAssessmentSchema = {
     type: "object",
@@ -49,7 +50,30 @@ const SkillDimensionAssessmentSchema = {
         },
     },
 };
-function buildSkillAssessmentPrompt(skills, conversationText) {
+// PersonaFit schema - only used when personaOverlay is provided
+const PersonaFitSchema = {
+    type: "object",
+    additionalProperties: false,
+    required: ["persona", "mistakesObserved", "authorityUsage", "tailoredAdvice", "successCriteriaMet", "overallPersonaFit"],
+    properties: {
+        persona: { type: "string" },
+        mistakesObserved: { type: "array", items: { type: "string" } },
+        authorityUsage: { type: "string" },
+        tailoredAdvice: { type: "string" },
+        successCriteriaMet: { type: "array", items: { type: "string" } },
+        overallPersonaFit: { type: "number" },
+    },
+};
+const SkillDimensionAssessmentSchemaWithPersona = {
+    type: "object",
+    additionalProperties: false,
+    required: ["skillAssessments", "personaFit"],
+    properties: {
+        skillAssessments: SkillDimensionAssessmentSchema.properties.skillAssessments,
+        personaFit: PersonaFitSchema,
+    },
+};
+function buildSkillAssessmentPrompt(skills, conversationText, personaOverlay, counterPersona) {
     const skillsContext = skills
         .map((skill) => {
         const dimensions = skill.assessmentDimensions.length > 0
@@ -64,10 +88,57 @@ function buildSkillAssessmentPrompt(skills, conversationText) {
 `;
     })
         .join("\n");
+    const counterPersonaContext = counterPersona ? `
+## Avatar Behavior Context (Counter-Persona)
+The avatar was playing: **${counterPersona.role}**
+The avatar cared about: ${counterPersona.caresAbout}
+The avatar's pressure response: ${counterPersona.pressureResponse.replace(/_/g, ' ')}
+
+### Avatar's Trigger Behaviors
+The avatar was programmed to become MORE difficult/resistant when the user exhibited these behaviors:
+${counterPersona.triggers.map(t => `- ${t}`).join("\n")}
+
+### Trigger-Based Feedback Instructions
+When providing feedback, specifically note:
+1. Did the user AVOID these triggering behaviors? (positive feedback)
+2. Did the user exhibit any of these triggers? (areas for improvement)
+3. How did the user adapt when the avatar pushed back?
+4. Provide specific quotes/examples where triggers were avoided or activated
+` : "";
+    const personaContext = personaOverlay ? `
+## User's Role Context (Persona Overlay)
+The user was practicing as a **${personaOverlay.userRoleTitle}**. Evaluate their performance considering these role-specific expectations:
+
+### Authority & Constraints for ${personaOverlay.userRoleTitle}:
+${personaOverlay.authorityAndConstraints.map(c => `- ${c}`).join("\n")}
+
+### Success Criteria for ${personaOverlay.userRoleTitle}:
+${personaOverlay.successCriteria.map(c => `- ${c}`).join("\n")}
+
+### Common Mistakes to Watch For:
+${personaOverlay.commonMistakes.map(m => `- ${m}`).join("\n")}
+
+### Expected Tone:
+${personaOverlay.toneGuidance}
+
+When assessing, consider:
+1. Did the user operate within their role's authority boundaries?
+2. Did they achieve the success criteria appropriate for their level?
+3. Did they avoid the common mistakes for their role level?
+4. Was their tone appropriate for someone at the ${personaOverlay.userRoleTitle} level?
+` : "";
+    const personaFitInstructions = personaOverlay ? `
+7. Assess persona fit: How well did the user perform within the ${personaOverlay.userRoleTitle} role context?
+   - Identify which common mistakes they made (if any)
+   - Evaluate how they used (or overstepped) their authority
+   - Provide tailored advice specific to their role level
+   - List which success criteria they achieved
+   - Score overall persona fit 1-5 (5 = perfectly aligned with role expectations)
+` : "";
     return `You are an expert coach and assessor evaluating a practice conversation session.
   
 Analyze the following conversation transcript and assess the user's demonstration of specific skills based on established frameworks.
-
+${personaContext}${counterPersonaContext}
 ## Skills to Assess:
 ${skillsContext}
 
@@ -86,18 +157,19 @@ For each dimension, use this rubric:
 3. Reference the framework principles when explaining scores
 4. Calculate overall skill score as the average of dimension scores
 5. Identify which dimensions are strengths (score >= 4) and which need improvement (score <= 2)
-6. Provide actionable notes for development
+6. Provide actionable notes for development${personaFitInstructions}
 
 ## Conversation Transcript:
 ${conversationText}
 
 Return your assessment as JSON matching the provided schema.`;
 }
-export async function generateSkillDimensionAssessment(conversationText, skills) {
+export async function generateSkillDimensionAssessment(conversationText, skills, personaOverlay, counterPersona) {
     if (skills.length === 0) {
-        return [];
+        return { skillAssessments: [] };
     }
-    const prompt = buildSkillAssessmentPrompt(skills, conversationText);
+    const prompt = buildSkillAssessmentPrompt(skills, conversationText, personaOverlay, counterPersona);
+    const usePersonaSchema = !!personaOverlay;
     try {
         const completion = await openai.chat.completions.create({
             model: "gpt-4o",
@@ -107,7 +179,7 @@ export async function generateSkillDimensionAssessment(conversationText, skills)
                 json_schema: {
                     name: "skill_dimension_assessment",
                     strict: true,
-                    schema: SkillDimensionAssessmentSchema,
+                    schema: usePersonaSchema ? SkillDimensionAssessmentSchemaWithPersona : SkillDimensionAssessmentSchema,
                 },
             },
             messages: [
@@ -121,17 +193,24 @@ export async function generateSkillDimensionAssessment(conversationText, skills)
                 },
             ],
         });
+        const usage = completion.usage;
+        if (usage) {
+            await trackOpenAIUsage("skill_assessment", "gpt-4o", usage.prompt_tokens || 0, usage.completion_tokens || 0);
+        }
         const msg = completion.choices[0]?.message?.content?.trim();
         if (!msg) {
             console.error("No skill assessment response generated");
-            return [];
+            return { skillAssessments: [] };
         }
         const parsed = JSON.parse(msg);
-        return parsed.skillAssessments || [];
+        return {
+            skillAssessments: parsed.skillAssessments || [],
+            personaFit: parsed.personaFit || undefined,
+        };
     }
     catch (error) {
         console.error("Error generating skill dimension assessment:", error);
-        return [];
+        return { skillAssessments: [] };
     }
 }
 export async function saveSkillDimensionAssessments(pool, sessionId, assessments) {
@@ -193,47 +272,56 @@ export async function getSkillAssessmentsForSession(pool, sessionId) {
         return { summary: [], dimensions: [] };
     }
 }
-export async function performSkillAssessmentForSession(pool, sessionId, scenarioId, conversationText, customScenarioId) {
+export async function performSkillAssessmentForSession(pool, sessionId, scenarioId, conversationText, customScenarioId, isImpromptuSession, personaOverlay, counterPersona) {
     if (!sessionId || sessionId <= 0) {
         console.log("No valid sessionId provided, skipping skill dimension assessment");
-        return [];
+        return { skillAssessments: [] };
     }
     if (!conversationText || conversationText.trim().length === 0) {
         console.log("No conversation text provided, skipping skill dimension assessment");
-        return [];
+        return { skillAssessments: [] };
     }
     let skills = [];
     try {
-        // First try to get skills from custom scenario mappings
-        if (customScenarioId && customScenarioId > 0) {
+        if (isImpromptuSession) {
+            console.log("Impromptu session detected - using Impromptu Communication skill (ID 105)");
+            const impromptuSkill = await getSkillWithFramework(pool, 105);
+            if (impromptuSkill) {
+                skills = [impromptuSkill];
+                console.log("Found impromptu communication skill for assessment");
+            }
+            else {
+                console.warn("Impromptu skill (ID 105) not found in database");
+            }
+        }
+        if (skills.length === 0 && customScenarioId && customScenarioId > 0) {
             skills = await getSkillsForCustomScenario(pool, customScenarioId);
             if (skills.length > 0) {
                 console.log(`Found ${skills.length} skills from custom scenario ${customScenarioId}`);
             }
         }
-        // Fall back to regular scenario skills if no custom scenario skills found
         if (skills.length === 0 && scenarioId && scenarioId > 0) {
             skills = await getSkillsForScenario(pool, scenarioId);
         }
     }
     catch (error) {
         console.error("Error fetching skills for scenario:", error);
-        return [];
+        return { skillAssessments: [] };
     }
     if (skills.length === 0) {
         console.log("No skills found for scenario, skipping skill dimension assessment");
-        return [];
+        return { skillAssessments: [] };
     }
     const skillsWithFrameworks = skills.filter((s) => s.frameworkMapping && s.assessmentDimensions.length > 0);
     if (skillsWithFrameworks.length === 0) {
         console.log("No skills with framework data found, skipping skill dimension assessment");
-        return [];
+        return { skillAssessments: [] };
     }
-    console.log(`Performing skill dimension assessment for ${skillsWithFrameworks.length} skills`);
-    const assessments = await generateSkillDimensionAssessment(conversationText, skillsWithFrameworks);
-    if (assessments.length > 0) {
-        await saveSkillDimensionAssessments(pool, sessionId, assessments);
-        console.log(`Saved ${assessments.length} skill assessments for session ${sessionId}`);
+    console.log(`Performing skill dimension assessment for ${skillsWithFrameworks.length} skills${personaOverlay ? ` with persona overlay: ${personaOverlay.userRoleTitle}` : ""}${counterPersona ? ` with counter-persona: ${counterPersona.role}` : ""}`);
+    const result = await generateSkillDimensionAssessment(conversationText, skillsWithFrameworks, personaOverlay, counterPersona);
+    if (result.skillAssessments.length > 0) {
+        await saveSkillDimensionAssessments(pool, sessionId, result.skillAssessments);
+        console.log(`Saved ${result.skillAssessments.length} skill assessments for session ${sessionId}`);
     }
-    return assessments;
+    return result;
 }

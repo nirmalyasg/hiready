@@ -1,4 +1,4 @@
-import { db } from "../db";
+import { db } from "../db.js";
 import { 
   roleArchetypes, 
   roleInterviewStructureDefaults, 
@@ -7,7 +7,7 @@ import {
   companyRoleBlueprints,
   seoPages,
   seoPageSections
-} from "../../shared/schema";
+} from "../../shared/schema.js";
 import { eq, and, inArray } from "drizzle-orm";
 import OpenAI from "openai";
 

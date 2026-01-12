@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { db } from "../db";
+import { db } from "../db.js";
 import { 
   seoPages, 
   seoPageSections, 
@@ -8,7 +8,7 @@ import {
   seoAnalyticsEvents,
   roleArchetypes,
   companies
-} from "../../shared/schema";
+} from "../../shared/schema.js";
 import { eq, desc, and, sql, inArray, isNull, or, gte, lte, SQL } from "drizzle-orm";
 import {
   generatePillarPage,
@@ -17,7 +17,7 @@ import {
   generateCompanyRolePage,
   generateSkillPracticePage,
   saveSeoPage
-} from "../lib/seo-content-generator";
+} from "../lib/seo-content-generator.js";
 
 const router = Router();
 

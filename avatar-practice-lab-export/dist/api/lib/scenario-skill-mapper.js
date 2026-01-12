@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { trackOpenAIUsage } from "../utils/api-usage-tracker.js";
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const SkillMappingResponseSchema = {
     type: "object",
@@ -123,6 +124,11 @@ export async function analyzeScenarioForSkills(customScenarioId, title, descript
             },
             temperature: 0.3,
         });
+        // Track OpenAI usage
+        const usage = response.usage;
+        if (usage) {
+            await trackOpenAIUsage("scenario_skill_mapping", "gpt-4o", usage.prompt_tokens || 0, usage.completion_tokens || 0);
+        }
         const content = response.choices[0]?.message?.content;
         if (!content) {
             throw new Error("No response from OpenAI");

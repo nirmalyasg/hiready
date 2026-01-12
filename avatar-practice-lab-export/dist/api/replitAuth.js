@@ -2,6 +2,34 @@ import bcrypt from "bcrypt";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { getUserByUsername, getUserByEmail, createUser } from "./storage.js";
+import { db } from "./db.js";
+import { userLoginEvents } from "../shared/schema.js";
+async function trackLoginEvent(authUserId, eventType, req) {
+    try {
+        await db.insert(userLoginEvents).values({
+            authUserId,
+            eventType,
+            sessionId: req.sessionID,
+            ipAddress: req.ip || req.headers["x-forwarded-for"]?.toString(),
+            userAgent: req.headers["user-agent"],
+            occurredAt: new Date(),
+            metadata: {
+                source: "web",
+                deviceType: detectDeviceType(req.headers["user-agent"] || "")
+            }
+        });
+    }
+    catch (error) {
+        console.error("Error tracking login event:", error);
+    }
+}
+function detectDeviceType(userAgent) {
+    if (/mobile/i.test(userAgent))
+        return "mobile";
+    if (/tablet/i.test(userAgent))
+        return "tablet";
+    return "desktop";
+}
 const SALT_ROUNDS = 10;
 export function getSession() {
     const sessionTtl = 7 * 24 * 60 * 60 * 1000;
@@ -63,6 +91,7 @@ export async function setupAuth(app) {
                 profileImageUrl: user.profileImageUrl,
             };
             req.session.user = sessionUser;
+            trackLoginEvent(user.id, "login", req);
             return res.status(201).json({
                 message: "Registration successful",
                 user: sessionUser,
@@ -96,6 +125,7 @@ export async function setupAuth(app) {
                 profileImageUrl: user.profileImageUrl,
             };
             req.session.user = sessionUser;
+            trackLoginEvent(user.id, "login", req);
             return res.json({
                 message: "Login successful",
                 user: sessionUser,
@@ -107,6 +137,10 @@ export async function setupAuth(app) {
         }
     });
     app.post("/api/auth/logout", (req, res) => {
+        const userId = req.session?.user?.id;
+        if (userId) {
+            trackLoginEvent(userId, "logout", req);
+        }
         req.session.destroy((err) => {
             if (err) {
                 console.error("Logout error:", err);

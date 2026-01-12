@@ -9,7 +9,9 @@ export const sessions = pgTable("sessions", {
     sid: varchar("sid").primaryKey(),
     sess: jsonb("sess").notNull(),
     expire: timestamp("expire").notNull(),
-}, (table) => [index("IDX_session_expire").on(table.expire)]);
+}, (table) => ({
+    expireIdx: index("IDX_session_expire").on(table.expire),
+}));
 // Auth users table for username/password authentication
 export const authUsers = pgTable("auth_users", {
     id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
@@ -19,6 +21,19 @@ export const authUsers = pgTable("auth_users", {
     firstName: varchar("first_name"),
     lastName: varchar("last_name"),
     profileImageUrl: varchar("profile_image_url"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+});
+// Employer users table (separate from regular users)
+export const employerUsers = pgTable("employer_users", {
+    id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
+    username: varchar("username").notNull().unique(),
+    email: varchar("email").unique(),
+    passwordHash: varchar("password_hash").notNull(),
+    firstName: varchar("first_name"),
+    lastName: varchar("last_name"),
+    companyId: varchar("company_id"), // FK to employer_companies managed at DB level
+    role: varchar("role").default("admin"),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -64,10 +79,17 @@ export const scenarios = pgTable("scenarios", {
     description: text("description"),
     context: text("context"),
     instructions: text("instructions"),
+    openingScene: text("opening_scene"),
     avatarName: varchar("avatar_name"),
     avatarRole: varchar("avatar_role"),
     difficulty: text("difficulty"),
     duration: numeric("duration"),
+    scenarioKey: varchar("scenario_key").unique(),
+    shortTitle: varchar("short_title"),
+    displayTitle: text("display_title"),
+    tags: jsonb("tags").$type(),
+    personaOverlays: jsonb("persona_overlays").$type(),
+    counterPersona: jsonb("counter_persona").$type(),
 });
 export const scenarioSkills = pgTable("scenario_skills", {
     scenarioId: integer("scenario_id")
@@ -97,6 +119,24 @@ export const avatars = pgTable("avatars", {
     gender: varchar("gender"),
     role: varchar("role"),
     imageUrl: text("image_url"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+});
+// =====================
+// Custom Personas (User/Org-defined persona overlays)
+// =====================
+export const customPersonas = pgTable("custom_personas", {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id").references(() => authUsers.id, { onDelete: "cascade" }),
+    organizationId: varchar("organization_id"),
+    name: varchar("name").notNull(),
+    userRoleTitle: varchar("user_role_title").notNull(),
+    authorityAndConstraints: jsonb("authority_and_constraints").$type().notNull(),
+    successCriteria: jsonb("success_criteria").$type().notNull(),
+    commonMistakes: jsonb("common_mistakes").$type().notNull(),
+    toneGuidance: text("tone_guidance").notNull(),
+    avatarPushbackLevel: varchar("avatar_pushback_level").$type().notNull().default("medium"),
+    isDefault: boolean("is_default").default(false),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -162,6 +202,7 @@ export const transcripts = pgTable("transcripts", {
     sessionType: varchar("session_type").default("streaming_avatar"),
     customScenarioId: integer("custom_scenario_id").references(() => customScenarios.id, { onDelete: "set null" }),
     culturalPresetId: varchar("cultural_preset_id"),
+    sessionConfig: jsonb("session_config").$type(),
 });
 export const transcriptMessages = pgTable("transcript_messages", {
     id: text("id").primaryKey(),
@@ -353,6 +394,66 @@ export const heygenQueueRelations = relations(heygenQueue, ({ one }) => ({
     }),
 }));
 // =====================
+// Presentation Scenarios (User-Created for presentation practice)
+// =====================
+export const presentationScenarios = pgTable("presentation_scenarios", {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id")
+        .notNull()
+        .references(() => authUsers.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    topic: text("topic").notNull(),
+    context: text("context"),
+    fileName: text("file_name").notNull(),
+    fileUrl: text("file_url"),
+    fileType: text("file_type"),
+    totalSlides: integer("total_slides").notNull(),
+    slidesData: jsonb("slides_data").notNull(),
+    extractedText: text("extracted_text").notNull(),
+    documentAnalysis: jsonb("document_analysis"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// Presentation Practice Sessions
+export const presentationSessions = pgTable("presentation_sessions", {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id")
+        .notNull()
+        .references(() => authUsers.id, { onDelete: "cascade" }),
+    presentationScenarioId: integer("presentation_scenario_id")
+        .notNull()
+        .references(() => presentationScenarios.id, { onDelete: "cascade" }),
+    sessionUid: text("session_uid").notNull().unique(),
+    duration: integer("duration").default(0),
+    slidesCovered: integer("slides_covered").default(0),
+    totalSlides: integer("total_slides").default(0),
+    transcript: text("transcript"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export const presentationFeedback = pgTable("presentation_feedback", {
+    id: serial("id").primaryKey(),
+    presentationSessionId: integer("presentation_session_id")
+        .references(() => presentationSessions.id, { onDelete: "cascade" })
+        .notNull(),
+    presentationScenarioId: integer("presentation_scenario_id")
+        .references(() => presentationScenarios.id, { onDelete: "cascade" })
+        .notNull(),
+    overallScore: real("overall_score").notNull(),
+    communicationScore: real("communication_score").notNull(),
+    communicationFeedback: text("communication_feedback"),
+    deliveryScore: real("delivery_score").notNull(),
+    deliveryFeedback: text("delivery_feedback"),
+    subjectMatterScore: real("subject_matter_score").notNull(),
+    subjectMatterFeedback: text("subject_matter_feedback"),
+    slideCoverage: jsonb("slide_coverage"),
+    strengths: jsonb("strengths"),
+    improvements: jsonb("improvements"),
+    summary: text("summary"),
+    skillAssessment: jsonb("skill_assessment"),
+    documentAnalysis: jsonb("document_analysis"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+// =====================
 // Custom Scenarios (User-Created)
 // =====================
 export const customScenarios = pgTable("custom_scenarios", {
@@ -404,8 +505,1214 @@ export const customScenarioSkillMappingsRelations = relations(customScenarioSkil
     }),
 }));
 // =====================
+// Interview Practice Lab Tables
+// =====================
+// Role Kits - Pre-built interview role catalog (replaces scenarios for interview mode)
+export const roleKits = pgTable("role_kits", {
+    id: serial("id").primaryKey(),
+    name: varchar("name").notNull(),
+    level: text("level")
+        .$type()
+        .notNull()
+        .default("entry"),
+    domain: varchar("domain").notNull(),
+    description: text("description"),
+    roleContext: text("role_context"),
+    coreCompetencies: jsonb("core_competencies").$type(),
+    typicalQuestions: jsonb("typical_questions").$type(),
+    defaultInterviewTypes: jsonb("default_interview_types").$type().default(["hr", "technical"]),
+    defaultRubricId: integer("default_rubric_id"),
+    skillsFocus: jsonb("skills_focus").$type(),
+    estimatedDuration: integer("estimated_duration").default(360),
+    trackTags: jsonb("track_tags").$type(),
+    roleArchetypeId: varchar("role_archetype_id"),
+    roleCategory: text("role_category").$type(),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// Interview Rubrics - Defines dimensions and scoring rules
+export const interviewRubrics = pgTable("interview_rubrics", {
+    id: serial("id").primaryKey(),
+    name: varchar("name").notNull(),
+    description: text("description"),
+    dimensions: jsonb("dimensions").$type().notNull(),
+    scoringGuide: jsonb("scoring_guide").$type().notNull(),
+    isDefault: boolean("is_default").default(false),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// User Documents - Resume/JD uploads
+export const userDocuments = pgTable("user_documents", {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id")
+        .notNull()
+        .references(() => authUsers.id, { onDelete: "cascade" }),
+    docType: text("doc_type")
+        .$type()
+        .notNull(),
+    fileName: varchar("file_name").notNull(),
+    mimeType: varchar("mime_type"),
+    s3Url: text("s3_url"),
+    rawText: text("raw_text"),
+    parsedJson: jsonb("parsed_json").$type(),
+    sourceHash: varchar("source_hash"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// User Profile Extracted - Derived interview profile from latest resume
+export const userProfileExtracted = pgTable("user_profile_extracted", {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id")
+        .notNull()
+        .unique()
+        .references(() => authUsers.id, { onDelete: "cascade" }),
+    latestResumeDocId: integer("latest_resume_doc_id")
+        .references(() => userDocuments.id, { onDelete: "set null" }),
+    headline: text("headline"),
+    workHistory: jsonb("work_history").$type(),
+    projects: jsonb("projects").$type(),
+    skillsClaimed: jsonb("skills_claimed").$type(),
+    riskFlags: jsonb("risk_flags").$type(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// =====================
+// Job Targets - Real jobs users are preparing for (NEW: Job-Centric Practice)
+// =====================
+export const jobTargets = pgTable("job_targets", {
+    id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
+    userId: varchar("user_id")
+        .notNull()
+        .references(() => authUsers.id, { onDelete: "cascade" }),
+    source: text("source").$type().default("manual"),
+    jobUrl: text("job_url"),
+    companyName: text("company_name"),
+    roleTitle: text("role_title").notNull(),
+    location: text("location"),
+    jdText: text("jd_text"),
+    jdParsed: jsonb("jd_parsed").$type(),
+    companyArchetype: text("company_archetype").$type(),
+    archetypeConfidence: text("archetype_confidence").$type(),
+    roleArchetypeId: varchar("role_archetype_id"),
+    roleFamily: text("role_family").$type(),
+    roleKitId: integer("role_kit_id").references(() => roleKits.id, { onDelete: "set null" }),
+    status: text("status")
+        .$type()
+        .notNull()
+        .default("saved"),
+    readinessScore: integer("readiness_score"),
+    lastPracticedAt: timestamp("last_practiced_at"),
+    lastResumeDocId: integer("last_resume_doc_id"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// User Skill Patterns - Career memory tracking improvements (NEW: Learning Loop)
+export const userSkillPatterns = pgTable("user_skill_patterns", {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id")
+        .notNull()
+        .references(() => authUsers.id, { onDelete: "cascade" }),
+    dimension: text("dimension").notNull(),
+    occurrences: integer("occurrences").default(1),
+    avgScore: real("avg_score"),
+    trend: text("trend").$type().default("stagnant"),
+    lastSeenAt: timestamp("last_seen_at").defaultNow(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// Interview Configs - User's chosen interview settings for a session
+export const interviewConfigs = pgTable("interview_configs", {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id")
+        .notNull()
+        .references(() => authUsers.id, { onDelete: "cascade" }),
+    roleKitId: integer("role_kit_id")
+        .references(() => roleKits.id, { onDelete: "set null" }),
+    roleArchetypeId: varchar("role_archetype_id"),
+    interviewMode: text("interview_mode")
+        .$type(),
+    jobTargetId: varchar("job_target_id")
+        .references(() => jobTargets.id, { onDelete: "set null" }),
+    resumeDocId: integer("resume_doc_id")
+        .references(() => userDocuments.id, { onDelete: "set null" }),
+    jdDocId: integer("jd_doc_id")
+        .references(() => userDocuments.id, { onDelete: "set null" }),
+    companyNotesDocId: integer("company_notes_doc_id")
+        .references(() => userDocuments.id, { onDelete: "set null" }),
+    interviewType: text("interview_type")
+        .$type()
+        .notNull()
+        .default("hr"),
+    style: text("style")
+        .$type()
+        .notNull()
+        .default("neutral"),
+    seniority: text("seniority")
+        .$type()
+        .notNull()
+        .default("entry"),
+    exerciseCount: integer("exercise_count").default(1),
+    includePuzzles: boolean("include_puzzles").default(false),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+// Interview Plans - AI-generated plan used during runtime
+export const interviewPlans = pgTable("interview_plans", {
+    id: serial("id").primaryKey(),
+    interviewConfigId: integer("interview_config_id")
+        .notNull()
+        .references(() => interviewConfigs.id, { onDelete: "cascade" }),
+    planJson: jsonb("plan_json").$type().notNull(),
+    version: integer("version").default(1),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+// Interview Sessions - Links roleplay_session to interview-specific context
+export const interviewSessions = pgTable("interview_sessions", {
+    id: serial("id").primaryKey(),
+    roleplaySessionId: integer("roleplay_session_id")
+        .references(() => roleplaySession.id, { onDelete: "cascade" }),
+    interviewConfigId: integer("interview_config_id")
+        .notNull()
+        .references(() => interviewConfigs.id, { onDelete: "cascade" }),
+    interviewPlanId: integer("interview_plan_id")
+        .references(() => interviewPlans.id, { onDelete: "set null" }),
+    rubricId: integer("rubric_id")
+        .references(() => interviewRubrics.id, { onDelete: "set null" }),
+    status: text("status")
+        .$type()
+        .notNull()
+        .default("created"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// Interview Analysis - Extended analysis for interview sessions
+export const interviewAnalysis = pgTable("interview_analysis", {
+    id: serial("id").primaryKey(),
+    interviewSessionId: integer("interview_session_id")
+        .notNull()
+        .references(() => interviewSessions.id, { onDelete: "cascade" }),
+    transcriptId: varchar("transcript_id")
+        .references(() => transcripts.id, { onDelete: "set null" }),
+    overallRecommendation: text("overall_recommendation")
+        .$type(),
+    confidenceLevel: text("confidence_level")
+        .$type(),
+    summary: text("summary"),
+    dimensionScores: jsonb("dimension_scores").$type(),
+    strengths: jsonb("strengths").$type(),
+    risks: jsonb("risks").$type(),
+    roleFitNotes: jsonb("role_fit_notes").$type(),
+    betterAnswers: jsonb("better_answers").$type(),
+    practicePlan: jsonb("practice_plan").$type(),
+    wins: jsonb("wins").$type(),
+    improvements: jsonb("improvements").$type(),
+    shareToken: varchar("share_token").unique(),
+    isPublic: boolean("is_public").default(false),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+// Interview Artifacts - Store structured outputs
+export const interviewArtifacts = pgTable("interview_artifacts", {
+    id: serial("id").primaryKey(),
+    interviewSessionId: integer("interview_session_id")
+        .notNull()
+        .references(() => interviewSessions.id, { onDelete: "cascade" }),
+    artifactType: text("artifact_type")
+        .$type()
+        .notNull(),
+    artifactJson: jsonb("artifact_json").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+// Interview Practice Lab Relations
+export const roleKitsRelations = relations(roleKits, ({ one }) => ({
+    defaultRubric: one(interviewRubrics, {
+        fields: [roleKits.defaultRubricId],
+        references: [interviewRubrics.id],
+    }),
+}));
+export const userDocumentsRelations = relations(userDocuments, ({ one }) => ({
+    user: one(authUsers, {
+        fields: [userDocuments.userId],
+        references: [authUsers.id],
+    }),
+}));
+export const userProfileExtractedRelations = relations(userProfileExtracted, ({ one }) => ({
+    user: one(authUsers, {
+        fields: [userProfileExtracted.userId],
+        references: [authUsers.id],
+    }),
+    latestResumeDoc: one(userDocuments, {
+        fields: [userProfileExtracted.latestResumeDocId],
+        references: [userDocuments.id],
+    }),
+}));
+export const interviewConfigsRelations = relations(interviewConfigs, ({ one, many }) => ({
+    user: one(authUsers, {
+        fields: [interviewConfigs.userId],
+        references: [authUsers.id],
+    }),
+    roleKit: one(roleKits, {
+        fields: [interviewConfigs.roleKitId],
+        references: [roleKits.id],
+    }),
+    resumeDoc: one(userDocuments, {
+        fields: [interviewConfigs.resumeDocId],
+        references: [userDocuments.id],
+    }),
+    jdDoc: one(userDocuments, {
+        fields: [interviewConfigs.jdDocId],
+        references: [userDocuments.id],
+    }),
+    companyNotesDoc: one(userDocuments, {
+        fields: [interviewConfigs.companyNotesDocId],
+        references: [userDocuments.id],
+    }),
+    plans: many(interviewPlans),
+    sessions: many(interviewSessions),
+}));
+export const interviewPlansRelations = relations(interviewPlans, ({ one }) => ({
+    config: one(interviewConfigs, {
+        fields: [interviewPlans.interviewConfigId],
+        references: [interviewConfigs.id],
+    }),
+}));
+export const interviewSessionsRelations = relations(interviewSessions, ({ one, many }) => ({
+    roleplaySession: one(roleplaySession, {
+        fields: [interviewSessions.roleplaySessionId],
+        references: [roleplaySession.id],
+    }),
+    config: one(interviewConfigs, {
+        fields: [interviewSessions.interviewConfigId],
+        references: [interviewConfigs.id],
+    }),
+    plan: one(interviewPlans, {
+        fields: [interviewSessions.interviewPlanId],
+        references: [interviewPlans.id],
+    }),
+    rubric: one(interviewRubrics, {
+        fields: [interviewSessions.rubricId],
+        references: [interviewRubrics.id],
+    }),
+    analysis: many(interviewAnalysis),
+    artifacts: many(interviewArtifacts),
+}));
+export const interviewAnalysisRelations = relations(interviewAnalysis, ({ one }) => ({
+    session: one(interviewSessions, {
+        fields: [interviewAnalysis.interviewSessionId],
+        references: [interviewSessions.id],
+    }),
+    transcript: one(transcripts, {
+        fields: [interviewAnalysis.transcriptId],
+        references: [transcripts.id],
+    }),
+}));
+export const interviewArtifactsRelations = relations(interviewArtifacts, ({ one }) => ({
+    session: one(interviewSessions, {
+        fields: [interviewArtifacts.interviewSessionId],
+        references: [interviewSessions.id],
+    }),
+}));
+// =====================
+// Interview Exercise Mode Tables (Case Study + Coding Lab)
+// =====================
+// Case Templates - "Prompt packages" for case study interviews
+export const caseTemplates = pgTable("case_templates", {
+    id: serial("id").primaryKey(),
+    roleKitId: integer("role_kit_id")
+        .references(() => roleKits.id, { onDelete: "set null" }),
+    name: varchar("name").notNull(),
+    caseType: text("case_type")
+        .$type()
+        .notNull(),
+    difficulty: text("difficulty")
+        .$type()
+        .notNull()
+        .default("medium"),
+    promptStatement: text("prompt_statement").notNull(),
+    context: text("context"),
+    clarifyingQuestionsAllowed: integer("clarifying_questions_allowed").default(3),
+    revealableData: jsonb("revealable_data").$type(),
+    evaluationFocus: jsonb("evaluation_focus").$type(),
+    probingMap: jsonb("probing_map").$type(),
+    expectedDurationMinutes: integer("expected_duration_minutes").default(15),
+    tags: jsonb("tags").$type(),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// Coding Exercises - Code snippets for Explain/Debug/Modify activities
+export const codingExercises = pgTable("coding_exercises", {
+    id: serial("id").primaryKey(),
+    roleKitId: integer("role_kit_id")
+        .references(() => roleKits.id, { onDelete: "set null" }),
+    name: varchar("name").notNull(),
+    activityType: text("activity_type")
+        .$type()
+        .notNull(),
+    language: varchar("language").notNull().default("javascript"),
+    difficulty: text("difficulty")
+        .$type()
+        .notNull()
+        .default("medium"),
+    codeSnippet: text("code_snippet").notNull(),
+    bugDescription: text("bug_description"),
+    failingTestCase: text("failing_test_case"),
+    modificationRequirement: text("modification_requirement"),
+    expectedBehavior: text("expected_behavior"),
+    expectedSignals: jsonb("expected_signals").$type(),
+    commonFailureModes: jsonb("common_failure_modes").$type(),
+    suggestedFix: text("suggested_fix"),
+    edgeCases: jsonb("edge_cases").$type(),
+    complexityExpected: text("complexity_expected"),
+    probingQuestions: jsonb("probing_questions").$type(),
+    tags: jsonb("tags").$type(),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// Exercise Sessions - Track case study and coding lab sessions
+export const exerciseSessions = pgTable("exercise_sessions", {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id")
+        .notNull()
+        .references(() => authUsers.id, { onDelete: "cascade" }),
+    exerciseType: text("exercise_type")
+        .$type()
+        .notNull(),
+    caseTemplateId: integer("case_template_id")
+        .references(() => caseTemplates.id, { onDelete: "set null" }),
+    codingExerciseId: integer("coding_exercise_id")
+        .references(() => codingExercises.id, { onDelete: "set null" }),
+    roleKitId: integer("role_kit_id")
+        .references(() => roleKits.id, { onDelete: "set null" }),
+    jobTargetId: varchar("job_target_id")
+        .references(() => jobTargets.id, { onDelete: "set null" }),
+    interviewType: text("interview_type")
+        .$type()
+        .default("hiring_manager"),
+    style: text("style")
+        .$type()
+        .default("neutral"),
+    thinkingTimeUsed: integer("thinking_time_used").default(0),
+    sessionUid: text("session_uid").notNull().unique(),
+    transcript: text("transcript"),
+    userCodeSubmission: text("user_code_submission"),
+    duration: integer("duration").default(0),
+    status: text("status")
+        .$type()
+        .notNull()
+        .default("created"),
+    autoLinked: boolean("auto_linked").default(false),
+    autoLinkConfidence: text("auto_link_confidence").$type(),
+    autoLinkSignals: jsonb("auto_link_signals").$type(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// Exercise Rubrics - Scoring dimensions for case study and coding exercises
+export const exerciseRubrics = pgTable("exercise_rubrics", {
+    id: serial("id").primaryKey(),
+    name: varchar("name").notNull(),
+    exerciseType: text("exercise_type")
+        .$type()
+        .notNull(),
+    dimensions: jsonb("dimensions").$type().notNull(),
+    isDefault: boolean("is_default").default(false),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// Exercise Analysis - Detailed feedback for exercise sessions
+export const exerciseAnalysis = pgTable("exercise_analysis", {
+    id: serial("id").primaryKey(),
+    exerciseSessionId: integer("exercise_session_id")
+        .notNull()
+        .references(() => exerciseSessions.id, { onDelete: "cascade" }),
+    rubricId: integer("rubric_id")
+        .references(() => exerciseRubrics.id, { onDelete: "set null" }),
+    overallScore: real("overall_score").notNull(),
+    dimensionScores: jsonb("dimension_scores").$type().notNull(),
+    strengthsIdentified: jsonb("strengths_identified").$type(),
+    areasForImprovement: jsonb("areas_for_improvement").$type(),
+    rewrittenAnswer: text("rewritten_answer"),
+    betterClarifyingQuestions: jsonb("better_clarifying_questions").$type(),
+    missedEdgeCases: jsonb("missed_edge_cases").$type(),
+    suggestedPatch: text("suggested_patch"),
+    practicePlan: jsonb("practice_plan").$type(),
+    summary: text("summary"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+// Exercise Sessions Relations
+export const caseTemplatesRelations = relations(caseTemplates, ({ one }) => ({
+    roleKit: one(roleKits, {
+        fields: [caseTemplates.roleKitId],
+        references: [roleKits.id],
+    }),
+}));
+export const codingExercisesRelations = relations(codingExercises, ({ one }) => ({
+    roleKit: one(roleKits, {
+        fields: [codingExercises.roleKitId],
+        references: [roleKits.id],
+    }),
+}));
+export const exerciseSessionsRelations = relations(exerciseSessions, ({ one, many }) => ({
+    user: one(authUsers, {
+        fields: [exerciseSessions.userId],
+        references: [authUsers.id],
+    }),
+    caseTemplate: one(caseTemplates, {
+        fields: [exerciseSessions.caseTemplateId],
+        references: [caseTemplates.id],
+    }),
+    codingExercise: one(codingExercises, {
+        fields: [exerciseSessions.codingExerciseId],
+        references: [codingExercises.id],
+    }),
+    roleKit: one(roleKits, {
+        fields: [exerciseSessions.roleKitId],
+        references: [roleKits.id],
+    }),
+    jobTarget: one(jobTargets, {
+        fields: [exerciseSessions.jobTargetId],
+        references: [jobTargets.id],
+    }),
+    analysis: many(exerciseAnalysis),
+}));
+// Job Targets Relations
+export const jobTargetsRelations = relations(jobTargets, ({ one, many }) => ({
+    user: one(authUsers, {
+        fields: [jobTargets.userId],
+        references: [authUsers.id],
+    }),
+    interviewConfigs: many(interviewConfigs),
+    exerciseSessions: many(exerciseSessions),
+}));
+// User Skill Patterns Relations
+export const userSkillPatternsRelations = relations(userSkillPatterns, ({ one }) => ({
+    user: one(authUsers, {
+        fields: [userSkillPatterns.userId],
+        references: [authUsers.id],
+    }),
+}));
+export const exerciseAnalysisRelations = relations(exerciseAnalysis, ({ one }) => ({
+    session: one(exerciseSessions, {
+        fields: [exerciseAnalysis.exerciseSessionId],
+        references: [exerciseSessions.id],
+    }),
+    rubric: one(exerciseRubrics, {
+        fields: [exerciseAnalysis.rubricId],
+        references: [exerciseRubrics.id],
+    }),
+}));
+// =====================
+// Admin Tables
+// =====================
+export const userRoles = pgTable("user_roles", {
+    id: serial("id").primaryKey(),
+    authUserId: varchar("auth_user_id")
+        .notNull()
+        .unique()
+        .references(() => authUsers.id, { onDelete: "cascade" }),
+    role: text("role")
+        .$type()
+        .notNull()
+        .default("learner"),
+    assignedBy: varchar("assigned_by")
+        .references(() => authUsers.id, { onDelete: "set null" }),
+    assignedAt: timestamp("assigned_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+export const userLoginEvents = pgTable("user_login_events", {
+    id: serial("id").primaryKey(),
+    authUserId: varchar("auth_user_id")
+        .notNull()
+        .references(() => authUsers.id, { onDelete: "cascade" }),
+    eventType: text("event_type")
+        .$type()
+        .notNull(),
+    sessionId: varchar("session_id"),
+    ipAddress: varchar("ip_address"),
+    userAgent: text("user_agent"),
+    occurredAt: timestamp("occurred_at").defaultNow().notNull(),
+    metadata: jsonb("metadata").$type(),
+});
+export const apiUsageEvents = pgTable("api_usage_events", {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+        .references(() => users.id, { onDelete: "set null" }),
+    authUserId: varchar("auth_user_id")
+        .references(() => authUsers.id, { onDelete: "set null" }),
+    sessionId: integer("session_id")
+        .references(() => roleplaySession.id, { onDelete: "set null" }),
+    service: text("service")
+        .$type()
+        .notNull(),
+    operation: text("operation").notNull(),
+    model: text("model"),
+    tokensIn: integer("tokens_in").default(0),
+    tokensOut: integer("tokens_out").default(0),
+    requestUnits: real("request_units").default(1),
+    unitCost: real("unit_cost").default(0),
+    estimatedCost: real("estimated_cost").default(0),
+    currency: varchar("currency").default("USD"),
+    durationMs: integer("duration_ms"),
+    success: boolean("success").default(true),
+    errorMessage: text("error_message"),
+    metadata: jsonb("metadata").$type(),
+    occurredAt: timestamp("occurred_at").defaultNow().notNull(),
+});
+export const sessionJourneyEvents = pgTable("session_journey_events", {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+        .references(() => users.id, { onDelete: "set null" }),
+    authUserId: varchar("auth_user_id")
+        .references(() => authUsers.id, { onDelete: "set null" }),
+    sessionId: integer("session_id")
+        .references(() => roleplaySession.id, { onDelete: "set null" }),
+    step: text("step")
+        .$type()
+        .notNull(),
+    mode: text("mode")
+        .$type(),
+    device: text("device")
+        .$type(),
+    language: varchar("language"),
+    avatarId: varchar("avatar_id"),
+    metadata: jsonb("metadata").$type(),
+    occurredAt: timestamp("occurred_at").defaultNow().notNull(),
+});
+export const budgetGuards = pgTable("budget_guards", {
+    id: serial("id").primaryKey(),
+    guardType: text("guard_type")
+        .$type()
+        .notNull()
+        .unique(),
+    limitValue: real("limit_value").notNull(),
+    currency: varchar("currency").default("USD"),
+    isActive: boolean("is_active").default(true),
+    fallbackAction: text("fallback_action")
+        .$type()
+        .default("warn"),
+    description: text("description"),
+    updatedBy: varchar("updated_by")
+        .references(() => authUsers.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+export const budgetAlerts = pgTable("budget_alerts", {
+    id: serial("id").primaryKey(),
+    guardId: integer("guard_id")
+        .references(() => budgetGuards.id, { onDelete: "cascade" }),
+    alertType: text("alert_type")
+        .$type()
+        .notNull(),
+    thresholdPercent: real("threshold_percent"),
+    currentValue: real("current_value"),
+    limitValue: real("limit_value"),
+    message: text("message"),
+    acknowledged: boolean("acknowledged").default(false),
+    acknowledgedBy: varchar("acknowledged_by")
+        .references(() => authUsers.id, { onDelete: "set null" }),
+    occurredAt: timestamp("occurred_at").defaultNow().notNull(),
+});
+export const adminSettings = pgTable("admin_settings", {
+    key: varchar("key").primaryKey(),
+    value: jsonb("value").notNull(),
+    category: text("category")
+        .$type()
+        .notNull()
+        .default("general"),
+    description: text("description"),
+    updatedBy: varchar("updated_by")
+        .references(() => authUsers.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+export const userMediaPreferences = pgTable("user_media_preferences", {
+    id: serial("id").primaryKey(),
+    authUserId: varchar("auth_user_id")
+        .notNull()
+        .unique()
+        .references(() => authUsers.id, { onDelete: "cascade" }),
+    mediaMode: text("media_mode")
+        .$type()
+        .notNull()
+        .default("both"),
+    effectiveFrom: timestamp("effective_from").defaultNow().notNull(),
+    updatedBy: varchar("updated_by")
+        .references(() => authUsers.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+export const apiCostDailyRollup = pgTable("api_cost_daily_rollup", {
+    id: serial("id").primaryKey(),
+    service: text("service")
+        .$type()
+        .notNull(),
+    date: timestamp("date").notNull(),
+    totalRequests: integer("total_requests").default(0),
+    totalTokensIn: integer("total_tokens_in").default(0),
+    totalTokensOut: integer("total_tokens_out").default(0),
+    totalCost: real("total_cost").default(0),
+    currency: varchar("currency").default("USD"),
+    computedAt: timestamp("computed_at").defaultNow().notNull(),
+});
+// Admin table relations
+export const userRolesRelations = relations(userRoles, ({ one }) => ({
+    user: one(authUsers, {
+        fields: [userRoles.authUserId],
+        references: [authUsers.id],
+    }),
+    assignedByUser: one(authUsers, {
+        fields: [userRoles.assignedBy],
+        references: [authUsers.id],
+    }),
+}));
+export const userLoginEventsRelations = relations(userLoginEvents, ({ one }) => ({
+    user: one(authUsers, {
+        fields: [userLoginEvents.authUserId],
+        references: [authUsers.id],
+    }),
+}));
+export const apiUsageEventsRelations = relations(apiUsageEvents, ({ one }) => ({
+    user: one(users, {
+        fields: [apiUsageEvents.userId],
+        references: [users.id],
+    }),
+    authUser: one(authUsers, {
+        fields: [apiUsageEvents.authUserId],
+        references: [authUsers.id],
+    }),
+    session: one(roleplaySession, {
+        fields: [apiUsageEvents.sessionId],
+        references: [roleplaySession.id],
+    }),
+}));
+export const userMediaPreferencesRelations = relations(userMediaPreferences, ({ one }) => ({
+    user: one(authUsers, {
+        fields: [userMediaPreferences.authUserId],
+        references: [authUsers.id],
+    }),
+}));
+// =====================
+// Interview Intelligence Tables
+// =====================
+// Companies - for company-specific interview patterns
+export const companies = pgTable("companies", {
+    id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
+    name: text("name").notNull().unique(),
+    country: text("country"),
+    sector: text("sector"),
+    tier: text("tier").$type().default("other"),
+    archetype: text("archetype").$type(),
+    aliases: jsonb("aliases").$type(),
+    interviewComponents: jsonb("interview_components").$type(),
+    confidence: text("confidence").$type().default("medium"),
+    tags: jsonb("tags").$type(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+// Role Archetypes - defines role types with skill dimensions and interview patterns
+export const roleArchetypes = pgTable("role_archetypes", {
+    id: varchar("id").primaryKey(),
+    name: varchar("name").notNull(),
+    description: text("description"),
+    primarySkillDimensions: jsonb("primary_skill_dimensions").$type(),
+    commonInterviewTypes: jsonb("common_interview_types").$type(),
+    typicalTaskTypes: jsonb("typical_task_types").$type(),
+    commonFailureModes: jsonb("common_failure_modes").$type(),
+    roleCategory: text("role_category").$type(),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// Role Interview Structure Defaults - phase structure and scoring weights per archetype + seniority
+export const roleInterviewStructureDefaults = pgTable("role_interview_structure_defaults", {
+    id: serial("id").primaryKey(),
+    roleArchetypeId: varchar("role_archetype_id")
+        .notNull()
+        .references(() => roleArchetypes.id, { onDelete: "cascade" }),
+    seniority: text("seniority")
+        .$type()
+        .notNull(),
+    phasesJson: jsonb("phases_json").$type().notNull(),
+    emphasisWeightsJson: jsonb("emphasis_weights_json").$type().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// Role Task Blueprints - task prompts, expected signals, and probe trees per role archetype
+export const roleTaskBlueprints = pgTable("role_task_blueprints", {
+    id: serial("id").primaryKey(),
+    roleArchetypeId: varchar("role_archetype_id")
+        .notNull()
+        .references(() => roleArchetypes.id, { onDelete: "cascade" }),
+    taskType: varchar("task_type").notNull(),
+    difficultyBand: varchar("difficulty_band").default("entry-mid"),
+    promptTemplate: text("prompt_template").notNull(),
+    expectedSignalsJson: jsonb("expected_signals_json").$type().default([]),
+    probeTreeJson: jsonb("probe_tree_json").$type().default([]),
+    tagsJson: jsonb("tags_json").$type().default([]),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// Question Patterns - templated questions with probe trees
+export const questionPatterns = pgTable("question_patterns", {
+    id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
+    patternType: text("pattern_type")
+        .$type()
+        .notNull(),
+    roleCategory: text("role_category")
+        .$type(),
+    interviewType: text("interview_type")
+        .$type(),
+    template: text("template").notNull(),
+    probeTree: jsonb("probe_tree").$type(),
+    tags: jsonb("tags").$type(),
+    sourceType: text("source_type").$type().default("curated"),
+    sourceRef: text("source_ref"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+// Question Bank - stores generated questions for reuse
+export const questionBank = pgTable("question_bank", {
+    id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
+    roleKitId: integer("role_kit_id").references(() => roleKits.id, { onDelete: "set null" }),
+    companyId: varchar("company_id").references(() => companies.id, { onDelete: "set null" }),
+    interviewType: text("interview_type")
+        .$type(),
+    question: text("question").notNull(),
+    questionType: text("question_type")
+        .$type()
+        .notNull(),
+    topic: text("topic"),
+    followUps: jsonb("follow_ups").$type(),
+    assessmentDimension: text("assessment_dimension"),
+    jdSourceTopics: jsonb("jd_source_topics").$type(),
+    difficulty: text("difficulty").$type().default("medium"),
+    skillsTested: jsonb("skills_tested").$type().default([]),
+    difficultyBand: text("difficulty_band").$type(),
+    roleContext: jsonb("role_context").$type().default({}),
+    usageCount: integer("usage_count").default(0),
+    avgRating: real("avg_rating"),
+    sourceType: text("source_type").$type().default("generated"),
+    sourceJobTargetId: varchar("source_job_target_id").references(() => jobTargets.id, { onDelete: "set null" }),
+    sourceSessionId: integer("source_session_id"),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+    roleKitIdx: index("question_bank_role_kit_idx").on(table.roleKitId),
+    companyIdx: index("question_bank_company_idx").on(table.companyId),
+    interviewTypeIdx: index("question_bank_interview_type_idx").on(table.interviewType),
+}));
+// Company Role Blueprints - company-specific interview configurations
+export const companyRoleBlueprints = pgTable("company_role_blueprints", {
+    id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
+    companyId: varchar("company_id").references(() => companies.id, { onDelete: "cascade" }),
+    roleCategory: text("role_category")
+        .$type()
+        .notNull(),
+    seniority: text("seniority").$type(),
+    skillFocus: jsonb("skill_focus").$type(),
+    questionPatternIds: jsonb("question_pattern_ids").$type(),
+    rubricOverrides: jsonb("rubric_overrides").$type(),
+    interviewRounds: jsonb("interview_rounds").$type(),
+    notes: text("notes"),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// Job Practice Links - connects saved jobs to practice sessions
+export const jobPracticeLinks = pgTable("job_practice_links", {
+    id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
+    jobTargetId: varchar("job_target_id")
+        .notNull()
+        .references(() => jobTargets.id, { onDelete: "cascade" }),
+    interviewConfigId: integer("interview_config_id")
+        .references(() => interviewConfigs.id, { onDelete: "set null" }),
+    interviewSessionId: integer("interview_session_id")
+        .references(() => interviewSessions.id, { onDelete: "set null" }),
+    exerciseSessionId: integer("exercise_session_id")
+        .references(() => exerciseSessions.id, { onDelete: "set null" }),
+    sessionType: text("session_type").$type().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+// User Skill Memory - tracks user improvement over time per dimension
+export const userSkillMemory = pgTable("user_skill_memory", {
+    id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
+    userId: varchar("user_id")
+        .notNull()
+        .references(() => authUsers.id, { onDelete: "cascade" }),
+    roleCategory: text("role_category")
+        .$type(),
+    dimension: text("dimension").notNull(),
+    baselineScore: real("baseline_score"),
+    latestScore: real("latest_score"),
+    trend: jsonb("trend").$type(),
+    commonIssues: jsonb("common_issues").$type(),
+    resolvedIssues: jsonb("resolved_issues").$type(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// Interview Intelligence relations
+export const companiesRelations = relations(companies, ({ many }) => ({
+    blueprints: many(companyRoleBlueprints),
+}));
+export const roleArchetypesRelations = relations(roleArchetypes, ({ many }) => ({
+    structureDefaults: many(roleInterviewStructureDefaults),
+    taskBlueprints: many(roleTaskBlueprints),
+}));
+export const roleTaskBlueprintsRelations = relations(roleTaskBlueprints, ({ one }) => ({
+    roleArchetype: one(roleArchetypes, {
+        fields: [roleTaskBlueprints.roleArchetypeId],
+        references: [roleArchetypes.id],
+    }),
+}));
+export const roleInterviewStructureDefaultsRelations = relations(roleInterviewStructureDefaults, ({ one }) => ({
+    roleArchetype: one(roleArchetypes, {
+        fields: [roleInterviewStructureDefaults.roleArchetypeId],
+        references: [roleArchetypes.id],
+    }),
+}));
+export const companyRoleBlueprintsRelations = relations(companyRoleBlueprints, ({ one }) => ({
+    company: one(companies, {
+        fields: [companyRoleBlueprints.companyId],
+        references: [companies.id],
+    }),
+}));
+export const jobPracticeLinksRelations = relations(jobPracticeLinks, ({ one }) => ({
+    jobTarget: one(jobTargets, {
+        fields: [jobPracticeLinks.jobTargetId],
+        references: [jobTargets.id],
+    }),
+    interviewConfig: one(interviewConfigs, {
+        fields: [jobPracticeLinks.interviewConfigId],
+        references: [interviewConfigs.id],
+    }),
+    interviewSession: one(interviewSessions, {
+        fields: [jobPracticeLinks.interviewSessionId],
+        references: [interviewSessions.id],
+    }),
+    exerciseSession: one(exerciseSessions, {
+        fields: [jobPracticeLinks.exerciseSessionId],
+        references: [exerciseSessions.id],
+    }),
+}));
+export const userSkillMemoryRelations = relations(userSkillMemory, ({ one }) => ({
+    user: one(authUsers, {
+        fields: [userSkillMemory.userId],
+        references: [authUsers.id],
+    }),
+}));
+// =====================
+// Hiready Platform Tables
+// =====================
+// Employer companies (for assessment links)
+export const employerCompanies = pgTable("employer_companies", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    domain: text("domain"),
+    logoUrl: text("logo_url"),
+    plan: text("plan").$type().default("free"),
+    ownerUserId: varchar("owner_user_id").references(() => authUsers.id, { onDelete: "set null" }),
+    settings: jsonb("settings").$type().default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+});
+// Company team members
+export const employerCompanyUsers = pgTable("employer_company_users", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    companyId: uuid("company_id").notNull().references(() => employerCompanies.id, { onDelete: "cascade" }),
+    userId: varchar("user_id").notNull().references(() => authUsers.id, { onDelete: "cascade" }),
+    role: text("role").$type().default("member"),
+    invitedAt: timestamp("invited_at").defaultNow(),
+    joinedAt: timestamp("joined_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+});
+// Employer job postings with assessment configuration
+export const employerJobs = pgTable("employer_jobs", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    companyId: uuid("company_id").notNull().references(() => employerCompanies.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    jdText: text("jd_text"),
+    jdUrl: text("jd_url"),
+    roleKitId: integer("role_kit_id").references(() => roleKits.id, { onDelete: "set null" }),
+    roleArchetypeId: varchar("role_archetype_id"),
+    assessmentConfig: jsonb("assessment_config").$type().default({ interviewTypes: ["hr", "technical"], totalDuration: 45 }),
+    status: text("status").$type().default("active"),
+    applyLinkSlug: varchar("apply_link_slug").unique(),
+    candidateCount: integer("candidate_count").default(0),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+});
+// Candidates who applied via employer assessment links
+export const employerCandidates = pgTable("employer_candidates", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    jobId: uuid("job_id").notNull().references(() => employerJobs.id, { onDelete: "cascade" }),
+    userId: varchar("user_id").notNull().references(() => authUsers.id, { onDelete: "cascade" }),
+    hireadyIndexScore: integer("hiready_index_score"),
+    status: text("status").$type().default("pending"),
+    completedInterviewTypes: jsonb("completed_interview_types").$type().default([]),
+    submittedAt: timestamp("submitted_at"),
+    reviewedAt: timestamp("reviewed_at"),
+    reviewerNotes: text("reviewer_notes"),
+    createdAt: timestamp("created_at").defaultNow(),
+});
+// User subscriptions
+export const subscriptions = pgTable("subscriptions", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: varchar("user_id").notNull().references(() => authUsers.id, { onDelete: "cascade" }),
+    planType: text("plan_type").$type().notNull(),
+    status: text("status").$type().notNull().default("active"),
+    roleContext: jsonb("role_context").$type(),
+    jobTargetId: varchar("job_target_id").references(() => jobTargets.id, { onDelete: "set null" }),
+    roleKitId: integer("role_kit_id").references(() => roleKits.id, { onDelete: "set null" }),
+    unlockedInterviewTypes: jsonb("unlocked_interview_types").$type().default([]),
+    startedAt: timestamp("started_at").defaultNow(),
+    expiresAt: timestamp("expires_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+});
+// Payment records
+export const payments = pgTable("payments", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: varchar("user_id").notNull().references(() => authUsers.id, { onDelete: "cascade" }),
+    subscriptionId: uuid("subscription_id").references(() => subscriptions.id, { onDelete: "set null" }),
+    provider: text("provider").notNull().default("razorpay"),
+    providerRef: text("provider_ref"),
+    amount: integer("amount").notNull(),
+    currency: text("currency").notNull().default("INR"),
+    status: text("status").$type().notNull().default("created"),
+    meta: jsonb("meta").$type().default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+});
+// Consolidated Hiready Index per role/job
+export const hireadyRoleIndex = pgTable("hiready_role_index", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: varchar("user_id").notNull().references(() => authUsers.id, { onDelete: "cascade" }),
+    jobTargetId: varchar("job_target_id").references(() => jobTargets.id, { onDelete: "cascade" }),
+    roleKitId: integer("role_kit_id").references(() => roleKits.id, { onDelete: "set null" }),
+    employerJobId: uuid("employer_job_id").references(() => employerJobs.id, { onDelete: "set null" }),
+    overallScore: integer("overall_score").notNull(),
+    dimensionScores: jsonb("dimension_scores").$type().notNull(),
+    completedInterviewTypes: jsonb("completed_interview_types").$type().notNull().default([]),
+    totalSessions: integer("total_sessions").default(0),
+    sessionBreakdown: jsonb("session_breakdown").$type().default([]),
+    strengths: jsonb("strengths").$type().default([]),
+    improvements: jsonb("improvements").$type().default([]),
+    readinessLevel: text("readiness_level").$type(),
+    shareToken: varchar("share_token").unique(),
+    isPublic: boolean("is_public").default(false),
+    lastUpdatedAt: timestamp("last_updated_at").defaultNow(),
+    createdAt: timestamp("created_at").defaultNow(),
+});
+// Hiready Platform Relations
+export const employerCompaniesRelations = relations(employerCompanies, ({ one, many }) => ({
+    owner: one(authUsers, {
+        fields: [employerCompanies.ownerUserId],
+        references: [authUsers.id],
+    }),
+    users: many(employerCompanyUsers),
+    jobs: many(employerJobs),
+}));
+export const employerJobsRelations = relations(employerJobs, ({ one, many }) => ({
+    company: one(employerCompanies, {
+        fields: [employerJobs.companyId],
+        references: [employerCompanies.id],
+    }),
+    roleKit: one(roleKits, {
+        fields: [employerJobs.roleKitId],
+        references: [roleKits.id],
+    }),
+    candidates: many(employerCandidates),
+}));
+export const employerCandidatesRelations = relations(employerCandidates, ({ one }) => ({
+    job: one(employerJobs, {
+        fields: [employerCandidates.jobId],
+        references: [employerJobs.id],
+    }),
+    user: one(authUsers, {
+        fields: [employerCandidates.userId],
+        references: [authUsers.id],
+    }),
+}));
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+    user: one(authUsers, {
+        fields: [subscriptions.userId],
+        references: [authUsers.id],
+    }),
+    jobTarget: one(jobTargets, {
+        fields: [subscriptions.jobTargetId],
+        references: [jobTargets.id],
+    }),
+    roleKit: one(roleKits, {
+        fields: [subscriptions.roleKitId],
+        references: [roleKits.id],
+    }),
+}));
+export const paymentsRelations = relations(payments, ({ one }) => ({
+    user: one(authUsers, {
+        fields: [payments.userId],
+        references: [authUsers.id],
+    }),
+    subscription: one(subscriptions, {
+        fields: [payments.subscriptionId],
+        references: [subscriptions.id],
+    }),
+}));
+export const hireadyRoleIndexRelations = relations(hireadyRoleIndex, ({ one }) => ({
+    user: one(authUsers, {
+        fields: [hireadyRoleIndex.userId],
+        references: [authUsers.id],
+    }),
+    jobTarget: one(jobTargets, {
+        fields: [hireadyRoleIndex.jobTargetId],
+        references: [jobTargets.id],
+    }),
+    roleKit: one(roleKits, {
+        fields: [hireadyRoleIndex.roleKitId],
+        references: [roleKits.id],
+    }),
+    employerJob: one(employerJobs, {
+        fields: [hireadyRoleIndex.employerJobId],
+        references: [employerJobs.id],
+    }),
+}));
+// =====================
+// SEO Pages System
+// =====================
+export const seoPages = pgTable("seo_pages", {
+    id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
+    pageType: text("page_type").$type().notNull(),
+    slug: text("slug").notNull().unique(),
+    title: text("title").notNull(),
+    metaTitle: text("meta_title"),
+    metaDescription: text("meta_description"),
+    h1: text("h1").notNull(),
+    status: text("status").$type().notNull().default("draft"),
+    roleArchetypeId: varchar("role_archetype_id").references(() => roleArchetypes.id, { onDelete: "set null" }),
+    companyId: varchar("company_id").references(() => companies.id, { onDelete: "set null" }),
+    skillCategory: text("skill_category"),
+    canonicalUrl: text("canonical_url"),
+    ogTitle: text("og_title"),
+    ogDescription: text("og_description"),
+    ogImageUrl: text("og_image_url"),
+    jsonLd: jsonb("json_ld"),
+    lastGeneratedAt: timestamp("last_generated_at"),
+    publishedAt: timestamp("published_at"),
+    refreshDueAt: timestamp("refresh_due_at"),
+    generationVersion: integer("generation_version").default(1),
+    viewCount: integer("view_count").default(0),
+    practiceStarts: integer("practice_starts").default(0),
+    avgTimeOnPageSec: integer("avg_time_on_page_sec"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+export const seoPageSections = pgTable("seo_page_sections", {
+    id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
+    seoPageId: varchar("seo_page_id").notNull().references(() => seoPages.id, { onDelete: "cascade" }),
+    sectionOrder: integer("section_order").notNull(),
+    headingType: text("heading_type").$type().notNull().default("h2"),
+    heading: text("heading").notNull(),
+    content: text("content").notNull(),
+    sourceTable: text("source_table"),
+    sourceData: jsonb("source_data"),
+    isCta: boolean("is_cta").default(false),
+    ctaType: text("cta_type").$type(),
+    ctaLink: text("cta_link"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+export const seoInternalLinks = pgTable("seo_internal_links", {
+    id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
+    sourcePageId: varchar("source_page_id").notNull().references(() => seoPages.id, { onDelete: "cascade" }),
+    targetPageId: varchar("target_page_id").notNull().references(() => seoPages.id, { onDelete: "cascade" }),
+    anchorText: text("anchor_text").notNull(),
+    linkContext: text("link_context"),
+    linkType: text("link_type").$type().notNull(),
+    positionOrder: integer("position_order"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export const seoGenerationQueue = pgTable("seo_generation_queue", {
+    id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
+    pageType: text("page_type").notNull(),
+    referenceId: varchar("reference_id"),
+    referenceData: jsonb("reference_data"),
+    priority: integer("priority").default(0),
+    status: text("status").$type().notNull().default("pending"),
+    errorMessage: text("error_message"),
+    seoPageId: varchar("seo_page_id").references(() => seoPages.id, { onDelete: "set null" }),
+    scheduledFor: timestamp("scheduled_for"),
+    startedAt: timestamp("started_at"),
+    completedAt: timestamp("completed_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export const seoAnalyticsEvents = pgTable("seo_analytics_events", {
+    id: varchar("id").primaryKey().default(sql `gen_random_uuid()`),
+    seoPageId: varchar("seo_page_id").references(() => seoPages.id, { onDelete: "set null" }),
+    eventType: text("event_type").$type().notNull(),
+    eventData: jsonb("event_data"),
+    userId: varchar("user_id").references(() => authUsers.id, { onDelete: "set null" }),
+    sessionId: text("session_id"),
+    referrer: text("referrer"),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+// SEO Relations
+export const seoPagesRelations = relations(seoPages, ({ one, many }) => ({
+    roleArchetype: one(roleArchetypes, {
+        fields: [seoPages.roleArchetypeId],
+        references: [roleArchetypes.id],
+    }),
+    company: one(companies, {
+        fields: [seoPages.companyId],
+        references: [companies.id],
+    }),
+    sections: many(seoPageSections),
+    outgoingLinks: many(seoInternalLinks, { relationName: "sourceLinks" }),
+    incomingLinks: many(seoInternalLinks, { relationName: "targetLinks" }),
+    analyticsEvents: many(seoAnalyticsEvents),
+}));
+export const seoPageSectionsRelations = relations(seoPageSections, ({ one }) => ({
+    seoPage: one(seoPages, {
+        fields: [seoPageSections.seoPageId],
+        references: [seoPages.id],
+    }),
+}));
+export const seoInternalLinksRelations = relations(seoInternalLinks, ({ one }) => ({
+    sourcePage: one(seoPages, {
+        fields: [seoInternalLinks.sourcePageId],
+        references: [seoPages.id],
+        relationName: "sourceLinks",
+    }),
+    targetPage: one(seoPages, {
+        fields: [seoInternalLinks.targetPageId],
+        references: [seoPages.id],
+        relationName: "targetLinks",
+    }),
+}));
+export const seoAnalyticsEventsRelations = relations(seoAnalyticsEvents, ({ one }) => ({
+    seoPage: one(seoPages, {
+        fields: [seoAnalyticsEvents.seoPageId],
+        references: [seoPages.id],
+    }),
+    user: one(authUsers, {
+        fields: [seoAnalyticsEvents.userId],
+        references: [authUsers.id],
+    }),
+}));
+// =====================
 // Insert Schemas
 // =====================
+// SEO Insert Schemas
+export const insertSeoPageSchema = createInsertSchema(seoPages).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertSeoPageSectionSchema = createInsertSchema(seoPageSections).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertSeoInternalLinkSchema = createInsertSchema(seoInternalLinks).omit({ id: true, createdAt: true });
+export const insertSeoGenerationQueueSchema = createInsertSchema(seoGenerationQueue).omit({ id: true, createdAt: true });
+export const insertSeoAnalyticsEventSchema = createInsertSchema(seoAnalyticsEvents).omit({ id: true, createdAt: true });
+// Interview Intelligence Insert Schemas
+export const insertCompanySchema = createInsertSchema(companies).omit({ createdAt: true });
+export const insertQuestionPatternSchema = createInsertSchema(questionPatterns).omit({ createdAt: true });
+export const insertQuestionBankSchema = createInsertSchema(questionBank).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCompanyRoleBlueprintSchema = createInsertSchema(companyRoleBlueprints).omit({ updatedAt: true });
+export const insertJobPracticeLinkSchema = createInsertSchema(jobPracticeLinks).omit({ createdAt: true });
+export const insertUserSkillMemorySchema = createInsertSchema(userSkillMemory).omit({ updatedAt: true });
+export const insertRoleArchetypeSchema = createInsertSchema(roleArchetypes).omit({ createdAt: true, updatedAt: true });
+export const insertRoleInterviewStructureDefaultSchema = createInsertSchema(roleInterviewStructureDefaults).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCustomScenarioSchema = createInsertSchema(customScenarios).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertScenarioSchema = createInsertSchema(scenarios).omit({ id: true });
 export const insertPersonaSchema = createInsertSchema(personas).omit({ id: true });
@@ -421,3 +1728,35 @@ export const insertSkillDimensionAssessmentSchema = createInsertSchema(skillDime
 export const insertSkillAssessmentSummarySchema = createInsertSchema(skillAssessmentSummary).omit({ id: true, createdAt: true });
 export const insertCustomScenarioSkillMappingSchema = createInsertSchema(customScenarioSkillMappings).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertCulturalStylePresetSchema = createInsertSchema(culturalStylePresets).omit({ createdAt: true, updatedAt: true });
+export const insertPresentationScenarioSchema = createInsertSchema(presentationScenarios).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertPresentationSessionSchema = createInsertSchema(presentationSessions).omit({ id: true, createdAt: true });
+export const insertPresentationFeedbackSchema = createInsertSchema(presentationFeedback).omit({ id: true, createdAt: true });
+// Job Targets Insert Schemas
+export const insertJobTargetSchema = createInsertSchema(jobTargets).omit({ createdAt: true, updatedAt: true });
+export const insertUserSkillPatternSchema = createInsertSchema(userSkillPatterns).omit({ id: true, createdAt: true, updatedAt: true });
+// Interview Practice Lab Insert Schemas
+export const insertRoleKitSchema = createInsertSchema(roleKits).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertInterviewRubricSchema = createInsertSchema(interviewRubrics).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertUserDocumentSchema = createInsertSchema(userDocuments).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertUserProfileExtractedSchema = createInsertSchema(userProfileExtracted).omit({ id: true });
+export const insertInterviewConfigSchema = createInsertSchema(interviewConfigs).omit({ id: true, createdAt: true });
+export const insertInterviewPlanSchema = createInsertSchema(interviewPlans).omit({ id: true, createdAt: true });
+export const insertInterviewSessionSchema = createInsertSchema(interviewSessions).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertInterviewAnalysisSchema = createInsertSchema(interviewAnalysis).omit({ id: true, createdAt: true });
+export const insertInterviewArtifactSchema = createInsertSchema(interviewArtifacts).omit({ id: true, createdAt: true });
+// Interview Exercise Mode Insert Schemas
+export const insertCaseTemplateSchema = createInsertSchema(caseTemplates).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCodingExerciseSchema = createInsertSchema(codingExercises).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertExerciseSessionSchema = createInsertSchema(exerciseSessions).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertExerciseRubricSchema = createInsertSchema(exerciseRubrics).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertExerciseAnalysisSchema = createInsertSchema(exerciseAnalysis).omit({ id: true, createdAt: true });
+// Admin Insert Schemas
+export const insertUserRoleSchema = createInsertSchema(userRoles).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertUserLoginEventSchema = createInsertSchema(userLoginEvents).omit({ id: true });
+export const insertApiUsageEventSchema = createInsertSchema(apiUsageEvents).omit({ id: true });
+export const insertSessionJourneyEventSchema = createInsertSchema(sessionJourneyEvents).omit({ id: true });
+export const insertBudgetGuardSchema = createInsertSchema(budgetGuards).omit({ id: true });
+export const insertBudgetAlertSchema = createInsertSchema(budgetAlerts).omit({ id: true });
+export const insertAdminSettingSchema = createInsertSchema(adminSettings).omit({ createdAt: true, updatedAt: true });
+export const insertUserMediaPreferenceSchema = createInsertSchema(userMediaPreferences).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertApiCostDailyRollupSchema = createInsertSchema(apiCostDailyRollup).omit({ id: true });
