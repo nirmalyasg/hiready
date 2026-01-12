@@ -106,7 +106,7 @@ export default function PricingPage() {
 
       {/* Hero Section */}
       <section className="pt-[100px] lg:pt-[120px] pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(203,108,230,0.2),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(36,196,184,0.1),transparent_50%)]" />
         
@@ -181,15 +181,15 @@ export default function PricingPage() {
                   
                   <div className="flex items-center gap-3 mb-4">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      plan.popular ? 'bg-[#24c4b8]' : 'bg-[#6b1fad]'
+                      plan.popular ? 'bg-[#24c4b8]' : 'bg-[#cb6ce6]'
                     }`}>
                       <Icon className="w-5 h-5 text-white" />
                     </div>
-                    <h3 className="font-bold text-[#1a1a2e] text-xl">{plan.name}</h3>
+                    <h3 className="font-bold text-[#000000] text-xl">{plan.name}</h3>
                   </div>
                   
                   <div className="mb-4">
-                    <span className="text-4xl font-bold text-[#1a1a2e]">
+                    <span className="text-4xl font-bold text-[#000000]">
                       {plan.currency}{plan.price}
                     </span>
                     <span className="text-gray-500"> {plan.period}</span>
@@ -201,7 +201,7 @@ export default function PricingPage() {
                     {plan.features.map((feature, j) => (
                       <li key={j} className="flex items-start gap-3">
                         <Check className="w-5 h-5 text-[#24c4b8] flex-shrink-0 mt-0.5" />
-                        <span className="text-[#1a1a2e] text-sm">{feature}</span>
+                        <span className="text-[#000000] text-sm">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -211,7 +211,7 @@ export default function PricingPage() {
                       className={`w-full h-12 font-semibold group ${
                         plan.popular 
                           ? 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white shadow-lg shadow-[#24c4b8]/25' 
-                          : 'bg-[#6b1fad] hover:bg-[#5a1a91] text-white'
+                          : 'bg-[#cb6ce6] hover:bg-[#a855f7] text-white'
                       }`}
                     >
                       {plan.cta}
@@ -229,16 +229,16 @@ export default function PricingPage() {
       <section className="py-20 px-6 bg-white">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <span className="inline-block text-[#6b1fad] text-sm font-semibold tracking-wider uppercase mb-3">FAQ</span>
-            <h2 className="text-3xl font-bold text-[#1a1a2e]">
+            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">FAQ</span>
+            <h2 className="text-3xl font-bold text-[#000000]">
               Frequently Asked Questions
             </h2>
           </div>
           
           <div className="space-y-4">
             {faqs.map((faq, i) => (
-              <div key={i} className="bg-[#f8f7fc] rounded-2xl p-6 border border-gray-100 hover:border-[#6b1fad]/30 transition-all">
-                <h3 className="font-semibold text-[#1a1a2e] mb-2">{faq.q}</h3>
+              <div key={i} className="bg-[#f8f7fc] rounded-2xl p-6 border border-gray-100 hover:border-[#cb6ce6]/30 transition-all">
+                <h3 className="font-semibold text-[#000000] mb-2">{faq.q}</h3>
                 <p className="text-gray-500">{faq.a}</p>
               </div>
             ))}
@@ -248,7 +248,7 @@ export default function PricingPage() {
 
       {/* CTA Section */}
       <section className="py-24 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(203,108,230,0.1),transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(36,196,184,0.08),transparent_50%)]" />
         
@@ -270,7 +270,7 @@ export default function PricingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#1a1a2e] border-t border-white/10 text-white py-8 px-6">
+      <footer className="bg-[#000000] border-t border-white/10 text-white py-8 px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
             <img src={logoImg} alt="Hiready" className="h-8 brightness-0 invert" />

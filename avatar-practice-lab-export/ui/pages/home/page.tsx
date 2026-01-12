@@ -37,7 +37,7 @@ export default function HomePage() {
       icon: GraduationCap, 
       title: 'Students & Fresh Grads', 
       desc: 'Nail your first job interview with AI-powered practice',
-      color: 'from-[#cb6ce6] to-[#6b1fad]'
+      color: 'from-[#cb6ce6] to-[#cb6ce6]'
     },
     { 
       icon: Briefcase, 
@@ -49,7 +49,7 @@ export default function HomePage() {
       icon: Building2, 
       title: 'Enterprise Teams', 
       desc: 'Scale interview prep across your entire organization',
-      color: 'from-[#6b1fad] to-[#4a1578]'
+      color: 'from-[#cb6ce6] to-[#4a1578]'
     },
   ];
 
@@ -140,7 +140,7 @@ export default function HomePage() {
 
       {/* Hero Section - Split Layout */}
       <section className="pt-[100px] lg:pt-[120px] pb-0 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(203,108,230,0.2),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(36,196,184,0.1),transparent_50%)]" />
         
@@ -211,11 +211,11 @@ export default function HomePage() {
                   {/* Floating score card */}
                   <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl p-4 shadow-2xl border border-gray-100">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-[#cb6ce6] to-[#6b1fad] rounded-xl flex items-center justify-center">
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#cb6ce6] to-[#cb6ce6] rounded-xl flex items-center justify-center">
                         <TrendingUp className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <div className="text-2xl font-bold text-[#1a1a2e]">78</div>
+                        <div className="text-2xl font-bold text-[#000000]">78</div>
                         <div className="text-xs text-gray-500">Readiness Score</div>
                       </div>
                     </div>
@@ -244,7 +244,7 @@ export default function HomePage() {
           </p>
           <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-6">
             {companies.map((company) => (
-              <span key={company} className="text-xl font-semibold text-[#1a1a2e]/25 hover:text-[#6b1fad]/60 transition-colors">
+              <span key={company} className="text-xl font-semibold text-[#000000]/25 hover:text-[#cb6ce6]/60 transition-colors">
                 {company}
               </span>
             ))}
@@ -260,10 +260,10 @@ export default function HomePage() {
               const Icon = metric.icon;
               return (
                 <div key={i} className="text-center">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-[#6b1fad]/10 rounded-xl mb-4">
-                    <Icon className="w-6 h-6 text-[#6b1fad]" />
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-[#cb6ce6]/10 rounded-xl mb-4">
+                    <Icon className="w-6 h-6 text-[#cb6ce6]" />
                   </div>
-                  <div className="text-4xl font-bold text-[#1a1a2e] mb-1">{metric.value}</div>
+                  <div className="text-4xl font-bold text-[#000000] mb-1">{metric.value}</div>
                   <div className="text-gray-500">{metric.label}</div>
                 </div>
               );
@@ -276,7 +276,7 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e] mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#000000] mb-4">
               Built for everyone preparing for interviews
             </h2>
             <p className="text-lg text-gray-500 max-w-2xl mx-auto">
@@ -293,7 +293,7 @@ export default function HomePage() {
                   <div className={`w-14 h-14 bg-gradient-to-br ${persona.color} rounded-2xl flex items-center justify-center mb-5 shadow-lg`}>
                     <Icon className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-[#1a1a2e] mb-2">{persona.title}</h3>
+                  <h3 className="text-xl font-bold text-[#000000] mb-2">{persona.title}</h3>
                   <p className="text-gray-500">{persona.desc}</p>
                   <ChevronRight className="w-5 h-5 text-gray-400 absolute bottom-8 right-8 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                 </div>
@@ -307,8 +307,8 @@ export default function HomePage() {
       <section className="py-20 bg-[#f8f7fc]">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block text-[#6b1fad] text-sm font-semibold tracking-wider uppercase mb-3">How It Works</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e] mb-4">
+            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">How It Works</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#000000] mb-4">
               Ready in 3 simple steps
             </h2>
             <p className="text-lg text-gray-500">No signup required. Start practicing in under a minute.</p>
@@ -316,20 +316,20 @@ export default function HomePage() {
           
           <div className="relative">
             {/* Connection line */}
-            <div className="hidden md:block absolute top-1/2 left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-[#6b1fad]/20 via-[#cb6ce6]/20 to-[#24c4b8]/20 -translate-y-1/2" />
+            <div className="hidden md:block absolute top-1/2 left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-[#cb6ce6]/20 via-[#cb6ce6]/20 to-[#24c4b8]/20 -translate-y-1/2" />
             
             <div className="grid md:grid-cols-3 gap-8 relative">
               {steps.map((step, i) => {
                 const Icon = step.icon;
                 return (
                   <div key={i} className="relative text-center group">
-                    <div className="relative inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-xl shadow-[#6b1fad]/5 mb-6 group-hover:shadow-2xl group-hover:shadow-[#24c4b8]/10 transition-all duration-300">
-                      <Icon className="w-9 h-9 text-[#6b1fad] group-hover:text-[#24c4b8] transition-colors" />
+                    <div className="relative inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-xl shadow-[#cb6ce6]/5 mb-6 group-hover:shadow-2xl group-hover:shadow-[#24c4b8]/10 transition-all duration-300">
+                      <Icon className="w-9 h-9 text-[#cb6ce6] group-hover:text-[#24c4b8] transition-colors" />
                       <div className="absolute -top-2 -right-2 w-7 h-7 bg-[#24c4b8] rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg">
                         {step.num.replace('0', '')}
                       </div>
                     </div>
-                    <h3 className="text-xl font-bold text-[#1a1a2e] mb-2">{step.title}</h3>
+                    <h3 className="text-xl font-bold text-[#000000] mb-2">{step.title}</h3>
                     <p className="text-gray-500">{step.desc}</p>
                   </div>
                 );
@@ -352,8 +352,8 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block text-[#6b1fad] text-sm font-semibold tracking-wider uppercase mb-3">Features</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e] mb-4">
+            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">Features</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#000000] mb-4">
               Everything you need to ace interviews
             </h2>
           </div>
@@ -362,11 +362,11 @@ export default function HomePage() {
             {features.map((feature, i) => {
               const Icon = feature.icon;
               return (
-                <div key={i} className="group bg-[#f8f7fc] rounded-2xl p-7 border border-gray-100 hover:bg-white hover:border-[#6b1fad]/20 hover:shadow-xl transition-all duration-300">
-                  <div className="w-12 h-12 bg-[#6b1fad] rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#24c4b8] transition-colors duration-300">
+                <div key={i} className="group bg-[#f8f7fc] rounded-2xl p-7 border border-gray-100 hover:bg-white hover:border-[#cb6ce6]/20 hover:shadow-xl transition-all duration-300">
+                  <div className="w-12 h-12 bg-[#cb6ce6] rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#24c4b8] transition-colors duration-300">
                     <Icon className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-lg font-bold text-[#1a1a2e] mb-2">{feature.title}</h3>
+                  <h3 className="text-lg font-bold text-[#000000] mb-2">{feature.title}</h3>
                   <p className="text-gray-500 leading-relaxed">{feature.desc}</p>
                 </div>
               );
@@ -376,7 +376,7 @@ export default function HomePage() {
       </section>
 
       {/* Readiness Score Showcase */}
-      <section className="py-24 bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] relative overflow-hidden">
+      <section className="py-24 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000] relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(203,108,230,0.1),transparent_70%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(36,196,184,0.08),transparent_50%)]" />
         
@@ -412,7 +412,7 @@ export default function HomePage() {
             <div className="relative">
               <div className="bg-white rounded-3xl p-8 shadow-2xl max-w-sm mx-auto">
                 <div className="text-center mb-6">
-                  <div className="text-6xl font-bold text-[#1a1a2e] mb-1">78</div>
+                  <div className="text-6xl font-bold text-[#000000] mb-1">78</div>
                   <div className="text-gray-500 font-medium">Nearly Interview Ready</div>
                 </div>
                 
@@ -426,11 +426,11 @@ export default function HomePage() {
                     <div key={i}>
                       <div className="flex justify-between text-sm mb-1.5">
                         <span className="text-gray-500 font-medium">{item.skill}</span>
-                        <span className="text-[#6b1fad] font-bold">{item.value}</span>
+                        <span className="text-[#cb6ce6] font-bold">{item.value}</span>
                       </div>
                       <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div 
-                          className="h-2 bg-gradient-to-r from-[#6b1fad] to-[#24c4b8] rounded-full" 
+                          className="h-2 bg-gradient-to-r from-[#cb6ce6] to-[#24c4b8] rounded-full" 
                           style={{ width: `${item.value}%` }}
                         />
                       </div>
@@ -459,8 +459,8 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block text-[#6b1fad] text-sm font-semibold tracking-wider uppercase mb-3">Success Stories</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e] mb-4">
+            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">Success Stories</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#000000] mb-4">
               Real results from real candidates
             </h2>
           </div>
@@ -473,13 +473,13 @@ export default function HomePage() {
                     <Star key={j} className="w-5 h-5 text-amber-400 fill-amber-400" />
                   ))}
                 </div>
-                <p className="text-[#1a1a2e] mb-6 leading-relaxed text-lg">"{t.quote}"</p>
+                <p className="text-[#000000] mb-6 leading-relaxed text-lg">"{t.quote}"</p>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#6b1fad] to-[#cb6ce6] rounded-full flex items-center justify-center text-white font-bold">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#cb6ce6] to-[#cb6ce6] rounded-full flex items-center justify-center text-white font-bold">
                     {t.avatar}
                   </div>
                   <div>
-                    <div className="font-semibold text-[#1a1a2e]">{t.name}</div>
+                    <div className="font-semibold text-[#000000]">{t.name}</div>
                     <div className="text-gray-500 text-sm">{t.role} at {t.company}</div>
                   </div>
                 </div>
@@ -495,7 +495,7 @@ export default function HomePage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#24c4b8] to-[#1a9e94] rounded-2xl mb-6 shadow-xl shadow-[#24c4b8]/30">
             <Award className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e] mb-5">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#000000] mb-5">
             Your next interview could be <span className="text-[#24c4b8]">the one.</span>
           </h2>
           <p className="text-gray-500 mb-10 text-lg max-w-lg mx-auto">
@@ -525,7 +525,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#1a1a2e] text-white py-12 px-6">
+      <footer className="bg-[#000000] text-white py-12 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
             <img src={logoImg} alt="Hiready" className="h-8 brightness-0 invert" />

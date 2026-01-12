@@ -311,11 +311,11 @@ export default function AvatarSimulatorDashboard() {
 
   const getStatusBadge = (status: string) => {
     switch(status) {
-      case 'applied': return { label: 'Applied', bg: 'bg-[#6b1fad]', text: 'text-white' };
+      case 'applied': return { label: 'Applied', bg: 'bg-[#cb6ce6]', text: 'text-white' };
       case 'interview': return { label: 'Interviewing', bg: 'bg-[#24c4b8]', text: 'text-white' };
       case 'offer': return { label: 'Offer', bg: 'bg-emerald-500', text: 'text-white' };
       case 'rejected': return { label: 'Rejected', bg: 'bg-red-500', text: 'text-white' };
-      case 'saved': return { label: 'Saved', bg: 'bg-[#1a1a2e]', text: 'text-white' };
+      case 'saved': return { label: 'Saved', bg: 'bg-[#000000]', text: 'text-white' };
       default: return { label: 'Active', bg: 'bg-slate-500', text: 'text-white' };
     }
   };
@@ -340,12 +340,12 @@ export default function AvatarSimulatorDashboard() {
           
           {/* Page Header */}
           <div>
-            <h1 className="text-2xl font-bold text-[#1a1a2e]">Dashboard</h1>
+            <h1 className="text-2xl font-bold text-[#000000]">Dashboard</h1>
             <p className="text-gray-500 text-sm mt-1">Here's your interview readiness at a glance</p>
           </div>
 
           {/* Stats Hero Bar */}
-          <div className="bg-[#1a1a2e] rounded-2xl p-6 shadow-xl">
+          <div className="bg-[#000000] rounded-2xl p-6 shadow-xl">
             <div className="grid grid-cols-3 gap-6 text-center">
               <div>
                 <p className="text-4xl font-bold text-[#24c4b8]">{readinessPercent}%</p>
@@ -371,7 +371,7 @@ export default function AvatarSimulatorDashboard() {
               </Button>
             </Link>
             <Link to="/jobs" className="block">
-              <Button variant="outline" className="w-full h-12 border-2 border-[#1a1a2e] text-[#1a1a2e] font-semibold rounded-xl hover:bg-[#1a1a2e]/5 gap-2">
+              <Button variant="outline" className="w-full h-12 border-2 border-[#000000] text-[#000000] font-semibold rounded-xl hover:bg-[#000000]/5 gap-2">
                 <Plus className="w-5 h-5" />
                 Add Job Target
               </Button>
@@ -398,15 +398,15 @@ export default function AvatarSimulatorDashboard() {
                             <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold ${statusBadge.bg} ${statusBadge.text} mb-2`}>
                               {statusBadge.label}
                             </span>
-                            <h3 className="font-semibold text-[#1a1a2e] group-hover:text-[#24c4b8] transition-colors">{job.roleTitle}</h3>
+                            <h3 className="font-semibold text-[#000000] group-hover:text-[#24c4b8] transition-colors">{job.roleTitle}</h3>
                             <p className="text-sm text-gray-500">{job.companyName || 'Company'}</p>
                           </div>
                           <div className="text-right flex items-center gap-3">
                             <div>
-                              <p className="text-lg font-bold text-[#1a1a2e]">{readiness}%</p>
+                              <p className="text-lg font-bold text-[#000000]">{readiness}%</p>
                               <p className="text-xs text-gray-500">ready</p>
                             </div>
-                            <ChevronRight className="w-5 h-5 text-[#6b1fad] group-hover:text-[#24c4b8] group-hover:translate-x-1 transition-all" />
+                            <ChevronRight className="w-5 h-5 text-[#cb6ce6] group-hover:text-[#24c4b8] group-hover:translate-x-1 transition-all" />
                           </div>
                         </div>
                         {/* Progress Bar */}
@@ -430,7 +430,7 @@ export default function AvatarSimulatorDashboard() {
           {(topSkill || lowestSkill) && (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-[#1a1a2e]">Your Skills</h2>
+                <h2 className="text-lg font-semibold text-[#000000]">Your Skills</h2>
                 <Link to="/avatar/results" className="text-sm text-[#24c4b8] hover:text-[#1db0a5] font-medium flex items-center gap-1">
                   View all <ChevronRight className="w-4 h-4" />
                 </Link>
@@ -444,7 +444,7 @@ export default function AvatarSimulatorDashboard() {
                       </div>
                       <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Strongest</span>
                     </div>
-                    <h3 className="font-semibold text-[#1a1a2e] mb-1">{topSkill.skillName}</h3>
+                    <h3 className="font-semibold text-[#000000] mb-1">{topSkill.skillName}</h3>
                     <p className="text-2xl font-bold text-emerald-600">{topSkill.avgScore.toFixed(1)}/5</p>
                   </div>
                 )}
@@ -456,7 +456,7 @@ export default function AvatarSimulatorDashboard() {
                       </div>
                       <span className="text-xs font-semibold text-[#24c4b8] uppercase tracking-wide">Focus Area</span>
                     </div>
-                    <h3 className="font-semibold text-[#1a1a2e] mb-1">{lowestSkill.skillName}</h3>
+                    <h3 className="font-semibold text-[#000000] mb-1">{lowestSkill.skillName}</h3>
                     <p className="text-2xl font-bold text-[#24c4b8]">{lowestSkill.avgScore.toFixed(1)}/5</p>
                   </div>
                 )}
@@ -466,7 +466,7 @@ export default function AvatarSimulatorDashboard() {
 
           {/* AI Coaching Insights */}
           {aiInsights?.hasData && aiInsights.insights?.length > 0 && (
-            <div className="bg-gradient-to-r from-[#1a1a2e] to-[#2d1b4e] rounded-xl p-5 text-white">
+            <div className="bg-gradient-to-r from-[#000000] to-[#1a0a2e] rounded-xl p-5 text-white">
               <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-5 h-5 text-[#24c4b8]" />
                 <h3 className="font-semibold">AI Coaching Insights</h3>
@@ -495,7 +495,7 @@ export default function AvatarSimulatorDashboard() {
           {activeJobs.length > 3 && (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-[#1a1a2e]">Other Job Targets</h2>
+                <h2 className="text-lg font-semibold text-[#000000]">Other Job Targets</h2>
                 <Link to="/jobs" className="text-sm text-[#24c4b8] hover:text-[#1db0a5] font-medium flex items-center gap-1">
                   View all <ChevronRight className="w-4 h-4" />
                 </Link>
@@ -504,7 +504,7 @@ export default function AvatarSimulatorDashboard() {
                 {activeJobs.slice(3, 7).map((job) => (
                   <Link key={job.id} to={`/jobs/${job.id}`}>
                     <div className="bg-white rounded-lg border border-slate-200 p-3 hover:shadow-md hover:border-[#24c4b8]/30 transition-all">
-                      <p className="font-medium text-[#1a1a2e] text-sm truncate">{job.roleTitle}</p>
+                      <p className="font-medium text-[#000000] text-sm truncate">{job.roleTitle}</p>
                       <p className="text-xs text-gray-500 truncate">{job.companyName}</p>
                     </div>
                   </Link>
@@ -519,7 +519,7 @@ export default function AvatarSimulatorDashboard() {
               <div className="w-20 h-20 bg-gradient-to-br from-[#24c4b8] to-[#1db0a5] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#24c4b8]/30">
                 <Play className="w-10 h-10 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-[#1a1a2e] mb-3">Start Your Journey</h2>
+              <h2 className="text-2xl font-bold text-[#000000] mb-3">Start Your Journey</h2>
               <p className="text-gray-500 mb-8 max-w-md mx-auto">
                 Complete your first interview practice to see your progress and get personalized recommendations.
               </p>
@@ -531,7 +531,7 @@ export default function AvatarSimulatorDashboard() {
                   </Button>
                 </Link>
                 <Link to="/jobs">
-                  <Button variant="outline" className="border-2 border-[#1a1a2e] text-[#1a1a2e] font-semibold px-8 h-12 rounded-xl hover:bg-[#1a1a2e]/5 gap-2">
+                  <Button variant="outline" className="border-2 border-[#000000] text-[#000000] font-semibold px-8 h-12 rounded-xl hover:bg-[#000000]/5 gap-2">
                     <Plus className="w-5 h-5" />
                     Add Job
                   </Button>

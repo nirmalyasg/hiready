@@ -52,7 +52,7 @@ export default function MobileBottomNav() {
               className={cn(
                 "flex flex-col items-center justify-center flex-1 gap-0.5 transition-all duration-200 active:scale-95",
                 active 
-                  ? "text-[#1a1a2e]" 
+                  ? "text-[#000000]" 
                   : "text-gray-400"
               )}
             >
@@ -64,7 +64,7 @@ export default function MobileBottomNav() {
               </div>
               <span className={cn(
                 "text-[10px] font-medium",
-                active ? "text-[#1a1a2e]" : "text-gray-500"
+                active ? "text-[#000000]" : "text-gray-500"
               )}>
                 {label}
               </span>

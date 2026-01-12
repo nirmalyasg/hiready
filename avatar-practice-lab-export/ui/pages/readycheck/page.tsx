@@ -79,10 +79,10 @@ export default function ReadycheckPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#1a1a2e] flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-[#000000] flex flex-col relative overflow-hidden">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')]" />
       <div className="absolute top-20 right-10 w-80 h-80 bg-[#24c4b8]/15 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 left-10 w-80 h-80 bg-[#6b1fad]/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 left-10 w-80 h-80 bg-[#cb6ce6]/10 rounded-full blur-3xl" />
       
       <header className="p-4 sm:p-6 relative">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
@@ -126,7 +126,7 @@ export default function ReadycheckPage() {
                   setError("");
                 }}
                 placeholder="Paste job description or LinkedIn job URL here..."
-                className="w-full h-40 sm:h-48 p-4 border-2 border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#1a1a2e]/10 focus:border-[#1a1a2e] text-[#1a1a2e] placeholder:text-[#6b1fad] text-sm transition-all bg-[#fbfbfc]"
+                className="w-full h-40 sm:h-48 p-4 border-2 border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#000000]/10 focus:border-[#000000] text-[#000000] placeholder:text-[#cb6ce6] text-sm transition-all bg-[#fbfbfc]"
               />
               
               {inputValue && (
@@ -172,7 +172,7 @@ export default function ReadycheckPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm">
                 {benefits.map((b, i) => (
                   <div key={i} className="flex items-center gap-2 text-gray-500">
-                    <div className="w-6 h-6 rounded-lg bg-[#1a1a2e] flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-lg bg-[#000000] flex items-center justify-center">
                       <b.icon className="w-3.5 h-3.5 text-white" />
                     </div>
                     {b.text}

@@ -66,7 +66,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] text-white p-12 flex-col justify-between relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000] text-white p-12 flex-col justify-between relative overflow-hidden">
         <div className="absolute top-20 right-20 w-96 h-96 bg-[#cb6ce6]/10 rounded-full blur-3xl" />
         <div className="absolute bottom-20 left-10 w-64 h-64 bg-[#24c4b8]/10 rounded-full blur-3xl" />
         
@@ -125,7 +125,7 @@ export default function RegisterPage() {
       </div>
 
       <div className="flex-1 flex items-center justify-center px-6 bg-[#f8f7fc] relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-b from-[#6b1fad]/5 to-transparent lg:hidden" />
+        <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-b from-[#cb6ce6]/5 to-transparent lg:hidden" />
         <div className="absolute top-40 left-20 w-64 h-64 bg-[#cb6ce6]/5 rounded-full blur-3xl" />
         
         <div className="w-full max-w-sm relative">
@@ -140,7 +140,7 @@ export default function RegisterPage() {
           </div>
           
           <div className="lg:mb-6">
-            <h1 className="text-2xl lg:text-3xl font-bold text-[#1a1a2e]">Create account</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-[#000000]">Create account</h1>
             <p className="text-gray-500 mt-2">Get started in less than a minute</p>
           </div>
 
@@ -154,7 +154,7 @@ export default function RegisterPage() {
               )}
 
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-[#1a1a2e] mb-2">
+                <label htmlFor="username" className="block text-sm font-medium text-[#000000] mb-2">
                   Username
                 </label>
                 <input
@@ -162,14 +162,14 @@ export default function RegisterPage() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc]"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc]"
                   placeholder="Choose a username"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-[#1a1a2e] mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-[#000000] mb-2">
                   Email <span className="text-gray-400">(optional)</span>
                 </label>
                 <input
@@ -177,13 +177,13 @@ export default function RegisterPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc]"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc]"
                   placeholder="your@email.com"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-[#1a1a2e] mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-[#000000] mb-2">
                   Password
                 </label>
                 <input
@@ -191,14 +191,14 @@ export default function RegisterPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc]"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc]"
                   placeholder="At least 6 characters"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#1a1a2e] mb-2">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#000000] mb-2">
                   Confirm Password
                 </label>
                 <input
@@ -206,7 +206,7 @@ export default function RegisterPage() {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc]"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc]"
                   placeholder="Confirm your password"
                   required
                 />
@@ -231,7 +231,7 @@ export default function RegisterPage() {
 
           <p className="text-center text-gray-500 mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-[#6b1fad] hover:text-[#5a1a91] font-semibold">
+            <Link to="/login" className="text-[#cb6ce6] hover:text-[#a855f7] font-semibold">
               Sign in
             </Link>
           </p>

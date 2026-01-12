@@ -109,7 +109,7 @@ export default function ProfilePage() {
   return (
     <SidebarLayout>
       <div className="min-h-screen bg-[#fbfbfc]">
-        <div className="bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] text-white">
+        <div className="bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000] text-white">
           <div className="max-w-lg mx-auto px-4 py-10 text-center">
             <div className="relative inline-block mb-4">
               {user.profileImageUrl ? (
@@ -123,7 +123,7 @@ export default function ProfilePage() {
                   <User className="w-12 h-12 text-white" />
                 </div>
               )}
-              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-[#24c4b8] rounded-full flex items-center justify-center border-2 border-[#1a1a2e]">
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-[#24c4b8] rounded-full flex items-center justify-center border-2 border-[#000000]">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
             </div>
@@ -142,7 +142,7 @@ export default function ProfilePage() {
         <div className="max-w-lg mx-auto px-4 -mt-6 pb-8 space-y-4">
           <div className="bg-white rounded-2xl p-5 shadow-xl shadow-slate-200/50 border border-slate-100">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-[#1a1a2e] flex items-center gap-2">
+              <h3 className="font-bold text-[#000000] flex items-center gap-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-[#24c4b8] to-[#1db0a5] rounded-lg flex items-center justify-center">
                   <FileText className="w-4 h-4 text-white" />
                 </div>
@@ -159,7 +159,7 @@ export default function ProfilePage() {
 
             {docsLoading ? (
               <div className="flex items-center justify-center py-6">
-                <Loader2 className="w-5 h-5 animate-spin text-[#6b1fad]" />
+                <Loader2 className="w-5 h-5 animate-spin text-[#cb6ce6]" />
               </div>
             ) : latestResume ? (
               <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl p-4 border border-slate-200">
@@ -168,7 +168,7 @@ export default function ProfilePage() {
                     <Check className="w-5 h-5 text-emerald-600" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-[#1a1a2e] truncate">{latestResume.fileName}</p>
+                    <p className="font-semibold text-[#000000] truncate">{latestResume.fileName}</p>
                     <p className="text-sm text-gray-500">
                       Uploaded {formatDate(latestResume.createdAt)}
                     </p>
@@ -178,7 +178,7 @@ export default function ProfilePage() {
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#1a1a2e] bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#000000] bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50"
                   >
                     {isUploading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -203,7 +203,7 @@ export default function ProfilePage() {
             ) : (
               <div className="text-center py-8">
                 <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                  <FileText className="w-7 h-7 text-[#6b1fad]" />
+                  <FileText className="w-7 h-7 text-[#cb6ce6]" />
                 </div>
                 <p className="text-gray-500 mb-4">
                   No resume uploaded yet
@@ -220,7 +220,7 @@ export default function ProfilePage() {
                   )}
                   Upload Resume
                 </button>
-                <p className="text-xs text-[#6b1fad] mt-3">
+                <p className="text-xs text-[#cb6ce6] mt-3">
                   PDF, DOC, DOCX, or TXT
                 </p>
               </div>
@@ -237,14 +237,14 @@ export default function ProfilePage() {
                     index !== menuItems.length - 1 ? 'border-b border-slate-100' : ''
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center group-hover:from-[#1a1a2e]/10 group-hover:to-[#1a1a2e]/5 transition-colors">
-                    <Icon className="w-5 h-5 text-gray-500 group-hover:text-[#1a1a2e] transition-colors" />
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center group-hover:from-[#000000]/10 group-hover:to-[#000000]/5 transition-colors">
+                    <Icon className="w-5 h-5 text-gray-500 group-hover:text-[#000000] transition-colors" />
                   </div>
                   <div className="flex-1 text-left">
-                    <span className="font-semibold text-[#1a1a2e] block">{item.label}</span>
+                    <span className="font-semibold text-[#000000] block">{item.label}</span>
                     <span className="text-sm text-gray-500">{item.description}</span>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-[#6b1fad] group-hover:text-[#24c4b8] group-hover:translate-x-1 transition-all" />
+                  <ChevronRight className="w-5 h-5 text-[#cb6ce6] group-hover:text-[#24c4b8] group-hover:translate-x-1 transition-all" />
                 </button>
               );
             })}

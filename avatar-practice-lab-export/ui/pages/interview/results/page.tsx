@@ -254,7 +254,7 @@ export default function InterviewResultsPage() {
     <SidebarLayout>
       <div className="min-h-screen bg-[#fbfbfc] pb-24 sm:pb-8">
         {/* Header with Practice Context */}
-        <div className="bg-[#1a1a2e] text-white">
+        <div className="bg-[#000000] text-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-5xl">
             <Link
               to="/avatar/results"
@@ -344,8 +344,8 @@ export default function InterviewResultsPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-5xl">
           {/* Role Fit Assessment */}
           {(skillGaps.length > 0 || strongSkills.length > 0 || jdSkills.length > 0) && (
-            <Card className="border-[#1a1a2e]/10 rounded-2xl mb-6 overflow-hidden">
-              <div className="bg-[#1a1a2e] p-4 sm:p-6">
+            <Card className="border-[#000000]/10 rounded-2xl mb-6 overflow-hidden">
+              <div className="bg-[#000000] p-4 sm:p-6">
                 <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                   <Target className="w-5 h-5 text-[#24c4b8]" />
                   Role Fit Assessment
@@ -362,7 +362,7 @@ export default function InterviewResultsPage() {
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {jdSkills.slice(0, 10).map((skill, idx) => (
-                        <Badge key={idx} variant="outline" className="bg-[#1a1a2e]/5 border-[#1a1a2e]/20 text-[#1a1a2e]">
+                        <Badge key={idx} variant="outline" className="bg-[#000000]/5 border-[#000000]/20 text-[#000000]">
                           {skill}
                         </Badge>
                       ))}
@@ -420,13 +420,13 @@ export default function InterviewResultsPage() {
                 {/* Recommendations */}
                 {skillGaps.length > 0 && (
                   <div className="bg-[#24c4b8]/5 rounded-xl p-4 border border-[#24c4b8]/20">
-                    <h4 className="text-sm font-medium text-[#1a1a2e] mb-2 flex items-center gap-2">
+                    <h4 className="text-sm font-medium text-[#000000] mb-2 flex items-center gap-2">
                       <GraduationCap className="w-4 h-4 text-[#24c4b8]" />
                       Priority Focus
                     </h4>
                     <p className="text-sm text-gray-500">
-                      Based on your results, focus on <span className="font-medium text-[#1a1a2e]">{skillGaps[0]?.dimension}</span>
-                      {skillGaps[1] && <> and <span className="font-medium text-[#1a1a2e]">{skillGaps[1]?.dimension}</span></>} 
+                      Based on your results, focus on <span className="font-medium text-[#000000]">{skillGaps[0]?.dimension}</span>
+                      {skillGaps[1] && <> and <span className="font-medium text-[#000000]">{skillGaps[1]?.dimension}</span></>} 
                       {' '}to improve your interview performance for this role.
                     </p>
                   </div>
@@ -468,16 +468,16 @@ export default function InterviewResultsPage() {
 
           <Tabs defaultValue="scores" className="space-y-6">
             <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-flex bg-white border border-slate-200">
-              <TabsTrigger value="scores" className="data-[state=active]:bg-[#1a1a2e] data-[state=active]:text-white">Skills</TabsTrigger>
-              <TabsTrigger value="feedback" className="data-[state=active]:bg-[#1a1a2e] data-[state=active]:text-white">Feedback</TabsTrigger>
-              <TabsTrigger value="answers" className="data-[state=active]:bg-[#1a1a2e] data-[state=active]:text-white">Better Answers</TabsTrigger>
-              <TabsTrigger value="plan" className="data-[state=active]:bg-[#1a1a2e] data-[state=active]:text-white">7-Day Plan</TabsTrigger>
+              <TabsTrigger value="scores" className="data-[state=active]:bg-[#000000] data-[state=active]:text-white">Skills</TabsTrigger>
+              <TabsTrigger value="feedback" className="data-[state=active]:bg-[#000000] data-[state=active]:text-white">Feedback</TabsTrigger>
+              <TabsTrigger value="answers" className="data-[state=active]:bg-[#000000] data-[state=active]:text-white">Better Answers</TabsTrigger>
+              <TabsTrigger value="plan" className="data-[state=active]:bg-[#000000] data-[state=active]:text-white">7-Day Plan</TabsTrigger>
             </TabsList>
 
             <TabsContent value="scores">
               <Card className="border-slate-200 rounded-2xl">
                 <CardHeader className="border-b border-slate-100 bg-[#fbfbfc]">
-                  <CardTitle className="flex items-center gap-2 text-[#1a1a2e]">
+                  <CardTitle className="flex items-center gap-2 text-[#000000]">
                     <BarChart3 className="w-5 h-5 text-[#24c4b8]" />
                     {jobContext || roleKitInfo ? (
                       <span>Skills Assessed for {practiceTitle}</span>
@@ -509,7 +509,7 @@ export default function InterviewResultsPage() {
                       {dim.improvement && (
                         <div className="flex items-start gap-3 p-3 bg-[#24c4b8]/5 rounded-xl border border-[#24c4b8]/20">
                           <Lightbulb className="w-4 h-4 text-[#24c4b8] flex-shrink-0 mt-0.5" />
-                          <p className="text-sm text-[#1a1a2e]">{dim.improvement}</p>
+                          <p className="text-sm text-[#000000]">{dim.improvement}</p>
                         </div>
                       )}
                     </div>
@@ -584,7 +584,7 @@ export default function InterviewResultsPage() {
             <TabsContent value="answers">
               <Card className="border-slate-200 rounded-2xl">
                 <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2 text-[#1a1a2e]">
+                  <CardTitle className="flex items-center gap-2 text-[#000000]">
                     <MessageSquare className="w-5 h-5 text-[#24c4b8]" />
                     Improved Answer Examples
                   </CardTitle>
@@ -609,7 +609,7 @@ export default function InterviewResultsPage() {
             <TabsContent value="plan">
               <Card className="border-slate-200 rounded-2xl">
                 <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2 text-[#1a1a2e]">
+                  <CardTitle className="flex items-center gap-2 text-[#000000]">
                     <Calendar className="w-5 h-5 text-[#24c4b8]" />
                     7-Day Practice Plan
                     {(jobContext || roleKitInfo) && (
@@ -622,7 +622,7 @@ export default function InterviewResultsPage() {
                 <CardContent className="p-0">
                   {analysis.practicePlan?.map((day, idx) => (
                     <div key={idx} className={`p-4 flex items-start gap-4 ${idx !== (analysis.practicePlan?.length || 0) - 1 ? "border-b border-slate-100" : ""}`}>
-                      <div className="w-12 h-12 rounded-xl bg-[#1a1a2e] flex flex-col items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-[#000000] flex flex-col items-center justify-center flex-shrink-0">
                         <span className="text-xs text-white/60">Day</span>
                         <span className="text-lg font-bold text-white">{day.day}</span>
                       </div>
@@ -641,7 +641,7 @@ export default function InterviewResultsPage() {
           </Tabs>
 
           {/* Next Steps CTA */}
-          <div className="mt-8 bg-[#1a1a2e] rounded-2xl p-6 text-white">
+          <div className="mt-8 bg-[#000000] rounded-2xl p-6 text-white">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h3 className="text-lg font-semibold mb-1">Ready to Improve?</h3>

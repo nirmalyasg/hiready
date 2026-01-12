@@ -399,7 +399,7 @@ export default function ResultsPage() {
     return (
       <SidebarLayout>
         <div className="min-h-screen bg-[#fbfbfc]">
-          <div className="bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] text-white py-16">
+          <div className="bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] text-white py-16">
             <div className="max-w-4xl mx-auto px-4 text-center">
               <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <BarChart3 className="w-8 h-8 text-[#24c4b8]" />
@@ -423,7 +423,7 @@ export default function ResultsPage() {
   return (
     <SidebarLayout>
       <div className="min-h-screen bg-[#fbfbfc]">
-        <div className="bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] text-white">
+        <div className="bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] text-white">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -476,8 +476,8 @@ export default function ResultsPage() {
                   onClick={() => setViewMode("sessions")}
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                     viewMode === "sessions" 
-                      ? "bg-[#1a1a2e] text-white shadow-lg" 
-                      : "text-gray-500 hover:text-[#1a1a2e]"
+                      ? "bg-[#000000] text-white shadow-lg" 
+                      : "text-gray-500 hover:text-[#000000]"
                   }`}
                 >
                   Sessions
@@ -486,8 +486,8 @@ export default function ResultsPage() {
                   onClick={() => setViewMode("skills")}
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                     viewMode === "skills" 
-                      ? "bg-[#1a1a2e] text-white shadow-lg" 
-                      : "text-gray-500 hover:text-[#1a1a2e]"
+                      ? "bg-[#000000] text-white shadow-lg" 
+                      : "text-gray-500 hover:text-[#000000]"
                   }`}
                 >
                   Performance
@@ -496,7 +496,7 @@ export default function ResultsPage() {
               
               <div className="flex gap-3 flex-1">
                 <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#6b1fad]" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#cb6ce6]" />
                   <Input
                     placeholder="Search sessions..."
                     value={searchTerm}
@@ -507,7 +507,7 @@ export default function ResultsPage() {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-[#1a1a2e] font-medium min-w-[120px] focus:border-[#24c4b8] focus:ring-[#24c4b8]/20"
+                  className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-[#000000] font-medium min-w-[120px] focus:border-[#24c4b8] focus:ring-[#24c4b8]/20"
                 >
                   <option value="all">All Types</option>
                   <option value="interviews">Interviews</option>
@@ -940,7 +940,7 @@ export default function ResultsPage() {
 
         {/* Next Recommended Exercise CTA */}
         {activeJobs.length > 0 && (
-          <div className="bg-gradient-to-r from-[#1a1a2e] to-[#2d1b4e] rounded-2xl p-5 sm:p-6 text-white shadow-xl">
+          <div className="bg-gradient-to-r from-[#000000] to-[#000000] rounded-2xl p-5 sm:p-6 text-white shadow-xl">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h3 className="text-lg font-bold mb-1">Continue practicing?</h3>

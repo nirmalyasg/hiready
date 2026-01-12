@@ -73,7 +73,7 @@ export function UpgradeModal({
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-[#cb6ce6] to-[#24c4b8] rounded-2xl flex items-center justify-center mb-4">
             <Lock className="w-8 h-8 text-white" />
           </div>
-          <DialogTitle className="text-2xl font-bold text-[#1a1a2e]">{title}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-[#000000]">{title}</DialogTitle>
           <DialogDescription className="text-gray-500">
             {description}
           </DialogDescription>
@@ -88,7 +88,7 @@ export function UpgradeModal({
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Package className="w-5 h-5 text-[#24c4b8]" />
-                  <h3 className="font-bold text-lg text-[#1a1a2e]">Interview Set</h3>
+                  <h3 className="font-bold text-lg text-[#000000]">Interview Set</h3>
                 </div>
                 <p className="text-sm text-gray-500 mb-3">
                   {interviewSetName || 'Complete interview preparation package'}
@@ -109,7 +109,7 @@ export function UpgradeModal({
                 </ul>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-[#1a1a2e]">₹199</div>
+                <div className="text-3xl font-bold text-[#000000]">₹199</div>
                 <div className="text-sm text-gray-500">one-time</div>
               </div>
             </div>
@@ -127,7 +127,7 @@ export function UpgradeModal({
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Crown className="w-5 h-5 text-[#cb6ce6]" />
-                  <h3 className="font-bold text-lg text-[#1a1a2e]">Unlimited</h3>
+                  <h3 className="font-bold text-lg text-[#000000]">Unlimited</h3>
                 </div>
                 <p className="text-sm text-gray-500 mb-3">
                   Unlimited access to everything
@@ -148,7 +148,7 @@ export function UpgradeModal({
                 </ul>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-[#1a1a2e]">₹499</div>
+                <div className="text-3xl font-bold text-[#000000]">₹499</div>
                 <div className="text-sm text-gray-500">/month</div>
               </div>
             </div>

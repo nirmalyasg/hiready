@@ -47,8 +47,8 @@ interface JobTarget {
 }
 
 const statusConfig: Record<string, { label: string; bg: string; text: string; border: string }> = {
-  saved: { label: "Saved", bg: "bg-[#1a1a2e]", text: "text-white", border: "border-[#1a1a2e]" },
-  applied: { label: "Applied", bg: "bg-[#6b1fad]", text: "text-white", border: "border-[#6b1fad]" },
+  saved: { label: "Saved", bg: "bg-[#000000]", text: "text-white", border: "border-[#000000]" },
+  applied: { label: "Applied", bg: "bg-[#cb6ce6]", text: "text-white", border: "border-[#cb6ce6]" },
   interview: { label: "Interviewing", bg: "bg-[#24c4b8]", text: "text-white", border: "border-[#24c4b8]" },
   offer: { label: "Offer", bg: "bg-emerald-500", text: "text-white", border: "border-emerald-500" },
   rejected: { label: "Rejected", bg: "bg-red-500", text: "text-white", border: "border-red-500" },
@@ -182,7 +182,7 @@ export default function JobsPage() {
   return (
     <SidebarLayout>
       <div className="min-h-screen bg-[#fbfbfc]">
-        <div className="bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] text-white">
+        <div className="bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000] text-white">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -219,13 +219,13 @@ export default function JobsPage() {
           <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-4 sm:p-6 border border-slate-100">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6b1fad]" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#cb6ce6]" />
                 <Input
                   type="text"
                   placeholder="Search jobs..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-12 bg-[#fbfbfc] rounded-xl border-slate-200 focus:border-[#24c4b8] focus:ring-[#24c4b8]/20 text-[#1a1a2e]"
+                  className="pl-12 h-12 bg-[#fbfbfc] rounded-xl border-slate-200 focus:border-[#24c4b8] focus:ring-[#24c4b8]/20 text-[#000000]"
                 />
               </div>
               <Dialog open={addDialogOpen} onOpenChange={(open) => { 
@@ -240,7 +240,7 @@ export default function JobsPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
                   <DialogHeader>
-                    <DialogTitle className="text-[#1a1a2e]">
+                    <DialogTitle className="text-[#000000]">
                       {addMode === "url" ? "Import from URL" :
                        addMode === "manual" ? "Enter Job Details" :
                        "Add Job Target"}
@@ -261,9 +261,9 @@ export default function JobsPage() {
           ) : filteredJobs.length === 0 ? (
             <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm">
               <div className="w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Briefcase className="w-8 h-8 text-[#6b1fad]" />
+                <Briefcase className="w-8 h-8 text-[#cb6ce6]" />
               </div>
-              <h3 className="text-xl font-bold text-[#1a1a2e] mb-2">
+              <h3 className="text-xl font-bold text-[#000000] mb-2">
                 {searchQuery ? "No matching jobs" : "No jobs yet"}
               </h3>
               <p className="text-gray-500 mb-6">
@@ -294,13 +294,13 @@ export default function JobsPage() {
                     onClick={() => navigate(`/jobs/${job.id}`)}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-[#1a1a2e] to-[#2d1b4e] rounded-xl flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#000000] to-[#1a0a2e] rounded-xl flex items-center justify-center flex-shrink-0">
                         <Building2 className="w-6 h-6 text-white" />
                       </div>
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-bold text-[#1a1a2e] truncate group-hover:text-[#24c4b8] transition-colors">
+                          <h3 className="font-bold text-[#000000] truncate group-hover:text-[#24c4b8] transition-colors">
                             {job.roleTitle}
                           </h3>
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${status.bg} ${status.text}`}>
@@ -325,7 +325,7 @@ export default function JobsPage() {
                       
                       <div className="hidden sm:flex items-center gap-4">
                         <div className="text-right">
-                          <p className="text-lg font-bold text-[#1a1a2e]">{readiness}%</p>
+                          <p className="text-lg font-bold text-[#000000]">{readiness}%</p>
                           <p className="text-xs text-gray-500">ready</p>
                         </div>
                         <div className="w-16 h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -336,7 +336,7 @@ export default function JobsPage() {
                         </div>
                       </div>
                       
-                      <ChevronRight className="w-5 h-5 text-[#6b1fad] flex-shrink-0 group-hover:text-[#24c4b8] group-hover:translate-x-1 transition-all" />
+                      <ChevronRight className="w-5 h-5 text-[#cb6ce6] flex-shrink-0 group-hover:text-[#24c4b8] group-hover:translate-x-1 transition-all" />
                     </div>
                   </div>
                 );
@@ -357,14 +357,14 @@ export default function JobsPage() {
             className="w-full p-4 border border-slate-200 rounded-xl text-left hover:bg-slate-50 hover:border-[#24c4b8]/30 transition-all group"
           >
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#1a1a2e] to-[#2d1b4e] rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#000000] to-[#1a0a2e] rounded-lg flex items-center justify-center">
                 <Link2 className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-[#1a1a2e] group-hover:text-[#24c4b8] transition-colors">Import from URL</p>
+                <p className="font-semibold text-[#000000] group-hover:text-[#24c4b8] transition-colors">Import from URL</p>
                 <p className="text-sm text-gray-500">LinkedIn, Indeed, Glassdoor...</p>
               </div>
-              <ChevronRight className="w-5 h-5 text-[#6b1fad]" />
+              <ChevronRight className="w-5 h-5 text-[#cb6ce6]" />
             </div>
           </button>
           <button
@@ -376,10 +376,10 @@ export default function JobsPage() {
                 <ClipboardPaste className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-[#1a1a2e] group-hover:text-[#24c4b8] transition-colors">Enter manually</p>
+                <p className="font-semibold text-[#000000] group-hover:text-[#24c4b8] transition-colors">Enter manually</p>
                 <p className="text-sm text-gray-500">Type or paste job details</p>
               </div>
-              <ChevronRight className="w-5 h-5 text-[#6b1fad]" />
+              <ChevronRight className="w-5 h-5 text-[#cb6ce6]" />
             </div>
           </button>
         </div>
@@ -393,7 +393,7 @@ export default function JobsPage() {
             value={pastedUrl}
             onChange={(e) => { setPastedUrl(e.target.value); setUrlError(""); }}
             placeholder="Paste job URL..."
-            className={`h-12 rounded-xl text-[#1a1a2e] ${urlError ? "border-red-500" : ""}`}
+            className={`h-12 rounded-xl text-[#000000] ${urlError ? "border-red-500" : ""}`}
           />
           {urlError && <p className="text-sm text-red-500">{urlError}</p>}
           <div className="flex gap-3">
@@ -418,27 +418,27 @@ export default function JobsPage() {
           value={newJob.roleTitle}
           onChange={(e) => setNewJob({ ...newJob, roleTitle: e.target.value })}
           placeholder="Role title *"
-          className="h-12 rounded-xl text-[#1a1a2e]"
+          className="h-12 rounded-xl text-[#000000]"
         />
         <div className="grid grid-cols-2 gap-3">
           <Input
             value={newJob.companyName}
             onChange={(e) => setNewJob({ ...newJob, companyName: e.target.value })}
             placeholder="Company"
-            className="h-12 rounded-xl text-[#1a1a2e]"
+            className="h-12 rounded-xl text-[#000000]"
           />
           <Input
             value={newJob.location}
             onChange={(e) => setNewJob({ ...newJob, location: e.target.value })}
             placeholder="Location"
-            className="h-12 rounded-xl text-[#1a1a2e]"
+            className="h-12 rounded-xl text-[#000000]"
           />
         </div>
         <textarea
           value={pastedJD}
           onChange={(e) => setPastedJD(e.target.value)}
           placeholder="Paste job description (optional)"
-          className="w-full h-24 p-4 border border-slate-200 rounded-xl resize-none focus:ring-2 focus:ring-[#24c4b8]/20 focus:border-[#24c4b8] text-[#1a1a2e] placeholder:text-[#6b1fad]"
+          className="w-full h-24 p-4 border border-slate-200 rounded-xl resize-none focus:ring-2 focus:ring-[#24c4b8]/20 focus:border-[#24c4b8] text-[#000000] placeholder:text-[#cb6ce6]"
         />
         <div className="flex gap-3">
           <Button variant="outline" onClick={() => setAddMode(null)} className="flex-1 h-11 rounded-xl border-slate-200">

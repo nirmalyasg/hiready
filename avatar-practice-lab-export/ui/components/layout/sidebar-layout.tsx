@@ -49,7 +49,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   return (
     <div className="min-h-screen bg-[#f8f7fc]">
       <aside className={cn(
-        "hidden lg:block fixed top-0 left-0 h-full bg-[#1a1a2e] z-50 transition-all duration-300 ease-out",
+        "hidden lg:block fixed top-0 left-0 h-full bg-[#000000] z-50 transition-all duration-300 ease-out",
         collapsed ? "w-20" : "w-60"
       )}>
         <div className="flex flex-col h-full">
@@ -109,7 +109,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-[#6b1fad] flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-[#cb6ce6] flex items-center justify-center">
                       <User className="w-4 h-4 text-white" />
                     </div>
                   )}

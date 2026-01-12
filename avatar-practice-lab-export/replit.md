@@ -46,33 +46,33 @@ avatar-practice-lab-export/
 ### Design Philosophy
 Professional, trustworthy design using the official brand color palette. Clean layouts with clear visual hierarchy, ample white space, and strategic use of coral accents for calls-to-action.
 
-### Brand Color Palette
-- **Primary Dark**: #042c4c (deep navy blue) - Headers, sidebar, primary text, hero backgrounds
-- **Accent**: #ee7e65 (coral/salmon) - CTAs, buttons, highlights, active states
-- **Secondary**: #768c9c (slate blue) - Secondary elements, icons, supporting UI
-- **Muted**: #6c8194 (gray-blue) - Subtle text, borders, inactive states
-- **Background**: #fbfbfc (off-white) - Page backgrounds
+### Brand Color Palette (Updated January 2026)
+- **Primary Purple**: #cb6ce6 (vibrant purple) - Primary accent, navigation highlights
+- **Light Purple**: #e2a9f1 (soft lavender) - Light accents, hover states
+- **Teal**: #24c4b8 (bright teal) - CTAs, buttons, success highlights
+- **Black**: #000000 - Hero backgrounds, sidebar, primary text
+- **White**: #ffffff / #f8f7fc - Light backgrounds, cards
 
 ### Color Usage
-- **Hero Sections**: Deep navy (#042c4c) background with coral (#ee7e65) accent text
-- **Primary Buttons**: Coral (#ee7e65) with hover darkening to #e06a50
-- **Secondary Buttons**: Navy (#042c4c) or ghost/outline variants
-- **Cards**: White background on off-white (#fbfbfc) page
-- **Text**: Navy for headings, gray-blue for descriptions
-- **Success**: emerald-500/600 for positive indicators
+- **Hero Sections**: Black (#000000) background with teal (#24c4b8) accent text
+- **Primary Buttons**: Teal (#24c4b8) with hover darkening to #1db0a5
+- **Secondary Buttons**: Purple (#cb6ce6) or ghost/outline variants
+- **Cards**: White background on light gray (#f8f7fc) page
+- **Text**: Black for headings, gray for descriptions
+- **Accents**: Purple for badges, links, secondary actions
 
 ### Components
 - **Cards**: White background, subtle gray-200 border, rounded-2xl, shadow-xl
-- **Buttons**: Coral background, white text, rounded-xl, shadow with coral glow
-- **Sidebar**: Deep navy (#042c4c) background, coral logo accent, coral active states
-- **Inputs**: Light background (#fbfbfc), gray-200 border, navy text
+- **Buttons**: Teal background, white text, rounded-xl, shadow with teal glow
+- **Sidebar**: Black (#000000) background, purple logo accent, teal active states
+- **Inputs**: Light background (#f8f7fc), gray-200 border, black text
 - **Spacing**: 4px grid system (gap-4 = 16px, space-y-6 = 24px)
 
 ### Sidebar
-- Background: #042c4c (deep navy)
-- Logo: Coral (#ee7e65) rounded icon with white sparkle
-- Active state: Coral (#ee7e65) background with white text
-- Inactive: Slate blue (#768c9c) text, hover to white
+- Background: #000000 (black)
+- Logo: Hiready logo with teal and purple accents
+- Active state: Teal (#24c4b8) background with white text
+- Inactive: Gray text, hover to white
 - Width: 240px desktop, overlay on mobile
 
 ## Recent Changes (January 12, 2026)

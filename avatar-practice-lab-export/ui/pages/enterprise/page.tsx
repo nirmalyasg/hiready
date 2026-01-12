@@ -22,7 +22,7 @@ export default function EnterprisePage() {
       title: 'Campus Recruiting', 
       desc: 'Prepare candidates at scale before they interview with your company',
       icon: Award,
-      color: 'from-[#cb6ce6] to-[#6b1fad]'
+      color: 'from-[#cb6ce6] to-[#cb6ce6]'
     },
     { 
       title: 'Internal Mobility', 
@@ -34,7 +34,7 @@ export default function EnterprisePage() {
       title: 'L&D Programs', 
       desc: 'Integrate interview practice into your learning curriculum',
       icon: Target,
-      color: 'from-[#9b4dca] to-[#6b1fad]'
+      color: 'from-[#9b4dca] to-[#cb6ce6]'
     },
   ];
 
@@ -52,7 +52,7 @@ export default function EnterprisePage() {
 
       {/* Hero Section */}
       <section className="pt-[100px] lg:pt-[120px] pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(203,108,230,0.2),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(36,196,184,0.1),transparent_50%)]" />
         
@@ -110,7 +110,7 @@ export default function EnterprisePage() {
           <div className="grid md:grid-cols-3 gap-8">
             {stats.map((stat, i) => (
               <div key={i} className="text-center">
-                <div className="text-4xl sm:text-5xl font-bold text-[#6b1fad] mb-2">{stat.value}</div>
+                <div className="text-4xl sm:text-5xl font-bold text-[#cb6ce6] mb-2">{stat.value}</div>
                 <div className="text-gray-500">{stat.label}</div>
               </div>
             ))}
@@ -124,7 +124,7 @@ export default function EnterprisePage() {
           <p className="text-center text-gray-500 text-sm mb-6">Trusted by leading organizations</p>
           <div className="flex flex-wrap justify-center gap-8 items-center">
             {logos.map((logo, i) => (
-              <div key={i} className="text-[#1a1a2e]/25 font-bold text-lg hover:text-[#6b1fad]/50 transition-colors">{logo}</div>
+              <div key={i} className="text-[#000000]/25 font-bold text-lg hover:text-[#cb6ce6]/50 transition-colors">{logo}</div>
             ))}
           </div>
         </div>
@@ -134,8 +134,8 @@ export default function EnterprisePage() {
       <section className="py-20 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <span className="inline-block text-[#6b1fad] text-sm font-semibold tracking-wider uppercase mb-3">Features</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e] mb-4">
+            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">Features</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#000000] mb-4">
               Built for enterprise needs
             </h2>
           </div>
@@ -144,11 +144,11 @@ export default function EnterprisePage() {
             {features.map((feature, i) => {
               const Icon = feature.icon;
               return (
-                <div key={i} className="bg-[#f8f7fc] rounded-2xl p-6 border border-gray-100 hover:border-[#6b1fad]/30 hover:shadow-xl hover:-translate-y-1 transition-all group">
-                  <div className="w-12 h-12 bg-[#6b1fad] rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#24c4b8] transition-colors">
+                <div key={i} className="bg-[#f8f7fc] rounded-2xl p-6 border border-gray-100 hover:border-[#cb6ce6]/30 hover:shadow-xl hover:-translate-y-1 transition-all group">
+                  <div className="w-12 h-12 bg-[#cb6ce6] rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#24c4b8] transition-colors">
                     <Icon className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="font-bold text-[#1a1a2e] text-lg mb-2">{feature.title}</h3>
+                  <h3 className="font-bold text-[#000000] text-lg mb-2">{feature.title}</h3>
                   <p className="text-gray-500">{feature.desc}</p>
                 </div>
               );
@@ -161,8 +161,8 @@ export default function EnterprisePage() {
       <section className="py-20 px-6 bg-[#f8f7fc]">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <span className="inline-block text-[#6b1fad] text-sm font-semibold tracking-wider uppercase mb-3">Use Cases</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e] mb-4">
+            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">Use Cases</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#000000] mb-4">
               How enterprises use Hiready
             </h2>
           </div>
@@ -175,7 +175,7 @@ export default function EnterprisePage() {
                   <div className={`w-16 h-16 bg-gradient-to-br ${useCase.color} rounded-2xl flex items-center justify-center mx-auto mb-5`}>
                     <Icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="font-bold text-[#1a1a2e] text-xl mb-3">{useCase.title}</h3>
+                  <h3 className="font-bold text-[#000000] text-xl mb-3">{useCase.title}</h3>
                   <p className="text-gray-500">{useCase.desc}</p>
                 </div>
               );
@@ -186,7 +186,7 @@ export default function EnterprisePage() {
 
       {/* CTA Section */}
       <section className="py-24 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(203,108,230,0.1),transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(36,196,184,0.08),transparent_50%)]" />
         
@@ -215,7 +215,7 @@ export default function EnterprisePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#1a1a2e] border-t border-white/10 text-white py-8 px-6">
+      <footer className="bg-[#000000] border-t border-white/10 text-white py-8 px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
             <img src={logoImg} alt="Hiready" className="h-8 brightness-0 invert" />

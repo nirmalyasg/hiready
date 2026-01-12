@@ -56,10 +56,10 @@ export default function FeaturesPage() {
   ];
 
   const interviewTypes = [
-    { name: 'Behavioral', desc: 'STAR format questions about past experiences', color: 'from-[#cb6ce6] to-[#6b1fad]' },
-    { name: 'Technical', desc: 'Role-specific technical knowledge assessment', color: 'from-[#6b1fad] to-[#4a1578]' },
+    { name: 'Behavioral', desc: 'STAR format questions about past experiences', color: 'from-[#cb6ce6] to-[#cb6ce6]' },
+    { name: 'Technical', desc: 'Role-specific technical knowledge assessment', color: 'from-[#cb6ce6] to-[#4a1578]' },
     { name: 'Case Study', desc: 'Business problem-solving and strategy', color: 'from-[#24c4b8] to-[#1a9e94]' },
-    { name: 'HR Interview', desc: 'Culture fit, motivation, and career goals', color: 'from-[#9b4dca] to-[#6b1fad]' },
+    { name: 'HR Interview', desc: 'Culture fit, motivation, and career goals', color: 'from-[#9b4dca] to-[#cb6ce6]' },
     { name: 'Coding', desc: 'Live coding with AI code review', color: 'from-[#cb6ce6] to-[#9b4dca]' },
   ];
 
@@ -75,7 +75,7 @@ export default function FeaturesPage() {
 
       {/* Hero Section */}
       <section className="pt-[100px] lg:pt-[120px] pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(203,108,230,0.2),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(36,196,184,0.1),transparent_50%)]" />
         
@@ -131,10 +131,10 @@ export default function FeaturesPage() {
               const Icon = stat.icon;
               return (
                 <div key={i} className="text-center">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-[#6b1fad]/10 rounded-xl mb-3">
-                    <Icon className="w-6 h-6 text-[#6b1fad]" />
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-[#cb6ce6]/10 rounded-xl mb-3">
+                    <Icon className="w-6 h-6 text-[#cb6ce6]" />
                   </div>
-                  <div className="text-3xl font-bold text-[#1a1a2e] mb-1">{stat.value}</div>
+                  <div className="text-3xl font-bold text-[#000000] mb-1">{stat.value}</div>
                   <div className="text-gray-500 text-sm">{stat.label}</div>
                 </div>
               );
@@ -147,8 +147,8 @@ export default function FeaturesPage() {
       <section className="py-20 px-6 bg-[#f8f7fc]">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <span className="inline-block text-[#6b1fad] text-sm font-semibold tracking-wider uppercase mb-3">Core Features</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e]">
+            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">Core Features</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#000000]">
               Powerful interview preparation
             </h2>
           </div>
@@ -161,18 +161,18 @@ export default function FeaturesPage() {
                   key={i} 
                   className={`rounded-2xl p-6 border transition-all hover:shadow-xl hover:-translate-y-1 group ${
                     feature.highlight 
-                      ? 'bg-[#1a1a2e] text-white border-[#1a1a2e]' 
-                      : 'bg-white border-gray-100 hover:border-[#6b1fad]/30'
+                      ? 'bg-[#000000] text-white border-[#000000]' 
+                      : 'bg-white border-gray-100 hover:border-[#cb6ce6]/30'
                   }`}
                 >
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors ${
                     feature.highlight 
                       ? 'bg-[#24c4b8]' 
-                      : 'bg-[#6b1fad] group-hover:bg-[#24c4b8]'
+                      : 'bg-[#cb6ce6] group-hover:bg-[#24c4b8]'
                   }`}>
                     <Icon className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className={`font-bold text-lg mb-2 ${feature.highlight ? 'text-white' : 'text-[#1a1a2e]'}`}>
+                  <h3 className={`font-bold text-lg mb-2 ${feature.highlight ? 'text-white' : 'text-[#000000]'}`}>
                     {feature.title}
                   </h3>
                   <p className={feature.highlight ? 'text-white/80' : 'text-gray-500'}>
@@ -189,8 +189,8 @@ export default function FeaturesPage() {
       <section className="py-20 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <span className="inline-block text-[#6b1fad] text-sm font-semibold tracking-wider uppercase mb-3">Interview Types</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e]">
+            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">Interview Types</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#000000]">
               Practice every interview type
             </h2>
           </div>
@@ -201,7 +201,7 @@ export default function FeaturesPage() {
                 <div className={`w-12 h-12 bg-gradient-to-br ${type.color} rounded-xl mx-auto mb-4 flex items-center justify-center`}>
                   <div className="w-3 h-3 bg-white rounded-full" />
                 </div>
-                <h3 className="font-bold text-[#1a1a2e] mb-2">{type.name}</h3>
+                <h3 className="font-bold text-[#000000] mb-2">{type.name}</h3>
                 <p className="text-gray-500 text-sm">{type.desc}</p>
               </div>
             ))}
@@ -211,7 +211,7 @@ export default function FeaturesPage() {
 
       {/* CTA Section */}
       <section className="py-24 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(203,108,230,0.1),transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(36,196,184,0.08),transparent_50%)]" />
         
@@ -240,7 +240,7 @@ export default function FeaturesPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#1a1a2e] border-t border-white/10 text-white py-8 px-6">
+      <footer className="bg-[#000000] border-t border-white/10 text-white py-8 px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
             <img src={logoImg} alt="Hiready" className="h-8 brightness-0 invert" />

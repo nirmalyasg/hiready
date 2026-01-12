@@ -4,9 +4,9 @@
 
 :root {
   --background: #f5f7fb;
-  --foreground: #1a1a2e;
+  --foreground: #000000;
   --card-background: #ffffff;
-  --card-foreground: #1a1a2e;
+  --card-foreground: #000000;
   --primary: #6366f1;
   --primary-foreground: #ffffff;
   --secondary: #64748b;

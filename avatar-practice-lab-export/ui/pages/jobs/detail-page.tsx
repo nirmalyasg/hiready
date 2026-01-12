@@ -148,7 +148,7 @@ interface CompanyData {
 
 const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
   saved: { label: "Saved", bg: "bg-slate-100", text: "text-slate-600" },
-  applied: { label: "Applied", bg: "bg-[#6b1fad]/20", text: "text-[#1a1a2e]" },
+  applied: { label: "Applied", bg: "bg-[#cb6ce6]/20", text: "text-[#000000]" },
   interview: { label: "Interviewing", bg: "bg-[#24c4b8]/10", text: "text-[#24c4b8]" },
   offer: { label: "Offer", bg: "bg-emerald-100", text: "text-emerald-700" },
   rejected: { label: "Rejected", bg: "bg-red-100", text: "text-red-700" },
@@ -158,27 +158,27 @@ const statusConfig: Record<string, { label: string; bg: string; text: string }> 
 const categoryConfig: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
   hr_screening: { icon: <Phone className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
   hr: { icon: <Phone className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
-  hiring_manager: { icon: <User className="w-4 h-4" />, color: "text-[#6b1fad]", bg: "bg-[#6b1fad]/10" },
-  technical_interview: { icon: <Code className="w-4 h-4" />, color: "text-[#1a1a2e]", bg: "bg-[#1a1a2e]/10" },
-  technical: { icon: <Code className="w-4 h-4" />, color: "text-[#1a1a2e]", bg: "bg-[#1a1a2e]/10" },
-  coding: { icon: <Code className="w-4 h-4" />, color: "text-[#1a1a2e]", bg: "bg-[#1a1a2e]/10" },
-  coding_assessment: { icon: <Code className="w-4 h-4" />, color: "text-[#1a1a2e]", bg: "bg-[#1a1a2e]/10" },
-  system_design: { icon: <Code className="w-4 h-4" />, color: "text-[#6b1fad]", bg: "bg-[#6b1fad]/10" },
+  hiring_manager: { icon: <User className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  technical_interview: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
+  technical: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
+  coding: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
+  coding_assessment: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
+  system_design: { icon: <Code className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
   sql: { icon: <Code className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
-  analytics: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#6b1fad]", bg: "bg-[#6b1fad]/10" },
-  ml: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#1a1a2e]", bg: "bg-[#1a1a2e]/10" },
+  analytics: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  ml: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
   case_study: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
   case: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
   product: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
-  portfolio: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#6b1fad]", bg: "bg-[#6b1fad]/10" },
+  portfolio: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
   sales_roleplay: { icon: <User className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
   behavioral: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
   culture_values: { icon: <Heart className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
-  bar_raiser: { icon: <TrendingUp className="w-4 h-4" />, color: "text-[#1a1a2e]", bg: "bg-[#1a1a2e]/10" },
+  bar_raiser: { icon: <TrendingUp className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
   aptitude_assessment: { icon: <TrendingUp className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
   aptitude: { icon: <TrendingUp className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
-  group_discussion: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#6b1fad]", bg: "bg-[#6b1fad]/10" },
-  group: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#6b1fad]", bg: "bg-[#6b1fad]/10" },
+  group_discussion: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  group: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
 };
 
 export default function JobDetailPage() {
@@ -373,7 +373,7 @@ export default function JobDetailPage() {
         <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
           
           {/* Hero Header */}
-          <div className="bg-gradient-to-br from-[#1a1a2e] to-[#2d1b4e] rounded-2xl p-6 shadow-xl text-white">
+          <div className="bg-gradient-to-br from-[#000000] to-[#1a0a2e] rounded-2xl p-6 shadow-xl text-white">
             <div className="flex items-start justify-between mb-4">
               <button
                 onClick={() => navigate("/jobs")}

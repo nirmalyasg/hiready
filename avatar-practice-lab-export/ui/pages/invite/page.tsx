@@ -29,7 +29,7 @@ export default function InvitePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-[#24c4b8] animate-spin mx-auto mb-4" />
           <p className="text-white/70">Validating your invite...</p>
@@ -40,7 +40,7 @@ export default function InvitePage() {
 
   if (error || !shareData?.valid) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] flex items-center justify-center px-6">
+      <div className="min-h-screen bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] flex items-center justify-center px-6">
         <div className="max-w-md w-full text-center">
           <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <AlertCircle className="w-8 h-8 text-red-400" />
@@ -61,7 +61,7 @@ export default function InvitePage() {
 
   if (claimed) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] flex items-center justify-center px-6">
+      <div className="min-h-screen bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] flex items-center justify-center px-6">
         <div className="max-w-md w-full text-center">
           <div className="w-16 h-16 bg-[#24c4b8]/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-8 h-8 text-[#24c4b8]" />
@@ -79,7 +79,7 @@ export default function InvitePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] flex items-center justify-center px-6 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] flex items-center justify-center px-6 py-12">
       <div className="max-w-lg w-full">
         <div className="text-center mb-8">
           <img src={logoImg} alt="Hiready" className="h-10 mx-auto mb-8 brightness-0 invert" />

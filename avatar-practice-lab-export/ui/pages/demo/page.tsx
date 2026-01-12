@@ -64,12 +64,12 @@ export default function DemoPage() {
             <div className="w-20 h-20 bg-[#24c4b8]/10 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-10 h-10 text-[#24c4b8]" />
             </div>
-            <h1 className="text-3xl font-bold text-[#1a1a2e] mb-4">Thank You!</h1>
+            <h1 className="text-3xl font-bold text-[#000000] mb-4">Thank You!</h1>
             <p className="text-gray-500 mb-8">
               We've received your demo request. Our team will reach out within 24 hours to schedule a personalized demo.
             </p>
             <Link to="/">
-              <Button className="bg-[#6b1fad] hover:bg-[#5a1a91] text-white">
+              <Button className="bg-[#cb6ce6] hover:bg-[#b85fd4] text-white">
                 Back to Home
               </Button>
             </Link>
@@ -85,7 +85,7 @@ export default function DemoPage() {
 
       {/* Hero Section */}
       <section className="pt-[100px] lg:pt-[120px] pb-16 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(203,108,230,0.2),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(36,196,184,0.1),transparent_50%)]" />
         
@@ -138,7 +138,7 @@ export default function DemoPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-start">
             {/* Left: Benefits */}
             <div className="lg:sticky lg:top-[120px]">
-              <h2 className="text-2xl font-bold text-[#1a1a2e] mb-6">
+              <h2 className="text-2xl font-bold text-[#000000] mb-6">
                 What you'll get in your demo
               </h2>
 
@@ -147,11 +147,11 @@ export default function DemoPage() {
                   const Icon = benefit.icon;
                   return (
                     <div key={i} className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-[#6b1fad] rounded-xl flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 bg-[#cb6ce6] rounded-xl flex items-center justify-center flex-shrink-0">
                         <Icon className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-[#1a1a2e] mb-1">{benefit.title}</h3>
+                        <h3 className="font-semibold text-[#000000] mb-1">{benefit.title}</h3>
                         <p className="text-gray-500 text-sm">{benefit.desc}</p>
                       </div>
                     </div>
@@ -162,7 +162,7 @@ export default function DemoPage() {
               <div className="bg-[#f8f7fc] rounded-2xl p-6 border border-gray-100">
                 <div className="flex items-center gap-2 mb-3">
                   <CheckCircle2 className="w-5 h-5 text-[#24c4b8]" />
-                  <span className="font-semibold text-[#1a1a2e]">Quick Response</span>
+                  <span className="font-semibold text-[#000000]">Quick Response</span>
                 </div>
                 <p className="text-gray-500 text-sm">
                   Our team typically responds within 24 hours to schedule your personalized demo.
@@ -172,10 +172,10 @@ export default function DemoPage() {
 
             {/* Right: Form */}
             <div id="demo-form" className="bg-white rounded-2xl border border-gray-200 shadow-xl p-8 scroll-mt-24">
-              <h2 className="text-xl font-bold text-[#1a1a2e] mb-6">Request a Demo</h2>
+              <h2 className="text-xl font-bold text-[#000000] mb-6">Request a Demo</h2>
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-[#1a1a2e] mb-2">
+                  <label className="block text-sm font-medium text-[#000000] mb-2">
                     Full Name *
                   </label>
                   <div className="relative">
@@ -185,14 +185,14 @@ export default function DemoPage() {
                       required
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc]"
+                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc]"
                       placeholder="John Smith"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#1a1a2e] mb-2">
+                  <label className="block text-sm font-medium text-[#000000] mb-2">
                     Work Email *
                   </label>
                   <div className="relative">
@@ -202,14 +202,14 @@ export default function DemoPage() {
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc]"
+                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc]"
                       placeholder="john@company.com"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#1a1a2e] mb-2">
+                  <label className="block text-sm font-medium text-[#000000] mb-2">
                     Company Name *
                   </label>
                   <div className="relative">
@@ -219,14 +219,14 @@ export default function DemoPage() {
                       required
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc]"
+                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc]"
                       placeholder="Acme Inc"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#1a1a2e] mb-2">
+                  <label className="block text-sm font-medium text-[#000000] mb-2">
                     Phone Number
                   </label>
                   <div className="relative">
@@ -235,20 +235,20 @@ export default function DemoPage() {
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc]"
+                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc]"
                       placeholder="+1 (555) 123-4567"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#1a1a2e] mb-2">
+                  <label className="block text-sm font-medium text-[#000000] mb-2">
                     Team Size
                   </label>
                   <select
                     value={formData.teamSize}
                     onChange={(e) => setFormData({ ...formData, teamSize: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc]"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#000000] focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc]"
                   >
                     <option value="">Select team size</option>
                     {teamSizeOptions.map(option => (
@@ -258,7 +258,7 @@ export default function DemoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#1a1a2e] mb-2">
+                  <label className="block text-sm font-medium text-[#000000] mb-2">
                     How can we help?
                   </label>
                   <div className="relative">
@@ -267,7 +267,7 @@ export default function DemoPage() {
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       rows={4}
-                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#1a1a2e] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6b1fad]/20 focus:border-[#6b1fad] transition-all bg-[#f8f7fc] resize-none"
+                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc] resize-none"
                       placeholder="Tell us about your needs..."
                     />
                   </div>
@@ -294,7 +294,7 @@ export default function DemoPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-[#1a1a2e] text-white py-8 px-6">
+      <footer className="bg-[#000000] text-white py-8 px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
             <img src={logoImg} alt="Hiready" className="h-8 brightness-0 invert" />

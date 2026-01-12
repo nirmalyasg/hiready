@@ -51,19 +51,19 @@ const domainIcons: Record<string, any> = {
 };
 
 const domainColors: Record<string, string> = {
-  software: "bg-[#1a1a2e]",
-  data: "bg-[#6b1fad]",
+  software: "bg-[#000000]",
+  data: "bg-[#cb6ce6]",
   product: "bg-[#24c4b8]",
   design: "bg-gray-500",
   sales: "bg-[#24c4b8]",
-  marketing: "bg-[#1a1a2e]",
-  customer_success: "bg-[#6b1fad]",
+  marketing: "bg-[#000000]",
+  customer_success: "bg-[#cb6ce6]",
   operations: "bg-gray-500",
-  consulting: "bg-[#1a1a2e]",
-  finance: "bg-[#6b1fad]",
+  consulting: "bg-[#000000]",
+  finance: "bg-[#cb6ce6]",
   hr: "bg-[#24c4b8]",
   recruiting: "bg-gray-500",
-  engineering_management: "bg-[#1a1a2e]",
+  engineering_management: "bg-[#000000]",
 };
 
 const interviewModeOptions = [
@@ -72,7 +72,7 @@ const interviewModeOptions = [
     label: "Coding & Technical Tasks", 
     description: "Solve, explain, debug, or modify technical problems",
     icon: Code,
-    color: "bg-[#1a1a2e]",
+    color: "bg-[#000000]",
     interviewMode: "coding_technical",
     duration: "15 min",
     includes: ["Coding", "Debugging", "Code Review", "SQL", "ML Basics"],
@@ -83,7 +83,7 @@ const interviewModeOptions = [
     label: "Case & Problem Solving", 
     description: "Structured thinking for ambiguous problems",
     icon: Briefcase,
-    color: "bg-[#6b1fad]",
+    color: "bg-[#cb6ce6]",
     interviewMode: "case_problem_solving",
     duration: "15 min",
     includes: ["Business Cases", "Product Cases", "Analytics Cases", "Strategy"],
@@ -120,9 +120,9 @@ const getLevelConfig = (level: string) => {
     case "mid":
       return { label: "Mid-Level", color: "bg-[#24c4b8]/10 text-[#24c4b8]" };
     case "senior":
-      return { label: "Senior", color: "bg-[#1a1a2e]/10 text-[#1a1a2e]" };
+      return { label: "Senior", color: "bg-[#000000]/10 text-[#000000]" };
     default:
-      return { label: level, color: "bg-[#6b1fad]/10 text-gray-500" };
+      return { label: level, color: "bg-[#cb6ce6]/10 text-gray-500" };
   }
 };
 
@@ -405,7 +405,7 @@ export default function InterviewPracticePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8 pb-20 sm:pb-12">
           
           {/* Hero Header */}
-          <div className="bg-gradient-to-br from-[#1a1a2e] to-[#2d1b4e] rounded-2xl p-6 sm:p-8 text-white shadow-xl">
+          <div className="bg-gradient-to-br from-[#000000] to-[#1a0a2e] rounded-2xl p-6 sm:p-8 text-white shadow-xl">
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">Interview Practice</h1>
             <p className="text-white/70 text-sm sm:text-base max-w-xl">
               AI-powered practice sessions to ace your interviews. Choose your path and start building confidence.
@@ -454,25 +454,25 @@ export default function InterviewPracticePage() {
             {/* Practice by Role */}
             <button
               onClick={() => setSelectedPath("role")}
-              className="w-full group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 sm:p-6 hover:border-[#1a1a2e] hover:shadow-xl transition-all duration-300"
+              className="w-full group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 sm:p-6 hover:border-[#000000] hover:shadow-xl transition-all duration-300"
             >
               <div className="flex sm:flex-col items-center sm:items-start gap-4 sm:gap-0">
-                <div className="w-14 h-14 rounded-2xl bg-[#1a1a2e] flex items-center justify-center sm:mb-4 flex-shrink-0 shadow-lg shadow-[#1a1a2e]/20">
+                <div className="w-14 h-14 rounded-2xl bg-[#000000] flex items-center justify-center sm:mb-4 flex-shrink-0 shadow-lg shadow-[#000000]/20">
                   <Briefcase className="w-7 h-7 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-lg sm:text-xl font-bold text-[#1a1a2e] mb-1 sm:mb-2 group-hover:text-[#24c4b8] transition-colors">
+                  <h2 className="text-lg sm:text-xl font-bold text-[#000000] mb-1 sm:mb-2 group-hover:text-[#24c4b8] transition-colors">
                     Practice by Role
                   </h2>
                   <p className="text-gray-500 text-sm line-clamp-2 sm:line-clamp-none sm:mb-4">
                     {roleKits.length}+ role kits: Engineer, PM, Analyst...
                   </p>
-                  <div className="hidden sm:flex items-center gap-2 text-[#1a1a2e] font-semibold text-sm group-hover:text-[#24c4b8] transition-colors">
+                  <div className="hidden sm:flex items-center gap-2 text-[#000000] font-semibold text-sm group-hover:text-[#24c4b8] transition-colors">
                     <span>Browse roles</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-[#6b1fad] group-hover:text-[#24c4b8] sm:hidden" />
+                <ChevronRight className="w-5 h-5 text-[#cb6ce6] group-hover:text-[#24c4b8] sm:hidden" />
               </div>
             </button>
 
@@ -486,7 +486,7 @@ export default function InterviewPracticePage() {
                   <Target className="w-7 h-7 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-lg sm:text-xl font-bold text-[#1a1a2e] mb-1 sm:mb-2 group-hover:text-[#24c4b8] transition-colors">
+                  <h2 className="text-lg sm:text-xl font-bold text-[#000000] mb-1 sm:mb-2 group-hover:text-[#24c4b8] transition-colors">
                     Practice by Type
                   </h2>
                   <p className="text-gray-500 text-sm line-clamp-2 sm:line-clamp-none sm:mb-4">
@@ -497,27 +497,27 @@ export default function InterviewPracticePage() {
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-[#6b1fad] group-hover:text-[#24c4b8] sm:hidden" />
+                <ChevronRight className="w-5 h-5 text-[#cb6ce6] group-hover:text-[#24c4b8] sm:hidden" />
               </div>
             </button>
 
             {/* Custom Interview */}
             <button
               onClick={() => setSelectedPath("custom")}
-              className="w-full group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 sm:p-6 hover:border-[#6b1fad] hover:shadow-xl transition-all duration-300"
+              className="w-full group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 sm:p-6 hover:border-[#cb6ce6] hover:shadow-xl transition-all duration-300"
             >
               <div className="flex sm:flex-col items-center sm:items-start gap-4 sm:gap-0">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#6b1fad] to-[gray-500] flex items-center justify-center sm:mb-4 flex-shrink-0 shadow-lg shadow-[#6b1fad]/30">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#cb6ce6] to-[gray-500] flex items-center justify-center sm:mb-4 flex-shrink-0 shadow-lg shadow-[#cb6ce6]/30">
                   <Sparkles className="w-7 h-7 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-lg sm:text-xl font-bold text-[#1a1a2e] mb-1 sm:mb-2 group-hover:text-[#24c4b8] transition-colors">
+                  <h2 className="text-lg sm:text-xl font-bold text-[#000000] mb-1 sm:mb-2 group-hover:text-[#24c4b8] transition-colors">
                     Custom Interview
                   </h2>
                   <p className="text-gray-500 text-sm line-clamp-2 sm:line-clamp-none sm:mb-4">
                     Tailored questions for your specific job
                   </p>
-                  <div className="hidden sm:flex items-center gap-2 text-[#6b1fad] font-semibold text-sm group-hover:text-[#24c4b8] transition-colors">
+                  <div className="hidden sm:flex items-center gap-2 text-[#cb6ce6] font-semibold text-sm group-hover:text-[#24c4b8] transition-colors">
                     <span>Get started</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -531,7 +531,7 @@ export default function InterviewPracticePage() {
                   {savedJobs.length > 0 && (
                     <span className="text-xs text-white bg-[#24c4b8] px-2 py-0.5 rounded-full font-medium">{savedJobs.length} jobs</span>
                   )}
-                  <ChevronRight className="w-5 h-5 text-[#6b1fad] group-hover:text-[#24c4b8]" />
+                  <ChevronRight className="w-5 h-5 text-[#cb6ce6] group-hover:text-[#24c4b8]" />
                 </div>
               </div>
             </button>

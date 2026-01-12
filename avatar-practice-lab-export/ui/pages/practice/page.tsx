@@ -129,7 +129,7 @@ export default function PracticePage() {
         </div>
       ) : (
         <div className="min-h-screen bg-[#fbfbfc]">
-          <div className="bg-gradient-to-br from-[#1a1a2e] via-[#2d1b4e] to-[#1a1a2e] text-white">
+          <div className="bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] text-white">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
@@ -165,13 +165,13 @@ export default function PracticePage() {
             <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-4 sm:p-6 border border-slate-100">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6b1fad]" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#cb6ce6]" />
                   <Input
                     type="text"
                     placeholder="Search scenarios..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-12 h-12 bg-[#fbfbfc] rounded-xl border-slate-200 focus:border-[#24c4b8] focus:ring-[#24c4b8]/20 text-[#1a1a2e]"
+                    className="pl-12 h-12 bg-[#fbfbfc] rounded-xl border-slate-200 focus:border-[#24c4b8] focus:ring-[#24c4b8]/20 text-[#000000]"
                     data-testid="input-search-scenarios"
                   />
                 </div>
@@ -182,7 +182,7 @@ export default function PracticePage() {
                   onClick={() => handleSkillFilter(null)}
                   className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
                     !selectedSkill 
-                      ? "bg-[#1a1a2e] text-white shadow-lg shadow-[#1a1a2e]/25" 
+                      ? "bg-[#000000] text-white shadow-lg shadow-[#000000]/25" 
                       : "bg-slate-100 text-gray-500 hover:bg-slate-200"
                   }`}
                 >
@@ -215,9 +215,9 @@ export default function PracticePage() {
             {filteredScenarios.length === 0 ? (
               <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm">
                 <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center">
-                  <MessageSquare className="w-8 h-8 text-[#6b1fad]" />
+                  <MessageSquare className="w-8 h-8 text-[#cb6ce6]" />
                 </div>
-                <h3 className="text-xl font-bold text-[#1a1a2e] mb-2">No scenarios found</h3>
+                <h3 className="text-xl font-bold text-[#000000] mb-2">No scenarios found</h3>
                 <p className="text-gray-500 mb-6">Try adjusting your search or filters.</p>
                 <Button 
                   onClick={() => { handleSkillFilter(null); setSearchQuery(""); }}
@@ -252,7 +252,7 @@ export default function PracticePage() {
                             </span>
                           </div>
 
-                          <h3 className="font-bold text-[#1a1a2e] text-base mb-2 line-clamp-2 group-hover:text-[#24c4b8] transition-colors">
+                          <h3 className="font-bold text-[#000000] text-base mb-2 line-clamp-2 group-hover:text-[#24c4b8] transition-colors">
                             {scenario.name}
                           </h3>
 
@@ -261,7 +261,7 @@ export default function PracticePage() {
                           </p>
 
                           <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                            <div className="flex items-center gap-1.5 text-[#6b1fad]">
+                            <div className="flex items-center gap-1.5 text-[#cb6ce6]">
                               <Clock className="w-4 h-4" />
                               <span className="text-xs font-medium">5-10 min</span>
                             </div>
