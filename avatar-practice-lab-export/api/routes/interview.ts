@@ -44,6 +44,8 @@ import {
 import { requireAuth } from "../middleware/auth.js";
 import { getOpenAI } from "../utils/openai-client.js";
 import { enforceEntitlements, checkEntitlements } from "../lib/entitlements.js";
+import { checkInterviewAccess, consumeFreeInterview, recordInterviewUsage } from "../lib/entitlement-service.js";
+import * as storage from "../storage.js";
 import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
 import {
@@ -1057,35 +1059,59 @@ interviewRouter.get("/plan/:id", requireAuth, async (req: Request, res: Response
 
 interviewRouter.post("/session/start", requireAuth, async (req: Request, res: Response) => {
   try {
-    const userId = req.user!.id;
+    const authUserId = req.user!.id;
     const { interviewConfigId, interviewPlanId, rubricId, employerJobId } = req.body;
     
     if (!interviewConfigId) {
       return res.status(400).json({ success: false, error: "Interview config ID is required" });
     }
     
+    // Convert auth user ID (UUID) to legacy user ID (integer) for entitlement checks
+    let legacyUserId: number | null = null;
+    const legacyUser = await storage.getLegacyUserByAuthUserId(authUserId);
+    if (legacyUser) {
+      legacyUserId = legacyUser.id;
+    } else if (req.user?.username) {
+      const created = await storage.getOrCreateLegacyUser(authUserId, req.user.username);
+      legacyUserId = created.id;
+    }
+    
+    // Check interview access using new monetization system
+    if (legacyUserId) {
+      const accessCheck = await checkInterviewAccess(legacyUserId);
+      if (!accessCheck.hasAccess) {
+        return res.status(403).json({
+          success: false,
+          error: accessCheck.reason || "No interview access",
+          code: "NO_ACCESS",
+          upgradeRequired: true,
+        });
+      }
+      
+      // Consume free interview credit if using free tier
+      if (accessCheck.accessType === 'free') {
+        const consumed = await consumeFreeInterview(legacyUserId);
+        if (!consumed) {
+          return res.status(403).json({
+            success: false,
+            error: "No free interviews remaining",
+            code: "FREE_LIMIT_REACHED",
+            upgradeRequired: true,
+          });
+        }
+      }
+      
+      // Store access info for usage tracking
+      (req as any).accessInfo = accessCheck;
+    }
+    
     const [config] = await db
       .select()
       .from(interviewConfigs)
-      .where(and(eq(interviewConfigs.id, interviewConfigId), eq(interviewConfigs.userId, userId)));
+      .where(and(eq(interviewConfigs.id, interviewConfigId), eq(interviewConfigs.userId, authUserId)));
     
     if (!config) {
       return res.status(404).json({ success: false, error: "Config not found" });
-    }
-
-    const entitlementCheck = await enforceEntitlements(userId, {
-      jobTargetId: config.jobTargetId || undefined,
-      roleKitId: config.roleKitId || undefined,
-      employerJobId: employerJobId || undefined,
-    });
-
-    if (!entitlementCheck.allowed) {
-      return res.status(403).json({
-        success: false,
-        error: entitlementCheck.error,
-        requiresPayment: true,
-        entitlement: entitlementCheck.entitlement,
-      });
     }
     
     let defaultRubricId = rubricId;
@@ -1138,6 +1164,21 @@ interviewRouter.post("/session/start", requireAuth, async (req: Request, res: Re
         evaluationFocus: ['Problem structuring', 'Analytical thinking', 'Communication', 'Recommendations'],
         expectedDurationMinutes: caseStudyPhase?.duration || 30,
       };
+    }
+    
+    // Record interview usage for analytics
+    if (legacyUserId && (req as any).accessInfo) {
+      try {
+        await recordInterviewUsage(
+          legacyUserId,
+          (req as any).accessInfo.accessType,
+          undefined,
+          session.id,
+          config.interviewType || 'interview'
+        );
+      } catch (usageErr) {
+        console.error("Failed to record interview usage:", usageErr);
+      }
     }
     
     res.json({ success: true, session: { ...session, plan: planData } });
