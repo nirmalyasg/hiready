@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
+import logoImg from '../../assets/logo.png';
 import { 
   FileText, 
   BarChart3, 
@@ -196,7 +197,7 @@ export default function SeoAdminPage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-10">
               <Link to="/" className="flex items-center">
-                <span className="text-2xl font-bold text-black">hi<span className="text-[#24c4b8]">ready</span></span>
+                <img src={logoImg} alt="Hiready" className="h-8" />
               </Link>
               <nav className="hidden md:flex items-center gap-8">
                 <Link to="/features" className="text-sm text-black/70 hover:text-black transition-colors">Features</Link>
