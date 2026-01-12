@@ -1,0 +1,117 @@
+Pillar Pages
+Mock Interview Page
+Section 1: What a Mock Interview Actually Tests (Improved)
+
+Replace with:
+
+Explain what mock interviews actually test beyond surface-level knowledge.
+Write from the interviewer’s perspective.
+Show how interviewers assess thinking under pressure, clarity of explanation, handling ambiguity, and recovery from mistakes.
+Describe what interviewers notice in the first few minutes versus later in the conversation.
+Make it feel like insight candidates usually only learn after multiple rejections.
+
+Why this works:
+→ Forces interviewer POV + time-based evaluation
+
+Section 2: Common Interview Types
+
+Replace with:
+
+Explain the four main interview types candidates encounter: HR screening, technical interviews, case interviews, and behavioral rounds.
+For each, describe how the interviewer’s mindset changes and what they are primarily trying to confirm or eliminate.
+Emphasize how the same answer can be judged differently across interview types.
+Interview types to reference: ${interviewTypes.join(", ")}.
+
+Section 3: Typical Interview Structure
+
+Replace with:
+
+Describe the typical flow of an interview from opening to close, based on this structure data: ${JSON.stringify(phasesData)}.
+Explain what interviewers are evaluating at each phase, how candidates often misread these moments, and where interviews are usually won or lost.
+Include realistic timing and pacing, not idealized versions.
+
+Section 4: Why Practicing Interviews Works
+
+Replace with:
+
+Explain why interview practice works from a behavioral and cognitive perspective.
+Describe how repeated exposure changes response quality, confidence, and clarity under pressure.
+Show the difference between candidates who “know the answers” versus those who have practiced saying them out loud.
+Avoid academic language — keep it grounded in interview-room reality.
+
+2️⃣ Role Prep Pages (/prepare/{role})
+Section 1: What Interviewers Evaluate in {Role}s
+
+Replace with:
+
+For ${roleName} interviews, explain what interviewers actually listen for when candidates speak.
+Use these dimensions: ${formatSkillDimensions(skillDimensions)}.
+Describe how each dimension shows up naturally in conversation, not as a checklist.
+Contrast how strong candidates demonstrate these traits versus weaker ones.
+
+Section 2: Typical {Role} Interview Structure
+
+Replace with:
+
+Describe the interview structure commonly used for ${roleName} roles, based on this data: ${JSON.stringify(structure.phasesJson)}.
+Explain how expectations shift across rounds and what candidates often underestimate at each stage.
+Focus on preparation mistakes candidates make for each phase.
+
+Section 3: Common Question Patterns
+
+Replace with:
+
+Describe the recurring question patterns ${roleName} candidates face, using these examples: ${patternSamples.join("; ")}.
+Explain why interviewers rely on these patterns and what they reveal about candidates beyond the surface answer.
+Emphasize structure and reasoning, not memorization.
+
+Section 4: Common Mistakes Candidates Make
+
+Replace with:
+
+Explain the most common ways ${roleName} candidates fail interviews, based on these failure modes: ${failureModes.join("; ")}.
+Describe how these mistakes typically appear in conversation and why candidates don’t realize they’re happening.
+Keep the tone diagnostic, not judgmental.
+
+3️⃣ Company Pages (/interview-prep/{company})
+Section 1: How Interviews at {Company} Typically Work
+
+Replace with:
+
+Describe how interviews at ${companyName} typically unfold in practice.
+Use their sector (${company.sector}) and archetype (${company.archetype}) to explain pacing, depth, and interviewer expectations.
+Reference these interview components: ${Object.keys(interviewComponents).filter(...).join(", ")}.
+Focus on what surprises candidates most.
+
+Section 2: Skills {Company} Emphasizes
+
+Replace with:
+
+Explain which skills ${companyName} consistently prioritizes during interviews, based on: ${skillFocusAreas.join(", ")}.
+Describe how interviewers test these skills indirectly through questions, follow-ups, and problem framing.
+Avoid stating values — show how they surface in interviews.
+
+4️⃣ Skill Practice Pages (/practice/{skill})
+Section 1: What This Interview Tests
+
+Replace with:
+
+Explain what a ${skill.name} interview truly evaluates beyond correctness.
+Describe how interviewers judge thinking process, communication clarity, and adaptability under questioning.
+Explain how this interview type differs in tone and expectations from others.
+
+Section 2: Common Question Patterns
+
+Replace with:
+
+Describe the most common question structures used in ${skill.name} interviews.
+Use examples like: ${patterns.slice(0, 5).map(p => p.template?.substring(0, 50)).join("; ")}.
+Explain the logic behind these patterns and what interviewers are trying to surface.
+
+Section 3: How Interviewers Evaluate Responses
+
+Replace with:
+
+Explain how interviewers evaluate answers during ${skill.name} interviews in real time.
+Describe what makes an answer feel confident and trustworthy versus risky or unclear.
+Highlight subtle signals interviewers react to, including pacing, framing, and handling follow-ups.
