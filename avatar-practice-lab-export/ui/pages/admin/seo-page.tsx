@@ -19,8 +19,7 @@ import {
   Zap,
   ArrowLeft,
   TrendingUp,
-  Layers,
-  Calendar
+  Layers
 } from 'lucide-react';
 
 interface SeoPageSummary {
@@ -192,54 +191,48 @@ export default function SeoAdminPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="bg-white border-b border-black/10">
+      <header className="bg-black text-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-10">
+            <div className="flex items-center gap-6">
               <Link to="/" className="flex items-center">
-                <img src={logoImg} alt="Hiready" className="h-8" />
+                <img src={logoImg} alt="Hiready" className="h-7 brightness-0 invert" />
               </Link>
-              <nav className="hidden md:flex items-center gap-8">
-                <Link to="/features" className="text-sm text-black/70 hover:text-black transition-colors">Features</Link>
-                <Link to="/pricing" className="text-sm text-black/70 hover:text-black transition-colors">Pricing</Link>
-                <Link to="/enterprise" className="text-sm text-black/70 hover:text-black transition-colors">Enterprise</Link>
-              </nav>
+              <div className="h-6 w-px bg-white/20"></div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-[#cb6ce6] bg-[#cb6ce6]/20 px-2 py-0.5 rounded">ADMIN</span>
+                <span className="text-sm text-white/80">Console</span>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <button className="hidden md:flex items-center gap-2 px-4 py-2 border border-black/20 rounded-lg text-sm text-black/70 hover:border-black/40 transition-colors">
-                <Calendar className="w-4 h-4" />
-                Book a Demo
-              </button>
-              <Link to="/login" className="text-sm text-black/70 hover:text-black transition-colors">Sign In</Link>
-              <Link 
-                to="/readycheck" 
-                className="px-5 py-2 bg-[#24c4b8] hover:bg-[#1fb3a7] text-white text-sm font-medium rounded-lg transition-colors"
-              >
-                Start Preparing
-              </Link>
-            </div>
+            <nav className="flex items-center gap-6">
+              <Link to="/admin" className="text-sm text-white/60 hover:text-white transition-colors">Dashboard</Link>
+              <Link to="/admin/seo" className="text-sm text-white font-medium">SEO Pages</Link>
+              <Link to="/admin/analytics" className="text-sm text-white/60 hover:text-white transition-colors">Analytics</Link>
+              <div className="h-6 w-px bg-white/20"></div>
+              <Link to="/" className="text-sm text-white/60 hover:text-white transition-colors">Exit Admin</Link>
+            </nav>
           </div>
         </div>
         <div className="h-1 bg-gradient-to-r from-[#cb6ce6] via-[#24c4b8] to-[#e2a9f1]"></div>
       </header>
 
-      <div className="bg-black text-white">
-        <div className="max-w-7xl mx-auto px-6 py-5">
+      <div className="bg-white border-b border-black/10">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link to="/admin" className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+              <Link to="/admin" className="p-2 hover:bg-black/5 rounded-lg transition-colors text-black/40 hover:text-black">
                 <ArrowLeft className="w-5 h-5" />
               </Link>
               <div>
-                <h1 className="text-xl font-bold">SEO Page Management</h1>
-                <p className="text-white/60 text-sm">Generate, publish, and monitor SEO pages</p>
+                <h1 className="text-xl font-bold text-black">SEO Page Management</h1>
+                <p className="text-black/50 text-sm">Generate, publish, and monitor SEO pages</p>
               </div>
             </div>
             <Button 
               onClick={fetchData} 
               variant="outline" 
               size="sm"
-              className="border-white/20 text-white hover:bg-white/10"
+              className="border-black/20 text-black hover:bg-black/5"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
