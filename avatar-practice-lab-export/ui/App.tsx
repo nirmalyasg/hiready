@@ -59,6 +59,7 @@ import CompanyDashboard from './pages/company/page';
 import CompanyLoginPage from './pages/company/login';
 import DynamicSeoPage from './pages/seo/dynamic-page';
 import SeoAdminPage from './pages/admin/seo-page';
+import InvitePage from './pages/invite/page';
 
 export default function App() {
   return (
@@ -123,6 +124,7 @@ export default function App() {
         <Route path="/employer/login" element={<Navigate to="/company/login" replace />} />
         <Route path="/employer" element={<Navigate to="/company/login" replace />} />
         <Route path="/admin/seo" element={<SeoAdminPage />} />
+        <Route path="/invite/:token" element={<InvitePage />} />
         
         {/* Dynamic SEO pages - must be near the end */}
         <Route path="/mock-interview" element={<DynamicSeoPage />} />

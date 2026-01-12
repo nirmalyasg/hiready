@@ -49,6 +49,7 @@ import {
 } from "../lib/skill-dimension-assessment.js";
 import { suggestRolesFromContext, analyzeScenarioContext } from "../lib/role-suggestion.js";
 import { trackHeygenUsage } from "../utils/api-usage-tracker.js";
+import { checkInterviewAccess, consumeFreeInterview, recordInterviewUsage } from "../lib/entitlement-service.js";
 dotenv.config();
 
 // Recreate __dirname
@@ -754,6 +755,34 @@ avatarSimulator.post("/session/start", async (req, res) => {
           existingSessionId: existingSession.id,
         });
       }
+      
+      // Check interview access entitlement
+      const accessCheck = await checkInterviewAccess(legacyUserId);
+      if (!accessCheck.hasAccess) {
+        return res.status(403).json({
+          success: false,
+          error: "Access denied",
+          code: "NO_ACCESS",
+          reason: accessCheck.reason,
+          upgradeRequired: true
+        });
+      }
+      
+      // Consume free interview credit if using free tier
+      if (accessCheck.accessType === 'free') {
+        const consumed = await consumeFreeInterview(legacyUserId);
+        if (!consumed) {
+          return res.status(403).json({
+            success: false,
+            error: "No free interviews remaining",
+            code: "FREE_LIMIT_REACHED",
+            upgradeRequired: true
+          });
+        }
+      }
+      
+      // Store access info for later recording
+      (req as any).accessInfo = accessCheck;
     }
     
     // Check concurrent session limit
@@ -800,6 +829,21 @@ avatarSimulator.post("/session/start", async (req, res) => {
     });
     
     console.log(`[HeyGen Session] Started session ${session.id} for user ${legacyUserId}, expires at ${expiresAt.toISOString()}`);
+    
+    // Record interview usage for analytics
+    if (legacyUserId && (req as any).accessInfo) {
+      try {
+        await recordInterviewUsage(
+          legacyUserId,
+          (req as any).accessInfo.accessType,
+          undefined,
+          session.id,
+          mode || 'voice'
+        );
+      } catch (usageErr) {
+        console.error("Failed to record interview usage:", usageErr);
+      }
+    }
     
     res.json({
       success: true,

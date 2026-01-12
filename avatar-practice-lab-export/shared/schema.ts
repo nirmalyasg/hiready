@@ -2122,6 +2122,190 @@ export const seoAnalyticsEventsRelations = relations(seoAnalyticsEvents, ({ one 
 }));
 
 // =====================
+// Monetization Tables
+// =====================
+
+// Payment subscriptions - $499/month subscribers
+export const paymentSubscriptions = pgTable("payment_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  stripeCustomerId: varchar("stripe_customer_id"),
+  status: varchar("status", { length: 50 }).notNull().default("active"),
+  planType: varchar("plan_type", { length: 50 }).notNull().default("monthly"),
+  amountCents: integer("amount_cents").notNull().default(49900),
+  currentPeriodStart: timestamp("current_period_start"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  canceledAt: timestamp("canceled_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User entitlements - tracks what tier each user has
+export const userEntitlements = pgTable("user_entitlements", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  tier: varchar("tier", { length: 20 }).notNull().default("free"),
+  freeInterviewsRemaining: integer("free_interviews_remaining").notNull().default(1),
+  paymentSubscriptionId: varchar("payment_subscription_id").references(() => paymentSubscriptions.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Interview sets - groupings of interview types for a role/JD
+export const interviewSets = pgTable("interview_sets", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  roleArchetypeId: varchar("role_archetype_id", { length: 100 }),
+  companyId: varchar("company_id", { length: 100 }).references(() => companies.id),
+  jobDescription: text("job_description"),
+  interviewTypes: jsonb("interview_types").notNull().default([]),
+  priceCents: integer("price_cents").notNull().default(19900),
+  ownerUserId: integer("owner_user_id").references(() => users.id),
+  ownerCompanyId: varchar("owner_company_id", { length: 100 }),
+  visibility: varchar("visibility", { length: 20 }).notNull().default("private"),
+  shareToken: varchar("share_token", { length: 100 }).unique(),
+  shareTokenExpiresAt: timestamp("share_token_expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Interview set purchases - $199 one-time purchases
+export const interviewSetPurchases = pgTable("interview_set_purchases", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  interviewSetId: integer("interview_set_id").notNull().references(() => interviewSets.id, { onDelete: "cascade" }),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
+  amountCents: integer("amount_cents").notNull().default(19900),
+  status: varchar("status", { length: 50 }).notNull().default("completed"),
+  purchasedAt: timestamp("purchased_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Company share links - for companies sharing interview sets with candidates
+export const companyShareLinks = pgTable("company_share_links", {
+  id: serial("id").primaryKey(),
+  interviewSetId: integer("interview_set_id").notNull().references(() => interviewSets.id, { onDelete: "cascade" }),
+  shareToken: varchar("share_token", { length: 100 }).notNull().unique(),
+  companyName: varchar("company_name", { length: 255 }),
+  companyEmail: varchar("company_email", { length: 255 }),
+  description: text("description"),
+  maxUses: integer("max_uses"),
+  currentUses: integer("current_uses").notNull().default(0),
+  expiresAt: timestamp("expires_at"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdByUserId: integer("created_by_user_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Company share link access - tracks which users accessed via share link
+export const companyShareLinkAccess = pgTable("company_share_link_access", {
+  id: serial("id").primaryKey(),
+  shareLinkId: integer("share_link_id").notNull().references(() => companyShareLinks.id, { onDelete: "cascade" }),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  interviewSetId: integer("interview_set_id").notNull().references(() => interviewSets.id, { onDelete: "cascade" }),
+  accessedAt: timestamp("accessed_at").defaultNow(),
+});
+
+// Interview usage tracking - counts interviews used
+export const interviewUsage = pgTable("interview_usage", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  interviewSetId: integer("interview_set_id").references(() => interviewSets.id),
+  sessionId: integer("session_id"),
+  interviewType: varchar("interview_type", { length: 100 }),
+  accessType: varchar("access_type", { length: 50 }).notNull(),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  durationSeconds: integer("duration_seconds"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Monetization Relations
+export const paymentSubscriptionsRelations = relations(paymentSubscriptions, ({ one }) => ({
+  user: one(users, {
+    fields: [paymentSubscriptions.userId],
+    references: [users.id],
+  }),
+}));
+
+export const userEntitlementsRelations = relations(userEntitlements, ({ one }) => ({
+  user: one(users, {
+    fields: [userEntitlements.userId],
+    references: [users.id],
+  }),
+  paymentSubscription: one(paymentSubscriptions, {
+    fields: [userEntitlements.paymentSubscriptionId],
+    references: [paymentSubscriptions.id],
+  }),
+}));
+
+export const interviewSetsRelations = relations(interviewSets, ({ one, many }) => ({
+  company: one(companies, {
+    fields: [interviewSets.companyId],
+    references: [companies.id],
+  }),
+  ownerUser: one(users, {
+    fields: [interviewSets.ownerUserId],
+    references: [users.id],
+  }),
+  purchases: many(interviewSetPurchases),
+  shareLinks: many(companyShareLinks),
+  usage: many(interviewUsage),
+}));
+
+export const interviewSetPurchasesRelations = relations(interviewSetPurchases, ({ one }) => ({
+  user: one(users, {
+    fields: [interviewSetPurchases.userId],
+    references: [users.id],
+  }),
+  interviewSet: one(interviewSets, {
+    fields: [interviewSetPurchases.interviewSetId],
+    references: [interviewSets.id],
+  }),
+}));
+
+export const companyShareLinksRelations = relations(companyShareLinks, ({ one, many }) => ({
+  interviewSet: one(interviewSets, {
+    fields: [companyShareLinks.interviewSetId],
+    references: [interviewSets.id],
+  }),
+  createdBy: one(users, {
+    fields: [companyShareLinks.createdByUserId],
+    references: [users.id],
+  }),
+  accessRecords: many(companyShareLinkAccess),
+}));
+
+export const companyShareLinkAccessRelations = relations(companyShareLinkAccess, ({ one }) => ({
+  shareLink: one(companyShareLinks, {
+    fields: [companyShareLinkAccess.shareLinkId],
+    references: [companyShareLinks.id],
+  }),
+  user: one(users, {
+    fields: [companyShareLinkAccess.userId],
+    references: [users.id],
+  }),
+  interviewSet: one(interviewSets, {
+    fields: [companyShareLinkAccess.interviewSetId],
+    references: [interviewSets.id],
+  }),
+}));
+
+export const interviewUsageRelations = relations(interviewUsage, ({ one }) => ({
+  user: one(users, {
+    fields: [interviewUsage.userId],
+    references: [users.id],
+  }),
+  interviewSet: one(interviewSets, {
+    fields: [interviewUsage.interviewSetId],
+    references: [interviewSets.id],
+  }),
+}));
+
+// =====================
 // Insert Schemas
 // =====================
 
@@ -2193,6 +2377,15 @@ export const insertBudgetAlertSchema = createInsertSchema(budgetAlerts).omit({ i
 export const insertAdminSettingSchema = createInsertSchema(adminSettings).omit({ createdAt: true, updatedAt: true });
 export const insertUserMediaPreferenceSchema = createInsertSchema(userMediaPreferences).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertApiCostDailyRollupSchema = createInsertSchema(apiCostDailyRollup).omit({ id: true });
+
+// Monetization Insert Schemas
+export const insertPaymentSubscriptionSchema = createInsertSchema(paymentSubscriptions).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertUserEntitlementSchema = createInsertSchema(userEntitlements).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertInterviewSetSchema = createInsertSchema(interviewSets).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertInterviewSetPurchaseSchema = createInsertSchema(interviewSetPurchases).omit({ id: true, createdAt: true });
+export const insertCompanyShareLinkSchema = createInsertSchema(companyShareLinks).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCompanyShareLinkAccessSchema = createInsertSchema(companyShareLinkAccess).omit({ id: true });
+export const insertInterviewUsageSchema = createInsertSchema(interviewUsage).omit({ id: true, createdAt: true });
 
 // =====================
 // Types
@@ -2330,3 +2523,19 @@ export type SeoGenerationQueueItem = typeof seoGenerationQueue.$inferSelect;
 export type InsertSeoGenerationQueueItem = z.infer<typeof insertSeoGenerationQueueSchema>;
 export type SeoAnalyticsEvent = typeof seoAnalyticsEvents.$inferSelect;
 export type InsertSeoAnalyticsEvent = z.infer<typeof insertSeoAnalyticsEventSchema>;
+
+// Monetization Types
+export type PaymentSubscription = typeof paymentSubscriptions.$inferSelect;
+export type InsertPaymentSubscription = z.infer<typeof insertPaymentSubscriptionSchema>;
+export type UserEntitlement = typeof userEntitlements.$inferSelect;
+export type InsertUserEntitlement = z.infer<typeof insertUserEntitlementSchema>;
+export type InterviewSet = typeof interviewSets.$inferSelect;
+export type InsertInterviewSet = z.infer<typeof insertInterviewSetSchema>;
+export type InterviewSetPurchase = typeof interviewSetPurchases.$inferSelect;
+export type InsertInterviewSetPurchase = z.infer<typeof insertInterviewSetPurchaseSchema>;
+export type CompanyShareLink = typeof companyShareLinks.$inferSelect;
+export type InsertCompanyShareLink = z.infer<typeof insertCompanyShareLinkSchema>;
+export type CompanyShareLinkAccess = typeof companyShareLinkAccess.$inferSelect;
+export type InsertCompanyShareLinkAccess = z.infer<typeof insertCompanyShareLinkAccessSchema>;
+export type InterviewUsage = typeof interviewUsage.$inferSelect;
+export type InsertInterviewUsage = z.infer<typeof insertInterviewUsageSchema>;

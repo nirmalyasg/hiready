@@ -13,6 +13,8 @@ import employerAuthRouter from "./routes/employer-auth.js";
 import { readycheckRouter } from "./routes/readycheck.js";
 import leadsRouter from "./routes/leads.js";
 import seoRouter from "./routes/seo.js";
+import monetizationRouter from "./routes/monetization.js";
+import stripePaymentsRouter from "./routes/stripe-payments.js";
 import { setupAuth } from "./replitAuth.js";
 import dotenv from "dotenv";
 
@@ -136,6 +138,30 @@ async function startServer() {
 
   // Mount SEO routes (public - no auth required for public pages)
   app.use("/api/seo", seoRouter);
+
+  // Middleware to populate req.user from session for monetization routes
+  app.use("/api/monetization", (req, res, next) => {
+    const sessionUser = (req.session as any)?.user;
+    if (sessionUser) {
+      req.user = sessionUser;
+    }
+    next();
+  });
+
+  // Mount monetization routes (entitlements, access control, pricing)
+  app.use("/api/monetization", monetizationRouter);
+
+  // Middleware to populate req.user from session for Stripe payment routes
+  app.use("/api/stripe", (req, res, next) => {
+    const sessionUser = (req.session as any)?.user;
+    if (sessionUser) {
+      req.user = sessionUser;
+    }
+    next();
+  });
+
+  // Mount Stripe payment routes
+  app.use("/api/stripe", stripePaymentsRouter);
 
   // Health check
   app.get("/health", (req, res) => {
