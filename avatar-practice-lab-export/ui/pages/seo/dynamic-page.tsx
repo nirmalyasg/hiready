@@ -2,7 +2,24 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent } from '../../components/ui/card';
-import { ChevronRight, ArrowRight, Sparkles, Building2, Briefcase, Target } from 'lucide-react';
+import { 
+  ChevronRight, 
+  ArrowRight, 
+  Sparkles, 
+  Building2, 
+  Briefcase, 
+  Target,
+  Play,
+  MessageSquare,
+  BarChart3,
+  CheckCircle2,
+  Users,
+  Zap,
+  Brain,
+  Trophy,
+  Clock,
+  Star
+} from 'lucide-react';
 
 interface SeoSection {
   id: string;
@@ -59,6 +76,9 @@ export default function DynamicSeoPage() {
     }
     return location.pathname.slice(1);
   })();
+
+  const isPillarPage = page?.pageType === 'pillar';
+  const isMockInterviewPage = derivedSlug === 'mock-interview';
 
   useEffect(() => {
     async function fetchPage() {
@@ -162,6 +182,22 @@ export default function DynamicSeoPage() {
     }
   }, [page]);
 
+  const trackAndNavigate = (path: string, eventType: string = 'cta_click') => {
+    if (page) {
+      fetch('/api/seo/analytics/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          seoPageId: page.id,
+          eventType: eventType === 'practice_start' ? 'practice_start' : 'cta_click',
+          eventData: { ctaLink: path },
+          sessionId: sessionStorage.getItem('seo_session_id')
+        })
+      }).catch(() => {});
+    }
+    navigate(path);
+  };
+
   const handleCtaClick = (section: SeoSection) => {
     if (page) {
       fetch('/api/seo/analytics/event', {
@@ -209,6 +245,293 @@ export default function DynamicSeoPage() {
     skill_practice: <Target className="w-8 h-8 text-[#ee7e65]" />
   };
 
+  const howItWorksSteps = [
+    { icon: Target, title: "Choose Your Focus", desc: "Select your target role, company, or skill to practice" },
+    { icon: MessageSquare, title: "Practice with AI", desc: "Engage in realistic interview simulations with AI avatars" },
+    { icon: BarChart3, title: "Get Feedback", desc: "Receive detailed analysis and actionable improvement tips" }
+  ];
+
+  const benefits = isMockInterviewPage ? [
+    { icon: Brain, title: "AI-Powered Realism", desc: "Practice with interviewers that adapt to your responses" },
+    { icon: Clock, title: "Practice Anytime", desc: "24/7 access to unlimited practice sessions" },
+    { icon: Trophy, title: "Track Progress", desc: "See your improvement over time with detailed metrics" },
+    { icon: Zap, title: "Instant Feedback", desc: "Get actionable insights immediately after each session" }
+  ] : [
+    { icon: Briefcase, title: "Role-Specific Prep", desc: "Tailored content for your target position" },
+    { icon: Building2, title: "Company Research", desc: "Learn what top companies look for in candidates" },
+    { icon: Users, title: "Expert Insights", desc: "Strategies from interview coaches and hiring managers" },
+    { icon: Star, title: "Proven Methods", desc: "Frameworks that have helped thousands succeed" }
+  ];
+
+  const trustedCompanies = ["Google", "Amazon", "Meta", "Microsoft", "Apple", "Netflix"];
+
+  if (isPillarPage) {
+    return (
+      <>
+        <div className="min-h-screen bg-white">
+          <header className="bg-[#042c4c] text-white py-4 sticky top-0 z-50">
+            <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
+              <Link to="/" className="text-2xl font-bold">Hiready</Link>
+              <nav className="hidden md:flex items-center gap-6">
+                <Link to="/mock-interview" className="hover:text-[#ee7e65] transition-colors">Mock Interview</Link>
+                <Link to="/interview-preparation" className="hover:text-[#ee7e65] transition-colors">Interview Prep</Link>
+                <Link to="/readycheck" className="bg-[#ee7e65] hover:bg-[#d96a52] px-4 py-2 rounded-lg transition-colors">
+                  Start Free Practice
+                </Link>
+              </nav>
+            </div>
+          </header>
+
+          <section className="bg-gradient-to-br from-[#042c4c] via-[#0a4a7a] to-[#042c4c] text-white py-20 md:py-28 relative overflow-hidden">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-20 left-10 w-72 h-72 bg-[#ee7e65] rounded-full blur-3xl"></div>
+              <div className="absolute bottom-10 right-20 w-96 h-96 bg-[#ee7e65] rounded-full blur-3xl"></div>
+            </div>
+            <div className="max-w-6xl mx-auto px-4 relative z-10">
+              <div className="max-w-3xl">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="w-5 h-5 text-[#ee7e65]" />
+                  <span className="text-[#ee7e65] font-medium text-sm uppercase tracking-wider">AI-Powered Practice</span>
+                </div>
+                <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                  {page.h1}
+                </h1>
+                <p className="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed">
+                  {page.metaDescription}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button 
+                    onClick={() => trackAndNavigate('/readycheck', 'practice_start')}
+                    className="bg-[#ee7e65] hover:bg-[#d96a52] text-white font-semibold py-4 px-8 rounded-xl text-lg flex items-center justify-center gap-2 shadow-lg shadow-[#ee7e65]/30"
+                  >
+                    <Play className="w-5 h-5" />
+                    Start Free Practice
+                  </Button>
+                  <Button 
+                    onClick={() => trackAndNavigate('/interview')}
+                    variant="outline"
+                    className="border-2 border-white/30 text-white hover:bg-white/10 font-semibold py-4 px-8 rounded-xl text-lg"
+                  >
+                    Explore Interview Types
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="bg-gray-50 py-8 border-b">
+            <div className="max-w-6xl mx-auto px-4">
+              <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
+                <span className="text-gray-500 text-sm font-medium">Trusted by candidates from</span>
+                <div className="flex flex-wrap justify-center gap-6 md:gap-8">
+                  {trustedCompanies.map((company) => (
+                    <span key={company} className="text-gray-400 font-semibold text-lg">{company}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="py-16 md:py-20 bg-white">
+            <div className="max-w-6xl mx-auto px-4">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold text-[#042c4c] mb-4">How It Works</h2>
+                <p className="text-gray-600 text-lg max-w-2xl mx-auto">Get interview-ready in three simple steps</p>
+              </div>
+              <div className="grid md:grid-cols-3 gap-8">
+                {howItWorksSteps.map((step, index) => (
+                  <div key={index} className="relative">
+                    <div className="bg-white rounded-2xl p-8 border-2 border-gray-100 hover:border-[#ee7e65]/30 hover:shadow-xl transition-all group">
+                      <div className="w-14 h-14 bg-gradient-to-br from-[#ee7e65] to-[#d96a52] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <step.icon className="w-7 h-7 text-white" />
+                      </div>
+                      <div className="absolute -top-3 -left-3 w-8 h-8 bg-[#042c4c] rounded-full flex items-center justify-center text-white font-bold text-sm">
+                        {index + 1}
+                      </div>
+                      <h3 className="text-xl font-bold text-[#042c4c] mb-3">{step.title}</h3>
+                      <p className="text-gray-600">{step.desc}</p>
+                    </div>
+                    {index < 2 && (
+                      <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2">
+                        <ArrowRight className="w-8 h-8 text-gray-300" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="py-16 md:py-20 bg-gray-50">
+            <div className="max-w-6xl mx-auto px-4">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold text-[#042c4c] mb-4">
+                  {isMockInterviewPage ? "Why Practice With AI?" : "Why Prepare With Us?"}
+                </h2>
+              </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {benefits.map((benefit, index) => (
+                  <Card key={index} className="bg-white border-0 shadow-lg hover:shadow-xl transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="w-12 h-12 bg-[#042c4c]/10 rounded-xl flex items-center justify-center mb-4">
+                        <benefit.icon className="w-6 h-6 text-[#042c4c]" />
+                      </div>
+                      <h3 className="text-lg font-bold text-[#042c4c] mb-2">{benefit.title}</h3>
+                      <p className="text-gray-600 text-sm">{benefit.desc}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <article className="py-16 md:py-20 bg-white">
+            <div className="max-w-4xl mx-auto px-4">
+              {sections.map((section, index) => (
+                <section key={section.id} className={`mb-12 ${index > 0 ? 'pt-8 border-t border-gray-100' : ''}`}>
+                  {section.headingType === 'h2' ? (
+                    <h2 className="text-2xl md:text-3xl font-bold text-[#042c4c] mb-6">
+                      {section.heading}
+                    </h2>
+                  ) : (
+                    <h3 className="text-xl md:text-2xl font-semibold text-[#042c4c] mb-4">
+                      {section.heading}
+                    </h3>
+                  )}
+                  
+                  <div className="text-gray-700 leading-relaxed text-lg whitespace-pre-wrap">
+                    {section.content}
+                  </div>
+
+                  {section.isCta && (
+                    <div className="mt-8 p-8 bg-gradient-to-r from-[#042c4c] to-[#0a4a7a] rounded-2xl">
+                      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="text-white">
+                          <h4 className="text-xl font-bold mb-2">Ready to practice?</h4>
+                          <p className="text-gray-300">Start your first mock interview in under 2 minutes</p>
+                        </div>
+                        <Button 
+                          onClick={() => handleCtaClick(section)}
+                          className="bg-[#ee7e65] hover:bg-[#d96a52] text-white font-semibold py-3 px-8 rounded-xl flex items-center gap-2 whitespace-nowrap"
+                        >
+                          Start Practice Now
+                          <ArrowRight className="w-5 h-5" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </section>
+              ))}
+            </div>
+          </article>
+
+          <section className="py-20 bg-gradient-to-br from-[#042c4c] via-[#0a4a7a] to-[#042c4c] text-white">
+            <div className="max-w-4xl mx-auto px-4 text-center">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Ace Your Interview?</h2>
+              <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                Join thousands of candidates who improved their interview skills with AI-powered practice
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  onClick={() => trackAndNavigate('/readycheck', 'practice_start')}
+                  className="bg-[#ee7e65] hover:bg-[#d96a52] text-white font-semibold py-4 px-10 rounded-xl text-lg flex items-center justify-center gap-2 shadow-lg"
+                >
+                  <Play className="w-5 h-5" />
+                  Start Free Practice
+                </Button>
+                <Button 
+                  onClick={() => trackAndNavigate('/pricing')}
+                  variant="outline"
+                  className="border-2 border-white/30 text-white hover:bg-white/10 font-semibold py-4 px-10 rounded-xl text-lg"
+                >
+                  View Pricing
+                </Button>
+              </div>
+              <p className="text-gray-400 text-sm mt-6">
+                <CheckCircle2 className="w-4 h-4 inline mr-1" />
+                No credit card required for free trial
+              </p>
+            </div>
+          </section>
+
+          {relatedLinks.length > 0 && (
+            <section className="py-16 bg-gray-50">
+              <div className="max-w-6xl mx-auto px-4">
+                <h2 className="text-2xl font-bold text-[#042c4c] mb-8 text-center">Explore More Resources</h2>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {relatedLinks.map((link, index) => (
+                    <Link 
+                      key={index}
+                      to={`/${link.slug}`}
+                      className="group bg-white p-6 rounded-xl border-2 border-gray-100 hover:border-[#ee7e65] hover:shadow-lg transition-all"
+                    >
+                      <span className="text-[#042c4c] group-hover:text-[#ee7e65] font-semibold text-lg flex items-center gap-2">
+                        {link.anchorText}
+                        <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
+
+          <footer className="bg-[#042c4c] text-white py-12">
+            <div className="max-w-6xl mx-auto px-4">
+              <div className="grid md:grid-cols-4 gap-8">
+                <div>
+                  <h3 className="text-xl font-bold mb-4">Hiready</h3>
+                  <p className="text-gray-300 text-sm">
+                    AI-powered interview practice platform. Prepare with real interview simulations and get actionable feedback.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-4">Interview Prep</h4>
+                  <ul className="space-y-2 text-sm text-gray-300">
+                    <li><Link to="/mock-interview" className="hover:text-white">Mock Interview</Link></li>
+                    <li><Link to="/interview-preparation" className="hover:text-white">Interview Preparation</Link></li>
+                    <li><Link to="/practice/behavioral-interview" className="hover:text-white">Behavioral Interview</Link></li>
+                    <li><Link to="/practice/technical-interview" className="hover:text-white">Technical Interview</Link></li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-4">By Role</h4>
+                  <ul className="space-y-2 text-sm text-gray-300">
+                    <li><Link to="/prepare/software-engineer-interview" className="hover:text-white">Software Engineer</Link></li>
+                    <li><Link to="/prepare/data-analyst-interview" className="hover:text-white">Data Analyst</Link></li>
+                    <li><Link to="/prepare/product-manager-interview" className="hover:text-white">Product Manager</Link></li>
+                    <li><Link to="/prepare/data-scientist-interview" className="hover:text-white">Data Scientist</Link></li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-4">Product</h4>
+                  <ul className="space-y-2 text-sm text-gray-300">
+                    <li><Link to="/features" className="hover:text-white">Features</Link></li>
+                    <li><Link to="/pricing" className="hover:text-white">Pricing</Link></li>
+                    <li><Link to="/enterprise" className="hover:text-white">Enterprise</Link></li>
+                  </ul>
+                </div>
+              </div>
+              <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
+                © {new Date().getFullYear()} Hiready. All rights reserved.
+              </div>
+            </div>
+          </footer>
+
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-lg md:hidden z-50">
+            <Button 
+              onClick={() => trackAndNavigate('/readycheck', 'practice_start')}
+              className="w-full bg-[#ee7e65] hover:bg-[#d96a52] text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2"
+            >
+              <Play className="w-5 h-5" />
+              Start Free Practice
+            </Button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <div className="min-h-screen bg-white">
@@ -218,7 +541,7 @@ export default function DynamicSeoPage() {
             <nav className="hidden md:flex items-center gap-6">
               <Link to="/mock-interview" className="hover:text-[#ee7e65] transition-colors">Mock Interview</Link>
               <Link to="/interview-preparation" className="hover:text-[#ee7e65] transition-colors">Interview Prep</Link>
-              <Link to="/interview" className="bg-[#ee7e65] hover:bg-[#d96a52] px-4 py-2 rounded-lg transition-colors">
+              <Link to="/readycheck" className="bg-[#ee7e65] hover:bg-[#d96a52] px-4 py-2 rounded-lg transition-colors">
                 Start Practice
               </Link>
             </nav>
@@ -230,19 +553,7 @@ export default function DynamicSeoPage() {
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Link to="/" className="hover:text-[#042c4c]">Home</Link>
               <ChevronRight className="w-4 h-4" />
-              {page.pageType === 'role_prep' && (
-                <>
-                  <Link to="/interview-preparation" className="hover:text-[#042c4c]">Interview Prep</Link>
-                  <ChevronRight className="w-4 h-4" />
-                </>
-              )}
-              {page.pageType === 'company_prep' && (
-                <>
-                  <Link to="/interview-preparation" className="hover:text-[#042c4c]">Interview Prep</Link>
-                  <ChevronRight className="w-4 h-4" />
-                </>
-              )}
-              {page.pageType === 'company_role' && (
+              {(page.pageType === 'role_prep' || page.pageType === 'company_prep' || page.pageType === 'company_role') && (
                 <>
                   <Link to="/interview-preparation" className="hover:text-[#042c4c]">Interview Prep</Link>
                   <ChevronRight className="w-4 h-4" />
@@ -259,6 +570,22 @@ export default function DynamicSeoPage() {
             <h1 className="text-4xl md:text-5xl font-bold text-[#042c4c] leading-tight">
               {page.h1}
             </h1>
+          </div>
+
+          <div className="mb-8 p-6 bg-gradient-to-r from-[#042c4c] to-[#0a4a7a] rounded-2xl text-white">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold mb-1">Ready to practice?</h2>
+                <p className="text-gray-300">Start a realistic mock interview now</p>
+              </div>
+              <Button 
+                onClick={() => trackAndNavigate('/readycheck', 'practice_start')}
+                className="bg-[#ee7e65] hover:bg-[#d96a52] text-white font-semibold py-3 px-6 rounded-xl flex items-center gap-2"
+              >
+                <Play className="w-5 h-5" />
+                Start Practice
+              </Button>
+            </div>
           </div>
 
           <article className="prose prose-lg max-w-none">
@@ -357,6 +684,16 @@ export default function DynamicSeoPage() {
             </div>
           </div>
         </footer>
+
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-lg md:hidden z-50">
+          <Button 
+            onClick={() => trackAndNavigate('/readycheck', 'practice_start')}
+            className="w-full bg-[#ee7e65] hover:bg-[#d96a52] text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2"
+          >
+            <Play className="w-5 h-5" />
+            Start Practice
+          </Button>
+        </div>
       </div>
     </>
   );
