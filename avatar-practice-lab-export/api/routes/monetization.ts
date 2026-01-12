@@ -21,17 +21,28 @@ import {
   consumeFreeInterview,
   recordInterviewUsage
 } from "../lib/entitlement-service.js";
+import * as storage from "../storage.js";
 
 const router = Router();
 
+async function getLegacyUserId(authUserId: string): Promise<number | null> {
+  const legacyUser = await storage.getLegacyUserByAuthUserId(authUserId);
+  return legacyUser?.id ?? null;
+}
+
 router.get("/entitlements", async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user?.id;
-    if (!userId) {
+    const authUserId = (req as any).user?.id;
+    if (!authUserId) {
       return res.status(401).json({ error: "Not authenticated" });
     }
 
-    const status = await getEntitlementStatus(userId);
+    const legacyUserId = await getLegacyUserId(authUserId);
+    if (!legacyUserId) {
+      return res.status(500).json({ error: "Failed to resolve user" });
+    }
+
+    const status = await getEntitlementStatus(legacyUserId);
     res.json(status);
   } catch (error) {
     console.error("Error fetching entitlements:", error);
@@ -41,16 +52,21 @@ router.get("/entitlements", async (req: Request, res: Response) => {
 
 router.get("/access-check", async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user?.id;
-    if (!userId) {
+    const authUserId = (req as any).user?.id;
+    if (!authUserId) {
       return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const legacyUserId = await getLegacyUserId(authUserId);
+    if (!legacyUserId) {
+      return res.status(500).json({ error: "Failed to resolve user" });
     }
 
     const interviewSetId = req.query.interviewSetId 
       ? parseInt(req.query.interviewSetId as string) 
       : undefined;
 
-    const access = await checkInterviewAccess(userId, interviewSetId);
+    const access = await checkInterviewAccess(legacyUserId, interviewSetId);
     res.json(access);
   } catch (error) {
     console.error("Error checking access:", error);
@@ -93,9 +109,14 @@ router.get("/interview-sets/:id", async (req: Request, res: Response) => {
 
 router.post("/interview-sets", async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user?.id;
-    if (!userId) {
+    const authUserId = (req as any).user?.id;
+    if (!authUserId) {
       return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const legacyUserId = await getLegacyUserId(authUserId);
+    if (!legacyUserId) {
+      return res.status(500).json({ error: "Failed to resolve user" });
     }
 
     const { 
@@ -116,7 +137,7 @@ router.post("/interview-sets", async (req: Request, res: Response) => {
       name,
       description || null,
       interviewTypes,
-      userId,
+      legacyUserId,
       roleArchetypeId,
       companyId,
       jobDescription,
@@ -157,9 +178,14 @@ router.get("/share/validate/:token", async (req: Request, res: Response) => {
 
 router.post("/share/claim/:token", async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user?.id;
-    if (!userId) {
+    const authUserId = (req as any).user?.id;
+    if (!authUserId) {
       return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const legacyUserId = await getLegacyUserId(authUserId);
+    if (!legacyUserId) {
+      return res.status(500).json({ error: "Failed to resolve user" });
     }
 
     const { token } = req.params;
@@ -170,7 +196,7 @@ router.post("/share/claim/:token", async (req: Request, res: Response) => {
     }
 
     await grantShareLinkAccess(
-      userId,
+      legacyUserId,
       result.shareLink!.id,
       result.interviewSet!.id
     );
@@ -188,9 +214,14 @@ router.post("/share/claim/:token", async (req: Request, res: Response) => {
 
 router.post("/share-links", async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user?.id;
-    if (!userId) {
+    const authUserId = (req as any).user?.id;
+    if (!authUserId) {
       return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const legacyUserId = await getLegacyUserId(authUserId);
+    if (!legacyUserId) {
+      return res.status(500).json({ error: "Failed to resolve user" });
     }
 
     const { 
@@ -209,7 +240,7 @@ router.post("/share-links", async (req: Request, res: Response) => {
     const set = await db.query.interviewSets.findFirst({
       where: and(
         eq(interviewSets.id, interviewSetId),
-        eq(interviewSets.ownerUserId, userId)
+        eq(interviewSets.ownerUserId, legacyUserId)
       )
     });
 
@@ -224,7 +255,7 @@ router.post("/share-links", async (req: Request, res: Response) => {
       description,
       maxUses,
       expiresAt ? new Date(expiresAt) : undefined,
-      userId
+      legacyUserId
     );
 
     res.json({ 
@@ -240,8 +271,8 @@ router.post("/share-links", async (req: Request, res: Response) => {
 
 router.get("/share-links/:interviewSetId", async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user?.id;
-    if (!userId) {
+    const authUserId = (req as any).user?.id;
+    if (!authUserId) {
       return res.status(401).json({ error: "Not authenticated" });
     }
 
@@ -262,14 +293,19 @@ router.get("/share-links/:interviewSetId", async (req: Request, res: Response) =
 
 router.post("/use-free-interview", async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user?.id;
-    if (!userId) {
+    const authUserId = (req as any).user?.id;
+    if (!authUserId) {
       return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const legacyUserId = await getLegacyUserId(authUserId);
+    if (!legacyUserId) {
+      return res.status(500).json({ error: "Failed to resolve user" });
     }
 
     const { interviewType, sessionId } = req.body;
 
-    const access = await checkInterviewAccess(userId);
+    const access = await checkInterviewAccess(legacyUserId);
     
     if (!access.hasAccess) {
       return res.status(403).json({ 
@@ -279,14 +315,14 @@ router.post("/use-free-interview", async (req: Request, res: Response) => {
     }
 
     if (access.accessType === 'free') {
-      const consumed = await consumeFreeInterview(userId);
+      const consumed = await consumeFreeInterview(legacyUserId);
       if (!consumed) {
         return res.status(403).json({ error: "No free interviews remaining" });
       }
     }
 
     await recordInterviewUsage(
-      userId,
+      legacyUserId,
       access.accessType!,
       undefined,
       sessionId,
@@ -306,9 +342,14 @@ router.post("/use-free-interview", async (req: Request, res: Response) => {
 
 router.get("/my-purchases", async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user?.id;
-    if (!userId) {
+    const authUserId = (req as any).user?.id;
+    if (!authUserId) {
       return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const legacyUserId = await getLegacyUserId(authUserId);
+    if (!legacyUserId) {
+      return res.status(500).json({ error: "Failed to resolve user" });
     }
 
     const purchases = await db
@@ -318,7 +359,7 @@ router.get("/my-purchases", async (req: Request, res: Response) => {
       })
       .from(interviewSetPurchases)
       .innerJoin(interviewSets, eq(interviewSetPurchases.interviewSetId, interviewSets.id))
-      .where(eq(interviewSetPurchases.userId, userId))
+      .where(eq(interviewSetPurchases.userId, legacyUserId))
       .orderBy(desc(interviewSetPurchases.purchasedAt));
 
     res.json(purchases);
@@ -330,14 +371,19 @@ router.get("/my-purchases", async (req: Request, res: Response) => {
 
 router.get("/my-subscription", async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user?.id;
-    if (!userId) {
+    const authUserId = (req as any).user?.id;
+    if (!authUserId) {
       return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const legacyUserId = await getLegacyUserId(authUserId);
+    if (!legacyUserId) {
+      return res.status(500).json({ error: "Failed to resolve user" });
     }
 
     const subscription = await db.query.paymentSubscriptions.findFirst({
       where: and(
-        eq(paymentSubscriptions.userId, userId),
+        eq(paymentSubscriptions.userId, legacyUserId),
         eq(paymentSubscriptions.status, 'active')
       )
     });

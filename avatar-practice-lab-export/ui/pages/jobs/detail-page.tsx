@@ -10,7 +10,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PurchaseModal } from "@/components/purchase-modal";
 import { useAccessGate } from "@/components/monetization/access-gate";
 import { UpgradeModal } from "@/components/monetization/upgrade-modal";
 
@@ -193,12 +192,10 @@ export default function JobDetailPage() {
   const [jdExpanded, setJdExpanded] = useState(false);
   const [requirementsExpanded, setRequirementsExpanded] = useState(true);
   const [entitlements, setEntitlements] = useState<Entitlements | null>(null);
-  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-  const [pendingPracticeOption, setPendingPracticeOption] = useState<PracticeOption | null>(null);
   const [roleKits, setRoleKits] = useState<RoleKit[]>([]);
   const [showRoleSelector, setShowRoleSelector] = useState(false);
   const [isSavingRole, setIsSavingRole] = useState(false);
-  const { checkAccess, showUpgradeModal, setShowUpgradeModal } = useAccessGate();
+  const { checkAccess, showUpgradeModal, setShowUpgradeModal, accessCheck } = useAccessGate();
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -322,15 +319,6 @@ export default function JobDetailPage() {
     navigate(`/interview/config?jobTargetId=${job?.id}&roundCategory=${option.roundCategory}`);
   };
 
-  const handlePurchaseSuccess = () => {
-    setEntitlements((prev) =>
-      prev ? { ...prev, hasAccess: true, canStartSession: true, accessType: "role_pack" } : null
-    );
-    if (pendingPracticeOption) {
-      navigate(`/interview/config?jobTargetId=${job?.id}&roundCategory=${pendingPracticeOption.roundCategory}`);
-    }
-    setPendingPracticeOption(null);
-  };
 
   const refreshEntitlements = async () => {
     if (!jobId) return;
@@ -547,7 +535,7 @@ export default function JobDetailPage() {
             </div>
           </div>
 
-          {entitlements && !entitlements.canStartSession && (
+          {accessCheck && !accessCheck.hasAccess && (
             <div className="bg-white rounded-lg border border-slate-200 p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
@@ -559,7 +547,7 @@ export default function JobDetailPage() {
                 </div>
               </div>
               <Button
-                onClick={() => setShowPurchaseModal(true)}
+                onClick={() => setShowUpgradeModal(true)}
                 size="sm"
                 className="h-8 px-3 text-xs bg-[#24c4b8] hover:bg-[#1db0a5] text-white"
               >
@@ -597,12 +585,12 @@ export default function JobDetailPage() {
                         onClick={() => handleStartPracticeOption(option)}
                         size="sm"
                         className={`h-8 px-3 text-xs ${
-                          entitlements?.canStartSession
+                          accessCheck?.hasAccess
                             ? "bg-[#24c4b8] hover:bg-[#1db0a5] text-white"
                             : "bg-slate-100 hover:bg-slate-200 text-slate-600"
                         }`}
                       >
-                        {entitlements?.canStartSession ? "Start" : "Unlock"}
+                        {accessCheck?.hasAccess ? "Start" : "Unlock"}
                       </Button>
                     </div>
                   );
@@ -752,17 +740,6 @@ export default function JobDetailPage() {
         </div>
       </div>
 
-      <PurchaseModal
-        isOpen={showPurchaseModal}
-        onClose={() => {
-          setShowPurchaseModal(false);
-          setPendingPracticeOption(null);
-        }}
-        jobTargetId={job?.id}
-        roleName={job?.roleTitle}
-        onSuccess={handlePurchaseSuccess}
-      />
-      
       <UpgradeModal
         open={showUpgradeModal}
         onOpenChange={setShowUpgradeModal}
