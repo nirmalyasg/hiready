@@ -101,13 +101,13 @@ export default function ReadycheckLaunchPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg p-8 max-w-md w-full text-center border border-slate-200">
+      <div className="min-h-screen bg-[#000000] flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg p-8 max-w-md w-full text-center border border-gray-200">
           <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="w-8 h-8 text-red-500" />
           </div>
-          <h2 className="text-xl font-semibold text-slate-900 mb-2">Oops!</h2>
-          <p className="text-slate-600 mb-6">{error}</p>
+          <h2 className="text-xl font-semibold text-black mb-2">Oops!</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
           <Button 
             onClick={() => navigate("/readycheck")}
             className="bg-[#24c4b8] hover:bg-[#1db0a5]"
@@ -120,7 +120,7 @@ export default function ReadycheckLaunchPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#000000] flex items-center justify-center p-4">
       <div className="text-center">
         <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-8">
           <Target className="w-5 h-5 text-white" />

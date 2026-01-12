@@ -3,7 +3,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   ArrowRight,
-  Sparkles,
   CheckCircle,
   Loader2,
   FileText,
@@ -13,6 +12,7 @@ import {
   BarChart3,
   Zap
 } from "lucide-react";
+import logoImg from '@/assets/logo.png';
 
 export default function ReadycheckPage() {
   const navigate = useNavigate();
@@ -87,10 +87,7 @@ export default function ReadycheckPage() {
       <header className="p-4 sm:p-6 relative">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-10 h-10 bg-[#24c4b8] rounded-xl flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-bold text-white text-xl">Hiready</span>
+            <img src={logoImg} alt="Hiready" className="h-9 brightness-0 invert" />
           </Link>
           {isLoggedIn && (
             <Link to="/avatar/dashboard">
