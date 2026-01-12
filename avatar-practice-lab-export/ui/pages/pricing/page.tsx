@@ -12,8 +12,9 @@ export default function PricingPage() {
       period: 'forever',
       description: 'Perfect for trying out Hiready',
       icon: Zap,
+      currency: '',
       features: [
-        '3 practice interviews per month',
+        '1 free interview',
         'Basic feedback & scoring',
         'Behavioral interview type',
         'Email support',
@@ -23,20 +24,38 @@ export default function PricingPage() {
       popular: false,
     },
     {
-      name: 'Pro',
-      price: '19',
-      period: '/month',
-      description: 'For serious job seekers',
-      icon: Crown,
+      name: 'Interview Set',
+      price: '199',
+      period: 'one-time',
+      description: 'For a specific role',
+      icon: Zap,
+      currency: '₹',
       features: [
-        'Unlimited practice interviews',
-        'All interview types (Behavioral, Technical, Case, HR)',
+        'All interview rounds (HR, Technical, Case)',
+        'Detailed feedback & scoring',
+        'Lifetime access to this set',
+        'Shareable scorecard',
+      ],
+      cta: 'Buy Now',
+      ctaLink: '/register',
+      popular: false,
+    },
+    {
+      name: 'Unlimited',
+      price: '499',
+      period: '/month',
+      description: 'Unlimited access to everything',
+      icon: Crown,
+      currency: '₹',
+      features: [
+        'Unlimited interviews for all roles',
+        'All companies & interview types',
         'Detailed 8-dimension feedback',
         'Resume analysis & personalized questions',
         'Progress tracking & analytics',
-        'Priority email support',
+        'Priority support',
       ],
-      cta: 'Get Pro',
+      cta: 'Get Unlimited',
       ctaLink: '/register',
       popular: true,
     },
@@ -46,8 +65,9 @@ export default function PricingPage() {
       period: '',
       description: 'For teams and organizations',
       icon: Building2,
+      currency: '',
       features: [
-        'Everything in Pro',
+        'Everything in Unlimited',
         'Unlimited team members',
         'SSO & advanced security',
         'Custom role kits & branding',
@@ -140,8 +160,8 @@ export default function PricingPage() {
 
       {/* Pricing Cards */}
       <section className="py-16 px-6 bg-[#f8f7fc]">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {plans.map((plan, i) => {
               const Icon = plan.icon;
               return (
@@ -170,9 +190,9 @@ export default function PricingPage() {
                   
                   <div className="mb-4">
                     <span className="text-4xl font-bold text-[#1a1a2e]">
-                      {plan.price === 'Custom' ? '' : '$'}{plan.price}
+                      {plan.currency}{plan.price}
                     </span>
-                    <span className="text-gray-500">{plan.period}</span>
+                    <span className="text-gray-500"> {plan.period}</span>
                   </div>
                   
                   <p className="text-gray-500 mb-6">{plan.description}</p>
