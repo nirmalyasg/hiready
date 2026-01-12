@@ -219,7 +219,7 @@ export default function DynamicSeoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-[#fbfbfc]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#042c4c]"></div>
       </div>
     );
@@ -227,9 +227,9 @@ export default function DynamicSeoPage() {
 
   if (error || !page) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">Page Not Found</h1>
-        <p className="text-gray-600 mb-6">The page you're looking for doesn't exist.</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#fbfbfc]">
+        <h1 className="text-2xl font-bold text-[#042c4c] mb-4">Page Not Found</h1>
+        <p className="text-[#6c8194] mb-6">The page you're looking for doesn't exist.</p>
         <Link to="/">
           <Button>Go Home</Button>
         </Link>
@@ -275,14 +275,14 @@ export default function DynamicSeoPage() {
               <nav className="hidden md:flex items-center gap-6">
                 <Link to="/mock-interview" className="hover:text-[#ee7e65] transition-colors">Mock Interview</Link>
                 <Link to="/interview-preparation" className="hover:text-[#ee7e65] transition-colors">Interview Prep</Link>
-                <Link to="/readycheck" className="bg-[#ee7e65] hover:bg-[#d96a52] px-4 py-2 rounded-lg transition-colors">
+                <Link to="/readycheck" className="bg-[#ee7e65] hover:bg-[#e06a50] px-4 py-2 rounded-lg transition-colors">
                   Start Free Practice
                 </Link>
               </nav>
             </div>
           </header>
 
-          <section className="bg-gradient-to-br from-[#042c4c] via-[#0a4a7a] to-[#042c4c] text-white py-20 md:py-28 relative overflow-hidden">
+          <section className="bg-gradient-to-br from-[#042c4c] via-[#042c4c]/90 to-[#042c4c] text-white py-20 md:py-28 relative overflow-hidden">
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-20 left-10 w-72 h-72 bg-[#ee7e65] rounded-full blur-3xl"></div>
               <div className="absolute bottom-10 right-20 w-96 h-96 bg-[#ee7e65] rounded-full blur-3xl"></div>
@@ -296,13 +296,13 @@ export default function DynamicSeoPage() {
                 <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
                   {page.h1}
                 </h1>
-                <p className="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed">
+                <p className="text-xl md:text-2xl text-white/80 mb-8 leading-relaxed">
                   {page.metaDescription}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button 
                     onClick={() => trackAndNavigate('/readycheck', 'practice_start')}
-                    className="bg-[#ee7e65] hover:bg-[#d96a52] text-white font-semibold py-4 px-8 rounded-xl text-lg flex items-center justify-center gap-2 shadow-lg shadow-[#ee7e65]/30"
+                    className="bg-[#ee7e65] hover:bg-[#e06a50] text-white font-semibold py-4 px-8 rounded-xl text-lg flex items-center justify-center gap-2 shadow-lg shadow-[#ee7e65]/30"
                   >
                     <Play className="w-5 h-5" />
                     Start Free Practice
@@ -319,13 +319,13 @@ export default function DynamicSeoPage() {
             </div>
           </section>
 
-          <section className="bg-gray-50 py-8 border-b">
+          <section className="bg-[#fbfbfc] py-8 border-b border-[#768c9c]/20">
             <div className="max-w-6xl mx-auto px-4">
               <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
-                <span className="text-gray-500 text-sm font-medium">Trusted by candidates from</span>
+                <span className="text-[#6c8194] text-sm font-medium">Trusted by candidates from</span>
                 <div className="flex flex-wrap justify-center gap-6 md:gap-8">
                   {trustedCompanies.map((company) => (
-                    <span key={company} className="text-gray-400 font-semibold text-lg">{company}</span>
+                    <span key={company} className="text-[#768c9c] font-semibold text-lg">{company}</span>
                   ))}
                 </div>
               </div>
@@ -336,24 +336,24 @@ export default function DynamicSeoPage() {
             <div className="max-w-6xl mx-auto px-4">
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold text-[#042c4c] mb-4">How It Works</h2>
-                <p className="text-gray-600 text-lg max-w-2xl mx-auto">Get interview-ready in three simple steps</p>
+                <p className="text-[#6c8194] text-lg max-w-2xl mx-auto">Get interview-ready in three simple steps</p>
               </div>
               <div className="grid md:grid-cols-3 gap-8">
                 {howItWorksSteps.map((step, index) => (
                   <div key={index} className="relative">
-                    <div className="bg-white rounded-2xl p-8 border-2 border-gray-100 hover:border-[#ee7e65]/30 hover:shadow-xl transition-all group">
-                      <div className="w-14 h-14 bg-gradient-to-br from-[#ee7e65] to-[#d96a52] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <div className="bg-white rounded-2xl p-8 border-2 border-[#768c9c]/20 hover:border-[#ee7e65]/30 hover:shadow-xl transition-all group">
+                      <div className="w-14 h-14 bg-gradient-to-br from-[#ee7e65] to-[#e06a50] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <step.icon className="w-7 h-7 text-white" />
                       </div>
                       <div className="absolute -top-3 -left-3 w-8 h-8 bg-[#042c4c] rounded-full flex items-center justify-center text-white font-bold text-sm">
                         {index + 1}
                       </div>
                       <h3 className="text-xl font-bold text-[#042c4c] mb-3">{step.title}</h3>
-                      <p className="text-gray-600">{step.desc}</p>
+                      <p className="text-[#6c8194]">{step.desc}</p>
                     </div>
                     {index < 2 && (
                       <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2">
-                        <ArrowRight className="w-8 h-8 text-gray-300" />
+                        <ArrowRight className="w-8 h-8 text-[#768c9c]" />
                       </div>
                     )}
                   </div>
@@ -362,7 +362,7 @@ export default function DynamicSeoPage() {
             </div>
           </section>
 
-          <section className="py-16 md:py-20 bg-gray-50">
+          <section className="py-16 md:py-20 bg-[#fbfbfc]">
             <div className="max-w-6xl mx-auto px-4">
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold text-[#042c4c] mb-4">
@@ -377,7 +377,7 @@ export default function DynamicSeoPage() {
                         <benefit.icon className="w-6 h-6 text-[#042c4c]" />
                       </div>
                       <h3 className="text-lg font-bold text-[#042c4c] mb-2">{benefit.title}</h3>
-                      <p className="text-gray-600 text-sm">{benefit.desc}</p>
+                      <p className="text-[#6c8194] text-sm">{benefit.desc}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -388,7 +388,7 @@ export default function DynamicSeoPage() {
           <article className="py-16 md:py-20 bg-white">
             <div className="max-w-4xl mx-auto px-4">
               {sections.map((section, index) => (
-                <section key={section.id} className={`mb-12 ${index > 0 ? 'pt-8 border-t border-gray-100' : ''}`}>
+                <section key={section.id} className={`mb-12 ${index > 0 ? 'pt-8 border-t border-[#768c9c]/20' : ''}`}>
                   {section.headingType === 'h2' ? (
                     <h2 className="text-2xl md:text-3xl font-bold text-[#042c4c] mb-6">
                       {section.heading}
@@ -399,20 +399,20 @@ export default function DynamicSeoPage() {
                     </h3>
                   )}
                   
-                  <div className="text-gray-700 leading-relaxed text-lg whitespace-pre-wrap">
+                  <div className="text-[#6c8194] leading-relaxed text-lg whitespace-pre-wrap">
                     {section.content}
                   </div>
 
                   {section.isCta && (
-                    <div className="mt-8 p-8 bg-gradient-to-r from-[#042c4c] to-[#0a4a7a] rounded-2xl">
+                    <div className="mt-8 p-8 bg-gradient-to-r from-[#042c4c] to-[#042c4c]/90 rounded-2xl">
                       <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                         <div className="text-white">
                           <h4 className="text-xl font-bold mb-2">Ready to practice?</h4>
-                          <p className="text-gray-300">Start your first mock interview in under 2 minutes</p>
+                          <p className="text-white/70">Start your first mock interview in under 2 minutes</p>
                         </div>
                         <Button 
                           onClick={() => handleCtaClick(section)}
-                          className="bg-[#ee7e65] hover:bg-[#d96a52] text-white font-semibold py-3 px-8 rounded-xl flex items-center gap-2 whitespace-nowrap"
+                          className="bg-[#ee7e65] hover:bg-[#e06a50] text-white font-semibold py-3 px-8 rounded-xl flex items-center gap-2 whitespace-nowrap"
                         >
                           Start Practice Now
                           <ArrowRight className="w-5 h-5" />
@@ -425,16 +425,16 @@ export default function DynamicSeoPage() {
             </div>
           </article>
 
-          <section className="py-20 bg-gradient-to-br from-[#042c4c] via-[#0a4a7a] to-[#042c4c] text-white">
+          <section className="py-20 bg-gradient-to-br from-[#042c4c] via-[#042c4c]/90 to-[#042c4c] text-white">
             <div className="max-w-4xl mx-auto px-4 text-center">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Ace Your Interview?</h2>
-              <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+              <p className="text-xl text-white/70 mb-8 max-w-2xl mx-auto">
                 Join thousands of candidates who improved their interview skills with AI-powered practice
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
                   onClick={() => trackAndNavigate('/readycheck', 'practice_start')}
-                  className="bg-[#ee7e65] hover:bg-[#d96a52] text-white font-semibold py-4 px-10 rounded-xl text-lg flex items-center justify-center gap-2 shadow-lg"
+                  className="bg-[#ee7e65] hover:bg-[#e06a50] text-white font-semibold py-4 px-10 rounded-xl text-lg flex items-center justify-center gap-2 shadow-lg"
                 >
                   <Play className="w-5 h-5" />
                   Start Free Practice
@@ -447,7 +447,7 @@ export default function DynamicSeoPage() {
                   View Pricing
                 </Button>
               </div>
-              <p className="text-gray-400 text-sm mt-6">
+              <p className="text-[#768c9c] text-sm mt-6">
                 <CheckCircle2 className="w-4 h-4 inline mr-1" />
                 No credit card required for free trial
               </p>
@@ -455,7 +455,7 @@ export default function DynamicSeoPage() {
           </section>
 
           {relatedLinks.length > 0 && (
-            <section className="py-16 bg-gray-50">
+            <section className="py-16 bg-[#fbfbfc]">
               <div className="max-w-6xl mx-auto px-4">
                 <h2 className="text-2xl font-bold text-[#042c4c] mb-8 text-center">Explore More Resources</h2>
                 <div className="grid md:grid-cols-3 gap-6">
@@ -463,7 +463,7 @@ export default function DynamicSeoPage() {
                     <Link 
                       key={index}
                       to={`/${link.slug}`}
-                      className="group bg-white p-6 rounded-xl border-2 border-gray-100 hover:border-[#ee7e65] hover:shadow-lg transition-all"
+                      className="group bg-white p-6 rounded-xl border-2 border-[#768c9c]/20 hover:border-[#ee7e65] hover:shadow-lg transition-all"
                     >
                       <span className="text-[#042c4c] group-hover:text-[#ee7e65] font-semibold text-lg flex items-center gap-2">
                         {link.anchorText}
@@ -481,47 +481,47 @@ export default function DynamicSeoPage() {
               <div className="grid md:grid-cols-4 gap-8">
                 <div>
                   <h3 className="text-xl font-bold mb-4">Hiready</h3>
-                  <p className="text-gray-300 text-sm">
+                  <p className="text-[#768c9c] text-sm">
                     AI-powered interview practice platform. Prepare with real interview simulations and get actionable feedback.
                   </p>
                 </div>
                 <div>
                   <h4 className="font-semibold mb-4">Interview Prep</h4>
-                  <ul className="space-y-2 text-sm text-gray-300">
-                    <li><Link to="/mock-interview" className="hover:text-white">Mock Interview</Link></li>
-                    <li><Link to="/interview-preparation" className="hover:text-white">Interview Preparation</Link></li>
-                    <li><Link to="/practice/behavioral-interview" className="hover:text-white">Behavioral Interview</Link></li>
-                    <li><Link to="/practice/technical-interview" className="hover:text-white">Technical Interview</Link></li>
+                  <ul className="space-y-2 text-sm text-[#768c9c]">
+                    <li><Link to="/mock-interview" className="hover:text-white transition-colors">Mock Interview</Link></li>
+                    <li><Link to="/interview-preparation" className="hover:text-white transition-colors">Interview Preparation</Link></li>
+                    <li><Link to="/practice/behavioral-interview" className="hover:text-white transition-colors">Behavioral Interview</Link></li>
+                    <li><Link to="/practice/technical-interview" className="hover:text-white transition-colors">Technical Interview</Link></li>
                   </ul>
                 </div>
                 <div>
                   <h4 className="font-semibold mb-4">By Role</h4>
-                  <ul className="space-y-2 text-sm text-gray-300">
-                    <li><Link to="/prepare/software-engineer-interview" className="hover:text-white">Software Engineer</Link></li>
-                    <li><Link to="/prepare/data-analyst-interview" className="hover:text-white">Data Analyst</Link></li>
-                    <li><Link to="/prepare/product-manager-interview" className="hover:text-white">Product Manager</Link></li>
-                    <li><Link to="/prepare/data-scientist-interview" className="hover:text-white">Data Scientist</Link></li>
+                  <ul className="space-y-2 text-sm text-[#768c9c]">
+                    <li><Link to="/prepare/software-engineer-interview" className="hover:text-white transition-colors">Software Engineer</Link></li>
+                    <li><Link to="/prepare/data-analyst-interview" className="hover:text-white transition-colors">Data Analyst</Link></li>
+                    <li><Link to="/prepare/product-manager-interview" className="hover:text-white transition-colors">Product Manager</Link></li>
+                    <li><Link to="/prepare/data-scientist-interview" className="hover:text-white transition-colors">Data Scientist</Link></li>
                   </ul>
                 </div>
                 <div>
                   <h4 className="font-semibold mb-4">Product</h4>
-                  <ul className="space-y-2 text-sm text-gray-300">
-                    <li><Link to="/features" className="hover:text-white">Features</Link></li>
-                    <li><Link to="/pricing" className="hover:text-white">Pricing</Link></li>
-                    <li><Link to="/enterprise" className="hover:text-white">Enterprise</Link></li>
+                  <ul className="space-y-2 text-sm text-[#768c9c]">
+                    <li><Link to="/features" className="hover:text-white transition-colors">Features</Link></li>
+                    <li><Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                    <li><Link to="/enterprise" className="hover:text-white transition-colors">Enterprise</Link></li>
                   </ul>
                 </div>
               </div>
-              <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
+              <div className="border-t border-[#768c9c]/30 mt-8 pt-8 text-center text-sm text-[#6c8194]">
                 © {new Date().getFullYear()} Hiready. All rights reserved.
               </div>
             </div>
           </footer>
 
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-lg md:hidden z-50">
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#768c9c]/20 shadow-lg md:hidden z-50">
             <Button 
               onClick={() => trackAndNavigate('/readycheck', 'practice_start')}
-              className="w-full bg-[#ee7e65] hover:bg-[#d96a52] text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2"
+              className="w-full bg-[#ee7e65] hover:bg-[#e06a50] text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2"
             >
               <Play className="w-5 h-5" />
               Start Free Practice
@@ -541,16 +541,16 @@ export default function DynamicSeoPage() {
             <nav className="hidden md:flex items-center gap-6">
               <Link to="/mock-interview" className="hover:text-[#ee7e65] transition-colors">Mock Interview</Link>
               <Link to="/interview-preparation" className="hover:text-[#ee7e65] transition-colors">Interview Prep</Link>
-              <Link to="/readycheck" className="bg-[#ee7e65] hover:bg-[#d96a52] px-4 py-2 rounded-lg transition-colors">
+              <Link to="/readycheck" className="bg-[#ee7e65] hover:bg-[#e06a50] px-4 py-2 rounded-lg transition-colors">
                 Start Practice
               </Link>
             </nav>
           </div>
         </header>
 
-        <nav className="bg-gray-100 py-3 border-b">
+        <nav className="bg-[#fbfbfc] py-3 border-b border-[#768c9c]/20">
           <div className="max-w-6xl mx-auto px-4">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-[#6c8194]">
               <Link to="/" className="hover:text-[#042c4c]">Home</Link>
               <ChevronRight className="w-4 h-4" />
               {(page.pageType === 'role_prep' || page.pageType === 'company_prep' || page.pageType === 'company_role') && (
@@ -572,15 +572,15 @@ export default function DynamicSeoPage() {
             </h1>
           </div>
 
-          <div className="mb-8 p-6 bg-gradient-to-r from-[#042c4c] to-[#0a4a7a] rounded-2xl text-white">
+          <div className="mb-8 p-6 bg-gradient-to-r from-[#042c4c] to-[#042c4c]/90 rounded-2xl text-white">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-bold mb-1">Ready to practice?</h2>
-                <p className="text-gray-300">Start a realistic mock interview now</p>
+                <p className="text-white/70">Start a realistic mock interview now</p>
               </div>
               <Button 
                 onClick={() => trackAndNavigate('/readycheck', 'practice_start')}
-                className="bg-[#ee7e65] hover:bg-[#d96a52] text-white font-semibold py-3 px-6 rounded-xl flex items-center gap-2"
+                className="bg-[#ee7e65] hover:bg-[#e06a50] text-white font-semibold py-3 px-6 rounded-xl flex items-center gap-2"
               >
                 <Play className="w-5 h-5" />
                 Start Practice
@@ -601,16 +601,16 @@ export default function DynamicSeoPage() {
                   </h3>
                 )}
                 
-                <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                <div className="text-[#6c8194] leading-relaxed whitespace-pre-wrap">
                   {section.content}
                 </div>
 
                 {section.isCta && (
-                  <Card className="mt-6 border-2 border-[#ee7e65] bg-gradient-to-r from-[#042c4c] to-[#0a4a7a]">
+                  <Card className="mt-6 border-2 border-[#ee7e65] bg-gradient-to-r from-[#042c4c] to-[#042c4c]/90">
                     <CardContent className="p-6">
                       <Button 
                         onClick={() => handleCtaClick(section)}
-                        className="w-full md:w-auto bg-[#ee7e65] hover:bg-[#d96a52] text-white font-semibold py-3 px-8 rounded-lg flex items-center justify-center gap-2"
+                        className="w-full md:w-auto bg-[#ee7e65] hover:bg-[#e06a50] text-white font-semibold py-3 px-8 rounded-lg flex items-center justify-center gap-2"
                       >
                         Start Practice Now
                         <ArrowRight className="w-5 h-5" />
@@ -623,14 +623,14 @@ export default function DynamicSeoPage() {
           </article>
 
           {relatedLinks.length > 0 && (
-            <section className="mt-16 pt-8 border-t">
+            <section className="mt-16 pt-8 border-t border-[#768c9c]/20">
               <h2 className="text-2xl font-bold text-[#042c4c] mb-6">Related Resources</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 {relatedLinks.map((link, index) => (
                   <Link 
                     key={index}
                     to={`/${link.slug}`}
-                    className="group p-4 border rounded-lg hover:border-[#ee7e65] hover:shadow-md transition-all"
+                    className="group p-4 border border-[#768c9c]/20 rounded-lg hover:border-[#ee7e65] hover:shadow-md transition-all"
                   >
                     <span className="text-[#042c4c] group-hover:text-[#ee7e65] font-medium flex items-center gap-2">
                       {link.anchorText}
@@ -648,47 +648,47 @@ export default function DynamicSeoPage() {
             <div className="grid md:grid-cols-4 gap-8">
               <div>
                 <h3 className="text-xl font-bold mb-4">Hiready</h3>
-                <p className="text-gray-300 text-sm">
+                <p className="text-[#768c9c] text-sm">
                   AI-powered interview practice platform. Prepare with real interview simulations and get actionable feedback.
                 </p>
               </div>
               <div>
                 <h4 className="font-semibold mb-4">Interview Prep</h4>
-                <ul className="space-y-2 text-sm text-gray-300">
-                  <li><Link to="/mock-interview" className="hover:text-white">Mock Interview</Link></li>
-                  <li><Link to="/interview-preparation" className="hover:text-white">Interview Preparation</Link></li>
-                  <li><Link to="/practice/behavioral-interview" className="hover:text-white">Behavioral Interview</Link></li>
-                  <li><Link to="/practice/technical-interview" className="hover:text-white">Technical Interview</Link></li>
+                <ul className="space-y-2 text-sm text-[#768c9c]">
+                  <li><Link to="/mock-interview" className="hover:text-white transition-colors">Mock Interview</Link></li>
+                  <li><Link to="/interview-preparation" className="hover:text-white transition-colors">Interview Preparation</Link></li>
+                  <li><Link to="/practice/behavioral-interview" className="hover:text-white transition-colors">Behavioral Interview</Link></li>
+                  <li><Link to="/practice/technical-interview" className="hover:text-white transition-colors">Technical Interview</Link></li>
                 </ul>
               </div>
               <div>
                 <h4 className="font-semibold mb-4">By Role</h4>
-                <ul className="space-y-2 text-sm text-gray-300">
-                  <li><Link to="/prepare/software-engineer-interview" className="hover:text-white">Software Engineer</Link></li>
-                  <li><Link to="/prepare/data-analyst-interview" className="hover:text-white">Data Analyst</Link></li>
-                  <li><Link to="/prepare/product-manager-interview" className="hover:text-white">Product Manager</Link></li>
-                  <li><Link to="/prepare/data-scientist-interview" className="hover:text-white">Data Scientist</Link></li>
+                <ul className="space-y-2 text-sm text-[#768c9c]">
+                  <li><Link to="/prepare/software-engineer-interview" className="hover:text-white transition-colors">Software Engineer</Link></li>
+                  <li><Link to="/prepare/data-analyst-interview" className="hover:text-white transition-colors">Data Analyst</Link></li>
+                  <li><Link to="/prepare/product-manager-interview" className="hover:text-white transition-colors">Product Manager</Link></li>
+                  <li><Link to="/prepare/data-scientist-interview" className="hover:text-white transition-colors">Data Scientist</Link></li>
                 </ul>
               </div>
               <div>
                 <h4 className="font-semibold mb-4">Product</h4>
-                <ul className="space-y-2 text-sm text-gray-300">
-                  <li><Link to="/features" className="hover:text-white">Features</Link></li>
-                  <li><Link to="/pricing" className="hover:text-white">Pricing</Link></li>
-                  <li><Link to="/enterprise" className="hover:text-white">Enterprise</Link></li>
+                <ul className="space-y-2 text-sm text-[#768c9c]">
+                  <li><Link to="/features" className="hover:text-white transition-colors">Features</Link></li>
+                  <li><Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                  <li><Link to="/enterprise" className="hover:text-white transition-colors">Enterprise</Link></li>
                 </ul>
               </div>
             </div>
-            <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
+            <div className="border-t border-[#768c9c]/30 mt-8 pt-8 text-center text-sm text-[#6c8194]">
               © {new Date().getFullYear()} Hiready. All rights reserved.
             </div>
           </div>
         </footer>
 
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-lg md:hidden z-50">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#768c9c]/20 shadow-lg md:hidden z-50">
           <Button 
             onClick={() => trackAndNavigate('/readycheck', 'practice_start')}
-            className="w-full bg-[#ee7e65] hover:bg-[#d96a52] text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2"
+            className="w-full bg-[#ee7e65] hover:bg-[#e06a50] text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2"
           >
             <Play className="w-5 h-5" />
             Start Practice
