@@ -12,6 +12,7 @@ import paymentsRouter from "./routes/payments.js";
 import employerAuthRouter from "./routes/employer-auth.js";
 import { readycheckRouter } from "./routes/readycheck.js";
 import leadsRouter from "./routes/leads.js";
+import seoRouter from "./routes/seo.js";
 import { setupAuth } from "./replitAuth.js";
 import dotenv from "dotenv";
 
@@ -132,6 +133,9 @@ async function startServer() {
 
   // Mount leads routes (public - no auth required)
   app.use("/api/leads", leadsRouter);
+
+  // Mount SEO routes (public - no auth required for public pages)
+  app.use("/api/seo", seoRouter);
 
   // Health check
   app.get("/health", (req, res) => {

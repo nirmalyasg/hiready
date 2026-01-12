@@ -1989,8 +1989,148 @@ export const hireadyRoleIndexRelations = relations(hireadyRoleIndex, ({ one }) =
 }));
 
 // =====================
+// SEO Pages System
+// =====================
+
+export const seoPages = pgTable("seo_pages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  pageType: text("page_type").$type<"pillar" | "role_prep" | "company_prep" | "company_role" | "skill_practice">().notNull(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  h1: text("h1").notNull(),
+  status: text("status").$type<"draft" | "published" | "archived">().notNull().default("draft"),
+  roleArchetypeId: varchar("role_archetype_id").references(() => roleArchetypes.id, { onDelete: "set null" }),
+  companyId: varchar("company_id").references(() => companies.id, { onDelete: "set null" }),
+  skillCategory: text("skill_category"),
+  canonicalUrl: text("canonical_url"),
+  ogTitle: text("og_title"),
+  ogDescription: text("og_description"),
+  ogImageUrl: text("og_image_url"),
+  jsonLd: jsonb("json_ld"),
+  lastGeneratedAt: timestamp("last_generated_at"),
+  publishedAt: timestamp("published_at"),
+  refreshDueAt: timestamp("refresh_due_at"),
+  generationVersion: integer("generation_version").default(1),
+  viewCount: integer("view_count").default(0),
+  practiceStarts: integer("practice_starts").default(0),
+  avgTimeOnPageSec: integer("avg_time_on_page_sec"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const seoPageSections = pgTable("seo_page_sections", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  seoPageId: varchar("seo_page_id").notNull().references(() => seoPages.id, { onDelete: "cascade" }),
+  sectionOrder: integer("section_order").notNull(),
+  headingType: text("heading_type").$type<"h2" | "h3">().notNull().default("h2"),
+  heading: text("heading").notNull(),
+  content: text("content").notNull(),
+  sourceTable: text("source_table"),
+  sourceData: jsonb("source_data"),
+  isCta: boolean("is_cta").default(false),
+  ctaType: text("cta_type").$type<"practice_start" | "explore_roles" | "explore_companies" | "mock_interview">(),
+  ctaLink: text("cta_link"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const seoInternalLinks = pgTable("seo_internal_links", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sourcePageId: varchar("source_page_id").notNull().references(() => seoPages.id, { onDelete: "cascade" }),
+  targetPageId: varchar("target_page_id").notNull().references(() => seoPages.id, { onDelete: "cascade" }),
+  anchorText: text("anchor_text").notNull(),
+  linkContext: text("link_context"),
+  linkType: text("link_type").$type<"related" | "parent" | "child" | "cta" | "breadcrumb">().notNull(),
+  positionOrder: integer("position_order"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const seoGenerationQueue = pgTable("seo_generation_queue", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  pageType: text("page_type").notNull(),
+  referenceId: varchar("reference_id"),
+  referenceData: jsonb("reference_data"),
+  priority: integer("priority").default(0),
+  status: text("status").$type<"pending" | "processing" | "completed" | "failed">().notNull().default("pending"),
+  errorMessage: text("error_message"),
+  seoPageId: varchar("seo_page_id").references(() => seoPages.id, { onDelete: "set null" }),
+  scheduledFor: timestamp("scheduled_for"),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const seoAnalyticsEvents = pgTable("seo_analytics_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  seoPageId: varchar("seo_page_id").references(() => seoPages.id, { onDelete: "set null" }),
+  eventType: text("event_type").$type<"page_view" | "practice_start" | "cta_click" | "time_on_page" | "bounce">().notNull(),
+  eventData: jsonb("event_data"),
+  userId: varchar("user_id").references(() => authUsers.id, { onDelete: "set null" }),
+  sessionId: text("session_id"),
+  referrer: text("referrer"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// SEO Relations
+export const seoPagesRelations = relations(seoPages, ({ one, many }) => ({
+  roleArchetype: one(roleArchetypes, {
+    fields: [seoPages.roleArchetypeId],
+    references: [roleArchetypes.id],
+  }),
+  company: one(companies, {
+    fields: [seoPages.companyId],
+    references: [companies.id],
+  }),
+  sections: many(seoPageSections),
+  outgoingLinks: many(seoInternalLinks, { relationName: "sourceLinks" }),
+  incomingLinks: many(seoInternalLinks, { relationName: "targetLinks" }),
+  analyticsEvents: many(seoAnalyticsEvents),
+}));
+
+export const seoPageSectionsRelations = relations(seoPageSections, ({ one }) => ({
+  seoPage: one(seoPages, {
+    fields: [seoPageSections.seoPageId],
+    references: [seoPages.id],
+  }),
+}));
+
+export const seoInternalLinksRelations = relations(seoInternalLinks, ({ one }) => ({
+  sourcePage: one(seoPages, {
+    fields: [seoInternalLinks.sourcePageId],
+    references: [seoPages.id],
+    relationName: "sourceLinks",
+  }),
+  targetPage: one(seoPages, {
+    fields: [seoInternalLinks.targetPageId],
+    references: [seoPages.id],
+    relationName: "targetLinks",
+  }),
+}));
+
+export const seoAnalyticsEventsRelations = relations(seoAnalyticsEvents, ({ one }) => ({
+  seoPage: one(seoPages, {
+    fields: [seoAnalyticsEvents.seoPageId],
+    references: [seoPages.id],
+  }),
+  user: one(authUsers, {
+    fields: [seoAnalyticsEvents.userId],
+    references: [authUsers.id],
+  }),
+}));
+
+// =====================
 // Insert Schemas
 // =====================
+
+// SEO Insert Schemas
+export const insertSeoPageSchema = createInsertSchema(seoPages).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertSeoPageSectionSchema = createInsertSchema(seoPageSections).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertSeoInternalLinkSchema = createInsertSchema(seoInternalLinks).omit({ id: true, createdAt: true });
+export const insertSeoGenerationQueueSchema = createInsertSchema(seoGenerationQueue).omit({ id: true, createdAt: true });
+export const insertSeoAnalyticsEventSchema = createInsertSchema(seoAnalyticsEvents).omit({ id: true, createdAt: true });
 
 // Interview Intelligence Insert Schemas
 export const insertCompanySchema = createInsertSchema(companies).omit({ createdAt: true });
@@ -2178,3 +2318,15 @@ export type EmployerCandidate = typeof employerCandidates.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type Payment = typeof payments.$inferSelect;
 export type HireadyRoleIndex = typeof hireadyRoleIndex.$inferSelect;
+
+// SEO Types
+export type SeoPage = typeof seoPages.$inferSelect;
+export type InsertSeoPage = z.infer<typeof insertSeoPageSchema>;
+export type SeoPageSection = typeof seoPageSections.$inferSelect;
+export type InsertSeoPageSection = z.infer<typeof insertSeoPageSectionSchema>;
+export type SeoInternalLink = typeof seoInternalLinks.$inferSelect;
+export type InsertSeoInternalLink = z.infer<typeof insertSeoInternalLinkSchema>;
+export type SeoGenerationQueueItem = typeof seoGenerationQueue.$inferSelect;
+export type InsertSeoGenerationQueueItem = z.infer<typeof insertSeoGenerationQueueSchema>;
+export type SeoAnalyticsEvent = typeof seoAnalyticsEvents.$inferSelect;
+export type InsertSeoAnalyticsEvent = z.infer<typeof insertSeoAnalyticsEventSchema>;

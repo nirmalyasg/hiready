@@ -57,6 +57,8 @@ import ReadycheckPage from './pages/readycheck/page';
 import ReadycheckLaunchPage from './pages/readycheck/launch';
 import CompanyDashboard from './pages/company/page';
 import CompanyLoginPage from './pages/company/login';
+import DynamicSeoPage from './pages/seo/dynamic-page';
+import SeoAdminPage from './pages/admin/seo-page';
 
 export default function App() {
   return (
@@ -120,6 +122,16 @@ export default function App() {
         <Route path="/company" element={<Navigate to="/company/login" replace />} />
         <Route path="/employer/login" element={<Navigate to="/company/login" replace />} />
         <Route path="/employer" element={<Navigate to="/company/login" replace />} />
+        <Route path="/admin/seo" element={<SeoAdminPage />} />
+        
+        {/* Dynamic SEO pages - must be near the end */}
+        <Route path="/mock-interview" element={<DynamicSeoPage />} />
+        <Route path="/interview-preparation" element={<DynamicSeoPage />} />
+        <Route path="/prepare/:slug" element={<DynamicSeoPage />} />
+        <Route path="/practice/:slug" element={<DynamicSeoPage />} />
+        <Route path="/company/:slug/interview" element={<DynamicSeoPage />} />
+        <Route path="/interview/:companySlug/:roleSlug" element={<DynamicSeoPage />} />
+        
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </RealtimeSessionPrewarmProvider>

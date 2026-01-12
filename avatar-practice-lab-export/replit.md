@@ -75,6 +75,52 @@ Professional, trustworthy design using the official brand color palette. Clean l
 - Inactive: Slate blue (#768c9c) text, hover to white
 - Width: 240px desktop, overlay on mobile
 
+## Recent Changes (January 12, 2026)
+
+### SEO Page Generation System
+Comprehensive SEO page generation system for organic traffic acquisition with AI-generated content:
+
+**Database Schema (Migration 015)**
+- `seo_pages`: Main page table with slug, title, meta tags, OG data, JSON-LD schema
+- `seo_page_sections`: Content sections with headings, body content, CTA flags
+- `seo_internal_links`: Internal linking graph for page interconnections
+- `seo_generation_queue`: Batch generation queue management
+- `seo_analytics_events`: Event tracking (page_view, practice_start, cta_click)
+
+**Page Types**
+- **Pillar Pages** (2): /mock-interview, /interview-preparation - Top-level category pages
+- **Role Prep** (18): /prepare/software-engineer-interview - Role-specific interview guides
+- **Company Prep** (30+): /company/google/interview - Company-specific interview preparation
+- **Company+Role** (26): /interview/google/software-engineer - High-intent combination pages
+- **Skill Practice** (8): /practice/behavioral-interview - Interview type skill guides
+
+**Content Generation** (`api/lib/seo-content-generator.ts`)
+- AI-powered narrative generation using OpenAI GPT-4o
+- Pulls content from existing database (roles, companies, question patterns)
+- Generates meta descriptions, OG tags, and JSON-LD structured data
+- Creates CTA sections with conversion links
+
+**API Routes** (`api/routes/seo.ts`)
+- `GET /api/seo/pages` - List all SEO pages with filters
+- `GET /api/seo/page-by-slug/:slug` - Fetch page by URL slug
+- `POST /api/seo/generate/pillar/:type` - Generate pillar page
+- `POST /api/seo/generate/role/:id` - Generate role prep page
+- `POST /api/seo/generate/company/:id` - Generate company prep page
+- `POST /api/seo/generate/batch` - Batch generation endpoint
+- `PATCH /api/seo/pages/:id/publish` - Publish/unpublish pages
+- `GET /api/seo/sitemap.xml` - Dynamic XML sitemap
+- `POST /api/seo/analytics/event` - Track analytics events
+
+**Frontend Components**
+- `ui/pages/seo/dynamic-page.tsx` - Dynamic SEO page renderer with meta tag injection
+- `ui/pages/admin/seo-page.tsx` - Admin dashboard for page generation and publishing
+- Routes: /mock-interview, /interview-preparation, /prepare/:slug, /practice/:slug, /company/:slug/interview, /interview/:companySlug/:roleSlug
+
+**Analytics Tracking**
+- Page views with referrer and user agent
+- Practice session starts from SEO pages
+- CTA click tracking for conversion optimization
+
 ## Recent Changes (January 9, 2026)
 
 ### Dynamic JD-Specific Assessment Dimensions
