@@ -80,49 +80,47 @@ export function UpgradeModal({
         </DialogHeader>
 
         <div className="grid gap-4 mt-4">
-          {interviewSetId && (
-            <div className="border-2 border-[#24c4b8] rounded-2xl p-6 bg-[#24c4b8]/5 relative">
-              <div className="absolute -top-3 left-4 bg-[#24c4b8] text-white text-xs font-bold px-3 py-1 rounded-full">
-                BEST FOR THIS ROLE
-              </div>
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Package className="w-5 h-5 text-[#24c4b8]" />
-                    <h3 className="font-bold text-lg text-[#1a1a2e]">Interview Set</h3>
-                  </div>
-                  <p className="text-sm text-gray-500 mb-3">
-                    {interviewSetName || 'Complete interview preparation package'}
-                  </p>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-[#24c4b8]" />
-                      <span>All interview rounds (HR, Technical, Case)</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-[#24c4b8]" />
-                      <span>Detailed feedback & scoring</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-[#24c4b8]" />
-                      <span>Lifetime access to this set</span>
-                    </li>
-                  </ul>
-                </div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-[#1a1a2e]">₹199</div>
-                  <div className="text-sm text-gray-500">one-time</div>
-                </div>
-              </div>
-              <Button 
-                onClick={handlePurchaseSet}
-                className="w-full mt-4 bg-[#24c4b8] hover:bg-[#1db0a5] h-12 font-semibold group"
-              >
-                Buy This Set
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+          <div className="border-2 border-[#24c4b8] rounded-2xl p-6 bg-[#24c4b8]/5 relative">
+            <div className="absolute -top-3 left-4 bg-[#24c4b8] text-white text-xs font-bold px-3 py-1 rounded-full">
+              BEST FOR THIS ROLE
             </div>
-          )}
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Package className="w-5 h-5 text-[#24c4b8]" />
+                  <h3 className="font-bold text-lg text-[#1a1a2e]">Interview Set</h3>
+                </div>
+                <p className="text-sm text-gray-500 mb-3">
+                  {interviewSetName || 'Complete interview preparation package'}
+                </p>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-[#24c4b8]" />
+                    <span>All interview rounds (HR, Technical, Case)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-[#24c4b8]" />
+                    <span>Detailed feedback & scoring</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-[#24c4b8]" />
+                    <span>Lifetime access to this set</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-[#1a1a2e]">₹199</div>
+                <div className="text-sm text-gray-500">one-time</div>
+              </div>
+            </div>
+            <Button 
+              onClick={handlePurchaseSet}
+              className="w-full mt-4 bg-[#24c4b8] hover:bg-[#1db0a5] h-12 font-semibold group"
+            >
+              Buy This Set
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </div>
 
           <div className="border-2 border-[#cb6ce6]/30 rounded-2xl p-6 hover:border-[#cb6ce6] transition-colors">
             <div className="flex items-start justify-between">
