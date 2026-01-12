@@ -111,9 +111,7 @@ export async function generatePillarPage(type: "mock-interview" | "interview-pre
       headingType: "h2",
       heading: "What a Mock Interview Actually Tests",
       content: await generateNarrativeContent(
-        `Write 2-3 paragraphs explaining what mock interviews really test beyond technical skills. 
-        Cover: communication under pressure, structured thinking, ability to handle curveballs, 
-        and how interviewers assess candidates in real-time. Make it feel like insider knowledge.`
+        `Explain what mock interviews actually test beyond surface-level knowledge. Write from the interviewer's perspective. Show how interviewers assess thinking under pressure, clarity of explanation, handling ambiguity, and recovery from mistakes. Describe what interviewers notice in the first few minutes versus later in the conversation. Make it feel like insight candidates usually only learn after multiple rejections.`
       ),
       sourceTable: "editorial"
     });
@@ -123,9 +121,7 @@ export async function generatePillarPage(type: "mock-interview" | "interview-pre
       headingType: "h2",
       heading: "Common Interview Types (HR, Technical, Case, Behavioral)",
       content: await generateNarrativeContent(
-        `Explain the 4 main interview types that candidates face: HR screening, technical interviews, 
-        case studies, and behavioral rounds. For each, briefly explain what they're looking for and 
-        how they differ. Interview types found in data: ${interviewTypes.join(", ")}`
+        `Explain the four main interview types candidates encounter: HR screening, technical interviews, case interviews, and behavioral rounds. For each, describe how the interviewer's mindset changes and what they are primarily trying to confirm or eliminate. Emphasize how the same answer can be judged differently across interview types. Interview types to reference: ${interviewTypes.join(", ")}.`
       ),
       sourceTable: "role_archetypes",
       sourceData: { interviewTypes }
@@ -136,9 +132,7 @@ export async function generatePillarPage(type: "mock-interview" | "interview-pre
       headingType: "h2",
       heading: "Typical Interview Structure",
       content: await generateNarrativeContent(
-        `Describe the typical flow of an interview from start to finish. 
-        Based on this structure data: ${JSON.stringify(phasesData)}. 
-        Explain what happens in each phase and how long each typically takes.`
+        `Describe the typical flow of an interview from opening to close, based on this structure data: ${JSON.stringify(phasesData)}. Explain what interviewers are evaluating at each phase, how candidates often misread these moments, and where interviews are usually won or lost. Include realistic timing and pacing, not idealized versions.`
       ),
       sourceTable: "role_interview_structure_defaults",
       sourceData: { phasesData }
@@ -148,9 +142,7 @@ export async function generatePillarPage(type: "mock-interview" | "interview-pre
       headingType: "h2",
       heading: "Why Practicing Interviews Works",
       content: await generateNarrativeContent(
-        `Explain the science and psychology behind why practice interviews improve performance. 
-        Cover: reducing anxiety through exposure, building muscle memory for common questions, 
-        getting feedback loops, and the compound effect of deliberate practice.`
+        `Explain why interview practice works from a behavioral and cognitive perspective. Describe how repeated exposure changes response quality, confidence, and clarity under pressure. Show the difference between candidates who "know the answers" versus those who have practiced saying them out loud. Avoid academic language — keep it grounded in interview-room reality.`
       ),
       sourceTable: "editorial"
     });
@@ -185,9 +177,7 @@ export async function generatePillarPage(type: "mock-interview" | "interview-pre
       headingType: "h2",
       heading: "What Interviewers Really Look For",
       content: await generateNarrativeContent(
-        `Reveal what interviewers are actually evaluating beyond the obvious. 
-        Cover: problem-solving approach, communication style, cultural fit signals, 
-        and the hidden criteria that separate good from great candidates.`
+        `Reveal what interviewers are actually evaluating beyond the obvious answers. Describe the hidden criteria that separate good from great candidates: how they approach problems, how they communicate uncertainty, and how they signal cultural fit without trying. Explain what interviewers notice in the first 5 minutes that often determines the outcome.`
       ),
       sourceTable: "editorial"
     });
@@ -196,9 +186,7 @@ export async function generatePillarPage(type: "mock-interview" | "interview-pre
       headingType: "h2",
       heading: "Interview Rounds Explained",
       content: await generateNarrativeContent(
-        `Break down the typical interview process from application to offer. 
-        Explain what happens at each stage: initial screening, technical rounds, 
-        hiring manager interviews, and final rounds. What's the purpose of each?`
+        `Break down the typical interview process from application to offer, explaining the distinct purpose of each stage. Describe how interviewers' expectations shift from screening to final rounds, and what candidates often underestimate at each stage. Reveal the common handoff notes that interviewers pass between rounds.`
       ),
       sourceTable: "role_interview_structure_defaults"
     });
@@ -208,9 +196,7 @@ export async function generatePillarPage(type: "mock-interview" | "interview-pre
       headingType: "h2",
       heading: "Common Question Patterns",
       content: await generateNarrativeContent(
-        `Explain the main categories of interview questions candidates face. 
-        Pattern types include: ${patternTypes.join(", ")}. 
-        For each category, give a sense of what interviewers are probing for.`
+        `Explain the main categories of interview questions candidates face, using these pattern types: ${patternTypes.join(", ")}. For each category, describe what interviewers are really probing for beneath the surface question, and how the same question type reveals different signals across candidate responses.`
       ),
       sourceTable: "question_patterns",
       sourceData: { patternTypes }
@@ -220,9 +206,7 @@ export async function generatePillarPage(type: "mock-interview" | "interview-pre
       headingType: "h2",
       heading: "Practice vs Theory",
       content: await generateNarrativeContent(
-        `Make the case for active practice over passive reading. 
-        Explain why reading about interviews isn't enough, and how 
-        simulated practice builds the real skills needed to succeed.`
+        `Make the case for active practice over passive reading. Explain how repeated exposure changes response quality, confidence, and clarity under pressure. Show the difference between candidates who "know the answers" versus those who have practiced saying them out loud in real time.`
       ),
       sourceTable: "editorial"
     });
@@ -276,9 +260,7 @@ export async function generateRolePrepPage(roleArchetypeId: string): Promise<Gen
     headingType: "h2",
     heading: `What Interviewers Evaluate in ${roleName}s`,
     content: await generateNarrativeContent(
-      `For ${roleName} interviews, explain what specific skills and dimensions interviewers assess. 
-      Key dimensions include: ${formatSkillDimensions(skillDimensions)}. 
-      Explain how each dimension is typically tested and what good vs weak answers look like.`
+      `For ${roleName} interviews, explain what interviewers actually listen for when candidates speak. Use these dimensions: ${formatSkillDimensions(skillDimensions)}. Describe how each dimension shows up naturally in conversation, not as a checklist. Contrast how strong candidates demonstrate these traits versus weaker ones.`
     ),
     sourceTable: "role_archetypes",
     sourceData: { skillDimensions }
@@ -290,9 +272,7 @@ export async function generateRolePrepPage(roleArchetypeId: string): Promise<Gen
       headingType: "h2",
       heading: `Typical ${roleName} Interview Structure`,
       content: await generateNarrativeContent(
-        `Describe the typical interview structure for ${roleName} roles. 
-        Based on this phase data: ${JSON.stringify(structure.phasesJson)}. 
-        Explain what happens in each phase and how candidates should prepare for each.`
+        `Describe the interview structure commonly used for ${roleName} roles, based on this data: ${JSON.stringify(structure.phasesJson)}. Explain how expectations shift across rounds and what candidates often underestimate at each stage. Focus on preparation mistakes candidates make for each phase.`
       ),
       sourceTable: "role_interview_structure_defaults",
       sourceData: { phases: structure.phasesJson }
@@ -305,9 +285,7 @@ export async function generateRolePrepPage(roleArchetypeId: string): Promise<Gen
       headingType: "h2",
       heading: "Common Question Patterns You'll Face",
       content: await generateNarrativeContent(
-        `Describe the types of questions ${roleName} candidates typically face. 
-        Sample patterns include: ${patternSamples.join("; ")}. 
-        Explain the intent behind these questions and how to approach them strategically.`
+        `Describe the recurring question patterns ${roleName} candidates face, using these examples: ${patternSamples.join("; ")}. Explain why interviewers rely on these patterns and what they reveal about candidates beyond the surface answer. Emphasize structure and reasoning, not memorization.`
       ),
       sourceTable: "question_patterns",
       sourceData: { patternCount: patterns.length }
@@ -319,9 +297,7 @@ export async function generateRolePrepPage(roleArchetypeId: string): Promise<Gen
     headingType: "h2",
     heading: "Common Mistakes Candidates Make",
     content: await generateNarrativeContent(
-      `Explain the most common mistakes ${roleName} candidates make in interviews. 
-      Common failure modes include: ${failureModes.join("; ")}. 
-      For each mistake, explain why it happens and how to avoid it.`
+      `Explain the most common ways ${roleName} candidates fail interviews, based on these failure modes: ${failureModes.join("; ")}. Describe how these mistakes typically appear in conversation and why candidates don't realize they're happening. Keep the tone diagnostic, not judgmental.`
     ),
     sourceTable: "role_archetypes",
     sourceData: { failureModes }
@@ -372,10 +348,7 @@ export async function generateCompanyPrepPage(companyId: string): Promise<Genera
     headingType: "h2",
     heading: `How Interviews at ${companyName} Typically Work`,
     content: await generateNarrativeContent(
-      `Describe the typical interview process at ${companyName}. 
-      They are in the ${company.sector || "tech"} sector with archetype ${company.archetype || "enterprise"}. 
-      Their interview typically includes: ${Object.keys(interviewComponents).filter(k => interviewComponents[k as keyof typeof interviewComponents]).join(", ")}. 
-      Explain what candidates should expect at each stage.`
+      `Describe how interviews at ${companyName} typically unfold in practice. Use their sector (${company.sector || "tech"}) and archetype (${company.archetype || "enterprise"}) to explain pacing, depth, and interviewer expectations. Reference these interview components: ${Object.keys(interviewComponents).filter(k => interviewComponents[k as keyof typeof interviewComponents]).join(", ")}. Focus on what surprises candidates most.`
     ),
     sourceTable: "companies",
     sourceData: { interviewComponents }
@@ -387,9 +360,7 @@ export async function generateCompanyPrepPage(companyId: string): Promise<Genera
       headingType: "h2",
       heading: `Skills ${companyName} Interviewers Emphasize`,
       content: await generateNarrativeContent(
-        `Explain what skills and qualities ${companyName} particularly values in candidates. 
-        Based on their hiring patterns, they focus on: ${skillFocusAreas.join(", ")}. 
-        Describe how they assess these skills during interviews.`
+        `Explain which skills ${companyName} consistently prioritizes during interviews, based on: ${skillFocusAreas.join(", ")}. Describe how interviewers test these skills indirectly through questions, follow-ups, and problem framing. Avoid stating values — show how they surface in interviews.`
       ),
       sourceTable: "company_role_blueprints",
       sourceData: { skillFocusAreas }
@@ -400,9 +371,7 @@ export async function generateCompanyPrepPage(companyId: string): Promise<Genera
     headingType: "h2",
     heading: `Interview Question Styles at ${companyName}`,
     content: await generateNarrativeContent(
-      `Describe the types of interview questions ${companyName} is known for asking. 
-      Given their ${company.archetype} archetype in the ${company.sector} sector, 
-      explain the typical question styles and what they're trying to assess.`
+      `Describe the types of interview questions ${companyName} is known for asking. Given their ${company.archetype} archetype in the ${company.sector} sector, explain the typical question styles, how interviewers probe for depth, and the subtle signals they're evaluating beyond the answer itself.`
     ),
     sourceTable: "question_patterns"
   });
@@ -469,9 +438,7 @@ export async function generateCompanyRolePage(companyId: string, roleArchetypeId
     headingType: "h2",
     heading: `What ${companyName} Looks for in ${roleName}s`,
     content: await generateNarrativeContent(
-      `Explain what ${companyName} specifically looks for when hiring ${roleName}s. 
-      Combine their company archetype (${company.archetype}) with the role's key dimensions: ${formatSkillDimensions(skillDimensions)}. 
-      Describe how ${companyName}'s culture and industry (${company.sector}) shapes their expectations.`
+      `Explain what ${companyName} specifically looks for when hiring ${roleName}s. Combine their company archetype (${company.archetype}) with the role's key dimensions: ${formatSkillDimensions(skillDimensions)}. Describe how ${companyName}'s culture and industry (${company.sector}) shapes the specific behaviors and signals interviewers watch for.`
     ),
     sourceTable: "role_archetypes",
     sourceData: { skillDimensions, companyArchetype: company.archetype }
@@ -483,9 +450,7 @@ export async function generateCompanyRolePage(companyId: string, roleArchetypeId
       headingType: "h2",
       heading: `${companyName} ${roleName} Interview Structure`,
       content: await generateNarrativeContent(
-        `Describe the interview structure for ${roleName} roles at ${companyName}. 
-        General ${roleName} structure: ${JSON.stringify(structure.phasesJson)}. 
-        Adapt this for ${companyName}'s known interview components: ${Object.keys(company.interviewComponents || {}).filter(k => company.interviewComponents?.[k as keyof typeof company.interviewComponents]).join(", ")}.`
+        `Describe the interview structure for ${roleName} roles at ${companyName}. General ${roleName} structure: ${JSON.stringify(structure.phasesJson)}. Adapt this for ${companyName}'s known interview components: ${Object.keys(company.interviewComponents || {}).filter(k => company.interviewComponents?.[k as keyof typeof company.interviewComponents]).join(", ")}. Focus on what surprises candidates most and common preparation gaps.`
       ),
       sourceTable: "role_interview_structure_defaults",
       sourceData: { phases: structure.phasesJson, companyComponents: company.interviewComponents }
@@ -497,9 +462,7 @@ export async function generateCompanyRolePage(companyId: string, roleArchetypeId
       headingType: "h2",
       heading: "Common Question Patterns Asked",
       content: await generateNarrativeContent(
-        `Describe the types of questions asked in ${roleName} interviews at companies like ${companyName}. 
-        Common patterns include questions about: ${patterns.slice(0, 5).map(p => p.patternType).join(", ")}. 
-        Explain how ${companyName}'s ${company.sector} focus might influence these questions.`
+        `Describe the types of questions asked in ${roleName} interviews at companies like ${companyName}. Common patterns include questions about: ${patterns.slice(0, 5).map(p => p.patternType).join(", ")}. Explain how ${companyName}'s ${company.sector} focus shapes these questions and what interviewers are really probing for beneath the surface.`
       ),
       sourceTable: "question_patterns",
       sourceData: { patternTypes: patterns.map(p => p.patternType) }
@@ -510,11 +473,7 @@ export async function generateCompanyRolePage(companyId: string, roleArchetypeId
     headingType: "h2",
     heading: "How to Prepare Effectively",
     content: await generateNarrativeContent(
-      `Provide a synthesis of how to prepare specifically for a ${roleName} interview at ${companyName}. 
-      Combine: role skills (${skillDimensions.slice(0, 3).join(", ")}), 
-      company culture (${company.archetype}, ${company.sector}), 
-      and common failure modes (${(archetype.commonFailureModes || []).slice(0, 3).join(", ")}). 
-      Give 3-4 concrete preparation strategies.`
+      `Provide a synthesis of how to prepare specifically for a ${roleName} interview at ${companyName}. Combine: role skills (${skillDimensions.slice(0, 3).join(", ")}), company culture (${company.archetype}, ${company.sector}), and common failure modes (${(archetype.commonFailureModes || []).slice(0, 3).join(", ")}). Focus on the preparation mistakes that lead to rejection even when candidates know the material.`
     ),
     sourceTable: "editorial"
   });
@@ -571,9 +530,7 @@ export async function generateSkillPracticePage(skillType: string): Promise<Gene
     headingType: "h2",
     heading: "What This Interview Tests",
     content: await generateNarrativeContent(
-      `Explain what a ${skill.name} specifically tests and evaluates. 
-      What core competencies is the interviewer assessing? 
-      How does this interview type differ from others?`
+      `Explain what a ${skill.name} interview truly evaluates beyond correctness. Describe how interviewers judge thinking process, communication clarity, and adaptability under questioning. Explain how this interview type differs in tone and expectations from others.`
     ),
     sourceTable: "editorial"
   });
@@ -583,9 +540,7 @@ export async function generateSkillPracticePage(skillType: string): Promise<Gene
       headingType: "h2",
       heading: "Common Question Patterns",
       content: await generateNarrativeContent(
-        `Describe the most common question patterns in ${skill.name}s. 
-        Examples include: ${patterns.slice(0, 5).map(p => p.template?.substring(0, 50)).join("; ")}... 
-        Explain the underlying structure of these questions and what interviewers want to see.`
+        `Describe the most common question structures used in ${skill.name} interviews. Use examples like: ${patterns.slice(0, 5).map(p => p.template?.substring(0, 50)).join("; ")}. Explain the logic behind these patterns and what interviewers are trying to surface about the candidate.`
       ),
       sourceTable: "question_patterns",
       sourceData: { patternCount: patterns.length }
@@ -596,9 +551,7 @@ export async function generateSkillPracticePage(skillType: string): Promise<Gene
     headingType: "h2",
     heading: "How Interviewers Evaluate Responses",
     content: await generateNarrativeContent(
-      `Explain the evaluation criteria interviewers use in ${skill.name}s. 
-      What distinguishes a good answer from a great one? 
-      What red flags cause concern? What signals impress interviewers?`
+      `Explain how interviewers evaluate answers during ${skill.name} interviews in real time. Describe what makes an answer feel confident and trustworthy versus risky or unclear. Highlight subtle signals interviewers react to, including pacing, framing, and handling follow-ups.`
     ),
     sourceTable: "editorial"
   });
