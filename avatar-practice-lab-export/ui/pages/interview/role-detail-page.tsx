@@ -4,6 +4,8 @@ import { ArrowLeft, Play, FileText, Code, Phone, User, Briefcase, MessageCircle,
 import { Button } from "@/components/ui/button";
 import SidebarLayout from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useAccessGate } from "@/components/monetization/access-gate";
+import { UpgradeModal } from "@/components/monetization/upgrade-modal";
 
 interface RoleKit {
   id: number;
@@ -97,6 +99,7 @@ export default function RoleDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [skillsExpanded, setSkillsExpanded] = useState(true);
+  const { checkAccess, showUpgradeModal, setShowUpgradeModal } = useAccessGate();
 
   useEffect(() => {
     const fetchRoleData = async () => {
@@ -131,6 +134,10 @@ export default function RoleDetailPage() {
   }, [roleId]);
 
   const handleStartPractice = (option: PracticeOption) => {
+    if (!checkAccess()) {
+      return;
+    }
+    
     const practiceContext = {
       roundCategory: option.roundCategory,
       taxonomy: option.taxonomy || {
@@ -332,6 +339,13 @@ export default function RoleDetailPage() {
           )}
         </div>
       </div>
+      
+      <UpgradeModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        title="Unlock Interview Access"
+        description="You've used your free interview. Upgrade to continue practicing."
+      />
     </SidebarLayout>
   );
 }

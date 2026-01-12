@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PurchaseModal } from "@/components/purchase-modal";
+import { useAccessGate } from "@/components/monetization/access-gate";
+import { UpgradeModal } from "@/components/monetization/upgrade-modal";
 
 interface Entitlements {
   hasAccess: boolean;
@@ -196,6 +198,7 @@ export default function JobDetailPage() {
   const [roleKits, setRoleKits] = useState<RoleKit[]>([]);
   const [showRoleSelector, setShowRoleSelector] = useState(false);
   const [isSavingRole, setIsSavingRole] = useState(false);
+  const { checkAccess, showUpgradeModal, setShowUpgradeModal } = useAccessGate();
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -313,9 +316,7 @@ export default function JobDetailPage() {
   };
 
   const handleStartPracticeOption = (option: PracticeOption) => {
-    if (entitlements && !entitlements.canStartSession) {
-      setPendingPracticeOption(option);
-      setShowPurchaseModal(true);
+    if (!checkAccess()) {
       return;
     }
     navigate(`/interview/config?jobTargetId=${job?.id}&roundCategory=${option.roundCategory}`);
@@ -760,6 +761,13 @@ export default function JobDetailPage() {
         jobTargetId={job?.id}
         roleName={job?.roleTitle}
         onSuccess={handlePurchaseSuccess}
+      />
+      
+      <UpgradeModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        title="Unlock Interview Access"
+        description="You've used your free interview. Upgrade to continue practicing."
       />
     </SidebarLayout>
   );

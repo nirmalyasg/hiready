@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useAccessGate } from "@/components/monetization/access-gate";
+import { UpgradeModal } from "@/components/monetization/upgrade-modal";
 
 interface RoleArchetype {
   id: string;
@@ -60,6 +62,8 @@ export default function InterviewModeSetupPage() {
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [exerciseCount, setExerciseCount] = useState<number>(1);
   const [includePuzzles, setIncludePuzzles] = useState<boolean>(false);
+  
+  const { checkAccess, showUpgradeModal, setShowUpgradeModal } = useAccessGate();
 
   const isProblemSolvingMode = mode === "coding_technical" || mode === "case_problem_solving";
 
@@ -120,6 +124,10 @@ export default function InterviewModeSetupPage() {
 
   const handleStartPractice = async () => {
     if (!selectedArchetype || !modeContext) return;
+    
+    if (!checkAccess()) {
+      return;
+    }
 
     setIsStarting(true);
     setError(null);
@@ -463,6 +471,13 @@ export default function InterviewModeSetupPage() {
           </div>
         </div>
       </div>
+      
+      <UpgradeModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        title="Unlock Interview Access"
+        description="You've used your free interview. Upgrade to continue practicing."
+      />
     </SidebarLayout>
   );
 }
