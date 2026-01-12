@@ -62,7 +62,16 @@ export function AccessGate({
   );
 }
 
-export function useAccessGate(interviewSetId?: number) {
+export type UpgradeContext = 'general' | 'role' | 'job';
+
+interface UseAccessGateOptions {
+  interviewSetId?: number;
+  interviewSetName?: string;
+  context?: UpgradeContext;
+}
+
+export function useAccessGate(options: UseAccessGateOptions = {}) {
+  const { interviewSetId, interviewSetName, context = 'general' } = options;
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const { data: accessCheck, isLoading, refetch } = useAccessCheck(interviewSetId);
 
@@ -84,7 +93,10 @@ export function useAccessGate(interviewSetId?: number) {
     showUpgradeModal,
     setShowUpgradeModal,
     accessCheck,
-    refetch
+    refetch,
+    interviewSetId,
+    interviewSetName,
+    context
   };
 }
 

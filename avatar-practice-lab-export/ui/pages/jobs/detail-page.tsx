@@ -195,7 +195,16 @@ export default function JobDetailPage() {
   const [roleKits, setRoleKits] = useState<RoleKit[]>([]);
   const [showRoleSelector, setShowRoleSelector] = useState(false);
   const [isSavingRole, setIsSavingRole] = useState(false);
-  const { checkAccess, showUpgradeModal, setShowUpgradeModal, accessCheck } = useAccessGate();
+  
+  const matchedRoleKit = roleKits.find(r => r.id === job?.roleKitId);
+  const interviewSetId = job?.roleKitId ?? undefined;
+  const interviewSetName = matchedRoleKit?.name ? `${matchedRoleKit.name} Interview Set` : job?.roleTitle ? `${job.roleTitle} Interview Set` : undefined;
+  
+  const { checkAccess, showUpgradeModal, setShowUpgradeModal, accessCheck } = useAccessGate({
+    interviewSetId,
+    interviewSetName,
+    context: 'job'
+  });
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -743,8 +752,10 @@ export default function JobDetailPage() {
       <UpgradeModal
         open={showUpgradeModal}
         onOpenChange={setShowUpgradeModal}
+        interviewSetId={interviewSetId}
+        interviewSetName={interviewSetName}
         title="Unlock Interview Access"
-        description="You've used your free interview. Upgrade to continue practicing."
+        description={`Unlock ${job?.roleTitle || 'this role'} interviews at ${job?.companyName || 'this company'}.`}
       />
     </SidebarLayout>
   );

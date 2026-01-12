@@ -99,7 +99,13 @@ export default function RoleDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [skillsExpanded, setSkillsExpanded] = useState(true);
-  const { checkAccess, showUpgradeModal, setShowUpgradeModal } = useAccessGate();
+  
+  const accessGateOptions = {
+    interviewSetId: roleKit?.id,
+    interviewSetName: roleKit?.name ? `${roleKit.name} Interview Set` : undefined,
+    context: 'role' as const
+  };
+  const { checkAccess, showUpgradeModal, setShowUpgradeModal } = useAccessGate(accessGateOptions);
 
   useEffect(() => {
     const fetchRoleData = async () => {
@@ -343,8 +349,10 @@ export default function RoleDetailPage() {
       <UpgradeModal
         open={showUpgradeModal}
         onOpenChange={setShowUpgradeModal}
+        interviewSetId={roleKit?.id}
+        interviewSetName={roleKit?.name ? `${roleKit.name} Interview Set` : undefined}
         title="Unlock Interview Access"
-        description="You've used your free interview. Upgrade to continue practicing."
+        description={`Unlock ${roleKit?.name || 'this role'} interviews to continue practicing.`}
       />
     </SidebarLayout>
   );

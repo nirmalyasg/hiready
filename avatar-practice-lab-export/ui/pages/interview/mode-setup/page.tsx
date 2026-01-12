@@ -63,7 +63,7 @@ export default function InterviewModeSetupPage() {
   const [exerciseCount, setExerciseCount] = useState<number>(1);
   const [includePuzzles, setIncludePuzzles] = useState<boolean>(false);
   
-  const { checkAccess, showUpgradeModal, setShowUpgradeModal } = useAccessGate();
+  const { checkAccess, showUpgradeModal, setShowUpgradeModal } = useAccessGate({ context: 'general' });
 
   const isProblemSolvingMode = mode === "coding_technical" || mode === "case_problem_solving";
 

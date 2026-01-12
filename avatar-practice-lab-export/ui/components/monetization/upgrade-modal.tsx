@@ -110,7 +110,7 @@ export function UpgradeModal({
                   </ul>
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-[#1a1a2e]">$199</div>
+                  <div className="text-3xl font-bold text-[#1a1a2e]">₹16,999</div>
                   <div className="text-sm text-gray-500">one-time</div>
                 </div>
               </div>
@@ -150,7 +150,7 @@ export function UpgradeModal({
                 </ul>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-[#1a1a2e]">$499</div>
+                <div className="text-3xl font-bold text-[#1a1a2e]">₹41,999</div>
                 <div className="text-sm text-gray-500">/month</div>
               </div>
             </div>
