@@ -26,10 +26,8 @@ import {
   Minus,
   Clock,
   BarChart3,
-  ChevronDown,
   Activity,
   Trophy,
-  Flame,
   Calendar,
   ExternalLink
 } from "lucide-react";
@@ -159,7 +157,6 @@ export default function HireadyIndexPage() {
   const [isSharing, setIsSharing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [showRoleSelector, setShowRoleSelector] = useState(false);
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -232,7 +229,6 @@ export default function HireadyIndexPage() {
 
   const handleRoleSelect = (role: RoleOption) => {
     setSelectedRole(role);
-    setShowRoleSelector(false);
     const params = new URLSearchParams();
     if (role.type === "role_kit") {
       params.set("roleKitId", String(role.id));
@@ -320,72 +316,53 @@ export default function HireadyIndexPage() {
   return (
     <SidebarLayout>
       <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <Target className="w-8 h-8 text-[#24c4b8]" />
-              Hiready Index
-            </h1>
-            <p className="text-gray-600 mt-1">Your interview readiness dashboard</p>
-          </div>
-          
-          <div className="relative">
-            <button
-              onClick={() => setShowRoleSelector(!showRoleSelector)}
-              className="flex items-center gap-3 px-4 py-3 bg-white border rounded-xl shadow-sm hover:shadow-md transition-all w-full sm:w-auto"
-            >
-              <Briefcase className="w-5 h-5 text-[#24c4b8]" />
-              <div className="text-left flex-1">
-                <div className="text-sm text-gray-500">Showing readiness for</div>
-                <div className="font-semibold text-gray-900 truncate max-w-[200px]">
-                  {selectedRole?.name || "Select Role"}
-                </div>
-              </div>
-              <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showRoleSelector ? 'rotate-180' : ''}`} />
-            </button>
-
-            {showRoleSelector && (
-              <div className="absolute right-0 mt-2 w-72 bg-white border rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto">
-                {roles.roleKits.length > 0 && (
-                  <div className="p-2">
-                    <div className="text-xs font-medium text-gray-500 px-3 py-2">Pre-built Roles</div>
-                    {roles.roleKits.map(role => (
-                      <button
-                        key={`kit-${role.id}`}
-                        onClick={() => handleRoleSelect(role)}
-                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                          selectedRole?.id === role.id && selectedRole?.type === role.type
-                            ? 'bg-[#24c4b8]/10 text-[#24c4b8]'
-                            : 'hover:bg-gray-50'
-                        }`}
-                      >
-                        {role.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {roles.jobTargets.length > 0 && (
-                  <div className="p-2 border-t">
-                    <div className="text-xs font-medium text-gray-500 px-3 py-2">Custom Job Targets</div>
-                    {roles.jobTargets.map(role => (
-                      <button
-                        key={`target-${role.id}`}
-                        onClick={() => handleRoleSelect(role)}
-                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                          selectedRole?.id === role.id && selectedRole?.type === role.type
-                            ? 'bg-[#24c4b8]/10 text-[#24c4b8]'
-                            : 'hover:bg-gray-50'
-                        }`}
-                      >
-                        {role.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <Target className="w-8 h-8 text-[#24c4b8]" />
+            Hiready Index
+          </h1>
+          <p className="text-gray-600 mt-1">Your interview readiness dashboard</p>
         </div>
+
+        {/* Role Selector Rail */}
+        {allRoles.length > 1 && (
+          <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="flex gap-3 min-w-max">
+              {allRoles.map((role) => {
+                const isSelected = selectedRole?.id === role.id && selectedRole?.type === role.type;
+                return (
+                  <button
+                    key={`${role.type}-${role.id}`}
+                    onClick={() => handleRoleSelect(role)}
+                    className={`flex-shrink-0 p-4 rounded-xl border-2 transition-all ${
+                      isSelected
+                        ? 'border-[#24c4b8] bg-[#24c4b8]/5 shadow-md'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        isSelected ? 'bg-[#24c4b8]' : 'bg-gray-100'
+                      }`}>
+                        <Briefcase className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-gray-500'}`} />
+                      </div>
+                      <div className="text-left">
+                        <div className={`font-semibold truncate max-w-[180px] ${
+                          isSelected ? 'text-[#24c4b8]' : 'text-gray-900'
+                        }`}>
+                          {role.name}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {role.type === 'role_kit' ? 'Pre-built Role' : 'Custom Job'}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {isLoadingIndex ? (
           <div className="flex items-center justify-center py-20">

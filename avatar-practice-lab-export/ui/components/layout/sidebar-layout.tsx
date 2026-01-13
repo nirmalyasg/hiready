@@ -7,7 +7,8 @@ import {
   User, 
   LogOut, 
   ChevronLeft,
-  Briefcase
+  Briefcase,
+  Award
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -33,6 +34,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
     { href: '/avatar/dashboard', label: 'Dashboard', icon: Home },
     { href: '/interview', label: 'Practice', icon: Target },
     { href: '/avatar/results', label: 'Results', icon: BarChart3 },
+    { href: '/hiready-index', label: 'Hiready Index', icon: Award },
     { href: '/jobs', label: 'Jobs', icon: Briefcase },
   ];
 
