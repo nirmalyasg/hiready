@@ -87,6 +87,22 @@ const modeLabels: Record<string, string> = {
   hiring_manager: "HR Interview",
 };
 
+const roundCategoryToInterviewType: Record<string, string> = {
+  case: "case_study",
+  case_study: "case_study",
+  coding: "technical",
+  coding_assessment: "technical",
+  technical: "technical",
+  technical_interview: "technical",
+  hr: "hr",
+  hr_screening: "hr",
+  hiring_manager: "hiring_manager",
+  behavioral: "behavioral",
+  culture_values: "behavioral",
+  system_design: "technical",
+  panel: "panel",
+};
+
 export default function InterviewConfigPage() {
   const [searchParams] = useSearchParams();
   const roleKitId = searchParams.get("roleKitId");
@@ -411,7 +427,8 @@ export default function InterviewConfigPage() {
             const data = await response.json();
             if (data.success) {
               setRoleKit(data.roleKit);
-              const selectedType = roundCategory || data.roleKit.defaultInterviewTypes?.[0] || "behavioral";
+              const rawSelectedType = roundCategory || data.roleKit.defaultInterviewTypes?.[0] || "behavioral";
+              const selectedType = roundCategoryToInterviewType[rawSelectedType] || rawSelectedType;
               setInterviewType(selectedType);
               setIsLoading(false);
               
