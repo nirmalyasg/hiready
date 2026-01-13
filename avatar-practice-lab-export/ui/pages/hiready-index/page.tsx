@@ -3,12 +3,12 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { 
   Target, 
   TrendingUp, 
+  TrendingDown,
   Award, 
   CheckCircle, 
   AlertTriangle, 
@@ -23,11 +23,18 @@ import {
   Play,
   ArrowUp,
   ArrowDown,
+  Minus,
   Clock,
   BarChart3,
-  ChevronDown
+  ChevronDown,
+  Activity,
+  Trophy,
+  Flame,
+  Calendar,
+  ExternalLink
 } from "lucide-react";
 import { format } from "date-fns";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Area, AreaChart } from 'recharts';
 
 interface RoleOption {
   id: number | string;
@@ -51,12 +58,33 @@ interface InterviewBreakdown {
   latestScore: number | null;
   bestScore: number | null;
   latestSessionId: number | null;
+  bestSessionId?: number | null;
 }
 
 interface ReadinessBand {
   band: string;
   label: string;
   description: string;
+}
+
+interface CapabilityMilestones {
+  practiceVolume: number;
+  bestAttempt: {
+    score: number;
+    sessionId: number | null;
+    interviewType: string | null;
+  };
+  consistencyScore: number | null;
+  coveragePercentage: number;
+  daysSinceStart: number;
+  practiceStreak: number;
+}
+
+interface SessionScore {
+  sessionId: number;
+  date: string;
+  score: number;
+  interviewType: string;
 }
 
 interface HireadyIndexData {
@@ -74,16 +102,19 @@ interface HireadyIndexData {
   strengths: string[];
   growthAreas: string[];
   trend: "improving" | "stable" | "declining";
+  momentum?: "accelerating" | "steady" | "slowing" | null;
   previousScore: number | null;
+  capabilityMilestones: CapabilityMilestones;
+  progressTimeline: SessionScore[];
   lastUpdated: string;
 }
 
 const getBandConfig = (band: string) => {
-  const configs: Record<string, { color: string; bgColor: string; borderColor: string; ringColor: string }> = {
-    interview_ready: { color: "text-emerald-700", bgColor: "bg-emerald-50", borderColor: "border-emerald-300", ringColor: "stroke-emerald-500" },
-    strong_foundation: { color: "text-blue-700", bgColor: "bg-blue-50", borderColor: "border-blue-300", ringColor: "stroke-blue-500" },
-    developing: { color: "text-amber-700", bgColor: "bg-amber-50", borderColor: "border-amber-300", ringColor: "stroke-amber-500" },
-    early_stage: { color: "text-red-700", bgColor: "bg-red-50", borderColor: "border-red-300", ringColor: "stroke-red-500" },
+  const configs: Record<string, { color: string; bgColor: string; borderColor: string; ringColor: string; hexColor: string }> = {
+    interview_ready: { color: "text-emerald-700", bgColor: "bg-emerald-50", borderColor: "border-emerald-300", ringColor: "stroke-emerald-500", hexColor: "#059669" },
+    strong_foundation: { color: "text-blue-700", bgColor: "bg-blue-50", borderColor: "border-blue-300", ringColor: "stroke-blue-500", hexColor: "#3B82F6" },
+    developing: { color: "text-amber-700", bgColor: "bg-amber-50", borderColor: "border-amber-300", ringColor: "stroke-amber-500", hexColor: "#D97706" },
+    early_stage: { color: "text-red-700", bgColor: "bg-red-50", borderColor: "border-red-300", ringColor: "stroke-red-500", hexColor: "#DC2626" },
   };
   return configs[band] || configs.developing;
 };
@@ -113,6 +144,12 @@ const getProgressColor = (score: number) => {
   return "bg-red-500";
 };
 
+const getTrendIcon = (trend: string) => {
+  if (trend === "up" || trend === "improving") return <ArrowUp className="w-4 h-4 text-emerald-500" />;
+  if (trend === "down" || trend === "declining") return <ArrowDown className="w-4 h-4 text-red-500" />;
+  return <Minus className="w-4 h-4 text-gray-400" />;
+};
+
 export default function HireadyIndexPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -126,7 +163,6 @@ export default function HireadyIndexPage() {
   const [copied, setCopied] = useState(false);
   const [showRoleSelector, setShowRoleSelector] = useState(false);
 
-  // Fetch available roles
   useEffect(() => {
     const fetchRoles = async () => {
       try {
@@ -137,7 +173,6 @@ export default function HireadyIndexPage() {
         if (data.success) {
           setRoles(data.roles);
           
-          // Auto-select role from URL params or first available
           const urlRoleKitId = searchParams.get('roleKitId');
           const urlJobTargetId = searchParams.get('jobTargetId');
           
@@ -163,7 +198,6 @@ export default function HireadyIndexPage() {
     fetchRoles();
   }, [searchParams]);
 
-  // Fetch Hiready Index when role is selected
   useEffect(() => {
     if (!selectedRole) return;
 
@@ -177,15 +211,19 @@ export default function HireadyIndexPage() {
           params.set("jobTargetId", String(selectedRole.id));
         }
 
-        const response = await fetch(`/api/interview-progress/hiready-index?${params.toString()}`, {
+        const response = await fetch(`/api/interview-progress/hiready-index?${params}`, {
           credentials: "include",
         });
         const data = await response.json();
-        if (data.success) {
+        
+        if (data.success && data.hireadyIndex) {
           setIndexData(data.hireadyIndex);
+        } else {
+          setIndexData(null);
         }
       } catch (error) {
         console.error("Error fetching Hiready index:", error);
+        setIndexData(null);
       } finally {
         setIsLoadingIndex(false);
       }
@@ -197,8 +235,6 @@ export default function HireadyIndexPage() {
   const handleRoleSelect = (role: RoleOption) => {
     setSelectedRole(role);
     setShowRoleSelector(false);
-    
-    // Update URL params
     const params = new URLSearchParams();
     if (role.type === "role_kit") {
       params.set("roleKitId", String(role.id));
@@ -210,38 +246,33 @@ export default function HireadyIndexPage() {
 
   const handleShare = async () => {
     if (!selectedRole) return;
-    
     setIsSharing(true);
     try {
       const body: any = { expiresInDays: 30 };
       if (selectedRole.type === "role_kit") {
-        body.roleKitId = selectedRole.id;
+        body.roleKitId = Number(selectedRole.id);
       } else {
-        body.jobTargetId = selectedRole.id;
+        body.jobTargetId = String(selectedRole.id);
       }
 
-      const response = await fetch('/api/interview-progress/share-link', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+      const response = await fetch("/api/interview-progress/share-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(body),
       });
       const data = await response.json();
       if (data.success) {
-        const fullUrl = `${window.location.origin}/share/${data.token}`;
-        setShareUrl(fullUrl);
-        await navigator.clipboard.writeText(fullUrl);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 3000);
+        setShareUrl(data.shareUrl);
       }
     } catch (error) {
-      console.error('Error sharing:', error);
+      console.error("Error generating share link:", error);
     } finally {
       setIsSharing(false);
     }
   };
 
-  const handleCopyLink = async () => {
+  const copyToClipboard = async () => {
     if (shareUrl) {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
@@ -249,237 +280,294 @@ export default function HireadyIndexPage() {
     }
   };
 
+  const allRoles = [...roles.roleKits, ...roles.jobTargets];
+
   if (isLoading) {
     return (
       <SidebarLayout>
-        <div className="flex justify-center items-center h-screen">
+        <div className="flex items-center justify-center min-h-screen">
           <LoadingSpinner />
         </div>
       </SidebarLayout>
     );
   }
 
-  const allRoles = [...roles.roleKits, ...roles.jobTargets];
-
-  // No roles available - show empty state
   if (allRoles.length === 0) {
     return (
       <SidebarLayout>
-        <div className="min-h-screen bg-[#fbfbfc]">
-          <div className="bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] text-white py-16">
-            <div className="max-w-4xl mx-auto px-4 text-center">
-              <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Target className="w-8 h-8 text-[#24c4b8]" />
-              </div>
-              <h2 className="text-2xl font-bold mb-3">Build Your Hiready Index</h2>
-              <p className="text-white/70 mb-8 max-w-md mx-auto">
-                Complete interview practice sessions for a specific role to build your personalized readiness score.
+        <div className="p-6 max-w-4xl mx-auto">
+          <Card className="text-center py-12">
+            <CardContent>
+              <Target className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h2 className="text-xl font-bold text-gray-900 mb-2">No Practice Data Yet</h2>
+              <p className="text-gray-600 mb-6">
+                Complete at least one interview practice session to see your Hiready Index.
               </p>
               <Link to="/interview">
-                <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white px-8 py-3 rounded-xl shadow-lg shadow-[#24c4b8]/25">
+                <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white">
                   Start Your First Interview
                 </Button>
               </Link>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </SidebarLayout>
     );
   }
 
   const bandConfig = indexData ? getBandConfig(indexData.readinessBand.band) : null;
-  const circumference = 2 * Math.PI * 70;
+  const circumference = 2 * Math.PI * 50;
   const strokeDashoffset = indexData ? circumference - (indexData.overallScore / 100) * circumference : circumference;
-  const scoreDelta = indexData?.previousScore ? indexData.overallScore - indexData.previousScore : 0;
 
   return (
     <SidebarLayout>
-      <div className="min-h-screen bg-[#fbfbfc] pb-24 sm:pb-8">
-        {/* Header with Role Selector */}
-        <div className="bg-[#000000] text-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-5xl">
-            <Link
-              to="/avatar/results"
-              className="inline-flex items-center text-white/70 hover:text-white mb-4 text-sm font-medium transition-colors group"
+      <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <Target className="w-8 h-8 text-[#24c4b8]" />
+              Hiready Index
+            </h1>
+            <p className="text-gray-600 mt-1">Your interview readiness dashboard</p>
+          </div>
+          
+          <div className="relative">
+            <button
+              onClick={() => setShowRoleSelector(!showRoleSelector)}
+              className="flex items-center gap-3 px-4 py-3 bg-white border rounded-xl shadow-sm hover:shadow-md transition-all w-full sm:w-auto"
             >
-              <ChevronRight className="w-4 h-4 rotate-180 mr-1 group-hover:-translate-x-0.5 transition-transform" />
-              Back to Results
-            </Link>
+              <Briefcase className="w-5 h-5 text-[#24c4b8]" />
+              <div className="text-left flex-1">
+                <div className="text-sm text-gray-500">Showing readiness for</div>
+                <div className="font-semibold text-gray-900 truncate max-w-[200px]">
+                  {selectedRole?.name || "Select Role"}
+                </div>
+              </div>
+              <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showRoleSelector ? 'rotate-180' : ''}`} />
+            </button>
 
-            {/* Role Selector */}
-            <div className="mb-6">
-              <div className="relative inline-block">
-                <button
-                  onClick={() => setShowRoleSelector(!showRoleSelector)}
-                  className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors"
-                >
-                  <Briefcase className="w-4 h-4 text-[#24c4b8]" />
-                  <span className="font-medium">{selectedRole?.name || "Select Role"}</span>
-                  <ChevronDown className={`w-4 h-4 transition-transform ${showRoleSelector ? 'rotate-180' : ''}`} />
-                </button>
-                
-                {showRoleSelector && (
-                  <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-xl border z-50 py-2 max-h-64 overflow-y-auto">
-                    {roles.roleKits.length > 0 && (
-                      <>
-                        <div className="px-3 py-1 text-xs font-medium text-gray-500 uppercase">Role Kits</div>
-                        {roles.roleKits.map((role) => (
-                          <button
-                            key={`rk-${role.id}`}
-                            onClick={() => handleRoleSelect(role)}
-                            className={`w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 ${
-                              selectedRole?.id === role.id && selectedRole?.type === role.type
-                                ? 'bg-[#24c4b8]/10 text-[#24c4b8]'
-                                : 'text-gray-700'
-                            }`}
-                          >
-                            <Briefcase className="w-4 h-4" />
-                            {role.name}
-                          </button>
-                        ))}
-                      </>
-                    )}
-                    {roles.jobTargets.length > 0 && (
-                      <>
-                        <div className="px-3 py-1 text-xs font-medium text-gray-500 uppercase mt-2">Job Targets</div>
-                        {roles.jobTargets.map((role) => (
-                          <button
-                            key={`jt-${role.id}`}
-                            onClick={() => handleRoleSelect(role)}
-                            className={`w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 ${
-                              selectedRole?.id === role.id && selectedRole?.type === role.type
-                                ? 'bg-[#24c4b8]/10 text-[#24c4b8]'
-                                : 'text-gray-700'
-                            }`}
-                          >
-                            <Target className="w-4 h-4" />
-                            {role.name}
-                          </button>
-                        ))}
-                      </>
-                    )}
+            {showRoleSelector && (
+              <div className="absolute right-0 mt-2 w-72 bg-white border rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto">
+                {roles.roleKits.length > 0 && (
+                  <div className="p-2">
+                    <div className="text-xs font-medium text-gray-500 px-3 py-2">Pre-built Roles</div>
+                    {roles.roleKits.map(role => (
+                      <button
+                        key={`kit-${role.id}`}
+                        onClick={() => handleRoleSelect(role)}
+                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                          selectedRole?.id === role.id && selectedRole?.type === role.type
+                            ? 'bg-[#24c4b8]/10 text-[#24c4b8]'
+                            : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        {role.name}
+                      </button>
+                    ))}
                   </div>
                 )}
-              </div>
-            </div>
-
-            {isLoadingIndex ? (
-              <div className="flex justify-center py-12">
-                <LoadingSpinner />
-              </div>
-            ) : indexData ? (
-              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
-                {/* Score Circle */}
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-                  <div className="relative">
-                    <svg className="w-40 h-40 transform -rotate-90">
-                      <circle
-                        cx="80"
-                        cy="80"
-                        r="70"
-                        stroke="rgba(255,255,255,0.1)"
-                        strokeWidth="12"
-                        fill="none"
-                      />
-                      <circle
-                        cx="80"
-                        cy="80"
-                        r="70"
-                        className={bandConfig?.ringColor || "stroke-emerald-500"}
-                        strokeWidth="12"
-                        fill="none"
-                        strokeLinecap="round"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={strokeDashoffset}
-                        style={{ transition: "stroke-dashoffset 1s ease-out" }}
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-4xl font-bold">{indexData.overallScore}</span>
-                      <span className="text-sm text-white/60">/ 100</span>
-                    </div>
+                {roles.jobTargets.length > 0 && (
+                  <div className="p-2 border-t">
+                    <div className="text-xs font-medium text-gray-500 px-3 py-2">Custom Job Targets</div>
+                    {roles.jobTargets.map(role => (
+                      <button
+                        key={`target-${role.id}`}
+                        onClick={() => handleRoleSelect(role)}
+                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                          selectedRole?.id === role.id && selectedRole?.type === role.type
+                            ? 'bg-[#24c4b8]/10 text-[#24c4b8]'
+                            : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        {role.name}
+                      </button>
+                    ))}
                   </div>
-
-                  <div className="text-center sm:text-left">
-                    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium mb-3 ${bandConfig?.bgColor} ${bandConfig?.color}`}>
-                      <Award className="w-4 h-4" />
-                      {indexData.readinessBand.label}
-                    </div>
-                    <h1 className="text-2xl font-bold mb-1">{indexData.role.name}</h1>
-                    {indexData.role.companyContext && (
-                      <p className="text-white/60 text-sm mb-2">at {indexData.role.companyContext}</p>
-                    )}
-                    <p className="text-white/70 text-sm max-w-xs">
-                      {indexData.readinessBand.description}
-                    </p>
-                    
-                    {scoreDelta !== 0 && (
-                      <div className={`flex items-center gap-1 mt-3 text-sm ${scoreDelta > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {scoreDelta > 0 ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
-                        <span>{Math.abs(scoreDelta)} points from last session</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Share Button */}
-                <div className="flex flex-col items-center sm:items-end gap-2">
-                  <Button
-                    onClick={handleShare}
-                    disabled={isSharing}
-                    className="bg-white/10 hover:bg-white/20 text-white border-0"
-                  >
-                    {isSharing ? (
-                      <LoadingSpinner />
-                    ) : copied ? (
-                      <>
-                        <Check className="w-4 h-4 mr-2" />
-                        Link Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Share2 className="w-4 h-4 mr-2" />
-                        Share Profile
-                      </>
-                    )}
-                  </Button>
-                  <span className="text-xs text-white/50">{indexData.totalSessions} practice sessions</span>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-white/70">No interview data for this role yet.</p>
-                <Link to="/interview">
-                  <Button className="mt-4 bg-[#24c4b8] hover:bg-[#1db0a5] text-white">
-                    Start Practicing
-                  </Button>
-                </Link>
+                )}
               </div>
             )}
           </div>
         </div>
 
-        {indexData && (
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-5xl">
-            {/* Core Dimensions */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <BarChart3 className="w-5 h-5 text-[#24c4b8]" />
-                  Core Dimensions
-                </CardTitle>
-                <p className="text-sm text-gray-500">Weighted for {indexData.role.name} role requirements</p>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+        {isLoadingIndex ? (
+          <div className="flex items-center justify-center py-20">
+            <LoadingSpinner />
+          </div>
+        ) : !indexData ? (
+          <Card className="text-center py-12">
+            <CardContent>
+              <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Data for This Role</h3>
+              <p className="text-gray-600 mb-4">You haven't practiced for this role yet.</p>
+              <Link to="/interview">
+                <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white">
+                  Start Practicing
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <Card className={`border-2 ${bandConfig?.borderColor} shadow-lg overflow-hidden`}>
+              <div className={`${bandConfig?.bgColor} p-6 sm:p-8`}>
+                <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+                  <div className="flex items-center gap-6">
+                    <div className="relative">
+                      <svg className="w-28 h-28 sm:w-36 sm:h-36 transform -rotate-90">
+                        <circle
+                          cx="50%"
+                          cy="50%"
+                          r="50"
+                          strokeWidth="8"
+                          fill="none"
+                          className="stroke-white/50"
+                        />
+                        <circle
+                          cx="50%"
+                          cy="50%"
+                          r="50"
+                          strokeWidth="8"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeDasharray={circumference}
+                          strokeDashoffset={strokeDashoffset}
+                          style={{ stroke: bandConfig?.hexColor }}
+                          className="transition-all duration-1000"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-3xl sm:text-4xl font-bold text-gray-900">{indexData.overallScore}</span>
+                        <span className="text-sm text-gray-500">/ 100</span>
+                      </div>
+                    </div>
+
+                    <div className="flex-1">
+                      <Badge className={`${bandConfig?.bgColor} ${bandConfig?.color} border ${bandConfig?.borderColor} text-base sm:text-lg px-3 py-1 mb-2`}>
+                        <Award className="w-4 h-4 mr-2" />
+                        {indexData.readinessBand.label}
+                      </Badge>
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
+                        {indexData.role.name}
+                      </h2>
+                      {indexData.role.companyContext && (
+                        <p className="text-gray-600">at {indexData.role.companyContext}</p>
+                      )}
+                      <p className="text-sm text-gray-600 mt-2">{indexData.readinessBand.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="lg:ml-auto flex flex-wrap gap-4">
+                    <div className="flex items-center gap-2 text-sm">
+                      {getTrendIcon(indexData.trend)}
+                      <span className="font-medium capitalize">{indexData.trend}</span>
+                      {indexData.previousScore !== null && (
+                        <span className="text-gray-500">
+                          (was {indexData.previousScore}%)
+                        </span>
+                      )}
+                    </div>
+                    
+                    <Button
+                      onClick={handleShare}
+                      disabled={isSharing}
+                      variant="outline"
+                      className="bg-white"
+                    >
+                      <Share2 className="w-4 h-4 mr-2" />
+                      {isSharing ? "Generating..." : "Share"}
+                    </Button>
+                  </div>
+                </div>
+
+                {shareUrl && (
+                  <div className="mt-4 p-3 bg-white rounded-lg flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={shareUrl}
+                      readOnly
+                      className="flex-1 bg-transparent text-sm text-gray-600 outline-none"
+                    />
+                    <Button onClick={copyToClipboard} size="sm" variant="ghost">
+                      {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-[#24c4b8]/10 flex items-center justify-center">
+                    <Activity className="w-5 h-5 text-[#24c4b8]" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-gray-900">{indexData.capabilityMilestones.practiceVolume}</div>
+                    <div className="text-xs text-gray-500">Practice Sessions</div>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
+                    <Trophy className="w-5 h-5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-gray-900">{indexData.capabilityMilestones.bestAttempt.score}%</div>
+                    <div className="text-xs text-gray-500">Best Score</div>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                    <BarChart3 className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {indexData.capabilityMilestones.consistencyScore !== null 
+                        ? `${indexData.capabilityMilestones.consistencyScore}%` 
+                        : '-'}
+                    </div>
+                    <div className="text-xs text-gray-500">Consistency</div>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
+                    <Flame className="w-5 h-5 text-purple-500" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-gray-900">{indexData.capabilityMilestones.practiceStreak}</div>
+                    <div className="text-xs text-gray-500">Day Streak</div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-[#24c4b8]" />
+                    Core Dimensions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   {indexData.dimensions.map((dim) => (
                     <div key={dim.key} className="space-y-1">
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="font-medium">{dim.label}</span>
+                      <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500">{dim.weight}% weight</span>
-                          <span className={`font-semibold ${getScoreColor(dim.score)}`}>{dim.score}%</span>
+                          <span className="font-medium text-gray-700">{dim.label}</span>
+                          <span className="text-xs text-gray-400">({dim.weight}%)</span>
                         </div>
+                        <span className={`font-semibold ${getScoreColor(dim.score)}`}>
+                          {dim.score}%
+                        </span>
                       </div>
                       <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div
@@ -489,112 +577,198 @@ export default function HireadyIndexPage() {
                       </div>
                     </div>
                   ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Strengths & Growth Areas */}
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg text-emerald-700">
-                    <CheckCircle className="w-5 h-5" />
-                    Top Strengths
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {indexData.strengths.length > 0 ? (
-                    <ul className="space-y-2">
-                      {indexData.strengths.map((s, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm">
-                          <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                          {s}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-gray-500">Complete more sessions to identify strengths</p>
-                  )}
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg text-amber-700">
-                    <AlertTriangle className="w-5 h-5" />
-                    Growth Areas
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Briefcase className="w-5 h-5 text-[#24c4b8]" />
+                    Interview Coverage
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {indexData.growthAreas.length > 0 ? (
-                    <ul className="space-y-2">
-                      {indexData.growthAreas.map((g, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm">
-                          <TrendingUp className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                          {g}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-gray-500">Complete more sessions to identify growth areas</p>
-                  )}
+                  <div className="mb-4">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-600">Coverage</span>
+                      <span className="font-medium">{indexData.capabilityMilestones.coveragePercentage}%</span>
+                    </div>
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#24c4b8] transition-all duration-500"
+                        style={{ width: `${indexData.capabilityMilestones.coveragePercentage}%` }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    {indexData.interviewBreakdown.map((ib) => {
+                      const Icon = getInterviewTypeIcon(ib.interviewType);
+                      return (
+                        <div
+                          key={ib.interviewType}
+                          className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <Icon className="w-4 h-4 text-[#24c4b8]" />
+                            <span className="text-sm font-medium text-gray-700 truncate">
+                              {formatInterviewType(ib.interviewType)}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-gray-500">{ib.attemptCount} attempts</span>
+                            {ib.latestScore !== null && (
+                              <span className={getScoreColor(ib.latestScore)}>{ib.latestScore}%</span>
+                            )}
+                          </div>
+                          {ib.latestSessionId && (
+                            <Link
+                              to={`/interview/results?sessionId=${ib.latestSessionId}`}
+                              className="text-xs text-[#24c4b8] hover:underline flex items-center gap-1 mt-1"
+                            >
+                              View Details <ExternalLink className="w-3 h-3" />
+                            </Link>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Interview Type Breakdown */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Briefcase className="w-5 h-5 text-[#24c4b8]" />
-                  Interview Types Practiced
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {indexData.interviewBreakdown.map((ib) => {
-                    const Icon = getInterviewTypeIcon(ib.interviewType);
-                    return (
-                      <div
-                        key={ib.interviewType}
-                        className="p-4 bg-gray-50 rounded-xl border hover:border-[#24c4b8]/50 transition-colors"
-                      >
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                            <Icon className="w-5 h-5 text-[#24c4b8]" />
-                          </div>
-                          <div>
-                            <div className="font-medium text-sm">{formatInterviewType(ib.interviewType)}</div>
-                            <div className="text-xs text-gray-500">{ib.attemptCount} attempt{ib.attemptCount !== 1 ? 's' : ''}</div>
-                          </div>
-                        </div>
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-500">Latest</span>
-                          <span className={`font-semibold ${ib.latestScore ? getScoreColor(ib.latestScore) : 'text-gray-400'}`}>
-                            {ib.latestScore !== null ? `${ib.latestScore}%` : '-'}
-                          </span>
-                        </div>
-                        {ib.bestScore && ib.bestScore !== ib.latestScore && (
-                          <div className="flex justify-between items-center text-sm mt-1">
-                            <span className="text-gray-500">Best</span>
-                            <span className="font-semibold text-emerald-600">{ib.bestScore}%</span>
-                          </div>
-                        )}
-                        {ib.latestSessionId && (
-                          <Link
-                            to={`/interview/results?sessionId=${ib.latestSessionId}`}
-                            className="mt-3 flex items-center justify-center gap-1 text-xs text-[#24c4b8] hover:underline"
-                          >
-                            View Details <ChevronRight className="w-3 h-3" />
-                          </Link>
-                        )}
-                      </div>
-                    );
-                  })}
+            {indexData.progressTimeline.length > 1 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-[#24c4b8]" />
+                    Progress Over Time
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    {/* @ts-expect-error recharts type compatibility */}
+                    <ResponsiveContainer width="100%" height="100%">
+                      {/* @ts-expect-error recharts type compatibility */}
+                      <AreaChart data={indexData.progressTimeline}>
+                        <defs>
+                          <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#24c4b8" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#24c4b8" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        {/* @ts-expect-error recharts type compatibility */}
+                        <XAxis 
+                          dataKey="date" 
+                          tickFormatter={(date: string) => format(new Date(date), 'MMM d')}
+                          tick={{ fontSize: 12 }}
+                        />
+                        {/* @ts-expect-error recharts type compatibility */}
+                        <YAxis 
+                          domain={[0, 100]} 
+                          tick={{ fontSize: 12 }}
+                          tickFormatter={(val: number) => `${val}%`}
+                        />
+                        <Tooltip
+                          labelFormatter={(date: string) => format(new Date(date), 'MMM d, yyyy')}
+                          formatter={(value: number, name: string, props: any) => [
+                            `${value}%`,
+                            formatInterviewType(props.payload.interviewType)
+                          ]}
+                        />
+                        <ReferenceLine y={75} stroke="#059669" strokeDasharray="3 3" label={{ value: 'Ready', position: 'right', fontSize: 10 }} />
+                        <ReferenceLine y={55} stroke="#3B82F6" strokeDasharray="3 3" />
+                        {/* @ts-expect-error recharts type compatibility */}
+                        <Area 
+                          type="monotone" 
+                          dataKey="score" 
+                          stroke="#24c4b8" 
+                          strokeWidth={2}
+                          fillOpacity={1} 
+                          fill="url(#colorScore)" 
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="grid lg:grid-cols-2 gap-6">
+              {indexData.strengths.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-emerald-500" />
+                      Top Strengths
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {indexData.strengths.map((strength, i) => (
+                        <Badge key={i} variant="secondary" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                          {strength}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {indexData.growthAreas.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <AlertTriangle className="w-5 h-5 text-amber-500" />
+                      Growth Areas
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {indexData.growthAreas.map((area, i) => (
+                        <Badge key={i} variant="secondary" className="bg-amber-50 text-amber-700 border-amber-200">
+                          {area}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            <Card className="border-[#24c4b8]/30 bg-gradient-to-r from-[#24c4b8]/5 to-transparent">
+              <CardContent className="p-6">
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-[#24c4b8]/10 flex items-center justify-center">
+                    <Play className="w-6 h-6 text-[#24c4b8]" />
+                  </div>
+                  <div className="flex-1 text-center sm:text-left">
+                    <h3 className="font-semibold text-gray-900">
+                      {indexData.overallScore >= 75 
+                        ? "You're Interview-Ready!" 
+                        : indexData.overallScore >= 55 
+                          ? "Almost There! One More Practice"
+                          : "Keep Practicing to Improve"}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {indexData.overallScore >= 75 
+                        ? "Consider applying to jobs or practice to maintain your edge."
+                        : indexData.overallScore >= 55 
+                          ? "A few more practice sessions can push you into the ready zone."
+                          : `Focus on ${indexData.growthAreas[0] || 'your weakest areas'} to improve faster.`}
+                    </p>
+                  </div>
+                  <Link to="/interview">
+                    <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white">
+                      Continue Practicing
+                      <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </>
         )}
       </div>
     </SidebarLayout>

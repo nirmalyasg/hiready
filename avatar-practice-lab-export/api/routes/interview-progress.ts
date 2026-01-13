@@ -794,8 +794,8 @@ interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, 
       .slice(0, 2)
       .map(([s]) => s);
 
-    // Get trend from previous snapshot
-    const [previousSnapshot] = await db
+    // Get historical snapshots for trend analysis
+    const historicalSnapshots = await db
       .select()
       .from(hireadyIndexSnapshots)
       .where(
@@ -806,8 +806,10 @@ interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, 
         )
       )
       .orderBy(desc(hireadyIndexSnapshots.createdAt))
-      .limit(1);
+      .limit(10);
 
+    // Use second snapshot as previous (first is most recent, need to compare to older one)
+    const previousSnapshot = historicalSnapshots.length >= 2 ? historicalSnapshots[1] : null;
     const previousScore = previousSnapshot?.consolidatedIndex
       ? Math.round((previousSnapshot.consolidatedIndex / 5) * 100)
       : null;
@@ -817,6 +819,127 @@ interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, 
       const delta = overallScore - previousScore;
       if (delta > 5) trend = "improving";
       else if (delta < -5) trend = "declining";
+    }
+
+    // Build session history for timeline chart - join sessions with configs for user/role info
+    const sessionsForTimeline = await db
+      .select({
+        id: interviewSessions.id,
+        createdAt: interviewSessions.createdAt,
+        interviewType: interviewConfigs.interviewType,
+        dimensionScores: interviewAnalysis.dimensionScores,
+      })
+      .from(interviewSessions)
+      .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+      .leftJoin(interviewAnalysis, eq(interviewAnalysis.interviewSessionId, interviewSessions.id))
+      .where(
+        and(
+          eq(interviewConfigs.userId, userId),
+          roleKitId ? eq(interviewConfigs.roleKitId, Number(roleKitId)) : sql`1=1`,
+          jobTargetId ? eq(interviewConfigs.jobTargetId, String(jobTargetId)) : sql`1=1`
+        )
+      )
+      .orderBy(interviewSessions.createdAt);
+
+    // Build session scores from query results - compute overall score from dimension scores
+    const sessionScores: Array<{
+      sessionId: number;
+      date: string;
+      score: number;
+      interviewType: string;
+    }> = sessionsForTimeline
+      .filter(s => s.dimensionScores && Array.isArray(s.dimensionScores) && s.dimensionScores.length > 0)
+      .map(s => {
+        const dims = s.dimensionScores as Array<{ score: number }>;
+        const avgScore = dims.reduce((sum, d) => sum + (d.score || 0), 0) / dims.length;
+        return {
+          sessionId: s.id,
+          date: s.createdAt?.toISOString() || new Date().toISOString(),
+          score: Math.round((avgScore / 5) * 100),
+          interviewType: s.interviewType || 'general',
+        };
+      });
+
+    // Calculate capability milestones
+    const practiceVolume = totalSessions;
+    
+    // Best attempt - use assignment data directly (most accurate source)
+    let bestAttemptScore = 0;
+    let bestAttemptSessionId: number | null = null;
+    let bestAttemptInterviewType: string | null = null;
+    
+    for (const assignment of assignments) {
+      if (assignment.bestScore !== null) {
+        const normalizedScore = Math.round((assignment.bestScore / 5) * 100);
+        if (normalizedScore > bestAttemptScore) {
+          bestAttemptScore = normalizedScore;
+          bestAttemptSessionId = assignment.bestSessionId || assignment.latestSessionId;
+          bestAttemptInterviewType = assignment.interviewType;
+        }
+      } else if (assignment.latestScore !== null) {
+        const normalizedScore = Math.round((assignment.latestScore / 5) * 100);
+        if (normalizedScore > bestAttemptScore) {
+          bestAttemptScore = normalizedScore;
+          bestAttemptSessionId = assignment.latestSessionId;
+          bestAttemptInterviewType = assignment.interviewType;
+        }
+      }
+    }
+
+    // Consistency score (how stable are the scores)
+    let consistencyScore = 0;
+    if (sessionScores.length >= 2) {
+      const scores = sessionScores.map(s => s.score);
+      const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+      const variance = scores.reduce((sum, s) => sum + Math.pow(s - avg, 2), 0) / scores.length;
+      const stdDev = Math.sqrt(variance);
+      // Consistency = 100 - (stdDev normalized). Higher consistency = lower variance
+      consistencyScore = Math.max(0, Math.min(100, 100 - stdDev * 2));
+    } else if (sessionScores.length === 1) {
+      consistencyScore = 50; // Not enough data
+    }
+
+    // Interview coverage - count of completed types vs total assigned types
+    const assignedTypes = new Set(assignments.map(a => a.interviewType));
+    const completedTypes = new Set(assignments.filter(a => a.attemptCount && a.attemptCount > 0).map(a => a.interviewType));
+    const coveragePercentage = assignedTypes.size > 0 
+      ? Math.round((completedTypes.size / assignedTypes.size) * 100) 
+      : 0;
+
+    // Note: Dimension trends would require historical dimension-level data to compute accurately
+    // For now, we omit trend data rather than show fabricated values
+    const hasTrendData = false;
+
+    // Calculate momentum only if we have sufficient data (6+ sessions)
+    let momentum: "accelerating" | "steady" | "slowing" | null = null;
+    if (sessionScores.length >= 6) {
+      const recent3 = sessionScores.slice(-3).map(s => s.score);
+      const prev3 = sessionScores.slice(-6, -3).map(s => s.score);
+      const recentAvg = recent3.reduce((a, b) => a + b, 0) / 3;
+      const prevAvg = prev3.reduce((a, b) => a + b, 0) / 3;
+      if (recentAvg - prevAvg > 5) momentum = "accelerating";
+      else if (prevAvg - recentAvg > 5) momentum = "slowing";
+      else momentum = "steady";
+    }
+
+    // Days since first practice
+    const firstPracticeDate = sessionsForTimeline[0]?.createdAt;
+    const daysSinceStart = firstPracticeDate
+      ? Math.floor((Date.now() - new Date(firstPracticeDate).getTime()) / (1000 * 60 * 60 * 24))
+      : 0;
+
+    // Practice streak (consecutive days with practice)
+    let practiceStreak = 0;
+    const uniqueDays = new Set(sessionScores.map(s => new Date(s.date).toDateString()));
+    const today = new Date();
+    for (let i = 0; i < 30; i++) {
+      const checkDate = new Date(today);
+      checkDate.setDate(checkDate.getDate() - i);
+      if (uniqueDays.has(checkDate.toDateString())) {
+        practiceStreak++;
+      } else if (practiceStreak > 0) {
+        break;
+      }
     }
 
     res.json({
@@ -831,12 +954,32 @@ interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, 
         },
         dimensions: dimensionResults,
         dimensionWeights,
-        interviewBreakdown,
+        interviewBreakdown: interviewBreakdown.map(ib => {
+          const assignment = assignments.find(a => a.interviewType === ib.interviewType);
+          return {
+            ...ib,
+            bestSessionId: assignment?.bestSessionId || assignment?.latestSessionId || null,
+          };
+        }),
         totalSessions,
         strengths: topStrengths,
         growthAreas: topImprovements,
         trend,
         previousScore,
+        momentum,
+        capabilityMilestones: {
+          practiceVolume,
+          bestAttempt: {
+            score: bestAttemptScore,
+            sessionId: bestAttemptSessionId,
+            interviewType: bestAttemptInterviewType,
+          },
+          consistencyScore: sessionScores.length >= 2 ? Math.round(consistencyScore) : null,
+          coveragePercentage,
+          daysSinceStart,
+          practiceStreak,
+        },
+        progressTimeline: sessionScores,
         lastUpdated: new Date().toISOString(),
       },
     });
@@ -887,9 +1030,15 @@ interviewProgressRouter.post("/share-link", requireAuth, async (req: Request, re
       })
       .returning();
 
+    const baseUrl = process.env.REPLIT_DOMAINS 
+      ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` 
+      : `${req.protocol}://${req.get('host')}`;
+    const shareUrl = `${baseUrl}/share/${shareLink.token}`;
+
     res.json({
       success: true,
       token: shareLink.token,
+      shareUrl,
       shareLink: {
         id: shareLink.id,
         token: shareLink.token,
