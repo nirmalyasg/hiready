@@ -1,0 +1,288 @@
+HIREADY INDEX™
+A Role-Specific Interview Readiness Signal
+1️⃣ WHAT THE HIREADY INDEX IS (AND IS NOT)
+What it IS
+
+The Hiready Index is:
+
+A role-specific, evidence-based signal of how interview-ready a candidate is — based on observed interview behavior, not self-assessment.
+
+It answers:
+
+“If this person walked into this interview tomorrow, how ready are they?”
+
+What it is NOT
+
+❌ Not an exam score
+❌ Not a personality test
+❌ Not a resume rating
+❌ Not a generic soft-skills score
+
+Those feel cheap and unshareable.
+
+2️⃣ CORE DESIGN PRINCIPLES (NON-NEGOTIABLE)
+
+Every part of the index must satisfy these 6 principles:
+
+Role-specific – readiness for this role, not in general
+
+Behavior-based – derived from what the user actually said
+
+Explainable – user understands why the score exists
+
+Progressive – can improve over time
+
+Comparable (soft) – relative, not absolute
+
+Respectful – never shaming or judgmental
+
+If any dimension violates these, redesign it.
+
+3️⃣ WHAT THE HIREADY INDEX MEASURES (THE CORE MODEL)
+
+The Index is built from 5 foundational dimensions, common across roles, but weighted differently per role/company.
+
+The 5 Core Dimensions
+Dimension	What it actually measures
+Clarity	How clearly the candidate explains ideas
+Structure	How logically answers are organized
+Confidence	Composure, fluency, self-belief
+Problem Solving	Reasoning, assumptions, trade-offs
+Role Fit	Alignment with role expectations
+
+These map cleanly to interview reality.
+
+4️⃣ HOW ROLE-SPECIFICITY WORKS (CRITICAL)
+
+This is where Hiready becomes defensible.
+
+Step 1: Role Archetype → Skill Weights
+
+From role_archetypes.primary_skill_dimensions
+
+Example: Data Analyst
+
+Dimension	Weight
+Structure	25%
+Problem Solving	25%
+Clarity	20%
+Role Fit	20%
+Confidence	10%
+
+Example: Sales / Customer Success
+
+Dimension	Weight
+Confidence	25%
+Clarity	25%
+Role Fit	20%
+Structure	15%
+Problem Solving	15%
+
+👉 Same dimensions, different importance.
+
+Step 2: Company Role Blueprint (Optional Enhancement)
+
+From company_role_blueprints
+
+Example: Zoho – Data Analyst
+
+Emphasize clarity + ownership
+
+Slightly downweight polish
+
+Upweight reasoning transparency
+
+This allows:
+
+“Hiready Index for Zoho Data Analyst interviews”
+
+Which feels credible, not gimmicky.
+
+5️⃣ HOW A SINGLE INTERVIEW BUILDS THE INDEX
+Step 1: Interview Session Data Capture
+
+From the interview session you already have:
+
+Transcript
+
+Turn-taking
+
+Response length
+
+Pauses / hesitation
+
+Question type (from question_patterns)
+
+Interview round type
+
+Step 2: Dimension Scoring (AI Layer)
+
+Each answer is scored per dimension, not globally.
+
+Example (one answer):
+
+Dimension	Score (0–100)	Reason
+Clarity	82	Clear explanation, minimal filler
+Structure	65	Some jumping between points
+Confidence	78	Stable tone, minor hesitation
+Problem Solving	70	Reasonable assumptions
+Role Fit	74	Example relevant but generic
+
+These are never shown raw to the user.
+
+Step 3: Aggregate Across Interview
+
+Normalize across question types
+
+Apply role-specific weights
+
+Smooth out outliers
+
+This produces a session-level readiness score.
+
+6️⃣ THE MOST IMPORTANT DESIGN CHOICE:
+NEVER SHOW A RAW SCORE ALONE
+
+Raw numbers feel:
+
+exam-like
+
+final
+
+risky to share
+
+7️⃣ THE HIREADY READINESS BAND SYSTEM (SHAREABLE)
+
+Instead of:
+
+78 / 100 ❌
+
+Use Readiness Bands:
+
+Band	Meaning	Shareability
+Interview-Ready	Can confidently handle real interviews	🔥 High
+Strong Foundation	Ready with minor refinement	✅ Safe
+Developing Readiness	Needs practice before applying	⚠️ Private
+Early Stage	Not interview-ready yet	❌ Never public
+Public view shows:
+
+Interview-Ready (Top 28% for Data Analyst roles)
+
+Relative framing = pride + safety.
+
+8️⃣ WHAT THE USER SEES (EXPERIENCE LAYER)
+A. Private Detailed View (inside app)
+
+Includes:
+
+Readiness band
+
+Dimension breakdown
+
+Example feedback
+
+Improvement suggestions
+
+Comparison vs previous attempt
+
+This is where honesty lives.
+
+B. Public Shareable View (VERY IMPORTANT)
+
+Shows only:
+
+Hiready Index band
+
+Role + company context
+
+Top 2 strengths
+
+1 growth area (soft language)
+
+“Generated via AI interview simulation”
+
+Example:
+
+Hiready Index™: Interview-Ready
+Role: Data Analyst
+Strengths: Structured thinking, clarity
+Growth area: Deeper metric framing
+
+hiready.app
+
+This is safe, professional, and proud.
+
+9️⃣ HOW MULTIPLE INTERVIEWS IMPROVE THE INDEX
+
+Each additional interview:
+
+Enriches confidence
+
+Improves reliability
+
+Narrows variance
+
+Show progress like this:
+Attempt 1: Developing Readiness
+Attempt 3: Strong Foundation
+Attempt 5: Interview-Ready
+
+
+People LOVE sharing progress stories.
+
+🔁 10️⃣ WHY THIS BECOMES VIRAL (WITHOUT TRYING)
+
+People don’t share because:
+
+“Look at my score”
+
+They share because:
+
+“I’m interview-ready for this role.”
+
+This is:
+
+identity signalling
+
+professional credibility
+
+low risk
+
+11️⃣ TECHNICAL OUTPUT (FOR DEV TEAM)
+Core Index Object (simplified)
+{
+  "role": "data_analyst",
+  "company_context": "zoho",
+  "readiness_band": "Interview-Ready",
+  "percentile": 72,
+  "dimensions": {
+    "clarity": 82,
+    "structure": 75,
+    "confidence": 78,
+    "problem_solving": 74,
+    "role_fit": 80
+  },
+  "strengths": ["Clarity", "Structured Thinking"],
+  "growth_area": "Deeper metric articulation",
+  "generated_at": "2026-01-12"
+}
+
+12️⃣ WHAT MAKES THIS INDEX TRUSTWORTHY (LONG TERM)
+
+Role-specific weighting
+
+Behavior-based scoring
+
+Explainable feedback
+
+No pass/fail framing
+
+Progress over time
+
+This avoids:
+
+“AI astrology”
+
+Test fatigue
+
+Employer distrust
