@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { avatarSimulator } from "./routes/avatar-simulator.js";
 import { adminRouter } from "./routes/admin.js";
 import { interviewRouter } from "./routes/interview.js";
+import interviewProgressRouter from "./routes/interview-progress.js";
 import { exerciseModeRouter } from "./routes/exercise-mode.js";
 import { realtimeRouter } from "./routes/realtime.js";
 import { jobsRouter } from "./routes/jobs.js";
@@ -66,6 +67,9 @@ async function startServer() {
 
   // Mount interview practice routes
   app.use("/api/interview", interviewRouter);
+
+  // Mount interview progress tracking routes (retakes, history, Hiready index)
+  app.use("/api/interview-progress", interviewProgressRouter);
 
   // Middleware to populate req.user from session for exercise mode routes
   app.use("/api/exercise-mode", (req, res, next) => {
