@@ -77,54 +77,60 @@ Professional, trustworthy design using the official brand color palette. Clean l
 
 ## Recent Changes (January 13, 2026)
 
-### Interview Progress Tracking & Hiready Index Dashboard
-Comprehensive interview retake and progress tracking system with consolidated scoring:
+### Hiready Index™ Readiness Dashboard (Redesigned)
+Transformed from simple session summary to comprehensive role-level readiness dashboard:
 
-1. **Interview Assignments Tracking**
-   - Tracks attempts per user + role/job + interview type combination
-   - Stores references to both latest and best-performing sessions
-   - Automatic assignment creation on first attempt
+1. **Hero Section**
+   - Circular score gauge (0-100 with color bands)
+   - Readiness band badge (Beginner, Developing, Competent, Proficient, Expert)
+   - Role context display with archetype name
+   - Trend indicator (improving/stable/declining) with delta
 
-2. **Hiready Index Scoring System**
-   - Weighted scoring by interview type importance:
-     - Technical: 3.0x weight
-     - Coding: 2.5x weight  
-     - System Design: 2.5x weight
-     - Case Study/Product Sense: 2.0x weight
-     - HR/Behavioral: 1.5x weight
-     - General: 1.0x weight
-   - Score range: 0-100 with readiness levels (Beginner, Developing, Competent, Proficient, Expert)
-   - Trend tracking with previous score comparison
+2. **Capability Milestones (6 metrics)**
+   - Practice volume: Total completed interview sessions
+   - Best attempt: Highest score with link to session results
+   - Consistency score: Standard deviation measure (shows "-" if <2 sessions)
+   - Coverage percentage: Completed interview types vs assigned types
+   - Practice streak: Consecutive days practiced (upcoming)
+   - Days since start: Time tracking (upcoming)
 
-3. **Retake Functionality**
-   - Retake button on interview results page
-   - Creates new interview config from existing one
-   - Preserves all settings (role, documents, interview type)
-   - Attempt history timeline shows all past attempts with scores
+3. **Progress Timeline Chart**
+   - AreaChart showing score improvement over sessions
+   - Uses recharts with gradient fill
+   - Displays session date/score on tooltips
 
-4. **Share Links**
-   - Token-based shareable score links
-   - Optional expiration (days)
-   - View count tracking
-   - Revokable by user
-   - Public scorecard at /share/:token
+4. **Interview Coverage Tiles**
+   - Each completed interview type shows best/latest session scores
+   - Links to session-specific results pages
+   - Weight and attempt count for each type
 
-5. **New Database Tables** (Migration 009)
-   - `interview_assignments`: User + role/job + type tracking with attempt counts
-   - `hiready_index_snapshots`: Point-in-time score snapshots with breakdown
-   - `hiready_share_links`: Shareable link tokens with expiration
+5. **Core Dimensions Section**
+   - Weighted averages of assessment dimensions
+   - Progress bars with percentage labels
+   - Weight indicators per dimension
 
-6. **API Endpoints** (`api/routes/interview-progress.ts`)
-   - `POST /api/interview-progress/retake` - Create new attempt (accepts configId or interviewSessionId)
-   - `GET /api/interview-progress/attempts` - Get attempt history for role/type
-   - `POST /api/interview-progress/update-assignment` - Update scores after session completion
-   - `GET /api/interview-progress/hiready-index` - Get consolidated Hiready Index
+6. **Data Accuracy Rules**
+   - Best attempt: Uses assignment.bestScore/bestSessionId (most reliable)
+   - Consistency: Returns null if fewer than 2 sessions
+   - Momentum: Returns null unless 6+ sessions exist
+   - Trend: Compares against historical snapshot [1], not [0]
+   - Coverage: Uses actual completed vs assigned interview types
+
+7. **Share Links**
+   - Token-based shareable score links with expiration
+   - Public scorecard at /share/:token showing role readiness
+   - Falls back to request origin when REPLIT_DOMAINS not set
+
+8. **API Endpoints** (`api/routes/interview-progress.ts`)
+   - `GET /api/interview-progress/hiready-index` - Full readiness dashboard data
    - `POST /api/interview-progress/share-link` - Generate shareable link
    - `GET /api/interview-progress/share/:token` - Resolve public share link
+   - `POST /api/interview-progress/retake` - Create new attempt
+   - `GET /api/interview-progress/attempts` - Get attempt history
 
-7. **Frontend Pages**
-   - `/hiready-index` - Consolidated dashboard with breakdown by interview type
-   - Updated `/interview/results` with retake button and attempt history
+9. **Frontend Pages**
+   - `/hiready-index` - Role-level readiness dashboard
+   - `/interview/results/:sessionId` - Session-specific analysis with retake
    - `/share/:token` - Public scorecard display
 
 ---
