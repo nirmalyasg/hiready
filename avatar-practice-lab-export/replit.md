@@ -75,6 +75,60 @@ Professional, trustworthy design using the official brand color palette. Clean l
 - Inactive: Gray text, hover to white
 - Width: 240px desktop, overlay on mobile
 
+## Recent Changes (January 13, 2026)
+
+### Interview Progress Tracking & Hiready Index Dashboard
+Comprehensive interview retake and progress tracking system with consolidated scoring:
+
+1. **Interview Assignments Tracking**
+   - Tracks attempts per user + role/job + interview type combination
+   - Stores references to both latest and best-performing sessions
+   - Automatic assignment creation on first attempt
+
+2. **Hiready Index Scoring System**
+   - Weighted scoring by interview type importance:
+     - Technical: 3.0x weight
+     - Coding: 2.5x weight  
+     - System Design: 2.5x weight
+     - Case Study/Product Sense: 2.0x weight
+     - HR/Behavioral: 1.5x weight
+     - General: 1.0x weight
+   - Score range: 0-100 with readiness levels (Beginner, Developing, Competent, Proficient, Expert)
+   - Trend tracking with previous score comparison
+
+3. **Retake Functionality**
+   - Retake button on interview results page
+   - Creates new interview config from existing one
+   - Preserves all settings (role, documents, interview type)
+   - Attempt history timeline shows all past attempts with scores
+
+4. **Share Links**
+   - Token-based shareable score links
+   - Optional expiration (days)
+   - View count tracking
+   - Revokable by user
+   - Public scorecard at /share/:token
+
+5. **New Database Tables** (Migration 009)
+   - `interview_assignments`: User + role/job + type tracking with attempt counts
+   - `hiready_index_snapshots`: Point-in-time score snapshots with breakdown
+   - `hiready_share_links`: Shareable link tokens with expiration
+
+6. **API Endpoints** (`api/routes/interview-progress.ts`)
+   - `POST /api/interview-progress/retake` - Create new attempt (accepts configId or interviewSessionId)
+   - `GET /api/interview-progress/attempts` - Get attempt history for role/type
+   - `POST /api/interview-progress/update-assignment` - Update scores after session completion
+   - `GET /api/interview-progress/hiready-index` - Get consolidated Hiready Index
+   - `POST /api/interview-progress/share-link` - Generate shareable link
+   - `GET /api/interview-progress/share/:token` - Resolve public share link
+
+7. **Frontend Pages**
+   - `/hiready-index` - Consolidated dashboard with breakdown by interview type
+   - Updated `/interview/results` with retake button and attempt history
+   - `/share/:token` - Public scorecard display
+
+---
+
 ## Recent Changes (January 12, 2026)
 
 ### SEO Page Generation System
