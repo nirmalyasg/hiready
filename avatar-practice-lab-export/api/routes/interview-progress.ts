@@ -91,30 +91,46 @@ interviewProgressRouter.post("/retake", requireAuth, async (req: Request, res: R
       return res.status(401).json({ success: false, error: "Not authenticated" });
     }
 
-    const { interviewSessionId } = req.body;
+    const { interviewSessionId, configId } = req.body;
 
-    if (!interviewSessionId) {
-      return res.status(400).json({ success: false, error: "Interview session ID is required" });
+    if (!interviewSessionId && !configId) {
+      return res.status(400).json({ success: false, error: "Either interview session ID or config ID is required" });
     }
 
-    const [session] = await db
-      .select()
-      .from(interviewSessions)
-      .where(eq(interviewSessions.id, interviewSessionId))
-      .limit(1);
+    let config: any;
 
-    if (!session) {
-      return res.status(404).json({ success: false, error: "Interview session not found" });
-    }
+    if (configId) {
+      const [foundConfig] = await db
+        .select()
+        .from(interviewConfigs)
+        .where(eq(interviewConfigs.id, configId))
+        .limit(1);
 
-    const [config] = await db
-      .select()
-      .from(interviewConfigs)
-      .where(eq(interviewConfigs.id, session.interviewConfigId))
-      .limit(1);
+      if (!foundConfig || foundConfig.userId !== userId) {
+        return res.status(403).json({ success: false, error: "Access denied" });
+      }
+      config = foundConfig;
+    } else {
+      const [session] = await db
+        .select()
+        .from(interviewSessions)
+        .where(eq(interviewSessions.id, interviewSessionId))
+        .limit(1);
 
-    if (!config || config.userId !== userId) {
-      return res.status(403).json({ success: false, error: "Access denied" });
+      if (!session) {
+        return res.status(404).json({ success: false, error: "Interview session not found" });
+      }
+
+      const [foundConfig] = await db
+        .select()
+        .from(interviewConfigs)
+        .where(eq(interviewConfigs.id, session.interviewConfigId))
+        .limit(1);
+
+      if (!foundConfig || foundConfig.userId !== userId) {
+        return res.status(403).json({ success: false, error: "Access denied" });
+      }
+      config = foundConfig;
     }
 
     const assignment = await getOrCreateAssignment(
@@ -514,14 +530,79 @@ interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, 
       .orderBy(desc(hireadyIndexSnapshots.createdAt))
       .limit(1);
 
+    const [previousSnapshot] = await db
+      .select()
+      .from(hireadyIndexSnapshots)
+      .where(
+        and(
+          eq(hireadyIndexSnapshots.userId, userId),
+          eq(hireadyIndexSnapshots.isLatest, false),
+          roleKitId ? eq(hireadyIndexSnapshots.roleKitId, Number(roleKitId)) : sql`1=1`,
+          jobTargetId ? eq(hireadyIndexSnapshots.jobTargetId, String(jobTargetId)) : sql`1=1`
+        )
+      )
+      .orderBy(desc(hireadyIndexSnapshots.createdAt))
+      .limit(1);
+
+    const totalSessions = assignments.reduce((sum, a) => sum + (a.attemptCount || 0), 0);
+
+    const getReadinessLevel = (score: number): string => {
+      if (score >= 85) return "exceptional";
+      if (score >= 70) return "strong";
+      if (score >= 55) return "ready";
+      if (score >= 40) return "developing";
+      return "not_ready";
+    };
+
+    const breakdown = interviewScores.map((s) => ({
+      interviewType: s.interviewType,
+      weight: s.weight,
+      weightedScore: s.latestScore !== null ? Math.round((s.latestScore / 5) * 100) : 0,
+      attemptCount: s.attemptCount || 0,
+      bestScore: s.bestScore !== null ? Math.round((s.bestScore / 5) * 100) : null,
+      latestScore: s.latestScore !== null ? Math.round((s.latestScore / 5) * 100) : null,
+      latestSessionId: s.latestSessionId,
+      dimensions: [] as any[],
+    }));
+
+    const overallScore = consolidatedLatest > 0 
+      ? Math.round((consolidatedLatest / 5) * 100) 
+      : 0;
+    const previousScore = previousSnapshot?.consolidatedIndex 
+      ? Math.round((previousSnapshot.consolidatedIndex / 5) * 100) 
+      : null;
+
+    let trend: "improving" | "stable" | "declining" = "stable";
+    if (previousScore !== null) {
+      const delta = overallScore - previousScore;
+      if (delta > 5) trend = "improving";
+      else if (delta < -5) trend = "declining";
+    }
+
+    const strongInterviews = breakdown.filter(b => (b.latestScore || 0) >= 75);
+    const weakInterviews = breakdown.filter(b => (b.latestScore || 0) < 60 && b.attemptCount > 0);
+
+    const formatType = (t: string) => t.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    
+    const strengths = strongInterviews.slice(0, 3).map(
+      s => `Strong ${formatType(s.interviewType)} performance (${s.latestScore}%)`
+    );
+    const improvements = weakInterviews.slice(0, 3).map(
+      s => `Focus on ${formatType(s.interviewType)} (currently ${s.latestScore}%)`
+    );
+
     res.json({
       success: true,
-      data: {
-        consolidatedLatest,
-        consolidatedBest,
-        interviewScores,
-        latestSnapshotId: latestSnapshot?.id,
-        lastUpdated: latestSnapshot?.createdAt,
+      hireadyIndex: {
+        overallScore,
+        readinessLevel: getReadinessLevel(overallScore),
+        totalSessions,
+        lastUpdated: latestSnapshot?.createdAt || new Date().toISOString(),
+        breakdown,
+        strengths,
+        improvements,
+        trend,
+        previousScore,
       },
     });
   } catch (error) {
@@ -573,6 +654,7 @@ interviewProgressRouter.post("/share-link", requireAuth, async (req: Request, re
 
     res.json({
       success: true,
+      token: shareLink.token,
       shareLink: {
         id: shareLink.id,
         token: shareLink.token,

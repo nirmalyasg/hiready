@@ -54,6 +54,7 @@ import PublicSharePage from './pages/share/page';
 import PublicResultsPage from './pages/results/public-page';
 import ApplyPage from './pages/apply/page';
 import ReadycheckPage from './pages/readycheck/page';
+import HireadyIndexPage from './pages/hiready-index/page';
 import ReadycheckLaunchPage from './pages/readycheck/launch';
 import CompanyDashboard from './pages/company/page';
 import CompanyLoginPage from './pages/company/login';
@@ -113,6 +114,7 @@ export default function App() {
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/jobs" element={<ProtectedRoute><JobsPage /></ProtectedRoute>} />
         <Route path="/jobs/:jobId" element={<ProtectedRoute><JobDetailPage /></ProtectedRoute>} />
+        <Route path="/hiready-index" element={<ProtectedRoute><HireadyIndexPage /></ProtectedRoute>} />
         <Route path="/share/:shareToken" element={<PublicSharePage />} />
         <Route path="/results/:shareToken" element={<PublicResultsPage />} />
         <Route path="/apply/:slug" element={<ApplyPage />} />

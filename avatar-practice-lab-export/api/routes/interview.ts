@@ -1832,6 +1832,7 @@ interviewRouter.get("/analysis/:sessionId", requireAuth, async (req: Request, re
       interviewMode,
       roleKitInfo,
       jdSkills,
+      configId: session?.interviewConfigId || null,
     });
   } catch (error: any) {
     console.error("Error fetching analysis:", error);

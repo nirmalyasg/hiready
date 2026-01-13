@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { ChevronRight, TrendingUp, Target, CheckCircle, AlertTriangle, Calendar, ArrowRight, Award, MessageSquare, Lightbulb, Star, BarChart3, Briefcase, Play, ArrowUp, Building2, Code, Users, Zap, BookOpen, GraduationCap, Share2, Copy, Check } from "lucide-react";
+import { ChevronRight, TrendingUp, Target, CheckCircle, AlertTriangle, Calendar, ArrowRight, Award, MessageSquare, Lightbulb, Star, BarChart3, Briefcase, Play, ArrowUp, Building2, Code, Users, Zap, BookOpen, GraduationCap, Share2, Copy, Check, RotateCcw, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { format } from "date-fns";
 
 interface DimensionScore {
   dimension: string;
@@ -65,6 +66,28 @@ interface ReadinessData {
   weakestDimensions: { dimension: string; avgScore: number; trend: string }[];
 }
 
+interface AttemptData {
+  attemptNumber: number;
+  sessionId: number;
+  status: string;
+  score: number | null;
+  recommendation: string | null;
+  createdAt: string;
+  isBest: boolean;
+  isLatest: boolean;
+}
+
+interface AssignmentWithAttempts {
+  assignmentId: number;
+  interviewType: string;
+  roleKitId: number | null;
+  jobTargetId: string | null;
+  attemptCount: number;
+  bestScore: number | null;
+  latestScore: number | null;
+  attempts: AttemptData[];
+}
+
 const getRecommendationConfig = (rec: string) => {
   const configs: Record<string, { label: string; color: string; bgColor: string; borderColor: string; icon: any }> = {
     strong_yes: { label: "Strong Yes", color: "text-emerald-700", bgColor: "bg-emerald-50", borderColor: "border-emerald-200", icon: Award },
@@ -112,6 +135,7 @@ const getInterviewTypeLabel = (type: string | null, mode: string | null) => {
 
 export default function InterviewResultsPage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const sessionId = searchParams.get("sessionId");
 
   const [analysis, setAnalysis] = useState<InterviewAnalysis | null>(null);
@@ -125,6 +149,10 @@ export default function InterviewResultsPage() {
   const [isSharing, setIsSharing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [attemptHistory, setAttemptHistory] = useState<AssignmentWithAttempts | null>(null);
+  const [isRetaking, setIsRetaking] = useState(false);
+  const [showAttemptHistory, setShowAttemptHistory] = useState(false);
+  const [configId, setConfigId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchAnalysis = async () => {
@@ -141,6 +169,7 @@ export default function InterviewResultsPage() {
           setInterviewMode(data.interviewMode);
           setRoleKitInfo(data.roleKitInfo);
           setJdSkills(data.jdSkills || []);
+          setConfigId(data.configId || null);
           
           if (data.jobContext) {
             setJobContext(data.jobContext);
@@ -162,6 +191,23 @@ export default function InterviewResultsPage() {
             } catch (e) {
               console.error("Error fetching readiness:", e);
             }
+          }
+
+          const attemptParams = new URLSearchParams();
+          if (data.roleKitInfo?.id) attemptParams.set('roleKitId', data.roleKitInfo.id);
+          if (data.jobContext?.id) attemptParams.set('jobTargetId', data.jobContext.id);
+          if (data.interviewType) attemptParams.set('interviewType', data.interviewType);
+          
+          try {
+            const attemptsRes = await fetch(`/api/interview-progress/attempts?${attemptParams.toString()}`, {
+              credentials: 'include'
+            });
+            const attemptsData = await attemptsRes.json();
+            if (attemptsData.success && attemptsData.assignments?.length > 0) {
+              setAttemptHistory(attemptsData.assignments[0]);
+            }
+          } catch (e) {
+            console.error("Error fetching attempt history:", e);
           }
         }
       } catch (error) {
@@ -209,6 +255,32 @@ export default function InterviewResultsPage() {
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  const handleRetake = async () => {
+    if (!configId) return;
+    
+    setIsRetaking(true);
+    try {
+      const response = await fetch('/api/interview-progress/retake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ configId }),
+      });
+      const data = await response.json();
+      if (data.success && data.configId) {
+        navigate(`/interview/pre-session?configId=${data.configId}`);
+      }
+    } catch (error) {
+      console.error('Error creating retake:', error);
+    } finally {
+      setIsRetaking(false);
+    }
+  };
+
+  const currentAttempt = attemptHistory?.attempts?.find(a => a.sessionId === Number(sessionId));
+  const attemptNumber = currentAttempt?.attemptNumber || 1;
+  const totalAttempts = attemptHistory?.attemptCount || 1;
 
   const practiceTitle = jobContext?.roleTitle || roleKitInfo?.name || "Interview Practice";
   const practiceSubtitle = jobContext?.companyName || (roleKitInfo?.domain ? roleKitInfo.domain.replace(/_/g, ' ') : null);
@@ -338,6 +410,97 @@ export default function InterviewResultsPage() {
                 )}
               </div>
             </div>
+
+            {/* Attempt Badge & Retake */}
+            {attemptHistory && totalAttempts >= 1 && (
+              <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white/5 rounded-xl p-4 border border-white/10">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-white/60" />
+                    <span className="text-white/80 text-sm">
+                      Attempt {attemptNumber} of {totalAttempts}
+                    </span>
+                    {currentAttempt?.isBest && (
+                      <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs">
+                        Best Score
+                      </Badge>
+                    )}
+                  </div>
+                  {totalAttempts > 1 && (
+                    <button
+                      onClick={() => setShowAttemptHistory(!showAttemptHistory)}
+                      className="text-sm text-[#24c4b8] hover:text-[#24c4b8]/80 flex items-center gap-1"
+                    >
+                      View History
+                      {showAttemptHistory ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </button>
+                  )}
+                </div>
+                <Button
+                  onClick={handleRetake}
+                  disabled={isRetaking || !configId}
+                  className="bg-[#cb6ce6] hover:bg-[#cb6ce6]/90 text-white gap-2"
+                >
+                  <RotateCcw className={`w-4 h-4 ${isRetaking ? 'animate-spin' : ''}`} />
+                  {isRetaking ? 'Starting...' : 'Retake Interview'}
+                </Button>
+              </div>
+            )}
+
+            {/* Attempt History Timeline */}
+            {showAttemptHistory && attemptHistory?.attempts && attemptHistory.attempts.length > 1 && (
+              <div className="mt-4 bg-white/5 rounded-xl p-4 border border-white/10 space-y-3">
+                <h4 className="text-sm font-medium text-white/80 flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-[#24c4b8]" />
+                  Attempt History
+                </h4>
+                <div className="space-y-2">
+                  {attemptHistory.attempts.map((attempt) => (
+                    <Link
+                      key={attempt.sessionId}
+                      to={`/interview/results?sessionId=${attempt.sessionId}`}
+                      className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                        attempt.sessionId === Number(sessionId)
+                          ? 'bg-[#24c4b8]/20 border border-[#24c4b8]/30'
+                          : 'bg-white/5 hover:bg-white/10 border border-white/5'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                          <span className="text-sm font-semibold text-white">#{attempt.attemptNumber}</span>
+                        </div>
+                        <div>
+                          <p className="text-sm text-white/80">
+                            {format(new Date(attempt.createdAt), 'MMM d, yyyy h:mm a')}
+                          </p>
+                          <div className="flex items-center gap-2">
+                            {attempt.isBest && (
+                              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs py-0">
+                                Best
+                              </Badge>
+                            )}
+                            {attempt.isLatest && !attempt.isBest && (
+                              <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs py-0">
+                                Latest
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        {attempt.score !== null ? (
+                          <span className={`text-lg font-bold ${attempt.score >= 3 ? 'text-emerald-400' : 'text-[#24c4b8]'}`}>
+                            {attempt.score.toFixed(1)}/5
+                          </span>
+                        ) : (
+                          <span className="text-sm text-white/40">In Progress</span>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
