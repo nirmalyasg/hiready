@@ -892,6 +892,8 @@ export const interviewSessions = pgTable("interview_sessions", {
     .references(() => interviewPlans.id, { onDelete: "set null" }),
   rubricId: integer("rubric_id")
     .references(() => interviewRubrics.id, { onDelete: "set null" }),
+  assignmentId: integer("assignment_id"),
+  attemptNumber: integer("attempt_number").default(1),
   status: text("status")
     .$type<"created" | "running" | "ended" | "analyzed">()
     .notNull()
@@ -951,6 +953,124 @@ export const interviewArtifacts = pgTable("interview_artifacts", {
   artifactJson: jsonb("artifact_json").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// =====================
+// Interview Assignments & Progress Tracking
+// =====================
+
+// Interview Assignments - Tracks user's progress on role/JD + interview type combinations
+export const interviewAssignments = pgTable("interview_assignments", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => authUsers.id, { onDelete: "cascade" }),
+  roleKitId: integer("role_kit_id")
+    .references(() => roleKits.id, { onDelete: "set null" }),
+  jobTargetId: varchar("job_target_id")
+    .references(() => jobTargets.id, { onDelete: "set null" }),
+  interviewType: text("interview_type")
+    .$type<"hr" | "hiring_manager" | "technical" | "panel" | "case_study" | "behavioral" | "coding" | "sql" | "analytics" | "ml" | "case" | "system_design" | "product_sense" | "general" | "skill_practice">()
+    .notNull(),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  latestSessionId: integer("latest_session_id")
+    .references(() => interviewSessions.id, { onDelete: "set null" }),
+  bestSessionId: integer("best_session_id")
+    .references(() => interviewSessions.id, { onDelete: "set null" }),
+  latestScore: real("latest_score"),
+  bestScore: real("best_score"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Hiready Index Snapshots - Computed index values per session
+export const hireadyIndexSnapshots = pgTable("hiready_index_snapshots", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => authUsers.id, { onDelete: "cascade" }),
+  roleKitId: integer("role_kit_id")
+    .references(() => roleKits.id, { onDelete: "set null" }),
+  jobTargetId: varchar("job_target_id")
+    .references(() => jobTargets.id, { onDelete: "set null" }),
+  interviewSessionId: integer("interview_session_id")
+    .references(() => interviewSessions.id, { onDelete: "set null" }),
+  indexValue: real("index_value").notNull(),
+  weightedScores: jsonb("weighted_scores").$type<{
+    interviewType: string;
+    weight: number;
+    score: number;
+    weightedScore: number;
+  }[]>(),
+  consolidatedIndex: real("consolidated_index"),
+  isLatest: boolean("is_latest").default(false),
+  isBest: boolean("is_best").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Hiready Share Links - Shareable links for users to share their scores
+export const hireadyShareLinks = pgTable("hiready_share_links", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => authUsers.id, { onDelete: "cascade" }),
+  roleKitId: integer("role_kit_id")
+    .references(() => roleKits.id, { onDelete: "set null" }),
+  jobTargetId: varchar("job_target_id")
+    .references(() => jobTargets.id, { onDelete: "set null" }),
+  token: varchar("token").notNull().unique(),
+  snapshotId: integer("snapshot_id")
+    .references(() => hireadyIndexSnapshots.id, { onDelete: "set null" }),
+  expiresAt: timestamp("expires_at"),
+  revokedAt: timestamp("revoked_at"),
+  viewCount: integer("view_count").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Interview Assignment Relations
+export const interviewAssignmentsRelations = relations(interviewAssignments, ({ one }) => ({
+  user: one(authUsers, {
+    fields: [interviewAssignments.userId],
+    references: [authUsers.id],
+  }),
+  roleKit: one(roleKits, {
+    fields: [interviewAssignments.roleKitId],
+    references: [roleKits.id],
+  }),
+  jobTarget: one(jobTargets, {
+    fields: [interviewAssignments.jobTargetId],
+    references: [jobTargets.id],
+  }),
+  latestSession: one(interviewSessions, {
+    fields: [interviewAssignments.latestSessionId],
+    references: [interviewSessions.id],
+  }),
+  bestSession: one(interviewSessions, {
+    fields: [interviewAssignments.bestSessionId],
+    references: [interviewSessions.id],
+  }),
+}));
+
+export const hireadyIndexSnapshotsRelations = relations(hireadyIndexSnapshots, ({ one }) => ({
+  user: one(authUsers, {
+    fields: [hireadyIndexSnapshots.userId],
+    references: [authUsers.id],
+  }),
+  interviewSession: one(interviewSessions, {
+    fields: [hireadyIndexSnapshots.interviewSessionId],
+    references: [interviewSessions.id],
+  }),
+}));
+
+export const hireadyShareLinksRelations = relations(hireadyShareLinks, ({ one }) => ({
+  user: one(authUsers, {
+    fields: [hireadyShareLinks.userId],
+    references: [authUsers.id],
+  }),
+  snapshot: one(hireadyIndexSnapshots, {
+    fields: [hireadyShareLinks.snapshotId],
+    references: [hireadyIndexSnapshots.id],
+  }),
+}));
 
 // Interview Practice Lab Relations
 export const roleKitsRelations = relations(roleKits, ({ one }) => ({
