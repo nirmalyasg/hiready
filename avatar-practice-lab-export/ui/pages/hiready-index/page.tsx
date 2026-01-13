@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,66 +24,72 @@ import {
   ArrowUp,
   ArrowDown,
   Clock,
-  BarChart3
+  BarChart3,
+  ChevronDown
 } from "lucide-react";
 import { format } from "date-fns";
 
-interface DimensionScore {
-  dimension: string;
-  avgScore: number;
-  count: number;
+interface RoleOption {
+  id: number | string;
+  name: string;
+  type: "role_kit" | "job_target";
+  archetypeId: string | null;
 }
 
-interface InterviewTypeBreakdown {
-  interviewType: string;
+interface DimensionResult {
+  key: string;
+  label: string;
+  score: number;
   weight: number;
   weightedScore: number;
+}
+
+interface InterviewBreakdown {
+  interviewType: string;
+  weight: number;
   attemptCount: number;
-  bestScore: number | null;
   latestScore: number | null;
+  bestScore: number | null;
   latestSessionId: number | null;
-  dimensions: DimensionScore[];
+}
+
+interface ReadinessBand {
+  band: string;
+  label: string;
+  description: string;
 }
 
 interface HireadyIndexData {
   overallScore: number;
-  readinessLevel: string;
+  readinessBand: ReadinessBand;
+  role: {
+    name: string;
+    companyContext: string | null;
+    archetypeId: string | null;
+  };
+  dimensions: DimensionResult[];
+  dimensionWeights: Record<string, number>;
+  interviewBreakdown: InterviewBreakdown[];
   totalSessions: number;
-  lastUpdated: string;
-  breakdown: InterviewTypeBreakdown[];
   strengths: string[];
-  improvements: string[];
+  growthAreas: string[];
   trend: "improving" | "stable" | "declining";
   previousScore: number | null;
+  lastUpdated: string;
 }
 
-const INTERVIEW_TYPE_WEIGHTS: Record<string, number> = {
-  technical: 3.0,
-  coding: 2.5,
-  system_design: 2.5,
-  case_study: 2.0,
-  product_sense: 2.0,
-  behavioral: 1.5,
-  hr: 1.5,
-  hiring_manager: 1.5,
-  general: 1.0,
-  panel: 1.5,
-  skill_practice: 1.0,
-};
-
-const getReadinessConfig = (level: string) => {
-  const configs: Record<string, { label: string; color: string; bgColor: string; borderColor: string }> = {
-    exceptional: { label: "Exceptional", color: "text-emerald-700", bgColor: "bg-emerald-50", borderColor: "border-emerald-300" },
-    strong: { label: "Strong", color: "text-green-700", bgColor: "bg-green-50", borderColor: "border-green-300" },
-    ready: { label: "Ready", color: "text-blue-700", bgColor: "bg-blue-50", borderColor: "border-blue-300" },
-    developing: { label: "Developing", color: "text-amber-700", bgColor: "bg-amber-50", borderColor: "border-amber-300" },
-    not_ready: { label: "Needs Work", color: "text-red-700", bgColor: "bg-red-50", borderColor: "border-red-300" },
+const getBandConfig = (band: string) => {
+  const configs: Record<string, { color: string; bgColor: string; borderColor: string; ringColor: string }> = {
+    interview_ready: { color: "text-emerald-700", bgColor: "bg-emerald-50", borderColor: "border-emerald-300", ringColor: "stroke-emerald-500" },
+    strong_foundation: { color: "text-blue-700", bgColor: "bg-blue-50", borderColor: "border-blue-300", ringColor: "stroke-blue-500" },
+    developing: { color: "text-amber-700", bgColor: "bg-amber-50", borderColor: "border-amber-300", ringColor: "stroke-amber-500" },
+    early_stage: { color: "text-red-700", bgColor: "bg-red-50", borderColor: "border-red-300", ringColor: "stroke-red-500" },
   };
-  return configs[level] || configs.developing;
+  return configs[band] || configs.developing;
 };
 
 const getInterviewTypeIcon = (type: string) => {
-  if (type.includes('coding') || type.includes('technical') || type.includes('system')) return Code;
+  if (type.includes('coding') || type.includes('technical') || type.includes('system') || type.includes('sql')) return Code;
   if (type.includes('behavioral') || type.includes('hr') || type.includes('hiring')) return Users;
   if (type.includes('case') || type.includes('product')) return Zap;
   return Briefcase;
@@ -94,31 +100,84 @@ const formatInterviewType = (type: string) => {
 };
 
 const getScoreColor = (score: number) => {
-  if (score >= 80) return "text-emerald-600";
-  if (score >= 60) return "text-blue-600";
-  if (score >= 40) return "text-amber-600";
+  if (score >= 75) return "text-emerald-600";
+  if (score >= 55) return "text-blue-600";
+  if (score >= 35) return "text-amber-600";
   return "text-red-500";
 };
 
 const getProgressColor = (score: number) => {
-  if (score >= 80) return "bg-emerald-500";
-  if (score >= 60) return "bg-blue-500";
-  if (score >= 40) return "bg-amber-500";
+  if (score >= 75) return "bg-emerald-500";
+  if (score >= 55) return "bg-blue-500";
+  if (score >= 35) return "bg-amber-500";
   return "bg-red-500";
 };
 
 export default function HireadyIndexPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [indexData, setIndexData] = useState<HireadyIndexData | null>(null);
+  const [roles, setRoles] = useState<{ roleKits: RoleOption[]; jobTargets: RoleOption[] }>({ roleKits: [], jobTargets: [] });
+  const [selectedRole, setSelectedRole] = useState<RoleOption | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingIndex, setIsLoadingIndex] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showRoleSelector, setShowRoleSelector] = useState(false);
 
+  // Fetch available roles
   useEffect(() => {
-    const fetchHireadyIndex = async () => {
+    const fetchRoles = async () => {
       try {
-        const response = await fetch("/api/interview-progress/hiready-index", {
+        const response = await fetch("/api/interview-progress/hiready-roles", {
+          credentials: "include",
+        });
+        const data = await response.json();
+        if (data.success) {
+          setRoles(data.roles);
+          
+          // Auto-select role from URL params or first available
+          const urlRoleKitId = searchParams.get('roleKitId');
+          const urlJobTargetId = searchParams.get('jobTargetId');
+          
+          if (urlRoleKitId) {
+            const role = data.roles.roleKits.find((r: RoleOption) => r.id === Number(urlRoleKitId));
+            if (role) setSelectedRole(role);
+          } else if (urlJobTargetId) {
+            const role = data.roles.jobTargets.find((r: RoleOption) => r.id === urlJobTargetId);
+            if (role) setSelectedRole(role);
+          } else if (data.roles.roleKits.length > 0) {
+            setSelectedRole(data.roles.roleKits[0]);
+          } else if (data.roles.jobTargets.length > 0) {
+            setSelectedRole(data.roles.jobTargets[0]);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRoles();
+  }, [searchParams]);
+
+  // Fetch Hiready Index when role is selected
+  useEffect(() => {
+    if (!selectedRole) return;
+
+    const fetchHireadyIndex = async () => {
+      setIsLoadingIndex(true);
+      try {
+        const params = new URLSearchParams();
+        if (selectedRole.type === "role_kit") {
+          params.set("roleKitId", String(selectedRole.id));
+        } else {
+          params.set("jobTargetId", String(selectedRole.id));
+        }
+
+        const response = await fetch(`/api/interview-progress/hiready-index?${params.toString()}`, {
           credentials: "include",
         });
         const data = await response.json();
@@ -128,21 +187,44 @@ export default function HireadyIndexPage() {
       } catch (error) {
         console.error("Error fetching Hiready index:", error);
       } finally {
-        setIsLoading(false);
+        setIsLoadingIndex(false);
       }
     };
 
     fetchHireadyIndex();
-  }, []);
+  }, [selectedRole]);
+
+  const handleRoleSelect = (role: RoleOption) => {
+    setSelectedRole(role);
+    setShowRoleSelector(false);
+    
+    // Update URL params
+    const params = new URLSearchParams();
+    if (role.type === "role_kit") {
+      params.set("roleKitId", String(role.id));
+    } else {
+      params.set("jobTargetId", String(role.id));
+    }
+    setSearchParams(params);
+  };
 
   const handleShare = async () => {
+    if (!selectedRole) return;
+    
     setIsSharing(true);
     try {
+      const body: any = { expiresInDays: 30 };
+      if (selectedRole.type === "role_kit") {
+        body.roleKitId = selectedRole.id;
+      } else {
+        body.jobTargetId = selectedRole.id;
+      }
+
       const response = await fetch('/api/interview-progress/share-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ expiresInDays: 30 }),
+        body: JSON.stringify(body),
       });
       const data = await response.json();
       if (data.success) {
@@ -177,7 +259,10 @@ export default function HireadyIndexPage() {
     );
   }
 
-  if (!indexData || indexData.totalSessions === 0) {
+  const allRoles = [...roles.roleKits, ...roles.jobTargets];
+
+  // No roles available - show empty state
+  if (allRoles.length === 0) {
     return (
       <SidebarLayout>
         <div className="min-h-screen bg-[#fbfbfc]">
@@ -188,7 +273,7 @@ export default function HireadyIndexPage() {
               </div>
               <h2 className="text-2xl font-bold mb-3">Build Your Hiready Index</h2>
               <p className="text-white/70 mb-8 max-w-md mx-auto">
-                Complete interview practice sessions to build your personalized readiness score.
+                Complete interview practice sessions for a specific role to build your personalized readiness score.
               </p>
               <Link to="/interview">
                 <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white px-8 py-3 rounded-xl shadow-lg shadow-[#24c4b8]/25">
@@ -202,14 +287,15 @@ export default function HireadyIndexPage() {
     );
   }
 
-  const readinessConfig = getReadinessConfig(indexData.readinessLevel);
+  const bandConfig = indexData ? getBandConfig(indexData.readinessBand.band) : null;
   const circumference = 2 * Math.PI * 70;
-  const strokeDashoffset = circumference - (indexData.overallScore / 100) * circumference;
-  const scoreDelta = indexData.previousScore ? indexData.overallScore - indexData.previousScore : 0;
+  const strokeDashoffset = indexData ? circumference - (indexData.overallScore / 100) * circumference : circumference;
+  const scoreDelta = indexData?.previousScore ? indexData.overallScore - indexData.previousScore : 0;
 
   return (
     <SidebarLayout>
       <div className="min-h-screen bg-[#fbfbfc] pb-24 sm:pb-8">
+        {/* Header with Role Selector */}
         <div className="bg-[#000000] text-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-5xl">
             <Link
@@ -220,238 +306,296 @@ export default function HireadyIndexPage() {
               Back to Results
             </Link>
 
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-                <div className="relative">
-                  <svg className="w-40 h-40 transform -rotate-90">
-                    <circle
-                      cx="80"
-                      cy="80"
-                      r="70"
-                      stroke="currentColor"
-                      strokeWidth="12"
-                      fill="none"
-                      className="text-white/10"
-                    />
-                    <circle
-                      cx="80"
-                      cy="80"
-                      r="70"
-                      strokeWidth="12"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeDasharray={circumference}
-                      strokeDashoffset={strokeDashoffset}
-                      className="text-[#24c4b8] transition-all duration-1000"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-5xl font-bold text-white">{indexData.overallScore}</span>
-                    <span className="text-sm text-white/60">/ 100</span>
-                  </div>
-                </div>
-
-                <div className="text-center sm:text-left">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Target className="w-5 h-5 text-[#24c4b8]" />
-                    <span className="text-[#24c4b8] text-sm font-semibold uppercase tracking-wide">Hiready Index™</span>
-                  </div>
-                  <h1 className="text-2xl sm:text-3xl font-bold mb-2">Your Interview Readiness</h1>
-                  
-                  <div className="flex items-center gap-3 mt-3">
-                    <Badge className={`${readinessConfig.bgColor} ${readinessConfig.color} border ${readinessConfig.borderColor} text-sm px-3 py-1`}>
-                      {readinessConfig.label}
-                    </Badge>
-                    {scoreDelta !== 0 && (
-                      <span className={`text-sm flex items-center gap-1 ${scoreDelta > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {scoreDelta > 0 ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
-                        {Math.abs(scoreDelta)} pts
-                      </span>
+            {/* Role Selector */}
+            <div className="mb-6">
+              <div className="relative inline-block">
+                <button
+                  onClick={() => setShowRoleSelector(!showRoleSelector)}
+                  className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors"
+                >
+                  <Briefcase className="w-4 h-4 text-[#24c4b8]" />
+                  <span className="font-medium">{selectedRole?.name || "Select Role"}</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showRoleSelector ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {showRoleSelector && (
+                  <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-xl border z-50 py-2 max-h-64 overflow-y-auto">
+                    {roles.roleKits.length > 0 && (
+                      <>
+                        <div className="px-3 py-1 text-xs font-medium text-gray-500 uppercase">Role Kits</div>
+                        {roles.roleKits.map((role) => (
+                          <button
+                            key={`rk-${role.id}`}
+                            onClick={() => handleRoleSelect(role)}
+                            className={`w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 ${
+                              selectedRole?.id === role.id && selectedRole?.type === role.type
+                                ? 'bg-[#24c4b8]/10 text-[#24c4b8]'
+                                : 'text-gray-700'
+                            }`}
+                          >
+                            <Briefcase className="w-4 h-4" />
+                            {role.name}
+                          </button>
+                        ))}
+                      </>
+                    )}
+                    {roles.jobTargets.length > 0 && (
+                      <>
+                        <div className="px-3 py-1 text-xs font-medium text-gray-500 uppercase mt-2">Job Targets</div>
+                        {roles.jobTargets.map((role) => (
+                          <button
+                            key={`jt-${role.id}`}
+                            onClick={() => handleRoleSelect(role)}
+                            className={`w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 ${
+                              selectedRole?.id === role.id && selectedRole?.type === role.type
+                                ? 'bg-[#24c4b8]/10 text-[#24c4b8]'
+                                : 'text-gray-700'
+                            }`}
+                          >
+                            <Target className="w-4 h-4" />
+                            {role.name}
+                          </button>
+                        ))}
+                      </>
                     )}
                   </div>
-
-                  <p className="text-white/60 text-sm mt-3">
-                    Based on {indexData.totalSessions} interview{indexData.totalSessions !== 1 ? 's' : ''} • 
-                    Updated {format(new Date(indexData.lastUpdated), 'MMM d, yyyy')}
-                  </p>
-                </div>
+                )}
               </div>
+            </div>
 
-              <div className="flex gap-3">
-                <Link to="/interview">
-                  <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white gap-2">
-                    <Play className="w-4 h-4" />
-                    Practice More
-                  </Button>
-                </Link>
-                {shareUrl ? (
-                  <Button
-                    onClick={handleCopyLink}
-                    variant="outline"
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 gap-2"
-                  >
-                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                    {copied ? 'Copied!' : 'Copy Link'}
-                  </Button>
-                ) : (
+            {isLoadingIndex ? (
+              <div className="flex justify-center py-12">
+                <LoadingSpinner />
+              </div>
+            ) : indexData ? (
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
+                {/* Score Circle */}
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                  <div className="relative">
+                    <svg className="w-40 h-40 transform -rotate-90">
+                      <circle
+                        cx="80"
+                        cy="80"
+                        r="70"
+                        stroke="rgba(255,255,255,0.1)"
+                        strokeWidth="12"
+                        fill="none"
+                      />
+                      <circle
+                        cx="80"
+                        cy="80"
+                        r="70"
+                        className={bandConfig?.ringColor || "stroke-emerald-500"}
+                        strokeWidth="12"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={strokeDashoffset}
+                        style={{ transition: "stroke-dashoffset 1s ease-out" }}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-4xl font-bold">{indexData.overallScore}</span>
+                      <span className="text-sm text-white/60">/ 100</span>
+                    </div>
+                  </div>
+
+                  <div className="text-center sm:text-left">
+                    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium mb-3 ${bandConfig?.bgColor} ${bandConfig?.color}`}>
+                      <Award className="w-4 h-4" />
+                      {indexData.readinessBand.label}
+                    </div>
+                    <h1 className="text-2xl font-bold mb-1">{indexData.role.name}</h1>
+                    {indexData.role.companyContext && (
+                      <p className="text-white/60 text-sm mb-2">at {indexData.role.companyContext}</p>
+                    )}
+                    <p className="text-white/70 text-sm max-w-xs">
+                      {indexData.readinessBand.description}
+                    </p>
+                    
+                    {scoreDelta !== 0 && (
+                      <div className={`flex items-center gap-1 mt-3 text-sm ${scoreDelta > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {scoreDelta > 0 ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
+                        <span>{Math.abs(scoreDelta)} points from last session</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Share Button */}
+                <div className="flex flex-col items-center sm:items-end gap-2">
                   <Button
                     onClick={handleShare}
                     disabled={isSharing}
-                    variant="outline"
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 gap-2"
+                    className="bg-white/10 hover:bg-white/20 text-white border-0"
                   >
-                    <Share2 className="w-4 h-4" />
-                    {isSharing ? 'Sharing...' : 'Share Score'}
+                    {isSharing ? (
+                      <LoadingSpinner />
+                    ) : copied ? (
+                      <>
+                        <Check className="w-4 h-4 mr-2" />
+                        Link Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Share2 className="w-4 h-4 mr-2" />
+                        Share Profile
+                      </>
+                    )}
                   </Button>
-                )}
+                  <span className="text-xs text-white/50">{indexData.totalSessions} practice sessions</span>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-white/70">No interview data for this role yet.</p>
+                <Link to="/interview">
+                  <Button className="mt-4 bg-[#24c4b8] hover:bg-[#1db0a5] text-white">
+                    Start Practicing
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-5xl space-y-6">
-          <Card className="border-slate-200 rounded-2xl">
-            <CardHeader className="border-b border-slate-100 bg-[#fbfbfc]">
-              <CardTitle className="flex items-center gap-2 text-[#000000]">
-                <BarChart3 className="w-5 h-5 text-[#24c4b8]" />
-                Interview Type Breakdown
-              </CardTitle>
-              <p className="text-sm text-slate-500 mt-1">
-                Weighted scores based on interview type importance
-              </p>
-            </CardHeader>
-            <CardContent className="p-0">
-              {indexData.breakdown.length > 0 ? (
-                indexData.breakdown.map((item, idx) => {
-                  const TypeIcon = getInterviewTypeIcon(item.interviewType);
-                  const scorePercent = (item.weightedScore / 100) * (item.weight / 3);
-                  
-                  return (
-                    <div 
-                      key={item.interviewType} 
-                      className={`p-4 sm:p-5 ${idx !== indexData.breakdown.length - 1 ? "border-b border-slate-100" : ""}`}
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                            <TypeIcon className="w-5 h-5 text-slate-600" />
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-slate-900">{formatInterviewType(item.interviewType)}</h4>
-                            <p className="text-xs text-slate-500">
-                              {item.attemptCount} attempt{item.attemptCount !== 1 ? 's' : ''} • 
-                              Weight: {item.weight.toFixed(1)}x
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <span className={`text-2xl font-bold ${getScoreColor(item.weightedScore)}`}>
-                            {item.weightedScore}
-                          </span>
-                          <span className="text-slate-400 text-sm">/100</span>
-                          {item.latestSessionId && (
-                            <Link
-                              to={`/interview/results?sessionId=${item.latestSessionId}`}
-                              className="block text-xs text-[#24c4b8] hover:underline mt-1"
-                            >
-                              View latest →
-                            </Link>
-                          )}
+        {indexData && (
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-5xl">
+            {/* Core Dimensions */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <BarChart3 className="w-5 h-5 text-[#24c4b8]" />
+                  Core Dimensions
+                </CardTitle>
+                <p className="text-sm text-gray-500">Weighted for {indexData.role.name} role requirements</p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {indexData.dimensions.map((dim) => (
+                    <div key={dim.key} className="space-y-1">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="font-medium">{dim.label}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-500">{dim.weight}% weight</span>
+                          <span className={`font-semibold ${getScoreColor(dim.score)}`}>{dim.score}%</span>
                         </div>
                       </div>
-                      
-                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full rounded-full transition-all ${getProgressColor(item.weightedScore)}`}
-                          style={{ width: `${item.weightedScore}%` }}
+                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${getProgressColor(dim.score)} transition-all duration-500`}
+                          style={{ width: `${dim.score}%` }}
                         />
                       </div>
-
-                      {item.bestScore !== item.latestScore && item.bestScore !== null && (
-                        <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
-                          <Award className="w-3 h-3" />
-                          Best: {item.bestScore}/100 • Latest: {item.latestScore}/100
-                        </p>
-                      )}
                     </div>
-                  );
-                })
-              ) : (
-                <div className="p-8 text-center">
-                  <Target className="w-10 h-10 mx-auto text-slate-400 mb-3" />
-                  <p className="text-slate-500">Complete interviews to see your breakdown</p>
+                  ))}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card className="border-emerald-200 bg-emerald-50/30 rounded-2xl">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-emerald-800">
-                  <CheckCircle className="w-5 h-5" />
-                  Strengths
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {indexData.strengths.length > 0 ? (
-                  <ul className="space-y-3">
-                    {indexData.strengths.map((s, idx) => (
-                      <li key={idx} className="text-sm text-slate-700 flex items-start gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
-                        {s}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm text-emerald-700/70">Complete more interviews to identify your strengths</p>
-                )}
               </CardContent>
             </Card>
 
-            <Card className="border-amber-200 bg-amber-50/30 rounded-2xl">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-amber-800">
-                  <AlertTriangle className="w-5 h-5" />
-                  Areas to Improve
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {indexData.improvements.length > 0 ? (
-                  <ul className="space-y-3">
-                    {indexData.improvements.map((i, idx) => (
-                      <li key={idx} className="text-sm text-slate-700 flex items-start gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 flex-shrink-0" />
-                        {i}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm text-amber-700/70">Complete more interviews to identify improvement areas</p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+            {/* Strengths & Growth Areas */}
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg text-emerald-700">
+                    <CheckCircle className="w-5 h-5" />
+                    Top Strengths
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {indexData.strengths.length > 0 ? (
+                    <ul className="space-y-2">
+                      {indexData.strengths.map((s, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm">
+                          <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                          {s}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-gray-500">Complete more sessions to identify strengths</p>
+                  )}
+                </CardContent>
+              </Card>
 
-          <div className="bg-[#000000] rounded-2xl p-6 text-white">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-semibold mb-1">Improve Your Score</h3>
-                <p className="text-white/70 text-sm">
-                  {indexData.improvements.length > 0 
-                    ? `Focus on ${indexData.improvements[0]} to boost your Hiready Index`
-                    : 'Keep practicing to maintain and improve your score'}
-                </p>
-              </div>
-              <Link to="/interview">
-                <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white gap-2">
-                  <Play className="w-4 h-4" />
-                  Practice Interview
-                </Button>
-              </Link>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg text-amber-700">
+                    <AlertTriangle className="w-5 h-5" />
+                    Growth Areas
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {indexData.growthAreas.length > 0 ? (
+                    <ul className="space-y-2">
+                      {indexData.growthAreas.map((g, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm">
+                          <TrendingUp className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                          {g}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-gray-500">Complete more sessions to identify growth areas</p>
+                  )}
+                </CardContent>
+              </Card>
             </div>
+
+            {/* Interview Type Breakdown */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Briefcase className="w-5 h-5 text-[#24c4b8]" />
+                  Interview Types Practiced
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {indexData.interviewBreakdown.map((ib) => {
+                    const Icon = getInterviewTypeIcon(ib.interviewType);
+                    return (
+                      <div
+                        key={ib.interviewType}
+                        className="p-4 bg-gray-50 rounded-xl border hover:border-[#24c4b8]/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                            <Icon className="w-5 h-5 text-[#24c4b8]" />
+                          </div>
+                          <div>
+                            <div className="font-medium text-sm">{formatInterviewType(ib.interviewType)}</div>
+                            <div className="text-xs text-gray-500">{ib.attemptCount} attempt{ib.attemptCount !== 1 ? 's' : ''}</div>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-gray-500">Latest</span>
+                          <span className={`font-semibold ${ib.latestScore ? getScoreColor(ib.latestScore) : 'text-gray-400'}`}>
+                            {ib.latestScore !== null ? `${ib.latestScore}%` : '-'}
+                          </span>
+                        </div>
+                        {ib.bestScore && ib.bestScore !== ib.latestScore && (
+                          <div className="flex justify-between items-center text-sm mt-1">
+                            <span className="text-gray-500">Best</span>
+                            <span className="font-semibold text-emerald-600">{ib.bestScore}%</span>
+                          </div>
+                        )}
+                        {ib.latestSessionId && (
+                          <Link
+                            to={`/interview/results?sessionId=${ib.latestSessionId}`}
+                            className="mt-3 flex items-center justify-center gap-1 text-xs text-[#24c4b8] hover:underline"
+                          >
+                            View Details <ChevronRight className="w-3 h-3" />
+                          </Link>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
+        )}
       </div>
     </SidebarLayout>
   );

@@ -12,6 +12,7 @@ import {
   roleKits,
   jobTargets,
   authUsers,
+  roleArchetypes,
 } from "../../shared/schema.js";
 import { requireAuth } from "../middleware/auth.js";
 
@@ -34,6 +35,66 @@ const INTERVIEW_WEIGHTS: Record<string, number> = {
   ml: 2.5,
   panel: 1.5,
 };
+
+// Core 5 dimensions for Hiready Index (from spec)
+const CORE_DIMENSIONS = [
+  { key: "clarity", label: "Clarity", aliases: ["Clarity & Structure", "clarity_structure"] },
+  { key: "structure", label: "Structure", aliases: ["Clarity & Structure", "structure"] },
+  { key: "confidence", label: "Confidence", aliases: ["Confidence & Composure", "confidence_composure"] },
+  { key: "problem_solving", label: "Problem Solving", aliases: ["Problem Solving Approach", "problem_solving"] },
+  { key: "role_fit", label: "Role Fit", aliases: ["Role Fit", "role_fit"] },
+];
+
+// Default dimension weights (if no role-specific weights available)
+const DEFAULT_DIMENSION_WEIGHTS: Record<string, number> = {
+  clarity: 20,
+  structure: 20,
+  confidence: 20,
+  problem_solving: 20,
+  role_fit: 20,
+};
+
+// Role-specific dimension weight presets based on role category
+const ROLE_DIMENSION_WEIGHTS: Record<string, Record<string, number>> = {
+  data_analyst: { clarity: 20, structure: 25, confidence: 10, problem_solving: 25, role_fit: 20 },
+  data_scientist: { clarity: 15, structure: 20, confidence: 10, problem_solving: 35, role_fit: 20 },
+  software_engineer: { clarity: 15, structure: 20, confidence: 15, problem_solving: 30, role_fit: 20 },
+  product_manager: { clarity: 25, structure: 20, confidence: 15, problem_solving: 20, role_fit: 20 },
+  sales_account: { clarity: 25, structure: 15, confidence: 25, problem_solving: 15, role_fit: 20 },
+  marketing_growth: { clarity: 25, structure: 15, confidence: 20, problem_solving: 20, role_fit: 20 },
+  hr_recruiter: { clarity: 25, structure: 15, confidence: 20, problem_solving: 15, role_fit: 25 },
+  consulting: { clarity: 20, structure: 25, confidence: 15, problem_solving: 25, role_fit: 15 },
+  finance: { clarity: 20, structure: 25, confidence: 15, problem_solving: 25, role_fit: 15 },
+  default: { clarity: 20, structure: 20, confidence: 20, problem_solving: 20, role_fit: 20 },
+};
+
+// Get readiness band from score (0-100 scale)
+function getReadinessBand(score: number): { band: string; label: string; description: string } {
+  if (score >= 75) {
+    return { band: "interview_ready", label: "Interview-Ready", description: "Can confidently handle real interviews" };
+  }
+  if (score >= 55) {
+    return { band: "strong_foundation", label: "Strong Foundation", description: "Ready with minor refinement" };
+  }
+  if (score >= 35) {
+    return { band: "developing", label: "Developing Readiness", description: "Needs practice before applying" };
+  }
+  return { band: "early_stage", label: "Early Stage", description: "Not interview-ready yet" };
+}
+
+// Map raw dimension names from interview_analysis to core dimension keys
+function mapDimensionToCore(dimensionName: string): string | null {
+  const lower = dimensionName.toLowerCase();
+  if (lower.includes("clarity") || lower.includes("structure")) return "clarity";
+  if (lower.includes("confidence") || lower.includes("composure")) return "confidence";
+  if (lower.includes("problem") || lower.includes("solving") || lower.includes("approach")) return "problem_solving";
+  if (lower.includes("role") || lower.includes("fit")) return "role_fit";
+  if (lower.includes("depth") || lower.includes("evidence")) return "structure";
+  if (lower.includes("communication") || lower.includes("hygiene")) return "clarity";
+  if (lower.includes("ownership") || lower.includes("impact")) return "problem_solving";
+  if (lower.includes("consistency") || lower.includes("honesty")) return "confidence";
+  return null;
+}
 
 function getInterviewWeight(interviewType: string): number {
   return INTERVIEW_WEIGHTS[interviewType] || 1.0;
@@ -464,7 +525,75 @@ async function computeConsolidatedIndex(
   return Math.round((weightedSum / totalWeight) * 10) / 10;
 }
 
-// Get consolidated Hiready Index for role/job
+// Get list of roles/jobs user has practiced for
+interviewProgressRouter.get("/hiready-roles", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "Not authenticated" });
+    }
+
+    // Get unique roleKitIds from assignments
+    const assignments = await db
+      .select({
+        roleKitId: interviewAssignments.roleKitId,
+        jobTargetId: interviewAssignments.jobTargetId,
+      })
+      .from(interviewAssignments)
+      .where(eq(interviewAssignments.userId, userId));
+
+    const uniqueRoleKitIds = [...new Set(assignments.filter(a => a.roleKitId).map(a => a.roleKitId))];
+    const uniqueJobTargetIds = [...new Set(assignments.filter(a => a.jobTargetId).map(a => a.jobTargetId))];
+
+    // Fetch role kit details
+    const roleKitDetails = uniqueRoleKitIds.length > 0
+      ? await db
+          .select({
+            id: roleKits.id,
+            name: roleKits.name,
+            archetypeId: roleKits.roleArchetypeId,
+          })
+          .from(roleKits)
+          .where(sql`${roleKits.id} = ANY(${sql.raw(`ARRAY[${uniqueRoleKitIds.join(',')}]`)})`)
+      : [];
+
+    // Fetch job target details
+    const jobTargetDetails = uniqueJobTargetIds.length > 0
+      ? await db
+          .select({
+            id: jobTargets.id,
+            roleTitle: jobTargets.roleTitle,
+            companyName: jobTargets.companyName,
+            roleArchetypeId: jobTargets.roleArchetypeId,
+          })
+          .from(jobTargets)
+          .where(sql`${jobTargets.id} = ANY(${sql.raw(`ARRAY['${uniqueJobTargetIds.join("','")}']`)})`)
+      : [];
+
+    res.json({
+      success: true,
+      roles: {
+        roleKits: roleKitDetails.map(r => ({
+          id: r.id,
+          name: r.name,
+          type: "role_kit",
+          archetypeId: r.archetypeId,
+        })),
+        jobTargets: jobTargetDetails.map(j => ({
+          id: j.id,
+          name: `${j.roleTitle}${j.companyName ? ` at ${j.companyName}` : ''}`,
+          type: "job_target",
+          archetypeId: j.roleArchetypeId,
+        })),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching hiready roles:", error);
+    res.status(500).json({ success: false, error: "Failed to fetch roles" });
+  }
+});
+
+// Get consolidated Hiready Index for role/job (ROLE-SPECIFIC)
 interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
@@ -475,8 +604,53 @@ interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, 
 
     const { roleKitId, jobTargetId } = req.query;
 
+    // Role or job target is required for role-specific index
+    if (!roleKitId && !jobTargetId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Role kit ID or Job target ID is required for Hiready Index",
+        requiresRole: true 
+      });
+    }
+
+    // Get role context
+    let roleName = "General";
+    let roleArchetypeId: string | null = null;
+    let companyContext: string | null = null;
+
+    if (roleKitId) {
+      const [roleKit] = await db
+        .select()
+        .from(roleKits)
+        .where(eq(roleKits.id, Number(roleKitId)))
+        .limit(1);
+      
+      if (roleKit) {
+        roleName = roleKit.name;
+        roleArchetypeId = roleKit.roleArchetypeId;
+      }
+    } else if (jobTargetId) {
+      const [jobTarget] = await db
+        .select()
+        .from(jobTargets)
+        .where(eq(jobTargets.id, String(jobTargetId)))
+        .limit(1);
+      
+      if (jobTarget) {
+        roleName = jobTarget.roleTitle || "Unknown Role";
+        companyContext = jobTarget.companyName || null;
+        roleArchetypeId = jobTarget.roleArchetypeId || null;
+      }
+    }
+
+    // Get dimension weights for this role
+    let dimensionWeights = ROLE_DIMENSION_WEIGHTS.default;
+    if (roleArchetypeId && ROLE_DIMENSION_WEIGHTS[roleArchetypeId]) {
+      dimensionWeights = ROLE_DIMENSION_WEIGHTS[roleArchetypeId];
+    }
+
+    // Build query conditions
     const conditions = [eq(interviewAssignments.userId, userId)];
-    
     if (roleKitId) {
       conditions.push(eq(interviewAssignments.roleKitId, Number(roleKitId)));
     }
@@ -489,57 +663,144 @@ interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, 
       .from(interviewAssignments)
       .where(and(...conditions));
     
-    console.log("[Hiready Index] Found assignments:", assignments.length);
+    console.log("[Hiready Index] Found assignments for role:", assignments.length);
 
-    const interviewScores = assignments.map((a) => ({
-      interviewType: a.interviewType,
-      weight: getInterviewWeight(a.interviewType),
-      latestScore: a.latestScore,
-      bestScore: a.bestScore,
-      attemptCount: a.attemptCount,
-      latestSessionId: a.latestSessionId,
-      bestSessionId: a.bestSessionId,
-    }));
+    if (assignments.length === 0) {
+      return res.json({
+        success: true,
+        hireadyIndex: null,
+        message: "No interview practice data found for this role",
+        role: { name: roleName, companyContext },
+      });
+    }
 
-    const consolidatedLatest = await computeConsolidatedIndex(
-      userId,
-      roleKitId ? Number(roleKitId) : null,
-      jobTargetId ? String(jobTargetId) : null
-    );
+    // Get all session IDs from assignments
+    const sessionIds = assignments
+      .filter(a => a.latestSessionId)
+      .map(a => a.latestSessionId!);
 
-    let consolidatedBest = 0;
-    let totalWeight = 0;
-    for (const score of interviewScores) {
-      if (score.bestScore !== null) {
-        consolidatedBest += (score.bestScore || 0) * score.weight;
-        totalWeight += score.weight;
+    // Fetch dimension scores from all related interview analyses
+    const analyses = sessionIds.length > 0
+      ? await db
+          .select({
+            sessionId: interviewAnalysis.interviewSessionId,
+            dimensionScores: interviewAnalysis.dimensionScores,
+            strengths: interviewAnalysis.strengths,
+            improvements: interviewAnalysis.improvements,
+          })
+          .from(interviewAnalysis)
+          .where(sql`${interviewAnalysis.interviewSessionId} = ANY(${sql.raw(`ARRAY[${sessionIds.join(',')}]`)})`)
+      : [];
+
+    // Aggregate dimension scores across all sessions
+    const dimensionAggregates: Record<string, { scores: number[]; count: number }> = {
+      clarity: { scores: [], count: 0 },
+      structure: { scores: [], count: 0 },
+      confidence: { scores: [], count: 0 },
+      problem_solving: { scores: [], count: 0 },
+      role_fit: { scores: [], count: 0 },
+    };
+
+    const allStrengths: string[] = [];
+    const allImprovements: string[] = [];
+
+    for (const analysis of analyses) {
+      if (analysis.dimensionScores && Array.isArray(analysis.dimensionScores)) {
+        for (const dim of analysis.dimensionScores as any[]) {
+          const coreKey = mapDimensionToCore(dim.dimension);
+          if (coreKey && dimensionAggregates[coreKey]) {
+            dimensionAggregates[coreKey].scores.push(dim.score);
+            dimensionAggregates[coreKey].count++;
+          }
+        }
+      }
+      if (analysis.strengths && Array.isArray(analysis.strengths)) {
+        allStrengths.push(...(analysis.strengths as string[]));
+      }
+      if (analysis.improvements && Array.isArray(analysis.improvements)) {
+        allImprovements.push(...(analysis.improvements as string[]));
       }
     }
-    if (totalWeight > 0) {
-      consolidatedBest = Math.round((consolidatedBest / totalWeight) * 10) / 10;
+
+    // Calculate weighted average score for each dimension
+    const dimensionResults: Array<{
+      key: string;
+      label: string;
+      score: number;
+      weight: number;
+      weightedScore: number;
+    }> = [];
+
+    let totalWeightedScore = 0;
+    let totalWeight = 0;
+
+    for (const dim of CORE_DIMENSIONS) {
+      const agg = dimensionAggregates[dim.key];
+      const avgScore = agg.scores.length > 0
+        ? agg.scores.reduce((a, b) => a + b, 0) / agg.scores.length
+        : 0;
+      
+      // Convert from 1-5 scale to 0-100 scale
+      const normalizedScore = Math.round((avgScore / 5) * 100);
+      const weight = dimensionWeights[dim.key] || 20;
+      const weightedScore = normalizedScore * (weight / 100);
+
+      dimensionResults.push({
+        key: dim.key,
+        label: dim.label,
+        score: normalizedScore,
+        weight,
+        weightedScore,
+      });
+
+      totalWeightedScore += weightedScore;
+      totalWeight += weight;
     }
 
-    const [latestSnapshot] = await db
-      .select()
-      .from(hireadyIndexSnapshots)
-      .where(
-        and(
-          eq(hireadyIndexSnapshots.userId, userId),
-          eq(hireadyIndexSnapshots.isLatest, true),
-          roleKitId ? eq(hireadyIndexSnapshots.roleKitId, Number(roleKitId)) : sql`1=1`,
-          jobTargetId ? eq(hireadyIndexSnapshots.jobTargetId, String(jobTargetId)) : sql`1=1`
-        )
-      )
-      .orderBy(desc(hireadyIndexSnapshots.createdAt))
-      .limit(1);
+    // Calculate overall score (0-100)
+    const overallScore = totalWeight > 0 ? Math.round(totalWeightedScore) : 0;
+    const readinessBand = getReadinessBand(overallScore);
 
+    // Interview type breakdown
+    const interviewBreakdown = assignments.map((a) => ({
+      interviewType: a.interviewType,
+      weight: getInterviewWeight(a.interviewType),
+      attemptCount: a.attemptCount || 0,
+      latestScore: a.latestScore !== null ? Math.round((a.latestScore / 5) * 100) : null,
+      bestScore: a.bestScore !== null ? Math.round((a.bestScore / 5) * 100) : null,
+      latestSessionId: a.latestSessionId,
+    }));
+
+    const totalSessions = assignments.reduce((sum, a) => sum + (a.attemptCount || 0), 0);
+
+    // Extract top strengths and improvements
+    const strengthCounts = allStrengths.reduce((acc, s) => {
+      acc[s] = (acc[s] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    const improvementCounts = allImprovements.reduce((acc, s) => {
+      acc[s] = (acc[s] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const topStrengths = Object.entries(strengthCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([s]) => s);
+
+    const topImprovements = Object.entries(improvementCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2)
+      .map(([s]) => s);
+
+    // Get trend from previous snapshot
     const [previousSnapshot] = await db
       .select()
       .from(hireadyIndexSnapshots)
       .where(
         and(
           eq(hireadyIndexSnapshots.userId, userId),
-          eq(hireadyIndexSnapshots.isLatest, false),
           roleKitId ? eq(hireadyIndexSnapshots.roleKitId, Number(roleKitId)) : sql`1=1`,
           jobTargetId ? eq(hireadyIndexSnapshots.jobTargetId, String(jobTargetId)) : sql`1=1`
         )
@@ -547,32 +808,8 @@ interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, 
       .orderBy(desc(hireadyIndexSnapshots.createdAt))
       .limit(1);
 
-    const totalSessions = assignments.reduce((sum, a) => sum + (a.attemptCount || 0), 0);
-
-    const getReadinessLevel = (score: number): string => {
-      if (score >= 85) return "exceptional";
-      if (score >= 70) return "strong";
-      if (score >= 55) return "ready";
-      if (score >= 40) return "developing";
-      return "not_ready";
-    };
-
-    const breakdown = interviewScores.map((s) => ({
-      interviewType: s.interviewType,
-      weight: s.weight,
-      weightedScore: s.latestScore !== null ? Math.round((s.latestScore / 5) * 100) : 0,
-      attemptCount: s.attemptCount || 0,
-      bestScore: s.bestScore !== null ? Math.round((s.bestScore / 5) * 100) : null,
-      latestScore: s.latestScore !== null ? Math.round((s.latestScore / 5) * 100) : null,
-      latestSessionId: s.latestSessionId,
-      dimensions: [] as any[],
-    }));
-
-    const overallScore = consolidatedLatest > 0 
-      ? Math.round((consolidatedLatest / 5) * 100) 
-      : 0;
-    const previousScore = previousSnapshot?.consolidatedIndex 
-      ? Math.round((previousSnapshot.consolidatedIndex / 5) * 100) 
+    const previousScore = previousSnapshot?.consolidatedIndex
+      ? Math.round((previousSnapshot.consolidatedIndex / 5) * 100)
       : null;
 
     let trend: "improving" | "stable" | "declining" = "stable";
@@ -582,30 +819,25 @@ interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, 
       else if (delta < -5) trend = "declining";
     }
 
-    const strongInterviews = breakdown.filter(b => (b.latestScore || 0) >= 75);
-    const weakInterviews = breakdown.filter(b => (b.latestScore || 0) < 60 && b.attemptCount > 0);
-
-    const formatType = (t: string) => t.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-    
-    const strengths = strongInterviews.slice(0, 3).map(
-      s => `Strong ${formatType(s.interviewType)} performance (${s.latestScore}%)`
-    );
-    const improvements = weakInterviews.slice(0, 3).map(
-      s => `Focus on ${formatType(s.interviewType)} (currently ${s.latestScore}%)`
-    );
-
     res.json({
       success: true,
       hireadyIndex: {
         overallScore,
-        readinessLevel: getReadinessLevel(overallScore),
+        readinessBand,
+        role: {
+          name: roleName,
+          companyContext,
+          archetypeId: roleArchetypeId,
+        },
+        dimensions: dimensionResults,
+        dimensionWeights,
+        interviewBreakdown,
         totalSessions,
-        lastUpdated: latestSnapshot?.createdAt || new Date().toISOString(),
-        breakdown,
-        strengths,
-        improvements,
+        strengths: topStrengths,
+        growthAreas: topImprovements,
         trend,
         previousScore,
+        lastUpdated: new Date().toISOString(),
       },
     });
   } catch (error) {
@@ -738,27 +970,98 @@ interviewProgressRouter.get("/share/:token", async (req: Request, res: Response)
       .from(interviewAssignments)
       .where(and(...conditions));
 
+    // Get session IDs for dimension analysis
+    const sessionIds = assignments
+      .filter(a => a.latestSessionId)
+      .map(a => a.latestSessionId!);
+
+    // Fetch dimension scores from interview analyses
+    const analyses = sessionIds.length > 0
+      ? await db
+          .select({
+            dimensionScores: interviewAnalysis.dimensionScores,
+            strengths: interviewAnalysis.strengths,
+          })
+          .from(interviewAnalysis)
+          .where(sql`${interviewAnalysis.interviewSessionId} = ANY(${sql.raw(`ARRAY[${sessionIds.join(',')}]`)})`)
+      : [];
+
+    // Aggregate dimension scores
+    const dimensionAggregates: Record<string, { scores: number[]; count: number }> = {
+      clarity: { scores: [], count: 0 },
+      structure: { scores: [], count: 0 },
+      confidence: { scores: [], count: 0 },
+      problem_solving: { scores: [], count: 0 },
+      role_fit: { scores: [], count: 0 },
+    };
+
+    const allStrengths: string[] = [];
+
+    for (const analysis of analyses) {
+      if (analysis.dimensionScores && Array.isArray(analysis.dimensionScores)) {
+        for (const dim of analysis.dimensionScores as any[]) {
+          const coreKey = mapDimensionToCore(dim.dimension);
+          if (coreKey && dimensionAggregates[coreKey]) {
+            dimensionAggregates[coreKey].scores.push(dim.score);
+            dimensionAggregates[coreKey].count++;
+          }
+        }
+      }
+      if (analysis.strengths && Array.isArray(analysis.strengths)) {
+        allStrengths.push(...(analysis.strengths as string[]));
+      }
+    }
+
+    // Calculate dimension averages
+    const dimensionResults = CORE_DIMENSIONS.map(dim => {
+      const agg = dimensionAggregates[dim.key];
+      const avgScore = agg.scores.length > 0
+        ? agg.scores.reduce((a, b) => a + b, 0) / agg.scores.length
+        : 0;
+      return {
+        key: dim.key,
+        label: dim.label,
+        score: Math.round((avgScore / 5) * 100),
+      };
+    });
+
+    // Calculate overall score
+    const totalScore = dimensionResults.reduce((sum, d) => sum + d.score, 0);
+    const overallScore = Math.round(totalScore / dimensionResults.length);
+    const readinessBand = getReadinessBand(overallScore);
+
+    // Get top strengths
+    const strengthCounts = allStrengths.reduce((acc, s) => {
+      acc[s] = (acc[s] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    const topStrengths = Object.entries(strengthCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2)
+      .map(([s]) => s);
+
     const interviewScores = assignments.map((a) => ({
       interviewType: a.interviewType,
       weight: getInterviewWeight(a.interviewType),
-      latestScore: a.latestScore,
+      latestScore: a.latestScore !== null ? Math.round((a.latestScore / 5) * 100) : null,
       attemptCount: a.attemptCount,
     }));
 
-    const consolidatedIndex = await computeConsolidatedIndex(
-      shareLink.userId,
-      shareLink.roleKitId,
-      shareLink.jobTargetId
-    );
+    const totalSessions = assignments.reduce((sum, a) => sum + (a.attemptCount || 0), 0);
 
     res.json({
       success: true,
       data: {
         candidateName: user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Anonymous" : "Anonymous",
-        roleInfo,
-        jobInfo,
-        consolidatedIndex,
+        role: roleInfo?.name || jobInfo?.title || "General",
+        companyContext: jobInfo?.company || null,
+        overallScore,
+        readinessBand,
+        dimensions: dimensionResults,
+        strengths: topStrengths,
         interviewScores,
+        totalSessions,
         lastUpdated: shareLink.createdAt,
       },
     });
