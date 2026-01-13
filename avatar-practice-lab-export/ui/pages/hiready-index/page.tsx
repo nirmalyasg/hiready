@@ -76,8 +76,6 @@ interface CapabilityMilestones {
   };
   consistencyScore: number | null;
   coveragePercentage: number;
-  daysSinceStart: number;
-  practiceStreak: number;
 }
 
 interface SessionScore {
@@ -536,17 +534,6 @@ export default function HireadyIndexPage() {
                 </div>
               </Card>
 
-              <Card className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
-                    <Flame className="w-5 h-5 text-purple-500" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-gray-900">{indexData.capabilityMilestones.practiceStreak}</div>
-                    <div className="text-xs text-gray-500">Day Streak</div>
-                  </div>
-                </div>
-              </Card>
             </div>
 
             <div className="grid lg:grid-cols-2 gap-6">

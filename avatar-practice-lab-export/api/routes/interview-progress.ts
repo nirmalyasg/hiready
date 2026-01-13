@@ -922,26 +922,6 @@ interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, 
       else momentum = "steady";
     }
 
-    // Days since first practice
-    const firstPracticeDate = sessionsForTimeline[0]?.createdAt;
-    const daysSinceStart = firstPracticeDate
-      ? Math.floor((Date.now() - new Date(firstPracticeDate).getTime()) / (1000 * 60 * 60 * 24))
-      : 0;
-
-    // Practice streak (consecutive days with practice)
-    let practiceStreak = 0;
-    const uniqueDays = new Set(sessionScores.map(s => new Date(s.date).toDateString()));
-    const today = new Date();
-    for (let i = 0; i < 30; i++) {
-      const checkDate = new Date(today);
-      checkDate.setDate(checkDate.getDate() - i);
-      if (uniqueDays.has(checkDate.toDateString())) {
-        practiceStreak++;
-      } else if (practiceStreak > 0) {
-        break;
-      }
-    }
-
     res.json({
       success: true,
       hireadyIndex: {
@@ -976,8 +956,6 @@ interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, 
           },
           consistencyScore: sessionScores.length >= 2 ? Math.round(consistencyScore) : null,
           coveragePercentage,
-          daysSinceStart,
-          practiceStreak,
         },
         progressTimeline: sessionScores,
         lastUpdated: new Date().toISOString(),
