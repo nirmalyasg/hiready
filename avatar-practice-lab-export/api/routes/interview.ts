@@ -45,7 +45,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { getOpenAI } from "../utils/openai-client.js";
 import { enforceEntitlements, checkEntitlements } from "../lib/entitlements.js";
 import { checkInterviewAccess, consumeFreeInterview, recordInterviewUsage } from "../lib/entitlement-service.js";
-import * as storage from "../storage.js";
+import { getLegacyUserByAuthUserId, getOrCreateLegacyUser } from "../storage.js";
 import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
 import {
@@ -1068,11 +1068,11 @@ interviewRouter.post("/session/start", requireAuth, async (req: Request, res: Re
     
     // Convert auth user ID (UUID) to legacy user ID (integer) for entitlement checks
     let legacyUserId: number | null = null;
-    const legacyUser = await storage.getLegacyUserByAuthUserId(authUserId);
+    const legacyUser = await getLegacyUserByAuthUserId(authUserId);
     if (legacyUser) {
       legacyUserId = legacyUser.id;
     } else if (req.user?.username) {
-      const created = await storage.getOrCreateLegacyUser(authUserId, req.user.username);
+      const created = await getOrCreateLegacyUser(authUserId, req.user.username);
       legacyUserId = created.id;
     }
     
