@@ -68,6 +68,15 @@ async function startServer() {
   // Mount interview practice routes
   app.use("/api/interview", interviewRouter);
 
+  // Middleware to populate req.user from session for interview-progress routes
+  app.use("/api/interview-progress", (req, res, next) => {
+    const sessionUser = (req.session as any)?.user;
+    if (sessionUser) {
+      req.user = sessionUser;
+    }
+    next();
+  });
+
   // Mount interview progress tracking routes (retakes, history, Hiready index)
   app.use("/api/interview-progress", interviewProgressRouter);
 
