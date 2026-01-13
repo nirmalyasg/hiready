@@ -259,7 +259,7 @@ After they work on it, discuss their approach and solution.
 `;
     }
 
-    if ((interviewType === 'hiring_manager' || interviewType === 'panel' || interviewType === 'case_study') && plan.caseStudy) {
+    if ((interviewType === 'hiring_manager' || interviewType === 'panel' || interviewType === 'case_study' || interviewType === 'case') && plan.caseStudy) {
       const caseStudy = plan.caseStudy;
       prompt += `
 CASE STUDY (introduce when appropriate):
@@ -357,7 +357,7 @@ IMPORTANT BEHAVIOR:
       // Check for case study data and trigger panel
       const effectiveInterviewType = config?.interviewType || (interviewSession as any)?.config?.interviewType;
       const effectiveInterviewMode = config?.interviewMode || (interviewSession as any)?.config?.interviewMode;
-      const isCaseStudyType = effectiveInterviewType === 'hiring_manager' || effectiveInterviewType === 'panel' || effectiveInterviewType === 'case_study' || effectiveInterviewMode === 'case_problem_solving';
+      const isCaseStudyType = effectiveInterviewType === 'hiring_manager' || effectiveInterviewType === 'panel' || effectiveInterviewType === 'case_study' || effectiveInterviewType === 'case' || effectiveInterviewMode === 'case_problem_solving';
       
       if (interviewSession?.plan?.caseStudy && isCaseStudyType) {
         const caseStudy = interviewSession.plan.caseStudy;

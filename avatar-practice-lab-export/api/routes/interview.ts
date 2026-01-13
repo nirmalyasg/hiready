@@ -1140,8 +1140,8 @@ interviewRouter.post("/session/start", requireAuth, async (req: Request, res: Re
       }
     }
     
-    // Add case study data if interview type is case_study
-    if (config.interviewType === 'case_study') {
+    // Add case study data if interview type is case_study or case
+    if (config.interviewType === 'case_study' || config.interviewType === 'case') {
       if (!planData) {
         planData = { phases: [], focusAreas: [] };
       }
@@ -1351,8 +1351,8 @@ interviewRouter.get("/session/:id", requireAuth, async (req: Request, res: Respo
     // Map plan data and add case study if needed
     let mappedPlan: any = mapPhasesToFrontendFormat(plan?.planJson);
     
-    // Add default case study data only if interview type is case_study and no case study exists in plan
-    const isCaseStudyMode = config?.interviewType === 'case_study' || config?.interviewMode === 'case_problem_solving';
+    // Add default case study data only if interview type is case_study/case and no case study exists in plan
+    const isCaseStudyMode = config?.interviewType === 'case_study' || config?.interviewType === 'case' || config?.interviewMode === 'case_problem_solving';
     
     if (isCaseStudyMode && mappedPlan && !mappedPlan.caseStudy) {
       const caseStudyPhase = mappedPlan.phases?.find((p: any) => 
