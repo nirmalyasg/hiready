@@ -26,6 +26,7 @@ import {
   codingExercises,
   roleTaskBlueprints,
   roleInterviewStructureDefaults,
+  interviewAssignments,
   RoleKit,
   UserDocument,
   InterviewConfig,
@@ -1738,6 +1739,54 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
             updatedAt: new Date(),
           });
       }
+    }
+    
+    // Update interview_assignments for Hiready Index tracking
+    const overallScore = dimensionScores.length > 0
+      ? dimensionScores.reduce((sum: number, d: any) => sum + (d.score || 0), 0) / dimensionScores.length
+      : 0;
+    
+    const [existingAssignment] = await db
+      .select()
+      .from(interviewAssignments)
+      .where(and(
+        eq(interviewAssignments.userId, userId),
+        config.roleKitId ? eq(interviewAssignments.roleKitId, config.roleKitId) : undefined,
+        config.jobTargetId ? eq(interviewAssignments.jobTargetId, config.jobTargetId) : undefined,
+        eq(interviewAssignments.interviewType, config.interviewType || 'general')
+      ));
+    
+    if (existingAssignment) {
+      const newAttemptCount = (existingAssignment.attemptCount || 0) + 1;
+      const isBestScore = overallScore > (existingAssignment.bestScore || 0);
+      
+      await db
+        .update(interviewAssignments)
+        .set({
+          attemptCount: newAttemptCount,
+          latestSessionId: sessionId,
+          latestScore: overallScore,
+          bestSessionId: isBestScore ? sessionId : existingAssignment.bestSessionId,
+          bestScore: isBestScore ? overallScore : existingAssignment.bestScore,
+          updatedAt: new Date(),
+        })
+        .where(eq(interviewAssignments.id, existingAssignment.id));
+    } else {
+      await db
+        .insert(interviewAssignments)
+        .values({
+          userId,
+          roleKitId: config.roleKitId || null,
+          jobTargetId: config.jobTargetId || null,
+          interviewType: config.interviewType || 'general',
+          attemptCount: 1,
+          latestSessionId: sessionId,
+          bestSessionId: sessionId,
+          latestScore: overallScore,
+          bestScore: overallScore,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
     }
     
     res.json({
