@@ -468,6 +468,7 @@ async function computeConsolidatedIndex(
 interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
+    console.log("[Hiready Index] userId from auth:", userId);
     if (!userId) {
       return res.status(401).json({ success: false, error: "Not authenticated" });
     }
@@ -487,6 +488,8 @@ interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, 
       .select()
       .from(interviewAssignments)
       .where(and(...conditions));
+    
+    console.log("[Hiready Index] Found assignments:", assignments.length);
 
     const interviewScores = assignments.map((a) => ({
       interviewType: a.interviewType,
