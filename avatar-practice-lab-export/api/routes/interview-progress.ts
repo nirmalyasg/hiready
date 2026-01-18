@@ -2099,4 +2099,679 @@ function getTypeSpecificMetrics(
   return metrics;
 }
 
+// =====================================================
+// UNIFIED FULL REPORT - Single endpoint for complete shareable page
+// =====================================================
+interviewProgressRouter.get("/full-report", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "Not authenticated" });
+    }
+
+    const { roleKitId, jobTargetId } = req.query;
+
+    if (!roleKitId && !jobTargetId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Role kit ID or Job target ID is required",
+      });
+    }
+
+    // Get role context and skills
+    let roleName = "General";
+    let companyContext: string | null = null;
+    let jdSkills: string[] = [];
+    let roleArchetypeId: string | null = null;
+
+    if (jobTargetId) {
+      const [jobTarget] = await db
+        .select()
+        .from(jobTargets)
+        .where(and(
+          eq(jobTargets.id, String(jobTargetId)),
+          eq(jobTargets.userId, userId)
+        ))
+        .limit(1);
+      
+      if (jobTarget) {
+        roleName = jobTarget.roleTitle || "Unknown Role";
+        companyContext = jobTarget.companyName || null;
+        roleArchetypeId = jobTarget.roleArchetypeId || null;
+        
+        const parsed = jobTarget.jdParsed as { requiredSkills?: string[]; preferredSkills?: string[] } | null;
+        if (parsed) {
+          jdSkills = [...(parsed.requiredSkills || []), ...(parsed.preferredSkills || [])];
+        }
+      }
+    } else if (roleKitId) {
+      const [roleKit] = await db
+        .select()
+        .from(roleKits)
+        .where(eq(roleKits.id, Number(roleKitId)))
+        .limit(1);
+      
+      if (roleKit) {
+        roleName = roleKit.name;
+        roleArchetypeId = roleKit.roleArchetypeId;
+        jdSkills = (roleKit.skillsFocus as string[]) || [];
+      }
+    }
+
+    // Categorize skills by interview type
+    const skillsByInterviewType = categorizeSkillsByInterviewType(jdSkills);
+
+    // Get all assignments for this role
+    const conditions = [eq(interviewAssignments.userId, userId)];
+    if (roleKitId) {
+      conditions.push(eq(interviewAssignments.roleKitId, Number(roleKitId)));
+    }
+    if (jobTargetId) {
+      conditions.push(eq(interviewAssignments.jobTargetId, String(jobTargetId)));
+    }
+
+    const assignments = await db
+      .select()
+      .from(interviewAssignments)
+      .where(and(...conditions));
+
+    // Get all session IDs
+    const allSessionIds: number[] = [];
+    for (const a of assignments) {
+      if (a.latestSessionId) allSessionIds.push(a.latestSessionId);
+      if (a.bestSessionId && a.bestSessionId !== a.latestSessionId) {
+        allSessionIds.push(a.bestSessionId);
+      }
+    }
+
+    // Get all configs for this user
+    const configConditions = [eq(interviewConfigs.userId, userId)];
+    if (roleKitId) {
+      configConditions.push(eq(interviewConfigs.roleKitId, Number(roleKitId)));
+    }
+    if (jobTargetId) {
+      configConditions.push(eq(interviewConfigs.jobTargetId, String(jobTargetId)));
+    }
+
+    const configs = await db
+      .select()
+      .from(interviewConfigs)
+      .where(and(...configConditions));
+
+    const configIds = configs.map(c => c.id);
+
+    // Fetch ALL sessions with their analyses (not just latest/best)
+    const allSessionsWithAnalysis = configIds.length > 0
+      ? await db
+          .select({
+            session: interviewSessions,
+            analysis: interviewAnalysis,
+            config: interviewConfigs,
+          })
+          .from(interviewSessions)
+          .leftJoin(interviewAnalysis, eq(interviewAnalysis.interviewSessionId, interviewSessions.id))
+          .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+          .where(inArray(interviewSessions.interviewConfigId, configIds))
+          .orderBy(desc(interviewSessions.createdAt))
+      : [];
+
+    // Group sessions by interview type
+    const sessionsByType: Record<string, typeof allSessionsWithAnalysis> = {};
+    for (const row of allSessionsWithAnalysis) {
+      const interviewType = row.config.interviewType || "general";
+      if (!sessionsByType[interviewType]) {
+        sessionsByType[interviewType] = [];
+      }
+      sessionsByType[interviewType].push(row);
+    }
+
+    // Build comprehensive per-type reports
+    const interviewTypeReports: Array<{
+      interviewType: string;
+      interviewTypeLabel: string;
+      relevantSkills: string[];
+      overallMetrics: {
+        overallScore: number | null;
+        readinessBand: ReadinessBand | null;
+        totalAttempts: number;
+        analyzedAttempts: number;
+        latestAttemptDate: string | null;
+      };
+      attempts: Array<{
+        sessionId: number;
+        attemptNumber: number;
+        createdAt: string;
+        status: string;
+        recommendation: string | null;
+        summary: string | null;
+        overallScore: number | null;
+        dimensionScores: any[];
+        strengths: string[];
+        improvements: string[];
+        risks: string[];
+        resultsUrl: string;
+      }>;
+      progressionData: Array<{ attemptNumber: number; date: string; score: number | null }>;
+      dimensionAverages: Array<{ dimension: string; avgScore: number; percentile: number }>;
+      topStrengths: Array<{ text: string; frequency: number }>;
+      topImprovements: Array<{ text: string; frequency: number }>;
+      typeSpecificMetrics: Record<string, any>;
+    }> = [];
+
+    // Process each interview type
+    for (const [interviewType, typeSessions] of Object.entries(sessionsByType)) {
+      const relevantSkills = skillsByInterviewType[interviewType] || [];
+
+      const attempts: typeof interviewTypeReports[0]["attempts"] = [];
+      let attemptNum = typeSessions.length;
+
+      // Track dimension scores
+      const allDimensionScores: Record<string, { total: number; count: number }> = {};
+
+      for (const { session, analysis, config } of typeSessions) {
+        const dimensionScores = (analysis?.dimensionScores as any[]) || [];
+        const strengths = (analysis?.strengths as string[]) || [];
+        const improvements = (analysis?.improvements as string[]) || [];
+        const risks = (analysis?.risks as string[]) || [];
+
+        let overallScore: number | null = null;
+        if (dimensionScores.length > 0) {
+          const avgScore = dimensionScores.reduce((sum, d) => sum + (d.score || 0), 0) / dimensionScores.length;
+          overallScore = Math.round((avgScore / 5) * 100);
+        }
+
+        attempts.push({
+          sessionId: session.id,
+          attemptNumber: attemptNum,
+          createdAt: session.createdAt?.toISOString() || new Date().toISOString(),
+          status: session.status,
+          recommendation: analysis?.overallRecommendation || null,
+          summary: analysis?.summary || null,
+          overallScore,
+          dimensionScores,
+          strengths,
+          improvements,
+          risks,
+          resultsUrl: `/interview/results?sessionId=${session.id}`,
+        });
+
+        // Track dimension scores
+        for (const dim of dimensionScores) {
+          const dimName = dim.dimension || "Unknown";
+          if (!allDimensionScores[dimName]) {
+            allDimensionScores[dimName] = { total: 0, count: 0 };
+          }
+          allDimensionScores[dimName].total += dim.score || 0;
+          allDimensionScores[dimName].count++;
+        }
+
+        attemptNum--;
+      }
+
+      // Sort attempts (oldest first)
+      attempts.sort((a, b) => a.attemptNumber - b.attemptNumber);
+
+      // Calculate dimension averages
+      const dimensionAverages = Object.entries(allDimensionScores).map(([dimension, data]) => ({
+        dimension,
+        avgScore: Math.round((data.total / data.count) * 10) / 10,
+        percentile: Math.round((data.total / data.count / 5) * 100),
+      }));
+
+      // Progression data
+      const progressionData = attempts
+        .filter(a => a.overallScore !== null)
+        .map(a => ({
+          attemptNumber: a.attemptNumber,
+          date: a.createdAt,
+          score: a.overallScore,
+        }));
+
+      // Strengths and improvements
+      const allStrengths = attempts.flatMap(a => a.strengths);
+      const allImprovements = attempts.flatMap(a => a.improvements);
+
+      const strengthCounts = allStrengths.reduce((acc, s) => {
+        acc[s] = (acc[s] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      const improvementCounts = allImprovements.reduce((acc, s) => {
+        acc[s] = (acc[s] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const topStrengths = Object.entries(strengthCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([s, count]) => ({ text: s, frequency: count }));
+
+      const topImprovements = Object.entries(improvementCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([s, count]) => ({ text: s, frequency: count }));
+
+      // Calculate overall metrics
+      const analyzedAttempts = attempts.filter(a => a.overallScore !== null);
+      const overallScore = analyzedAttempts.length > 0
+        ? Math.round(analyzedAttempts.reduce((sum, a) => sum + (a.overallScore || 0), 0) / analyzedAttempts.length)
+        : null;
+      const readinessBand = overallScore !== null ? getReadinessBand(overallScore) : null;
+
+      interviewTypeReports.push({
+        interviewType,
+        interviewTypeLabel: formatInterviewTypeLabel(interviewType),
+        relevantSkills,
+        overallMetrics: {
+          overallScore,
+          readinessBand,
+          totalAttempts: attempts.length,
+          analyzedAttempts: analyzedAttempts.length,
+          latestAttemptDate: attempts.length > 0 ? attempts[attempts.length - 1].createdAt : null,
+        },
+        attempts,
+        progressionData,
+        dimensionAverages,
+        topStrengths,
+        topImprovements,
+        typeSpecificMetrics: getTypeSpecificMetrics(interviewType, dimensionAverages, attempts),
+      });
+    }
+
+    // Sort by number of attempts (most practiced first)
+    interviewTypeReports.sort((a, b) => b.attempts.length - a.attempts.length);
+
+    // Calculate overall HiReady metrics
+    const allTypeScores = interviewTypeReports
+      .filter(t => t.overallMetrics.overallScore !== null)
+      .map(t => ({
+        type: t.interviewType,
+        score: t.overallMetrics.overallScore!,
+        weight: getInterviewWeight(t.interviewType),
+      }));
+
+    let overallWeightedScore = 0;
+    let totalWeight = 0;
+    for (const ts of allTypeScores) {
+      overallWeightedScore += ts.score * ts.weight;
+      totalWeight += ts.weight;
+    }
+    const consolidatedScore = totalWeight > 0 ? Math.round(overallWeightedScore / totalWeight) : null;
+
+    // Generate interview breakdown for overview
+    const interviewBreakdown = interviewTypeReports.map(report => {
+      const assignment = assignments.find(a => {
+        const matchingConfig = configs.find(c => 
+          c.interviewType === report.interviewType &&
+          (roleKitId ? c.roleKitId === Number(roleKitId) : true) &&
+          (jobTargetId ? c.jobTargetId === String(jobTargetId) : true)
+        );
+        return matchingConfig !== undefined;
+      });
+
+      return {
+        interviewType: report.interviewType,
+        weight: getInterviewWeight(report.interviewType),
+        attemptCount: report.attempts.length,
+        latestScore: report.overallMetrics.overallScore,
+        bestScore: report.attempts.length > 0
+          ? Math.max(...report.attempts.filter(a => a.overallScore !== null).map(a => a.overallScore!))
+          : null,
+        latestSessionId: report.attempts.length > 0 ? report.attempts[report.attempts.length - 1].sessionId : null,
+      };
+    });
+
+    // Calculate dimension aggregates across all interview types
+    const overallDimensions: Record<string, { total: number; count: number; weight: number }> = {};
+    for (const report of interviewTypeReports) {
+      for (const dim of report.dimensionAverages) {
+        const key = dim.dimension.toLowerCase().replace(/[^a-z_]/g, '_');
+        if (!overallDimensions[key]) {
+          overallDimensions[key] = { total: 0, count: 0, weight: 0 };
+        }
+        overallDimensions[key].total += dim.avgScore;
+        overallDimensions[key].count++;
+      }
+    }
+
+    const dimensions: DimensionResult[] = Object.entries(overallDimensions).map(([key, data]) => {
+      const score = data.total / data.count;
+      const weight = 1 / Object.keys(overallDimensions).length;
+      return {
+        key,
+        label: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        score: Math.round(score * 10) / 10,
+        weight,
+        weightedScore: Math.round(score * weight * 100) / 100,
+      };
+    });
+
+    // Get user info
+    const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+
+    // Calculate capability milestones
+    const totalSessions = interviewTypeReports.reduce((sum, r) => sum + r.attempts.length, 0);
+    const allAttemptScores = interviewTypeReports.flatMap(r => 
+      r.attempts.filter(a => a.overallScore !== null).map(a => ({
+        score: a.overallScore!,
+        sessionId: a.sessionId,
+        interviewType: r.interviewType,
+      }))
+    );
+    const bestAttempt = allAttemptScores.length > 0
+      ? allAttemptScores.reduce((best, curr) => curr.score > best.score ? curr : best)
+      : { score: 0, sessionId: null, interviewType: null };
+
+    // Session score history for overall chart
+    const sessionScoreHistory = interviewTypeReports.flatMap(r =>
+      r.attempts
+        .filter(a => a.overallScore !== null)
+        .map(a => ({
+          sessionId: a.sessionId,
+          date: a.createdAt,
+          score: a.overallScore!,
+          interviewType: r.interviewType,
+        }))
+    ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    // Strongest and weakest areas
+    const sortedTypes = [...allTypeScores].sort((a, b) => b.score - a.score);
+    const strongestAreas = sortedTypes.slice(0, 2).map(t => t.type);
+    const weakestAreas = sortedTypes.slice(-2).reverse().map(t => t.type);
+
+    res.json({
+      success: true,
+      fullReport: {
+        // User info
+        user: {
+          id: userId,
+          displayName: user?.displayName || user?.username || "Anonymous",
+        },
+        // Role context
+        role: {
+          name: roleName,
+          companyContext,
+          archetypeId: roleArchetypeId,
+          roleKitId: roleKitId ? Number(roleKitId) : null,
+          jobTargetId: jobTargetId ? String(jobTargetId) : null,
+        },
+        // Overall HiReady Score
+        overallScore: consolidatedScore,
+        readinessBand: consolidatedScore ? getReadinessBand(consolidatedScore) : null,
+        dimensions,
+        // Summary stats
+        totalSessions,
+        totalInterviewTypes: interviewTypeReports.length,
+        strongestAreas,
+        weakestAreas,
+        // Interview breakdown for overview cards
+        interviewBreakdown,
+        // Full session score history for overall chart
+        sessionScoreHistory,
+        // Capability milestones
+        capabilityMilestones: {
+          practiceVolume: totalSessions,
+          bestAttempt,
+          consistencyScore: allAttemptScores.length >= 3
+            ? Math.round(100 - (standardDeviation(allAttemptScores.map(a => a.score)) * 10))
+            : null,
+          coveragePercentage: Math.round((interviewTypeReports.length / 5) * 100), // Assuming 5 main interview types
+        },
+        // All skills
+        allSkills: jdSkills,
+        skillsByInterviewType,
+        // Complete per-type reports with all attempts
+        interviewTypeReports,
+        // Metadata
+        lastUpdated: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching full report:", error);
+    res.status(500).json({ success: false, error: "Failed to fetch full report" });
+  }
+});
+
+// Helper: Calculate standard deviation
+function standardDeviation(values: number[]): number {
+  if (values.length === 0) return 0;
+  const mean = values.reduce((a, b) => a + b, 0) / values.length;
+  const squaredDiffs = values.map(v => Math.pow(v - mean, 2));
+  return Math.sqrt(squaredDiffs.reduce((a, b) => a + b, 0) / values.length);
+}
+
+// Public share endpoint for full report
+interviewProgressRouter.get("/share/:token/full-report", async (req: Request, res: Response) => {
+  try {
+    const { token } = req.params;
+
+    // Find valid share link
+    const [shareLink] = await db
+      .select()
+      .from(hireadyShareLinks)
+      .where(
+        and(
+          eq(hireadyShareLinks.token, token),
+          sql`${hireadyShareLinks.revokedAt} IS NULL`,
+          sql`(${hireadyShareLinks.expiresAt} IS NULL OR ${hireadyShareLinks.expiresAt} > NOW())`
+        )
+      )
+      .limit(1);
+
+    if (!shareLink) {
+      return res.status(404).json({ success: false, error: "Share link not found or expired" });
+    }
+
+    // Increment view count
+    await db
+      .update(hireadyShareLinks)
+      .set({ viewCount: (shareLink.viewCount || 0) + 1 })
+      .where(eq(hireadyShareLinks.id, shareLink.id));
+
+    const userId = shareLink.userId;
+    const roleKitId = shareLink.roleKitId;
+    const jobTargetId = shareLink.jobTargetId;
+
+    // Get role context and skills
+    let roleName = "General";
+    let companyContext: string | null = null;
+    let jdSkills: string[] = [];
+    let roleArchetypeId: string | null = null;
+
+    if (jobTargetId) {
+      const [jobTarget] = await db
+        .select()
+        .from(jobTargets)
+        .where(and(
+          eq(jobTargets.id, String(jobTargetId)),
+          eq(jobTargets.userId, userId)
+        ))
+        .limit(1);
+      
+      if (jobTarget) {
+        roleName = jobTarget.roleTitle || "Unknown Role";
+        companyContext = jobTarget.companyName || null;
+        roleArchetypeId = jobTarget.roleArchetypeId || null;
+        
+        const parsed = jobTarget.jdParsed as { requiredSkills?: string[]; preferredSkills?: string[] } | null;
+        if (parsed) {
+          jdSkills = [...(parsed.requiredSkills || []), ...(parsed.preferredSkills || [])];
+        }
+      }
+    } else if (roleKitId) {
+      const [roleKit] = await db
+        .select()
+        .from(roleKits)
+        .where(eq(roleKits.id, Number(roleKitId)))
+        .limit(1);
+      
+      if (roleKit) {
+        roleName = roleKit.name;
+        roleArchetypeId = roleKit.roleArchetypeId;
+        jdSkills = (roleKit.skillsFocus as string[]) || [];
+      }
+    }
+
+    // Categorize skills
+    const skillsByInterviewType = categorizeSkillsByInterviewType(jdSkills);
+
+    // Get all assignments
+    const conditions: any[] = [eq(interviewAssignments.userId, userId)];
+    if (roleKitId) conditions.push(eq(interviewAssignments.roleKitId, Number(roleKitId)));
+    if (jobTargetId) conditions.push(eq(interviewAssignments.jobTargetId, String(jobTargetId)));
+
+    const assignments = await db
+      .select()
+      .from(interviewAssignments)
+      .where(and(...conditions));
+
+    // Get configs
+    const configConditions: any[] = [eq(interviewConfigs.userId, userId)];
+    if (roleKitId) configConditions.push(eq(interviewConfigs.roleKitId, Number(roleKitId)));
+    if (jobTargetId) configConditions.push(eq(interviewConfigs.jobTargetId, String(jobTargetId)));
+
+    const configs = await db
+      .select()
+      .from(interviewConfigs)
+      .where(and(...configConditions));
+
+    const configIds = configs.map(c => c.id);
+
+    // Fetch all sessions with analyses
+    const allSessionsWithAnalysis = configIds.length > 0
+      ? await db
+          .select({
+            session: interviewSessions,
+            analysis: interviewAnalysis,
+            config: interviewConfigs,
+          })
+          .from(interviewSessions)
+          .leftJoin(interviewAnalysis, eq(interviewAnalysis.interviewSessionId, interviewSessions.id))
+          .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+          .where(inArray(interviewSessions.interviewConfigId, configIds))
+          .orderBy(desc(interviewSessions.createdAt))
+      : [];
+
+    // Group by interview type and build reports (same logic as authenticated endpoint)
+    const sessionsByType: Record<string, typeof allSessionsWithAnalysis> = {};
+    for (const row of allSessionsWithAnalysis) {
+      const interviewType = row.config.interviewType || "general";
+      if (!sessionsByType[interviewType]) {
+        sessionsByType[interviewType] = [];
+      }
+      sessionsByType[interviewType].push(row);
+    }
+
+    const interviewTypeReports: any[] = [];
+    for (const [interviewType, typeSessions] of Object.entries(sessionsByType)) {
+      const relevantSkills = skillsByInterviewType[interviewType] || [];
+      const attempts: any[] = [];
+      let attemptNum = typeSessions.length;
+      const allDimensionScores: Record<string, { total: number; count: number }> = {};
+
+      for (const { session, analysis } of typeSessions) {
+        const dimensionScores = (analysis?.dimensionScores as any[]) || [];
+        const strengths = (analysis?.strengths as string[]) || [];
+        const improvements = (analysis?.improvements as string[]) || [];
+
+        let overallScore: number | null = null;
+        if (dimensionScores.length > 0) {
+          const avgScore = dimensionScores.reduce((sum, d) => sum + (d.score || 0), 0) / dimensionScores.length;
+          overallScore = Math.round((avgScore / 5) * 100);
+        }
+
+        attempts.push({
+          sessionId: session.id,
+          attemptNumber: attemptNum,
+          createdAt: session.createdAt?.toISOString() || new Date().toISOString(),
+          overallScore,
+          dimensionScores,
+          strengths,
+          improvements,
+        });
+
+        for (const dim of dimensionScores) {
+          const dimName = dim.dimension || "Unknown";
+          if (!allDimensionScores[dimName]) {
+            allDimensionScores[dimName] = { total: 0, count: 0 };
+          }
+          allDimensionScores[dimName].total += dim.score || 0;
+          allDimensionScores[dimName].count++;
+        }
+
+        attemptNum--;
+      }
+
+      attempts.sort((a, b) => a.attemptNumber - b.attemptNumber);
+
+      const dimensionAverages = Object.entries(allDimensionScores).map(([dimension, data]) => ({
+        dimension,
+        avgScore: Math.round((data.total / data.count) * 10) / 10,
+        percentile: Math.round((data.total / data.count / 5) * 100),
+      }));
+
+      const progressionData = attempts
+        .filter(a => a.overallScore !== null)
+        .map(a => ({ attemptNumber: a.attemptNumber, date: a.createdAt, score: a.overallScore }));
+
+      const analyzedAttempts = attempts.filter(a => a.overallScore !== null);
+      const overallScore = analyzedAttempts.length > 0
+        ? Math.round(analyzedAttempts.reduce((sum, a) => sum + (a.overallScore || 0), 0) / analyzedAttempts.length)
+        : null;
+
+      interviewTypeReports.push({
+        interviewType,
+        interviewTypeLabel: formatInterviewTypeLabel(interviewType),
+        relevantSkills,
+        overallMetrics: {
+          overallScore,
+          readinessBand: overallScore !== null ? getReadinessBand(overallScore) : null,
+          totalAttempts: attempts.length,
+          analyzedAttempts: analyzedAttempts.length,
+        },
+        attempts,
+        progressionData,
+        dimensionAverages,
+      });
+    }
+
+    interviewTypeReports.sort((a, b) => b.attempts.length - a.attempts.length);
+
+    // Calculate overall score
+    const allTypeScores = interviewTypeReports
+      .filter(t => t.overallMetrics.overallScore !== null)
+      .map(t => ({ type: t.interviewType, score: t.overallMetrics.overallScore!, weight: getInterviewWeight(t.interviewType) }));
+
+    let overallWeightedScore = 0;
+    let totalWeight = 0;
+    for (const ts of allTypeScores) {
+      overallWeightedScore += ts.score * ts.weight;
+      totalWeight += ts.weight;
+    }
+    const consolidatedScore = totalWeight > 0 ? Math.round(overallWeightedScore / totalWeight) : null;
+
+    // Get user info
+    const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+
+    res.json({
+      success: true,
+      isSharedView: true,
+      fullReport: {
+        user: { displayName: user?.displayName || user?.username || "Anonymous" },
+        role: { name: roleName, companyContext, archetypeId: roleArchetypeId },
+        overallScore: consolidatedScore,
+        readinessBand: consolidatedScore ? getReadinessBand(consolidatedScore) : null,
+        totalSessions: allSessionsWithAnalysis.length,
+        totalInterviewTypes: interviewTypeReports.length,
+        allSkills: jdSkills,
+        skillsByInterviewType,
+        interviewTypeReports,
+        lastUpdated: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching shared full report:", error);
+    res.status(500).json({ success: false, error: "Failed to fetch shared report" });
+  }
+});
+
 export default interviewProgressRouter;
