@@ -1502,13 +1502,14 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
       jdSkills = extractSkillsFromParsed(jdParsed);
     }
     
-    // If no skills from JD doc, try to get from jobTarget's parsedData and direct fields
+    // If no skills from JD doc, try to get from jobTarget's jdParsed/parsedData and direct fields
     if (jdSkills.length === 0 && session.jobTargetId) {
       const [jobTarget] = await db.select().from(jobTargets).where(eq(jobTargets.id, session.jobTargetId));
       if (jobTarget) {
-        // First check parsedData
-        if (jobTarget.parsedData) {
-          jdSkills = extractSkillsFromParsed(jobTarget.parsedData);
+        // First check jdParsed (from schema) and parsedData
+        const parsedDataForSkills = (jobTarget as any).jdParsed || (jobTarget as any).parsedData;
+        if (parsedDataForSkills) {
+          jdSkills = extractSkillsFromParsed(parsedDataForSkills);
         }
         // Also check top-level analysisDimensions and interviewTopics
         if (jdSkills.length === 0) {
@@ -1553,22 +1554,37 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
     if (session.jobTargetId) {
       const [jobTarget] = await db.select().from(jobTargets).where(eq(jobTargets.id, session.jobTargetId));
       if (jobTarget) {
-        const parsedData = (jobTarget as any).parsedData;
+        // Check both jdParsed (from schema) and parsedData fields
+        const parsedData = (jobTarget as any).jdParsed || (jobTarget as any).parsedData;
         if (parsedData) {
           jobTargetParsedData = typeof parsedData === 'string' ? JSON.parse(parsedData) : parsedData;
           
           // Extract and normalize analysisDimensions from parsedData
           const rawDimensions = jobTargetParsedData.analysisDimensions || jobTargetParsedData.analysis_dimensions;
           const rawTopics = jobTargetParsedData.interviewTopics || jobTargetParsedData.interview_topics;
-          const normalizedDimensions = normalizeDimensions(rawDimensions);
+          let normalizedDimensions = normalizeDimensions(rawDimensions);
           const normalizedTopics = normalizeDimensions(rawTopics);
+          
+          // If no explicit analysisDimensions, use requiredSkills + preferredSkills as the dimensions
+          const mustHaveSkills = normalizeDimensions(jobTargetParsedData.requiredSkills || jobTargetParsedData.required_skills);
+          const niceToHaveSkills = normalizeDimensions(jobTargetParsedData.preferredSkills || jobTargetParsedData.preferred_skills);
+          
+          if (normalizedDimensions.length === 0 && (mustHaveSkills.length > 0 || niceToHaveSkills.length > 0)) {
+            // Use JD skills as analysis dimensions - prioritize requiredSkills (all of them), then add preferredSkills up to limit
+            // Limit to 10 dimensions total to keep scoring manageable while covering key JD skills
+            const allJdSkills = [...mustHaveSkills];
+            const remainingSlots = Math.max(0, 10 - allJdSkills.length);
+            allJdSkills.push(...niceToHaveSkills.slice(0, remainingSlots));
+            normalizedDimensions = allJdSkills.slice(0, 10);
+            console.log(`[Interview Analysis] Session ${sessionId}: using JD skills as analysisDimensions (${mustHaveSkills.length} required + ${Math.min(remainingSlots, niceToHaveSkills.length)} preferred): ${normalizedDimensions.slice(0, 5).join(', ')}...`);
+          }
           
           if (normalizedDimensions.length > 0) {
             jdExtract = {
               analysisDimensions: normalizedDimensions,
               interviewTopics: normalizedTopics,
-              mustHave: normalizeDimensions(jobTargetParsedData.requiredSkills || jobTargetParsedData.required_skills),
-              niceToHave: normalizeDimensions(jobTargetParsedData.preferredSkills || jobTargetParsedData.preferred_skills),
+              mustHave: mustHaveSkills,
+              niceToHave: niceToHaveSkills,
               keywords: normalizeDimensions(jobTargetParsedData.keywords),
               senioritySignal: jobTargetParsedData.seniority,
             };
@@ -1587,13 +1603,28 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
       console.log(`[Interview Analysis] Session ${sessionId}: using fallback jdSkills as analysisDimensions`);
     }
     
+    // Final fallback: use roleKit.skillsFocus if no JD extract available
+    if (!jdExtract && roleKitData?.skillsFocus) {
+      const roleKitSkillsFocus = (roleKitData.skillsFocus as string[]) || [];
+      if (roleKitSkillsFocus.length > 0) {
+        jdExtract = {
+          analysisDimensions: roleKitSkillsFocus.slice(0, 10),
+          interviewTopics: [],
+        };
+        console.log(`[Interview Analysis] Session ${sessionId}: using roleKit skillsFocus as analysisDimensions (${roleKitSkillsFocus.length} skills): ${roleKitSkillsFocus.slice(0, 5).join(', ')}...`);
+      }
+    }
+    
     // Build dynamic rubric from JD if available
     const roleCategory = roleKitData?.roleCategory || roleKitData?.domain || 'general';
     let dynamicRubric: DynamicEvaluationRubric | null = null;
     
     if (jdExtract && jdExtract.analysisDimensions && jdExtract.analysisDimensions.length > 0) {
       dynamicRubric = buildDynamicRubric(roleCategory, jdExtract);
-      console.log(`[Interview Analysis] Session ${sessionId}: built dynamic rubric with ${dynamicRubric.dimensions.length} dimensions, JD-critical: ${dynamicRubric.jdCriticalDimensions.join(', ')}`);
+      const jdDimNames = dynamicRubric.dimensions.filter(d => d.isFromJd).map(d => d.name);
+      console.log(`[Interview Analysis] Session ${sessionId}: ✅ DYNAMIC RUBRIC built with ${dynamicRubric.dimensions.length} dimensions (${jdDimNames.length} from JD: ${jdDimNames.slice(0, 5).join(', ')}${jdDimNames.length > 5 ? '...' : ''})`);
+    } else {
+      console.log(`[Interview Analysis] Session ${sessionId}: ⚠️ NO JD EXTRACT - using default fixed rubric (jdExtract: ${!!jdExtract}, analysisDimensions: ${jdExtract?.analysisDimensions?.length || 0})`);
     }
 
     const evaluatorContext = {
