@@ -297,10 +297,27 @@ export default function PublicSharePage() {
 
                     {isExpanded && (
                       <div className="p-6 space-y-6 border-t">
-                        {/* Dimension Averages */}
+                        {/* JD-Specific Skills - Show first */}
+                        {report.relevantSkills && report.relevantSkills.length > 0 && (
+                          <div className="p-4 bg-gradient-to-r from-[#24c4b8]/10 to-transparent rounded-lg border border-[#24c4b8]/20">
+                            <h5 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                              <Target className="w-4 h-4 text-[#24c4b8]" />
+                              Skills Being Assessed
+                            </h5>
+                            <div className="flex flex-wrap gap-2">
+                              {report.relevantSkills.map((skill, i) => (
+                                <Badge key={i} className="bg-[#24c4b8]/10 text-gray-700 border-[#24c4b8]/30">
+                                  {skill}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Interview Performance Rubric */}
                         {report.dimensionAverages.length > 0 && (
                           <div>
-                            <h5 className="text-sm font-medium text-gray-700 mb-3">Skill Dimensions</h5>
+                            <h5 className="text-sm font-medium text-gray-700 mb-3">Interview Performance</h5>
                             <div className="grid sm:grid-cols-2 gap-3">
                               {report.dimensionAverages.map((dim) => (
                                 <div key={dim.dimension} className="flex items-center gap-3">
