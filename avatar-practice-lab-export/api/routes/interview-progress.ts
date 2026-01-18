@@ -2446,7 +2446,7 @@ interviewProgressRouter.get("/full-report", requireAuth, async (req: Request, re
     });
 
     // Get user info
-    const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    const [user] = await db.select().from(authUsers).where(eq(authUsers.id, userId)).limit(1);
 
     // Calculate capability milestones
     const totalSessions = interviewTypeReports.reduce((sum, r) => sum + r.attempts.length, 0);
@@ -2484,7 +2484,9 @@ interviewProgressRouter.get("/full-report", requireAuth, async (req: Request, re
         // User info
         user: {
           id: userId,
-          displayName: user?.displayName || user?.username || "Anonymous",
+          displayName: user?.firstName && user?.lastName 
+            ? `${user.firstName} ${user.lastName}` 
+            : user?.username || "Anonymous",
         },
         // Role context
         role: {
@@ -2750,13 +2752,13 @@ interviewProgressRouter.get("/share/:token/full-report", async (req: Request, re
     const consolidatedScore = totalWeight > 0 ? Math.round(overallWeightedScore / totalWeight) : null;
 
     // Get user info
-    const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    const [user] = await db.select().from(authUsers).where(eq(authUsers.id, userId)).limit(1);
 
     res.json({
       success: true,
       isSharedView: true,
       fullReport: {
-        user: { displayName: user?.displayName || user?.username || "Anonymous" },
+        user: { displayName: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.username || "Anonymous" },
         role: { name: roleName, companyContext, archetypeId: roleArchetypeId },
         overallScore: consolidatedScore,
         readinessBand: consolidatedScore ? getReadinessBand(consolidatedScore) : null,
