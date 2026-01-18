@@ -542,10 +542,10 @@ interviewProgressRouter.get("/hiready-roles", requireAuth, async (req: Request, 
       .from(interviewAssignments)
       .where(eq(interviewAssignments.userId, userId));
 
-    const uniqueRoleKitIds = [...new Set(assignments.filter(a => a.roleKitId).map(a => a.roleKitId))];
-    const uniqueJobTargetIds = [...new Set(assignments.filter(a => a.jobTargetId).map(a => a.jobTargetId))];
+    const uniqueRoleKitIds = [...new Set(assignments.filter(a => a.roleKitId).map(a => a.roleKitId))] as number[];
+    const uniqueJobTargetIds = [...new Set(assignments.filter(a => a.jobTargetId).map(a => a.jobTargetId))] as string[];
 
-    // Fetch role kit details
+    // Fetch role kit details with parameterized query
     const roleKitDetails = uniqueRoleKitIds.length > 0
       ? await db
           .select({
@@ -554,10 +554,10 @@ interviewProgressRouter.get("/hiready-roles", requireAuth, async (req: Request, 
             archetypeId: roleKits.roleArchetypeId,
           })
           .from(roleKits)
-          .where(sql`${roleKits.id} = ANY(${sql.raw(`ARRAY[${uniqueRoleKitIds.join(',')}]`)})`)
+          .where(inArray(roleKits.id, uniqueRoleKitIds))
       : [];
 
-    // Fetch job target details
+    // Fetch job target details with parameterized query and userId filter
     const jobTargetDetails = uniqueJobTargetIds.length > 0
       ? await db
           .select({
@@ -567,7 +567,10 @@ interviewProgressRouter.get("/hiready-roles", requireAuth, async (req: Request, 
             roleArchetypeId: jobTargets.roleArchetypeId,
           })
           .from(jobTargets)
-          .where(sql`${jobTargets.id} = ANY(${sql.raw(`ARRAY['${uniqueJobTargetIds.join("','")}']`)})`)
+          .where(and(
+            inArray(jobTargets.id, uniqueJobTargetIds),
+            eq(jobTargets.userId, userId)
+          ))
       : [];
 
     res.json({
@@ -633,7 +636,10 @@ interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, 
       const [jobTarget] = await db
         .select()
         .from(jobTargets)
-        .where(eq(jobTargets.id, String(jobTargetId)))
+        .where(and(
+          eq(jobTargets.id, String(jobTargetId)),
+          eq(jobTargets.userId, userId)
+        ))
         .limit(1);
       
       if (jobTarget) {
@@ -689,7 +695,7 @@ interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, 
             improvements: interviewAnalysis.improvements,
           })
           .from(interviewAnalysis)
-          .where(sql`${interviewAnalysis.interviewSessionId} = ANY(${sql.raw(`ARRAY[${sessionIds.join(',')}]`)})`)
+          .where(inArray(interviewAnalysis.interviewSessionId, sessionIds))
       : [];
 
     // Aggregate dimension scores across all sessions
@@ -1098,7 +1104,10 @@ interviewProgressRouter.get("/comprehensive-analysis", requireAuth, async (req: 
       const [jobTarget] = await db
         .select()
         .from(jobTargets)
-        .where(eq(jobTargets.id, String(jobTargetId)))
+        .where(and(
+          eq(jobTargets.id, String(jobTargetId)),
+          eq(jobTargets.userId, userId)
+        ))
         .limit(1);
       
       if (jobTarget) {
@@ -1489,7 +1498,7 @@ interviewProgressRouter.get("/share/:token", async (req: Request, res: Response)
             strengths: interviewAnalysis.strengths,
           })
           .from(interviewAnalysis)
-          .where(sql`${interviewAnalysis.interviewSessionId} = ANY(${sql.raw(`ARRAY[${sessionIds.join(',')}]`)})`)
+          .where(inArray(interviewAnalysis.interviewSessionId, sessionIds))
       : [];
 
     // Aggregate dimension scores
@@ -1604,5 +1613,490 @@ interviewProgressRouter.post("/share/:token/revoke", requireAuth, async (req: Re
     res.status(500).json({ success: false, error: "Failed to revoke share link" });
   }
 });
+
+// Detailed Interview Type Report - Deep analysis for a specific interview type
+interviewProgressRouter.get("/interview-type-report", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "Not authenticated" });
+    }
+
+    const { roleKitId, jobTargetId, interviewType } = req.query;
+
+    if (!interviewType) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Interview type is required",
+      });
+    }
+
+    if (!roleKitId && !jobTargetId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Role kit ID or Job target ID is required",
+      });
+    }
+
+    // Get role context and skills
+    let roleName = "General";
+    let companyContext: string | null = null;
+    let jdSkills: string[] = [];
+    let roleArchetypeId: string | null = null;
+
+    if (jobTargetId) {
+      const [jobTarget] = await db
+        .select()
+        .from(jobTargets)
+        .where(and(
+          eq(jobTargets.id, String(jobTargetId)),
+          eq(jobTargets.userId, userId)
+        ))
+        .limit(1);
+      
+      if (jobTarget) {
+        roleName = jobTarget.roleTitle || "Unknown Role";
+        companyContext = jobTarget.companyName || null;
+        roleArchetypeId = jobTarget.roleArchetypeId || null;
+        
+        const parsed = jobTarget.jdParsed as { requiredSkills?: string[]; preferredSkills?: string[] } | null;
+        if (parsed) {
+          jdSkills = [...(parsed.requiredSkills || []), ...(parsed.preferredSkills || [])];
+        }
+      }
+    } else if (roleKitId) {
+      const [roleKit] = await db
+        .select()
+        .from(roleKits)
+        .where(eq(roleKits.id, Number(roleKitId)))
+        .limit(1);
+      
+      if (roleKit) {
+        roleName = roleKit.name;
+        roleArchetypeId = roleKit.roleArchetypeId;
+        jdSkills = (roleKit.skillsFocus as string[]) || [];
+      }
+    }
+
+    // Categorize skills by interview type and get skills relevant to this interview type
+    const skillsByInterviewType = categorizeSkillsByInterviewType(jdSkills);
+    const relevantSkills = skillsByInterviewType[String(interviewType)] || [];
+
+    // Get all configs for this user with the specific interview type
+    const configConditions = [
+      eq(interviewConfigs.userId, userId),
+      eq(interviewConfigs.interviewType, String(interviewType) as any),
+    ];
+    if (roleKitId) {
+      configConditions.push(eq(interviewConfigs.roleKitId, Number(roleKitId)));
+    }
+    if (jobTargetId) {
+      configConditions.push(eq(interviewConfigs.jobTargetId, String(jobTargetId)));
+    }
+
+    const configs = await db
+      .select()
+      .from(interviewConfigs)
+      .where(and(...configConditions));
+
+    if (configs.length === 0) {
+      return res.json({
+        success: true,
+        report: null,
+        message: `No ${interviewType} interview sessions found for this role`,
+        role: { name: roleName, companyContext },
+        interviewType: String(interviewType),
+        relevantSkills,
+      });
+    }
+
+    const configIds = configs.map(c => c.id);
+
+    // Fetch all sessions with their analyses for these configs
+    const sessionsWithAnalysis = await db
+      .select({
+        session: interviewSessions,
+        analysis: interviewAnalysis,
+        config: interviewConfigs,
+      })
+      .from(interviewSessions)
+      .leftJoin(interviewAnalysis, eq(interviewAnalysis.interviewSessionId, interviewSessions.id))
+      .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+      .where(inArray(interviewSessions.interviewConfigId, configIds))
+      .orderBy(desc(interviewSessions.createdAt));
+
+    // Build attempt-by-attempt data
+    const attempts: Array<{
+      sessionId: number;
+      attemptNumber: number;
+      createdAt: string;
+      status: string;
+      recommendation: string | null;
+      summary: string | null;
+      overallScore: number | null;
+      dimensionScores: Array<{
+        dimension: string;
+        score: number;
+        evidence: string[];
+        rationale: string;
+        improvement: string;
+      }>;
+      strengths: string[];
+      improvements: string[];
+      risks: string[];
+      betterAnswers: Array<{ question: string; betterAnswer: string }>;
+      resultsUrl: string;
+    }> = [];
+
+    // Track skill-by-skill scores across all attempts
+    const skillScoreHistory: Record<string, Array<{
+      attemptNumber: number;
+      sessionId: number;
+      score: number;
+      date: string;
+    }>> = {};
+
+    // Initialize relevant skills tracking
+    for (const skill of relevantSkills) {
+      skillScoreHistory[skill] = [];
+    }
+
+    // Also track dimension scores across attempts
+    const dimensionScoreHistory: Record<string, Array<{
+      attemptNumber: number;
+      sessionId: number;
+      score: number;
+      date: string;
+    }>> = {};
+
+    let attemptNum = sessionsWithAnalysis.length;
+    for (const { session, analysis, config } of sessionsWithAnalysis) {
+      const dimensionScores = (analysis?.dimensionScores as any[]) || [];
+      const strengths = (analysis?.strengths as string[]) || [];
+      const improvements = (analysis?.improvements as string[]) || [];
+      const risks = (analysis?.risks as string[]) || [];
+      const betterAnswers = (analysis?.betterAnswers as any[]) || [];
+
+      // Calculate overall score from dimensions
+      let overallScore: number | null = null;
+      if (dimensionScores.length > 0) {
+        const avgScore = dimensionScores.reduce((sum, d) => sum + (d.score || 0), 0) / dimensionScores.length;
+        overallScore = Math.round((avgScore / 5) * 100);
+      }
+
+      attempts.push({
+        sessionId: session.id,
+        attemptNumber: attemptNum,
+        createdAt: session.createdAt?.toISOString() || new Date().toISOString(),
+        status: session.status,
+        recommendation: analysis?.overallRecommendation || null,
+        summary: analysis?.summary || null,
+        overallScore,
+        dimensionScores,
+        strengths,
+        improvements,
+        risks,
+        betterAnswers,
+        resultsUrl: `/interview/results?sessionId=${session.id}`,
+      });
+
+      // Track dimension scores over time
+      for (const dimScore of dimensionScores) {
+        const dimName = dimScore.dimension || "Unknown";
+        if (!dimensionScoreHistory[dimName]) {
+          dimensionScoreHistory[dimName] = [];
+        }
+        dimensionScoreHistory[dimName].push({
+          attemptNumber: attemptNum,
+          sessionId: session.id,
+          score: dimScore.score || 0,
+          date: session.createdAt?.toISOString() || new Date().toISOString(),
+        });
+
+        // Map dimension to relevant skills if possible
+        const mappedSkill = mapDimensionToSkill(dimName, relevantSkills);
+        if (mappedSkill && skillScoreHistory[mappedSkill]) {
+          skillScoreHistory[mappedSkill].push({
+            attemptNumber: attemptNum,
+            sessionId: session.id,
+            score: dimScore.score || 0,
+            date: session.createdAt?.toISOString() || new Date().toISOString(),
+          });
+        }
+      }
+
+      attemptNum--;
+    }
+
+    // Sort attempts by attempt number (oldest first for progression display)
+    attempts.sort((a, b) => a.attemptNumber - b.attemptNumber);
+
+    // Calculate skill summaries with trends
+    const skillSummaries: Array<{
+      skill: string;
+      latestScore: number | null;
+      avgScore: number | null;
+      trend: "improving" | "declining" | "stable" | "insufficient_data";
+      attemptCount: number;
+      bestScore: number | null;
+      evidenceSnippets: string[];
+    }> = [];
+
+    for (const skill of relevantSkills) {
+      const history = skillScoreHistory[skill] || [];
+      if (history.length === 0) {
+        skillSummaries.push({
+          skill,
+          latestScore: null,
+          avgScore: null,
+          trend: "insufficient_data",
+          attemptCount: 0,
+          bestScore: null,
+          evidenceSnippets: [],
+        });
+        continue;
+      }
+
+      const sortedHistory = [...history].sort((a, b) => a.attemptNumber - b.attemptNumber);
+      const latestScore = sortedHistory[sortedHistory.length - 1]?.score || null;
+      const avgScore = Math.round((history.reduce((sum, h) => sum + h.score, 0) / history.length) * 10) / 10;
+      const bestScore = Math.max(...history.map(h => h.score));
+
+      // Determine trend
+      let trend: "improving" | "declining" | "stable" | "insufficient_data" = "insufficient_data";
+      if (sortedHistory.length >= 2) {
+        const firstHalf = sortedHistory.slice(0, Math.ceil(sortedHistory.length / 2));
+        const secondHalf = sortedHistory.slice(Math.ceil(sortedHistory.length / 2));
+        const firstAvg = firstHalf.reduce((sum, h) => sum + h.score, 0) / firstHalf.length;
+        const secondAvg = secondHalf.reduce((sum, h) => sum + h.score, 0) / secondHalf.length;
+        const diff = secondAvg - firstAvg;
+        if (diff > 0.3) trend = "improving";
+        else if (diff < -0.3) trend = "declining";
+        else trend = "stable";
+      }
+
+      skillSummaries.push({
+        skill,
+        latestScore,
+        avgScore,
+        trend,
+        attemptCount: history.length,
+        bestScore,
+        evidenceSnippets: [],
+      });
+    }
+
+    // Calculate overall metrics for this interview type
+    const analyzedAttempts = attempts.filter(a => a.overallScore !== null);
+    const overallScore = analyzedAttempts.length > 0
+      ? Math.round(analyzedAttempts.reduce((sum, a) => sum + (a.overallScore || 0), 0) / analyzedAttempts.length)
+      : null;
+
+    // Aggregate all dimension scores
+    const allDimensionScores: Record<string, { total: number; count: number }> = {};
+    for (const attempt of attempts) {
+      for (const dim of attempt.dimensionScores) {
+        if (!allDimensionScores[dim.dimension]) {
+          allDimensionScores[dim.dimension] = { total: 0, count: 0 };
+        }
+        allDimensionScores[dim.dimension].total += dim.score || 0;
+        allDimensionScores[dim.dimension].count++;
+      }
+    }
+
+    const dimensionAverages = Object.entries(allDimensionScores).map(([dimension, data]) => ({
+      dimension,
+      avgScore: Math.round((data.total / data.count) * 10) / 10,
+      percentile: Math.round((data.total / data.count / 5) * 100),
+    }));
+
+    // Collect all strengths and improvements across attempts
+    const allStrengths = attempts.flatMap(a => a.strengths);
+    const allImprovements = attempts.flatMap(a => a.improvements);
+    const allRisks = attempts.flatMap(a => a.risks);
+
+    // Count frequency of each
+    const strengthCounts = allStrengths.reduce((acc, s) => {
+      acc[s] = (acc[s] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    const improvementCounts = allImprovements.reduce((acc, s) => {
+      acc[s] = (acc[s] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const topStrengths = Object.entries(strengthCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([s, count]) => ({ text: s, frequency: count }));
+
+    const topImprovements = Object.entries(improvementCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([s, count]) => ({ text: s, frequency: count }));
+
+    // Calculate progression data for chart
+    const progressionData = attempts
+      .filter(a => a.overallScore !== null)
+      .map(a => ({
+        attemptNumber: a.attemptNumber,
+        date: a.createdAt,
+        score: a.overallScore,
+      }));
+
+    // Determine readiness band
+    const readinessBand = overallScore !== null ? getReadinessBand(overallScore) : null;
+
+    // Generate interview-type specific metrics
+    const typeSpecificMetrics = getTypeSpecificMetrics(String(interviewType), dimensionAverages, attempts);
+
+    // Calculate skill coverage (skills practiced vs total relevant skills)
+    const skillsCovered = skillSummaries.filter(s => s.attemptCount > 0).length;
+    const skillCoverage = {
+      covered: skillsCovered,
+      total: relevantSkills.length,
+      percentage: relevantSkills.length > 0 ? Math.round((skillsCovered / relevantSkills.length) * 100) : 0,
+      uncoveredSkills: skillSummaries.filter(s => s.attemptCount === 0).map(s => s.skill),
+    };
+
+    res.json({
+      success: true,
+      report: {
+        role: {
+          name: roleName,
+          companyContext,
+          archetypeId: roleArchetypeId,
+        },
+        interviewType: String(interviewType),
+        interviewTypeLabel: formatInterviewTypeLabel(String(interviewType)),
+        relevantSkills,
+        overallMetrics: {
+          overallScore,
+          readinessBand,
+          totalAttempts: attempts.length,
+          analyzedAttempts: analyzedAttempts.length,
+          latestAttemptDate: attempts.length > 0 ? attempts[attempts.length - 1].createdAt : null,
+        },
+        skillSummaries,
+        skillCoverage,
+        dimensionAverages,
+        typeSpecificMetrics,
+        attempts,
+        progressionData,
+        topStrengths,
+        topImprovements,
+        commonRisks: [...new Set(allRisks)].slice(0, 5),
+        lastUpdated: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching interview type report:", error);
+    res.status(500).json({ success: false, error: "Failed to fetch interview type report" });
+  }
+});
+
+// Helper: Map dimension name to relevant skill
+function mapDimensionToSkill(dimension: string, relevantSkills: string[]): string | null {
+  const lower = dimension.toLowerCase();
+  for (const skill of relevantSkills) {
+    const skillLower = skill.toLowerCase();
+    if (lower.includes(skillLower) || skillLower.includes(lower)) {
+      return skill;
+    }
+    // Check for common mappings
+    if ((lower.includes("problem") || lower.includes("solving")) && 
+        (skillLower.includes("problem") || skillLower.includes("analytical"))) {
+      return skill;
+    }
+    if (lower.includes("communication") && skillLower.includes("communication")) {
+      return skill;
+    }
+    if (lower.includes("clarity") && (skillLower.includes("clarity") || skillLower.includes("communication"))) {
+      return skill;
+    }
+  }
+  return null;
+}
+
+// Helper: Format interview type as readable label
+function formatInterviewTypeLabel(type: string): string {
+  const labels: Record<string, string> = {
+    technical: "Technical Interview",
+    coding: "Coding Interview",
+    behavioral: "Behavioral Interview",
+    case_study: "Case Study Interview",
+    case: "Case Interview",
+    system_design: "System Design Interview",
+    hr: "HR Screening",
+    hiring_manager: "Hiring Manager Interview",
+    sql: "SQL Technical Interview",
+    ml: "Machine Learning Interview",
+    analytics: "Analytics Interview",
+    panel: "Panel Interview",
+    product_sense: "Product Sense Interview",
+    general: "General Interview",
+    skill_practice: "Skill Practice",
+  };
+  return labels[type] || type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+}
+
+// Helper: Get interview-type-specific metrics
+function getTypeSpecificMetrics(
+  interviewType: string,
+  dimensionAverages: Array<{ dimension: string; avgScore: number; percentile: number }>,
+  attempts: any[]
+): Record<string, any> {
+  const metrics: Record<string, any> = {};
+
+  switch (interviewType) {
+    case "technical":
+    case "coding":
+      metrics.focusAreas = ["Problem Solving", "Code Quality", "Algorithm Knowledge", "Debugging Skills"];
+      metrics.keyDimensions = dimensionAverages.filter(d => 
+        d.dimension.toLowerCase().includes("problem") ||
+        d.dimension.toLowerCase().includes("depth") ||
+        d.dimension.toLowerCase().includes("technical")
+      );
+      break;
+    case "behavioral":
+      metrics.focusAreas = ["STAR Structure", "Leadership Examples", "Communication Clarity", "Self-Awareness"];
+      metrics.keyDimensions = dimensionAverages.filter(d => 
+        d.dimension.toLowerCase().includes("clarity") ||
+        d.dimension.toLowerCase().includes("confidence") ||
+        d.dimension.toLowerCase().includes("structure")
+      );
+      break;
+    case "case_study":
+    case "case":
+      metrics.focusAreas = ["Structured Thinking", "Hypothesis Formation", "Data Analysis", "Recommendation Quality"];
+      metrics.keyDimensions = dimensionAverages.filter(d => 
+        d.dimension.toLowerCase().includes("structure") ||
+        d.dimension.toLowerCase().includes("problem") ||
+        d.dimension.toLowerCase().includes("analysis")
+      );
+      break;
+    case "system_design":
+      metrics.focusAreas = ["Scalability", "Trade-off Analysis", "Component Design", "Requirements Gathering"];
+      metrics.keyDimensions = dimensionAverages.filter(d => 
+        d.dimension.toLowerCase().includes("depth") ||
+        d.dimension.toLowerCase().includes("problem")
+      );
+      break;
+    case "hr":
+    case "hiring_manager":
+      metrics.focusAreas = ["Culture Fit", "Career Motivation", "Role Understanding", "Communication"];
+      metrics.keyDimensions = dimensionAverages.filter(d => 
+        d.dimension.toLowerCase().includes("fit") ||
+        d.dimension.toLowerCase().includes("confidence") ||
+        d.dimension.toLowerCase().includes("communication")
+      );
+      break;
+    default:
+      metrics.focusAreas = ["Overall Performance", "Communication", "Problem Solving", "Role Fit"];
+      metrics.keyDimensions = dimensionAverages.slice(0, 4);
+  }
+
+  return metrics;
+}
 
 export default interviewProgressRouter;

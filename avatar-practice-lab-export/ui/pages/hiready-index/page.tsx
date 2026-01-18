@@ -28,6 +28,7 @@ import {
   Minus,
   Clock,
   BarChart3,
+  BarChart2,
   Activity,
   Trophy,
   Calendar,
@@ -912,6 +913,19 @@ export default function HireadyIndexPage() {
                                       </div>
                                     </div>
                                   )}
+
+                                  {/* View Detailed Report Button */}
+                                  <div className="pt-3 border-t border-gray-100">
+                                    <Link
+                                      to={`/hiready-index/${typeAnalysis.interviewType}?${selectedRole?.type === 'role_kit' ? `roleKitId=${selectedRole.id}` : `jobTargetId=${selectedRole?.id}`}`}
+                                      className="inline-flex items-center gap-2 px-4 py-2 bg-[#042c4c] text-white rounded-lg hover:bg-[#0a3d66] transition-colors text-sm font-medium"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <BarChart2 className="w-4 h-4" />
+                                      View Detailed Report
+                                      <ExternalLink className="w-3 h-3" />
+                                    </Link>
+                                  </div>
                                 </div>
                               </div>
                             )}
