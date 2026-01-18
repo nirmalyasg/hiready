@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { db } from "../db.js";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, inArray } from "drizzle-orm";
 import { randomBytes } from "crypto";
 import {
   interviewAssignments,
@@ -964,6 +964,385 @@ interviewProgressRouter.get("/hiready-index", requireAuth, async (req: Request, 
   } catch (error) {
     console.error("Error fetching Hiready index:", error);
     res.status(500).json({ success: false, error: "Failed to fetch Hiready index" });
+  }
+});
+
+// =====================
+// Skills-to-Interview-Type Mapping
+// =====================
+
+// Categorize skills into interview type buckets
+const SKILL_INTERVIEW_TYPE_MAPPING: Record<string, string[]> = {
+  // Technical/Coding skills
+  coding: [
+    "python", "java", "javascript", "typescript", "c++", "go", "rust", "ruby", "php",
+    "data structures", "algorithms", "leetcode", "programming", "software development",
+    "coding", "debugging", "object-oriented", "oop", "functional programming",
+    "api development", "backend", "frontend", "full stack", "web development",
+    "mobile development", "react", "angular", "vue", "node.js", "django", "flask",
+    "spring", "docker", "kubernetes", "git", "version control"
+  ],
+  // SQL/Analytics skills  
+  sql: [
+    "sql", "mysql", "postgresql", "database", "query optimization", "data modeling",
+    "etl", "data warehousing", "snowflake", "redshift", "bigquery", "nosql", "mongodb"
+  ],
+  // System Design skills
+  system_design: [
+    "system design", "architecture", "scalability", "distributed systems", "microservices",
+    "load balancing", "caching", "database design", "api design", "high availability",
+    "fault tolerance", "performance optimization", "cloud architecture", "aws", "gcp", "azure"
+  ],
+  // ML/Data Science skills
+  ml: [
+    "machine learning", "deep learning", "neural networks", "nlp", "computer vision",
+    "tensorflow", "pytorch", "scikit-learn", "data science", "statistics", "modeling",
+    "feature engineering", "model deployment", "mlops", "a/b testing"
+  ],
+  // Analytics/Product skills
+  analytics: [
+    "analytics", "data analysis", "metrics", "kpis", "dashboards", "tableau", "power bi",
+    "excel", "data visualization", "business intelligence", "reporting", "insights"
+  ],
+  // Behavioral/HR skills
+  behavioral: [
+    "communication", "teamwork", "collaboration", "leadership", "problem solving",
+    "conflict resolution", "time management", "adaptability", "creativity", "initiative",
+    "work ethic", "self-motivation", "emotional intelligence", "interpersonal skills"
+  ],
+  // Case Study/Product Sense skills
+  case_study: [
+    "case study", "business analysis", "strategy", "market analysis", "competitive analysis",
+    "financial modeling", "consulting", "problem framing", "hypothesis testing",
+    "product sense", "product management", "user research", "product strategy",
+    "prioritization", "roadmap", "stakeholder management"
+  ],
+  // Hiring Manager/General skills
+  hiring_manager: [
+    "project management", "agile", "scrum", "team leadership", "mentoring",
+    "cross-functional", "stakeholder communication", "business acumen", "domain expertise"
+  ],
+  // Technical (general technical)
+  technical: [
+    "technical skills", "technical knowledge", "engineering", "development",
+    "testing", "qa", "debugging", "troubleshooting", "code review"
+  ],
+};
+
+function categorizeSkillsByInterviewType(skills: string[]): Record<string, string[]> {
+  const result: Record<string, string[]> = {
+    coding: [],
+    sql: [],
+    system_design: [],
+    ml: [],
+    analytics: [],
+    behavioral: [],
+    case_study: [],
+    hiring_manager: [],
+    technical: [],
+    general: [],
+  };
+
+  for (const skill of skills) {
+    const lowerSkill = skill.toLowerCase();
+    let matched = false;
+
+    for (const [interviewType, keywords] of Object.entries(SKILL_INTERVIEW_TYPE_MAPPING)) {
+      if (keywords.some(kw => lowerSkill.includes(kw) || kw.includes(lowerSkill))) {
+        if (result[interviewType]) {
+          result[interviewType].push(skill);
+        }
+        matched = true;
+        break;
+      }
+    }
+
+    if (!matched) {
+      // Default to technical for unmatched technical-sounding skills
+      if (lowerSkill.match(/\b(api|sdk|framework|library|tool|platform)\b/i)) {
+        result.technical.push(skill);
+      } else {
+        result.general.push(skill);
+      }
+    }
+  }
+
+  return result;
+}
+
+// Get comprehensive analysis across all interview types for a role/job
+interviewProgressRouter.get("/comprehensive-analysis", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: "Not authenticated" });
+    }
+
+    const { roleKitId, jobTargetId } = req.query;
+
+    if (!roleKitId && !jobTargetId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Role kit ID or Job target ID is required",
+      });
+    }
+
+    // Get role context and skills
+    let roleName = "General";
+    let companyContext: string | null = null;
+    let jdSkills: string[] = [];
+    let skillsFocus: string[] = [];
+    let roleArchetypeId: string | null = null;
+
+    if (jobTargetId) {
+      const [jobTarget] = await db
+        .select()
+        .from(jobTargets)
+        .where(eq(jobTargets.id, String(jobTargetId)))
+        .limit(1);
+      
+      if (jobTarget) {
+        roleName = jobTarget.roleTitle || "Unknown Role";
+        companyContext = jobTarget.companyName || null;
+        roleArchetypeId = jobTarget.roleArchetypeId || null;
+        
+        // Extract skills from parsed JD
+        const parsed = jobTarget.jdParsed as { requiredSkills?: string[]; preferredSkills?: string[] } | null;
+        if (parsed) {
+          jdSkills = [...(parsed.requiredSkills || []), ...(parsed.preferredSkills || [])];
+        }
+      }
+    } else if (roleKitId) {
+      const [roleKit] = await db
+        .select()
+        .from(roleKits)
+        .where(eq(roleKits.id, Number(roleKitId)))
+        .limit(1);
+      
+      if (roleKit) {
+        roleName = roleKit.name;
+        roleArchetypeId = roleKit.roleArchetypeId;
+        skillsFocus = (roleKit.skillsFocus as string[]) || [];
+        jdSkills = skillsFocus;
+      }
+    }
+
+    // Categorize skills by interview type
+    const skillsByInterviewType = categorizeSkillsByInterviewType(jdSkills);
+
+    // Get all assignments for this role
+    const conditions = [eq(interviewAssignments.userId, userId)];
+    if (roleKitId) {
+      conditions.push(eq(interviewAssignments.roleKitId, Number(roleKitId)));
+    }
+    if (jobTargetId) {
+      conditions.push(eq(interviewAssignments.jobTargetId, String(jobTargetId)));
+    }
+
+    const assignments = await db
+      .select()
+      .from(interviewAssignments)
+      .where(and(...conditions));
+
+    if (assignments.length === 0) {
+      return res.json({
+        success: true,
+        comprehensiveAnalysis: null,
+        message: "No interview data found for this role",
+        role: { name: roleName, companyContext },
+        skillsByInterviewType,
+        allSkills: jdSkills,
+      });
+    }
+
+    // Get all session IDs
+    const allSessionIds: number[] = [];
+    for (const a of assignments) {
+      if (a.latestSessionId) allSessionIds.push(a.latestSessionId);
+      if (a.bestSessionId && a.bestSessionId !== a.latestSessionId) {
+        allSessionIds.push(a.bestSessionId);
+      }
+    }
+
+    // Fetch all analyses with their session/config data
+    const analysesWithConfig = allSessionIds.length > 0
+      ? await db
+          .select({
+            analysis: interviewAnalysis,
+            session: interviewSessions,
+            config: interviewConfigs,
+          })
+          .from(interviewAnalysis)
+          .innerJoin(interviewSessions, eq(interviewAnalysis.interviewSessionId, interviewSessions.id))
+          .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+          .where(inArray(interviewAnalysis.interviewSessionId, allSessionIds))
+      : [];
+
+    // Group analyses by interview type
+    const analysisByType: Record<string, {
+      interviewType: string;
+      sessions: Array<{
+        sessionId: number;
+        createdAt: string;
+        recommendation: string | null;
+        summary: string | null;
+        dimensionScores: any[];
+        strengths: string[];
+        improvements: string[];
+        risks: string[];
+        betterAnswers: any[];
+      }>;
+      relevantSkills: string[];
+      aggregatedScore: number | null;
+      overallRecommendation: string | null;
+      topStrengths: string[];
+      topImprovements: string[];
+    }> = {};
+
+    for (const { analysis, session, config } of analysesWithConfig) {
+      const interviewType = config.interviewType || "general";
+      
+      if (!analysisByType[interviewType]) {
+        analysisByType[interviewType] = {
+          interviewType,
+          sessions: [],
+          relevantSkills: skillsByInterviewType[interviewType] || [],
+          aggregatedScore: null,
+          overallRecommendation: null,
+          topStrengths: [],
+          topImprovements: [],
+        };
+      }
+
+      analysisByType[interviewType].sessions.push({
+        sessionId: session.id,
+        createdAt: session.createdAt?.toISOString() || new Date().toISOString(),
+        recommendation: analysis.overallRecommendation,
+        summary: analysis.summary,
+        dimensionScores: (analysis.dimensionScores as any[]) || [],
+        strengths: (analysis.strengths as string[]) || [],
+        improvements: (analysis.improvements as string[]) || [],
+        risks: (analysis.risks as string[]) || [],
+        betterAnswers: (analysis.betterAnswers as any[]) || [],
+      });
+    }
+
+    // Calculate aggregated metrics for each interview type
+    for (const typeData of Object.values(analysisByType)) {
+      if (typeData.sessions.length === 0) continue;
+
+      // Calculate average score across sessions
+      const scores: number[] = [];
+      const allStrengths: string[] = [];
+      const allImprovements: string[] = [];
+      const recommendations: string[] = [];
+
+      for (const session of typeData.sessions) {
+        if (session.dimensionScores && session.dimensionScores.length > 0) {
+          const avgScore = session.dimensionScores.reduce((sum, d) => sum + (d.score || 0), 0) / session.dimensionScores.length;
+          scores.push(avgScore);
+        }
+        allStrengths.push(...session.strengths);
+        allImprovements.push(...session.improvements);
+        if (session.recommendation) recommendations.push(session.recommendation);
+      }
+
+      typeData.aggregatedScore = scores.length > 0
+        ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length / 5) * 100)
+        : null;
+
+      // Get most recent/frequent recommendation
+      if (recommendations.length > 0) {
+        const recCounts = recommendations.reduce((acc, r) => {
+          acc[r] = (acc[r] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        typeData.overallRecommendation = Object.entries(recCounts)
+          .sort((a, b) => b[1] - a[1])[0][0];
+      }
+
+      // Top strengths and improvements (deduplicated)
+      const strengthCounts = allStrengths.reduce((acc, s) => {
+        acc[s] = (acc[s] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      typeData.topStrengths = Object.entries(strengthCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([s]) => s);
+
+      const improvementCounts = allImprovements.reduce((acc, s) => {
+        acc[s] = (acc[s] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      typeData.topImprovements = Object.entries(improvementCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([s]) => s);
+    }
+
+    // Generate overall consolidated summary
+    const allTypeScores = Object.values(analysisByType)
+      .filter(t => t.aggregatedScore !== null)
+      .map(t => ({ type: t.interviewType, score: t.aggregatedScore!, weight: getInterviewWeight(t.interviewType) }));
+
+    let overallWeightedScore = 0;
+    let totalWeight = 0;
+    for (const ts of allTypeScores) {
+      overallWeightedScore += ts.score * ts.weight;
+      totalWeight += ts.weight;
+    }
+    const consolidatedScore = totalWeight > 0 ? Math.round(overallWeightedScore / totalWeight) : null;
+
+    // Determine strongest and weakest areas
+    const sortedTypes = [...allTypeScores].sort((a, b) => b.score - a.score);
+    const strongestAreas = sortedTypes.slice(0, 2).map(t => t.type);
+    const weakestAreas = sortedTypes.slice(-2).reverse().map(t => t.type);
+
+    // Generate narrative summary
+    let narrativeSummary = "";
+    if (consolidatedScore !== null) {
+      const readinessBand = getReadinessBand(consolidatedScore);
+      narrativeSummary = `Overall interview readiness: ${readinessBand.label} (${consolidatedScore}%). `;
+      
+      if (strongestAreas.length > 0) {
+        narrativeSummary += `Strongest performance in ${strongestAreas.map(a => a.replace(/_/g, ' ')).join(' and ')}. `;
+      }
+      if (weakestAreas.length > 0 && weakestAreas[0] !== strongestAreas[0]) {
+        narrativeSummary += `Focus on improving ${weakestAreas[0].replace(/_/g, ' ')} skills. `;
+      }
+      
+      const totalInterviewTypes = Object.keys(analysisByType).length;
+      const totalSessions = Object.values(analysisByType).reduce((sum, t) => sum + t.sessions.length, 0);
+      narrativeSummary += `Based on ${totalSessions} interview sessions across ${totalInterviewTypes} interview types.`;
+    }
+
+    res.json({
+      success: true,
+      comprehensiveAnalysis: {
+        role: {
+          name: roleName,
+          companyContext,
+          archetypeId: roleArchetypeId,
+        },
+        allSkills: jdSkills,
+        skillsByInterviewType,
+        interviewTypeAnalyses: Object.values(analysisByType),
+        consolidatedMetrics: {
+          overallScore: consolidatedScore,
+          readinessBand: consolidatedScore ? getReadinessBand(consolidatedScore) : null,
+          strongestAreas,
+          weakestAreas,
+          totalInterviewTypes: Object.keys(analysisByType).length,
+          totalSessions: Object.values(analysisByType).reduce((sum, t) => sum + t.sessions.length, 0),
+        },
+        narrativeSummary,
+        lastUpdated: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching comprehensive analysis:", error);
+    res.status(500).json({ success: false, error: "Failed to fetch comprehensive analysis" });
   }
 });
 

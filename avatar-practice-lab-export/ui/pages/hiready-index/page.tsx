@@ -13,6 +13,8 @@ import {
   CheckCircle, 
   AlertTriangle, 
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Share2,
   Copy,
   Check,
@@ -105,6 +107,47 @@ interface HireadyIndexData {
   lastUpdated: string;
 }
 
+interface InterviewTypeAnalysis {
+  interviewType: string;
+  sessions: Array<{
+    sessionId: number;
+    createdAt: string;
+    recommendation: string | null;
+    summary: string | null;
+    dimensionScores: Array<{ dimension: string; score: number; evidence: string[]; rationale: string; improvement: string }>;
+    strengths: string[];
+    improvements: string[];
+    risks: string[];
+    betterAnswers: Array<{ question: string; betterAnswer: string }>;
+  }>;
+  relevantSkills: string[];
+  aggregatedScore: number | null;
+  overallRecommendation: string | null;
+  topStrengths: string[];
+  topImprovements: string[];
+}
+
+interface ComprehensiveAnalysisData {
+  role: {
+    name: string;
+    companyContext: string | null;
+    archetypeId: string | null;
+  };
+  allSkills: string[];
+  skillsByInterviewType: Record<string, string[]>;
+  interviewTypeAnalyses: InterviewTypeAnalysis[];
+  consolidatedMetrics: {
+    overallScore: number | null;
+    readinessBand: ReadinessBand | null;
+    strongestAreas: string[];
+    weakestAreas: string[];
+    totalInterviewTypes: number;
+    totalSessions: number;
+  };
+  narrativeSummary: string;
+  lastUpdated: string;
+}
+
 const getBandConfig = (band: string) => {
   const configs: Record<string, { color: string; bgColor: string; borderColor: string; ringColor: string; hexColor: string }> = {
     interview_ready: { color: "text-emerald-700", bgColor: "bg-emerald-50", borderColor: "border-emerald-300", ringColor: "stroke-emerald-500", hexColor: "#059669" },
@@ -150,6 +193,7 @@ export default function HireadyIndexPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [indexData, setIndexData] = useState<HireadyIndexData | null>(null);
+  const [comprehensiveData, setComprehensiveData] = useState<ComprehensiveAnalysisData | null>(null);
   const [roles, setRoles] = useState<{ roleKits: RoleOption[]; jobTargets: RoleOption[] }>({ roleKits: [], jobTargets: [] });
   const [selectedRole, setSelectedRole] = useState<RoleOption | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -157,6 +201,9 @@ export default function HireadyIndexPage() {
   const [isSharing, setIsSharing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showDetailedAnalysis, setShowDetailedAnalysis] = useState(false);
+  const [expandedInterviewType, setExpandedInterviewType] = useState<string | null>(null);
+  const [isLoadingComprehensive, setIsLoadingComprehensive] = useState(false);
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -226,6 +273,40 @@ export default function HireadyIndexPage() {
 
     fetchHireadyIndex();
   }, [selectedRole]);
+
+  useEffect(() => {
+    if (!selectedRole || !showDetailedAnalysis) return;
+
+    const fetchComprehensiveAnalysis = async () => {
+      setIsLoadingComprehensive(true);
+      try {
+        const params = new URLSearchParams();
+        if (selectedRole.type === "role_kit") {
+          params.set("roleKitId", String(selectedRole.id));
+        } else {
+          params.set("jobTargetId", String(selectedRole.id));
+        }
+
+        const response = await fetch(`/api/interview-progress/comprehensive-analysis?${params}`, {
+          credentials: "include",
+        });
+        const data = await response.json();
+        
+        if (data.success && data.comprehensiveAnalysis) {
+          setComprehensiveData(data.comprehensiveAnalysis);
+        } else {
+          setComprehensiveData(null);
+        }
+      } catch (error) {
+        console.error("Error fetching comprehensive analysis:", error);
+        setComprehensiveData(null);
+      } finally {
+        setIsLoadingComprehensive(false);
+      }
+    };
+
+    fetchComprehensiveAnalysis();
+  }, [selectedRole, showDetailedAnalysis]);
 
   const handleRoleSelect = (role: RoleOption) => {
     setSelectedRole(role);
@@ -600,6 +681,258 @@ export default function HireadyIndexPage() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Comprehensive Analysis Toggle */}
+            <Card className="border-[#24c4b8]/30">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-[#24c4b8]" />
+                    Detailed Interview Analysis
+                  </CardTitle>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowDetailedAnalysis(!showDetailedAnalysis)}
+                    className="border-[#24c4b8] text-[#24c4b8] hover:bg-[#24c4b8]/10"
+                  >
+                    {showDetailedAnalysis ? (
+                      <>
+                        <ChevronUp className="w-4 h-4 mr-1" />
+                        Hide Details
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="w-4 h-4 mr-1" />
+                        Show Details
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Deep dive into each interview type with skills mapping and recommendations
+                </p>
+              </CardHeader>
+
+              {showDetailedAnalysis && (
+                <CardContent className="space-y-6">
+                  {/* Consolidated Narrative Summary */}
+                  {comprehensiveData?.narrativeSummary && (
+                    <div className="p-4 bg-gradient-to-r from-[#24c4b8]/10 to-blue-50/50 rounded-lg border border-[#24c4b8]/20">
+                      <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                        <Award className="w-4 h-4 text-[#24c4b8]" />
+                        Overall Assessment
+                      </h4>
+                      <p className="text-gray-700">{comprehensiveData.narrativeSummary}</p>
+                      
+                      {comprehensiveData.consolidatedMetrics.strongestAreas.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <span className="text-xs text-gray-500">Strongest:</span>
+                          {comprehensiveData.consolidatedMetrics.strongestAreas.map((area) => (
+                            <Badge key={area} className="bg-emerald-100 text-emerald-700 border-emerald-200">
+                              {formatInterviewType(area)}
+                            </Badge>
+                          ))}
+                          {comprehensiveData.consolidatedMetrics.weakestAreas.length > 0 && (
+                            <>
+                              <span className="text-xs text-gray-500 ml-2">Focus on:</span>
+                              {comprehensiveData.consolidatedMetrics.weakestAreas.slice(0, 1).map((area) => (
+                                <Badge key={area} className="bg-amber-100 text-amber-700 border-amber-200">
+                                  {formatInterviewType(area)}
+                                </Badge>
+                              ))}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* All JD Skills */}
+                  {comprehensiveData?.allSkills && comprehensiveData.allSkills.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-2 text-sm">Skills from Job Description</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {comprehensiveData.allSkills.slice(0, 15).map((skill, i) => (
+                          <Badge key={i} variant="outline" className="text-xs bg-gray-50">
+                            {skill}
+                          </Badge>
+                        ))}
+                        {comprehensiveData.allSkills.length > 15 && (
+                          <Badge variant="outline" className="text-xs bg-gray-100">
+                            +{comprehensiveData.allSkills.length - 15} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Per-Interview-Type Analysis Cards */}
+                  {comprehensiveData?.interviewTypeAnalyses && comprehensiveData.interviewTypeAnalyses.length > 0 ? (
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-gray-700">Analysis by Interview Type</h4>
+                      {comprehensiveData.interviewTypeAnalyses.map((typeAnalysis) => {
+                        const Icon = getInterviewTypeIcon(typeAnalysis.interviewType);
+                        const isExpanded = expandedInterviewType === typeAnalysis.interviewType;
+                        
+                        return (
+                          <Card 
+                            key={typeAnalysis.interviewType} 
+                            className={`border transition-all ${isExpanded ? 'border-[#24c4b8] shadow-md' : 'border-gray-200'}`}
+                          >
+                            <div 
+                              className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                              onClick={() => setExpandedInterviewType(isExpanded ? null : typeAnalysis.interviewType)}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                    typeAnalysis.aggregatedScore !== null && typeAnalysis.aggregatedScore >= 75 
+                                      ? 'bg-emerald-100' 
+                                      : typeAnalysis.aggregatedScore !== null && typeAnalysis.aggregatedScore >= 55
+                                        ? 'bg-blue-100'
+                                        : 'bg-amber-100'
+                                  }`}>
+                                    <Icon className={`w-5 h-5 ${
+                                      typeAnalysis.aggregatedScore !== null && typeAnalysis.aggregatedScore >= 75 
+                                        ? 'text-emerald-600' 
+                                        : typeAnalysis.aggregatedScore !== null && typeAnalysis.aggregatedScore >= 55
+                                          ? 'text-blue-600'
+                                          : 'text-amber-600'
+                                    }`} />
+                                  </div>
+                                  <div>
+                                    <h5 className="font-semibold text-gray-900">
+                                      {formatInterviewType(typeAnalysis.interviewType)}
+                                    </h5>
+                                    <p className="text-sm text-gray-500">
+                                      {typeAnalysis.sessions.length} session{typeAnalysis.sessions.length !== 1 ? 's' : ''}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  {typeAnalysis.aggregatedScore !== null && (
+                                    <span className={`text-xl font-bold ${getScoreColor(typeAnalysis.aggregatedScore)}`}>
+                                      {typeAnalysis.aggregatedScore}%
+                                    </span>
+                                  )}
+                                  {isExpanded ? (
+                                    <ChevronUp className="w-5 h-5 text-gray-400" />
+                                  ) : (
+                                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Relevant Skills for this interview type */}
+                              {typeAnalysis.relevantSkills.length > 0 && (
+                                <div className="mt-3 flex flex-wrap gap-1">
+                                  <span className="text-xs text-gray-400 mr-1">Focus skills:</span>
+                                  {typeAnalysis.relevantSkills.slice(0, 5).map((skill, i) => (
+                                    <Badge key={i} variant="secondary" className="text-xs bg-[#24c4b8]/10 text-[#24c4b8] border-[#24c4b8]/20">
+                                      {skill}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Expanded Details */}
+                            {isExpanded && (
+                              <div className="px-4 pb-4 border-t border-gray-100">
+                                <div className="pt-4 space-y-4">
+                                  {/* Top Strengths & Improvements */}
+                                  <div className="grid md:grid-cols-2 gap-4">
+                                    {typeAnalysis.topStrengths.length > 0 && (
+                                      <div className="p-3 bg-emerald-50 rounded-lg">
+                                        <h6 className="text-sm font-medium text-emerald-700 mb-2 flex items-center gap-1">
+                                          <CheckCircle className="w-4 h-4" />
+                                          Strengths
+                                        </h6>
+                                        <ul className="space-y-1">
+                                          {typeAnalysis.topStrengths.map((s, i) => (
+                                            <li key={i} className="text-sm text-emerald-800">{s}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    {typeAnalysis.topImprovements.length > 0 && (
+                                      <div className="p-3 bg-amber-50 rounded-lg">
+                                        <h6 className="text-sm font-medium text-amber-700 mb-2 flex items-center gap-1">
+                                          <AlertTriangle className="w-4 h-4" />
+                                          Areas to Improve
+                                        </h6>
+                                        <ul className="space-y-1">
+                                          {typeAnalysis.topImprovements.map((s, i) => (
+                                            <li key={i} className="text-sm text-amber-800">{s}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Session History */}
+                                  {typeAnalysis.sessions.length > 0 && (
+                                    <div>
+                                      <h6 className="text-sm font-medium text-gray-700 mb-2">Session History</h6>
+                                      <div className="space-y-2">
+                                        {typeAnalysis.sessions.slice(0, 3).map((session, i) => (
+                                          <div 
+                                            key={session.sessionId}
+                                            className="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm"
+                                          >
+                                            <div className="flex items-center gap-2">
+                                              <Clock className="w-3 h-3 text-gray-400" />
+                                              <span className="text-gray-600">
+                                                {format(new Date(session.createdAt), 'MMM d, yyyy')}
+                                              </span>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                              {session.recommendation && (
+                                                <Badge 
+                                                  variant="outline"
+                                                  className={`text-xs ${
+                                                    session.recommendation.includes('yes') 
+                                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                      : 'bg-amber-50 text-amber-700 border-amber-200'
+                                                  }`}
+                                                >
+                                                  {session.recommendation.replace(/_/g, ' ')}
+                                                </Badge>
+                                              )}
+                                              <Link
+                                                to={`/interview/results?sessionId=${session.sessionId}`}
+                                                className="text-[#24c4b8] hover:underline flex items-center gap-1"
+                                              >
+                                                View <ExternalLink className="w-3 h-3" />
+                                              </Link>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  ) : isLoadingComprehensive ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Activity className="w-8 h-8 mx-auto mb-2 opacity-50 animate-pulse" />
+                      <p>Loading detailed analysis...</p>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <Target className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p>No detailed analysis data available yet. Complete more interviews to see insights.</p>
+                    </div>
+                  )}
+                </CardContent>
+              )}
+            </Card>
 
             {indexData.progressTimeline.length > 1 && (
               <Card>
