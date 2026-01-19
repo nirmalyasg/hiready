@@ -10,7 +10,8 @@ import {
   Briefcase,
   Award,
   Layers,
-  TrendingUp
+  TrendingUp,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -47,13 +48,13 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       title: 'PREPARE',
       items: [
         { href: '/jobs', label: 'Jobs', icon: Briefcase },
+        { href: '/interview/roles', label: 'Roles', icon: Users },
         { href: '/interview/by-type', label: 'By Type', icon: Layers },
       ]
     },
     {
       title: 'PROGRESS',
       items: [
-        { href: '/avatar/dashboard', label: 'Dashboard', icon: Home },
         { href: '/hiready-index', label: 'HiReady Index', icon: TrendingUp },
         { href: '/avatar/results', label: 'Results', icon: BarChart3 },
       ]
