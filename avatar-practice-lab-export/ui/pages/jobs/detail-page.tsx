@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Building2, MapPin, Sparkles, Play, FileText, Code, CheckCircle2, AlertCircle, MoreVertical, Trash2, ChevronDown, ChevronUp, Phone, User, Briefcase, MessageCircle, Heart, TrendingUp, ExternalLink, Lock, Crown } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, Sparkles, Play, FileText, Code, CheckCircle2, AlertCircle, MoreVertical, Trash2, ChevronDown, ChevronUp, Phone, User, Briefcase, MessageCircle, Heart, TrendingUp, ExternalLink, Lock, Crown, Clock, Target, BarChart3, RotateCcw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SidebarLayout from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -527,66 +527,85 @@ export default function JobDetailPage() {
       <div className="min-h-screen bg-[#fbfbfc]">
         <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
           
-          {/* Hero Header */}
-          <div className="bg-gradient-to-br from-[#000000] to-[#1a0a2e] rounded-2xl p-6 shadow-xl text-white">
-            <div className="flex items-start justify-between mb-4">
-              <button
-                onClick={() => navigate("/jobs")}
-                className="p-2 -ml-2 hover:bg-white/10 rounded-lg transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5 text-white/80" />
-              </button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-                    <MoreVertical className="w-5 h-5 text-white/60" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleDelete} className="text-red-600">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete Job
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                <Building2 className="w-7 h-7 text-white" />
+          {/* Compact Header - Matching Role Detail Page */}
+          <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl text-white">
+            <div className="px-4 py-4">
+              <div className="flex items-center justify-between mb-3">
+                <button
+                  onClick={() => navigate("/jobs")}
+                  className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  All jobs
+                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="p-1.5 hover:bg-white/10 rounded-lg transition-colors">
+                      <MoreVertical className="w-4 h-4 text-white/60" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete Job
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-              <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-2xl font-bold truncate">{job.roleTitle}</h1>
-                <div className="flex items-center gap-2 text-sm text-white/70 mt-1">
-                  {job.companyName && <span className="flex items-center gap-1"><Building2 className="w-3.5 h-3.5" />{job.companyName}</span>}
-                  {job.location && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{job.location}</span>}
+              
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                  <Building2 className="w-5 h-5" />
                 </div>
-              </div>
-            </div>
-            
-            {/* Stats Bar */}
-            <div className="grid grid-cols-4 gap-3 mt-6 pt-4 border-t border-white/10">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-[#24c4b8]">{readiness}%</p>
-                <p className="text-xs text-white/60">Readiness</p>
-              </div>
-              <div className="text-center border-x border-white/10">
-                <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${status.bg} ${status.text}`}>
-                  {status.label}
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-lg font-bold truncate">{job.roleTitle}</h1>
+                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                    {job.companyName && (
+                      <span className="text-xs text-slate-400 flex items-center gap-1">
+                        <Building2 className="w-3 h-3" />
+                        {job.companyName}
+                      </span>
+                    )}
+                    {job.location && (
+                      <>
+                        <span className="text-slate-600">•</span>
+                        <span className="text-xs text-slate-400 flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {job.location}
+                        </span>
+                      </>
+                    )}
+                    <span className="text-slate-600">•</span>
+                    <span className="text-xs text-slate-400 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {totalPrepTime.min === totalPrepTime.max 
+                        ? `${totalPrepTime.min}m` 
+                        : `${totalPrepTime.min}-${totalPrepTime.max}m`}
+                    </span>
+                    <span className="text-slate-600">•</span>
+                    <span className="text-xs text-slate-400">{practiceOptions.length} rounds</span>
+                    {practiceHistory && practiceHistory.summary.totalAttempts > 0 && (
+                      <>
+                        <span className="text-slate-600">•</span>
+                        <span className="text-xs text-emerald-400 flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3" />
+                          {practiceHistory.summary.totalAttempts} practiced
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <p className="text-xs text-white/60 mt-1">Status</p>
-              </div>
-              <div className="text-center border-r border-white/10">
-                <p className="text-2xl font-bold text-white">{practiceOptions.length}</p>
-                <p className="text-xs text-white/60">Rounds</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xl font-bold text-white">
-                  {totalPrepTime.min === totalPrepTime.max 
-                    ? `${totalPrepTime.min}` 
-                    : `${totalPrepTime.min}-${totalPrepTime.max}`}
-                </p>
-                <p className="text-xs text-white/60">Est. Minutes</p>
+                {practiceHistory && practiceHistory.summary.totalAttempts > 0 && (
+                  <Button
+                    onClick={() => navigate(`/hiready-index?jobTargetId=${job.id}`)}
+                    size="sm"
+                    variant="outline"
+                    className="hidden sm:flex h-8 px-3 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white text-xs"
+                  >
+                    <BarChart3 className="w-3.5 h-3.5 mr-1.5" />
+                    View Index
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -756,65 +775,124 @@ export default function JobDetailPage() {
           )}
 
           {practiceOptions.length > 0 && (
-            <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h2 className="font-medium text-slate-900 text-sm">Interview Stages</h2>
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <Target className="w-4 h-4 text-slate-500" />
+                  Interview Rounds
+                </h2>
+                {practiceHistory && practiceHistory.summary.totalAttempts > 0 && (
+                  <span className="text-xs text-slate-500">
+                    {practiceHistory.summary.roundsPracticed}/{practiceOptions.length} completed
+                  </span>
+                )}
               </div>
+              
               {companyData?.blueprintNotes && (
-                <div className="mx-3 mt-3 p-2.5 bg-amber-50 border border-amber-200/60 rounded-lg">
+                <div className="mb-3 p-2.5 bg-amber-50 border border-amber-200/60 rounded-lg">
                   <p className="text-xs text-amber-800 leading-relaxed">{companyData.blueprintNotes}</p>
                 </div>
               )}
-              <div className="p-2">
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {practiceOptions.map((option, idx) => {
-                  const config = categoryConfig[option.roundCategory] || { icon: <FileText className="w-4 h-4" />, color: "text-slate-600", bg: "bg-slate-50" };
+                  const config = categoryConfig[option.roundCategory] || { icon: <FileText className="w-3.5 h-3.5" />, color: "text-slate-600", bg: "bg-slate-100" };
                   const history = getRoundHistory(option.roundCategory);
                   const hasPracticed = history && history.attemptCount > 0;
+                  const focusAreas = option.skillsAssessed || [];
+                  
                   return (
                     <div
                       key={option.id}
-                      className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${idx !== practiceOptions.length - 1 ? "mb-1" : ""} hover:bg-slate-50 active:bg-slate-100`}
+                      className={`bg-white rounded-xl border p-3 hover:shadow-md transition-all group ${
+                        hasPracticed ? 'border-emerald-200' : 'border-slate-200 hover:border-slate-300'
+                      }`}
                     >
-                      <div className={`w-9 h-9 rounded-lg ${config.bg} ${config.color} flex items-center justify-center flex-shrink-0`}>
-                        {config.icon}
+                      <div className="flex items-start gap-2.5">
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className={`w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center ${
+                            hasPracticed ? 'bg-emerald-500 text-white' : 'bg-slate-900 text-white'
+                          }`}>
+                            {hasPracticed ? <CheckCircle2 className="w-3 h-3" /> : idx + 1}
+                          </span>
+                          <div className={`w-7 h-7 rounded-lg ${config.bg} ${config.color} flex items-center justify-center`}>
+                            {config.icon}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-slate-900 text-sm truncate">{option.label}</p>
+                          <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">{option.description}</p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
+                      
+                      {hasPracticed && (
+                        <div className="mt-2 flex items-center gap-3 text-[10px]">
+                          <span className="text-slate-500">
+                            {history.attemptCount} attempt{history.attemptCount > 1 ? 's' : ''}
+                          </span>
+                          {history.bestScore !== null && (
+                            <span className="text-emerald-600 font-medium">
+                              Best: {history.bestScore}%
+                            </span>
+                          )}
+                          {history.latestScore !== null && history.latestScore !== history.bestScore && (
+                            <span className="text-slate-500">
+                              Latest: {history.latestScore}%
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
                         <div className="flex items-center gap-2">
-                          <p className="font-medium text-slate-900 text-sm truncate">{option.label}</p>
-                          {hasPracticed && (
-                            <span className="px-1.5 py-0.5 bg-[#24c4b8]/10 text-[#24c4b8] rounded text-[10px] font-medium">
-                              {history.attemptCount} {history.attemptCount === 1 ? "attempt" : "attempts"}
-                            </span>
+                          <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {option.typicalDuration}
+                          </span>
+                          {focusAreas.length > 0 && !hasPracticed && (
+                            <div className="flex items-center gap-1 flex-wrap">
+                              {focusAreas.slice(0, 2).map((area, areaIdx) => (
+                                <span key={areaIdx} className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-[9px] font-medium truncate max-w-[70px]">
+                                  {area}
+                                </span>
+                              ))}
+                            </div>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-xs text-slate-500">{option.typicalDuration}</p>
-                          {hasPracticed && history.latestScore !== null && (
-                            <span className="text-xs text-slate-400">
-                              • Last: {history.latestScore}%
-                              {history.bestScore !== null && history.bestScore > history.latestScore && (
-                                <span className="text-emerald-600 ml-1">Best: {history.bestScore}%</span>
-                              )}
-                            </span>
+                        <Button
+                          onClick={() => handleStartPracticeOption(option)}
+                          size="sm"
+                          disabled={isStarting}
+                          className={`h-7 px-2.5 text-xs font-medium ${
+                            accessCheck?.hasAccess
+                              ? hasPracticed 
+                                ? 'bg-slate-800 hover:bg-slate-700 text-white' 
+                                : 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white'
+                              : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                          } disabled:opacity-70`}
+                        >
+                          {isStarting ? (
+                            <>
+                              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                              Starting...
+                            </>
+                          ) : accessCheck?.hasAccess ? (
+                            hasPracticed ? (
+                              <>
+                                <RotateCcw className="w-3 h-3 mr-1" />
+                                Retake
+                              </>
+                            ) : (
+                              <>
+                                <Play className="w-3 h-3 mr-1" />
+                                Start
+                              </>
+                            )
+                          ) : (
+                            "Unlock"
                           )}
-                        </div>
+                        </Button>
                       </div>
-                      <Button
-                        onClick={() => handleStartPracticeOption(option)}
-                        size="sm"
-                        disabled={isStarting}
-                        className={`h-8 px-3 text-xs ${
-                          accessCheck?.hasAccess
-                            ? hasPracticed 
-                              ? "bg-[#24c4b8]/10 hover:bg-[#24c4b8]/20 text-[#24c4b8] border border-[#24c4b8]/30"
-                              : "bg-[#24c4b8] hover:bg-[#1db0a5] text-white"
-                            : "bg-slate-100 hover:bg-slate-200 text-slate-600"
-                        }`}
-                      >
-                        {isStarting ? "..." : accessCheck?.hasAccess 
-                          ? (hasPracticed ? "Retake" : "Start") 
-                          : "Unlock"}
-                      </Button>
                     </div>
                   );
                 })}
