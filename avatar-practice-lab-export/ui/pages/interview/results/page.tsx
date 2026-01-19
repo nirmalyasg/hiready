@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronRight, TrendingUp, Target, CheckCircle, AlertTriangle, Calendar, ArrowRight, Award, MessageSquare, Lightbulb, Star, BarChart3, Briefcase, Play, ArrowUp, Building2, Code, Users, Zap, BookOpen, GraduationCap, Share2, Copy, Check, RotateCcw, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronRight, TrendingUp, Target, CheckCircle, AlertTriangle, Calendar, ArrowRight, Award, MessageSquare, Lightbulb, Star, BarChart3, Briefcase, Play, ArrowUp, ArrowDown, Minus, Building2, Code, Users, Zap, BookOpen, GraduationCap, Share2, Copy, Check, RotateCcw, Clock, ChevronDown, ChevronUp, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { format } from "date-fns";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface DimensionScore {
   dimension: string;
@@ -57,6 +58,20 @@ interface RoleKitInfo {
   domain: string;
 }
 
+interface PlanData {
+  objective?: string;
+  skillsToAssess?: string[];
+  roundCategory?: string;
+  focusAreas?: string[];
+  companyContext?: { companyName?: string; roleTitle?: string; archetype?: string };
+}
+
+interface ReadinessBand {
+  band: string;
+  label: string;
+  description: string;
+}
+
 interface ReadinessData {
   readinessScore: number;
   previousScore: number;
@@ -88,6 +103,16 @@ interface AssignmentWithAttempts {
   attempts: AttemptData[];
 }
 
+const getBandConfig = (band: string) => {
+  const configs: Record<string, { color: string; bgColor: string; borderColor: string; ringColor: string; hexColor: string }> = {
+    interview_ready: { color: "text-emerald-700", bgColor: "bg-emerald-50", borderColor: "border-emerald-300", ringColor: "stroke-emerald-500", hexColor: "#059669" },
+    strong_foundation: { color: "text-blue-700", bgColor: "bg-blue-50", borderColor: "border-blue-300", ringColor: "stroke-blue-500", hexColor: "#3B82F6" },
+    developing: { color: "text-amber-700", bgColor: "bg-amber-50", borderColor: "border-amber-300", ringColor: "stroke-amber-500", hexColor: "#D97706" },
+    early_stage: { color: "text-red-700", bgColor: "bg-red-50", borderColor: "border-red-300", ringColor: "stroke-red-500", hexColor: "#DC2626" },
+  };
+  return configs[band] || configs.developing;
+};
+
 const getRecommendationConfig = (rec: string) => {
   const configs: Record<string, { label: string; color: string; bgColor: string; borderColor: string; icon: any }> = {
     strong_yes: { label: "Strong Yes", color: "text-emerald-700", bgColor: "bg-emerald-50", borderColor: "border-emerald-200", icon: Award },
@@ -111,26 +136,37 @@ const getScoreBg = (score: number) => {
   return "bg-red-50 border-red-200";
 };
 
-const getScoreLabel = (score: number) => {
-  if (score >= 4.5) return "Excellent";
-  if (score >= 4) return "Strong";
-  if (score >= 3) return "Satisfactory";
-  if (score >= 2) return "Needs Work";
-  return "Weak";
+const getProgressColor = (score: number) => {
+  if (score >= 4) return "bg-emerald-500";
+  if (score >= 3) return "bg-blue-500";
+  if (score >= 2) return "bg-amber-500";
+  return "bg-red-500";
 };
 
 const getInterviewTypeIcon = (type: string | null) => {
   if (!type) return Briefcase;
   const t = type.toLowerCase();
-  if (t.includes('coding') || t.includes('technical')) return Code;
-  if (t.includes('behavioral') || t.includes('leadership')) return Users;
-  if (t.includes('case') || t.includes('problem')) return Zap;
+  if (t.includes('coding') || t.includes('technical') || t.includes('sql') || t.includes('system')) return Code;
+  if (t.includes('behavioral') || t.includes('hr') || t.includes('leadership') || t.includes('culture')) return Users;
+  if (t.includes('case') || t.includes('problem') || t.includes('product')) return Zap;
   return Briefcase;
 };
 
 const getInterviewTypeLabel = (type: string | null, mode: string | null) => {
   const value = type || mode || 'general';
   return value.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+};
+
+const getTrendIcon = (scores: number[]) => {
+  if (scores.length < 2) return <Minus className="w-4 h-4 text-gray-400" />;
+  const firstHalf = scores.slice(0, Math.ceil(scores.length / 2));
+  const secondHalf = scores.slice(Math.ceil(scores.length / 2));
+  const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
+  const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
+  const diff = secondAvg - firstAvg;
+  if (diff > 0.3) return <ArrowUp className="w-4 h-4 text-emerald-500" />;
+  if (diff < -0.3) return <ArrowDown className="w-4 h-4 text-red-500" />;
+  return <Minus className="w-4 h-4 text-gray-400" />;
 };
 
 export default function InterviewResultsPage() {
@@ -144,6 +180,8 @@ export default function InterviewResultsPage() {
   const [interviewType, setInterviewType] = useState<string | null>(null);
   const [interviewMode, setInterviewMode] = useState<string | null>(null);
   const [jdSkills, setJdSkills] = useState<string[]>([]);
+  const [planData, setPlanData] = useState<PlanData | null>(null);
+  const [readinessBand, setReadinessBand] = useState<ReadinessBand | null>(null);
   const [readinessData, setReadinessData] = useState<ReadinessData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSharing, setIsSharing] = useState(false);
@@ -169,6 +207,8 @@ export default function InterviewResultsPage() {
           setInterviewMode(data.interviewMode);
           setRoleKitInfo(data.roleKitInfo);
           setJdSkills(data.jdSkills || []);
+          setPlanData(data.planData || null);
+          setReadinessBand(data.readinessBand || null);
           setConfigId(data.configId || null);
           
           if (data.jobContext) {
@@ -222,6 +262,7 @@ export default function InterviewResultsPage() {
   const averageScore = analysis?.dimensionScores
     ? analysis.dimensionScores.reduce((sum, d) => sum + d.score, 0) / analysis.dimensionScores.length
     : 0;
+  const percentScore = (averageScore / 5) * 100;
 
   const handleShare = async () => {
     if (!sessionId) return;
@@ -282,13 +323,26 @@ export default function InterviewResultsPage() {
   const attemptNumber = currentAttempt?.attemptNumber || 1;
   const totalAttempts = attemptHistory?.attemptCount || 1;
 
-  const practiceTitle = jobContext?.roleTitle || roleKitInfo?.name || "Interview Practice";
-  const practiceSubtitle = jobContext?.companyName || (roleKitInfo?.domain ? roleKitInfo.domain.replace(/_/g, ' ') : null);
+  const practiceTitle = jobContext?.roleTitle || roleKitInfo?.name || planData?.companyContext?.roleTitle || "Interview Practice";
+  const practiceSubtitle = jobContext?.companyName || planData?.companyContext?.companyName || (roleKitInfo?.domain ? roleKitInfo.domain.replace(/_/g, ' ') : null);
   const InterviewIcon = getInterviewTypeIcon(interviewType || interviewMode);
+  const skillsBeingAssessed = planData?.skillsToAssess?.length ? planData.skillsToAssess : jdSkills;
 
-  // Identify skill gaps - dimensions with score < 3.5
   const skillGaps = analysis?.dimensionScores?.filter(d => d.score < 3.5) || [];
   const strongSkills = analysis?.dimensionScores?.filter(d => d.score >= 4) || [];
+
+  const bandConfig = readinessBand ? getBandConfig(readinessBand.band) : null;
+  const circumference = 2 * Math.PI * 45;
+  const strokeDashoffset = circumference - (percentScore / 100) * circumference;
+
+  const progressData = attemptHistory?.attempts
+    ?.filter(a => a.score !== null)
+    .map(a => ({
+      attemptNumber: a.attemptNumber,
+      date: format(new Date(a.createdAt), 'MMM d'),
+      score: a.score,
+    }))
+    .reverse() || [];
 
   if (isLoading) {
     return (
@@ -320,491 +374,430 @@ export default function InterviewResultsPage() {
   }
 
   const recConfig = analysis.overallRecommendation ? getRecommendationConfig(analysis.overallRecommendation) : null;
-  const RecIcon = recConfig?.icon || CheckCircle;
 
   return (
     <SidebarLayout>
-      <div className="min-h-screen bg-[#fbfbfc] pb-24 sm:pb-8">
-        {/* Header with Practice Context */}
-        <div className="bg-[#000000] text-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-5xl">
-            <Link
-              to="/avatar/results"
-              className="inline-flex items-center text-white/70 hover:text-white mb-4 text-sm font-medium transition-colors group"
-            >
-              <ChevronRight className="w-4 h-4 rotate-180 mr-1 group-hover:-translate-x-0.5 transition-transform" />
-              Back to Results
-            </Link>
-            
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl bg-[#24c4b8] flex items-center justify-center">
-                    <InterviewIcon className="w-5 h-5 text-white" />
+      <div className="min-h-screen bg-[#f8f9fb] pb-24 sm:pb-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-5xl space-y-6">
+          
+          <Link
+            to={jobContext?.id ? `/jobs/${jobContext.id}` : "/avatar/results"}
+            className="inline-flex items-center text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors group"
+          >
+            <ChevronRight className="w-4 h-4 rotate-180 mr-1 group-hover:-translate-x-0.5 transition-transform" />
+            {jobContext?.id ? `Back to ${practiceTitle}` : 'Back to Results'}
+          </Link>
+
+          <Card className={`border-2 ${bandConfig?.borderColor || 'border-gray-200'} shadow-lg overflow-hidden`}>
+            <div className={`${bandConfig?.bgColor || 'bg-gray-50'} p-6 sm:p-8`}>
+              <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+                <div className="flex items-center gap-6">
+                  <div className="relative">
+                    <svg className="w-28 h-28 sm:w-32 sm:h-32 transform -rotate-90">
+                      <circle cx="50%" cy="50%" r="45" strokeWidth="8" fill="none" className="stroke-white/50" />
+                      <circle
+                        cx="50%" cy="50%" r="45" strokeWidth="8" fill="none"
+                        strokeLinecap="round"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={strokeDashoffset}
+                        style={{ stroke: bandConfig?.hexColor || '#9CA3AF' }}
+                        className="transition-all duration-1000"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-2xl sm:text-3xl font-bold text-gray-900">
+                        {averageScore.toFixed(1)}
+                      </span>
+                      <span className="text-xs text-gray-500">out of 5</span>
+                    </div>
                   </div>
-                  <div>
-                    <h1 className="text-xl sm:text-2xl font-bold">{practiceTitle}</h1>
+
+                  <div className="flex-1">
+                    {readinessBand && (
+                      <Badge className={`${bandConfig?.bgColor} ${bandConfig?.color} border ${bandConfig?.borderColor} text-sm px-2.5 py-0.5 mb-2`}>
+                        <Award className="w-3.5 h-3.5 mr-1.5" />
+                        {readinessBand.label}
+                      </Badge>
+                    )}
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-0.5 flex items-center gap-2">
+                      <InterviewIcon className="w-5 h-5 text-[#24c4b8]" />
+                      {getInterviewTypeLabel(interviewType, interviewMode)}
+                    </h2>
+                    <p className="text-gray-600 text-sm">{practiceTitle}</p>
                     {practiceSubtitle && (
-                      <p className="text-white/70 text-sm flex items-center gap-1">
+                      <p className="text-gray-500 text-xs flex items-center gap-1 mt-0.5">
                         <Building2 className="w-3 h-3" />
                         <span className="capitalize">{practiceSubtitle}</span>
                       </p>
                     )}
-                  </div>
-                </div>
-                
-                <div className="flex flex-wrap items-center gap-2 mt-3">
-                  <Badge className="bg-white/10 text-white border-white/20 gap-1">
-                    <InterviewIcon className="w-3 h-3" />
-                    {getInterviewTypeLabel(interviewType, interviewMode)}
-                  </Badge>
-                  {(readinessData?.readinessScore ?? jobContext?.readinessScore) !== null && (
-                    <Badge className="bg-[#24c4b8]/20 text-[#24c4b8] border-[#24c4b8]/30 gap-1">
-                      {readinessData?.readinessScore ?? jobContext?.readinessScore}% Ready
-                      {readinessData?.readinessDelta !== undefined && readinessData.readinessDelta > 0 && (
-                        <ArrowUp className="w-3 h-3" />
-                      )}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-              
-              {/* Quick Score Summary + Share */}
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-4 bg-white/10 rounded-xl p-4">
-                  <div className="text-center">
-                    <div className={`text-3xl font-bold ${averageScore >= 3 ? 'text-emerald-400' : 'text-[#24c4b8]'}`}>
-                      {averageScore.toFixed(1)}
-                    </div>
-                    <div className="text-xs text-white/60">out of 5</div>
-                  </div>
-                  {recConfig && (
-                    <div className={`px-3 py-1.5 rounded-lg ${recConfig.bgColor} ${recConfig.borderColor} border`}>
-                      <div className={`text-sm font-semibold ${recConfig.color}`}>{recConfig.label}</div>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Share Button */}
-                {shareUrl ? (
-                  <Button
-                    onClick={handleCopyLink}
-                    variant="outline"
-                    size="sm"
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 gap-2"
-                  >
-                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                    {copied ? 'Copied!' : 'Copy Link'}
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleShare}
-                    disabled={isSharing}
-                    variant="outline"
-                    size="sm"
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 gap-2"
-                  >
-                    <Share2 className="w-4 h-4" />
-                    {isSharing ? 'Sharing...' : 'Share'}
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Attempt Badge & Retake */}
-            {attemptHistory && totalAttempts >= 1 && (
-              <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white/5 rounded-xl p-4 border border-white/10">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-white/60" />
-                    <span className="text-white/80 text-sm">
-                      Attempt {attemptNumber} of {totalAttempts}
-                    </span>
-                    {currentAttempt?.isBest && (
-                      <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs">
-                        Best Score
-                      </Badge>
+                    {readinessBand && (
+                      <p className="text-xs text-gray-600 mt-2">{readinessBand.description}</p>
                     )}
                   </div>
-                  {totalAttempts > 1 && (
-                    <button
-                      onClick={() => setShowAttemptHistory(!showAttemptHistory)}
-                      className="text-sm text-[#24c4b8] hover:text-[#24c4b8]/80 flex items-center gap-1"
-                    >
-                      View History
-                      {showAttemptHistory ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </button>
-                  )}
                 </div>
-                <Button
-                  onClick={handleRetake}
-                  disabled={isRetaking || !configId}
-                  className="bg-[#cb6ce6] hover:bg-[#cb6ce6]/90 text-white gap-2"
-                >
-                  <RotateCcw className={`w-4 h-4 ${isRetaking ? 'animate-spin' : ''}`} />
-                  {isRetaking ? 'Starting...' : 'Retake Interview'}
-                </Button>
-              </div>
-            )}
 
-            {/* Attempt History Timeline */}
+                <div className="lg:ml-auto flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                  {recConfig && (
+                    <div className={`px-3 py-1.5 rounded-lg ${recConfig.bgColor} ${recConfig.borderColor} border`}>
+                      <div className={`text-sm font-semibold ${recConfig.color} flex items-center gap-1.5`}>
+                        <recConfig.icon className="w-4 h-4" />
+                        {recConfig.label}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="flex gap-2">
+                    {shareUrl ? (
+                      <Button
+                        onClick={handleCopyLink}
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                      >
+                        {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                        {copied ? 'Copied!' : 'Copy Link'}
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleShare}
+                        disabled={isSharing}
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                      >
+                        <Share2 className="w-4 h-4" />
+                        {isSharing ? 'Sharing...' : 'Share'}
+                      </Button>
+                    )}
+                    
+                    <Button
+                      onClick={handleRetake}
+                      disabled={isRetaking || !configId}
+                      size="sm"
+                      className="bg-[#cb6ce6] hover:bg-[#cb6ce6]/90 text-white gap-2"
+                    >
+                      <RotateCcw className={`w-4 h-4 ${isRetaking ? 'animate-spin' : ''}`} />
+                      {isRetaking ? 'Starting...' : 'Retake'}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {attemptHistory && totalAttempts > 1 && (
+                <div className="mt-4 pt-4 border-t border-white/30">
+                  <button
+                    onClick={() => setShowAttemptHistory(!showAttemptHistory)}
+                    className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900"
+                  >
+                    <Clock className="w-4 h-4" />
+                    Attempt {attemptNumber} of {totalAttempts}
+                    {currentAttempt?.isBest && (
+                      <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-xs py-0">Best</Badge>
+                    )}
+                    {showAttemptHistory ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
+                  </button>
+                </div>
+              )}
+            </div>
+
             {showAttemptHistory && attemptHistory?.attempts && attemptHistory.attempts.length > 1 && (
-              <div className="mt-4 bg-white/5 rounded-xl p-4 border border-white/10 space-y-3">
-                <h4 className="text-sm font-medium text-white/80 flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-[#24c4b8]" />
-                  Attempt History
-                </h4>
-                <div className="space-y-2">
+              <div className="p-4 bg-white border-t space-y-3">
+                <div className="flex flex-wrap gap-2">
                   {attemptHistory.attempts.map((attempt) => (
                     <Link
                       key={attempt.sessionId}
                       to={`/interview/results?sessionId=${attempt.sessionId}`}
-                      className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
                         attempt.sessionId === Number(sessionId)
-                          ? 'bg-[#24c4b8]/20 border border-[#24c4b8]/30'
-                          : 'bg-white/5 hover:bg-white/10 border border-white/5'
+                          ? 'bg-[#24c4b8]/10 border border-[#24c4b8]/30'
+                          : 'bg-gray-50 hover:bg-gray-100 border border-gray-100'
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-                          <span className="text-sm font-semibold text-white">#{attempt.attemptNumber}</span>
-                        </div>
-                        <div>
-                          <p className="text-sm text-white/80">
-                            {format(new Date(attempt.createdAt), 'MMM d, yyyy h:mm a')}
-                          </p>
-                          <div className="flex items-center gap-2">
-                            {attempt.isBest && (
-                              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs py-0">
-                                Best
-                              </Badge>
-                            )}
-                            {attempt.isLatest && !attempt.isBest && (
-                              <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs py-0">
-                                Latest
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        {attempt.score !== null ? (
-                          <span className={`text-lg font-bold ${attempt.score >= 3 ? 'text-emerald-400' : 'text-[#24c4b8]'}`}>
-                            {attempt.score.toFixed(1)}/5
-                          </span>
-                        ) : (
-                          <span className="text-sm text-white/40">In Progress</span>
-                        )}
-                      </div>
+                      <span className="text-sm font-medium">#{attempt.attemptNumber}</span>
+                      {attempt.score !== null ? (
+                        <span className={`text-sm font-bold ${attempt.score >= 3 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                          {attempt.score.toFixed(1)}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">--</span>
+                      )}
+                      {attempt.isBest && <Star className="w-3 h-3 text-amber-500" />}
                     </Link>
                   ))}
                 </div>
               </div>
             )}
-          </div>
-        </div>
+          </Card>
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-5xl">
-          {/* Role Fit Assessment */}
-          {(skillGaps.length > 0 || strongSkills.length > 0 || jdSkills.length > 0) && (
-            <Card className="border-[#000000]/10 rounded-2xl mb-6 overflow-hidden">
-              <div className="bg-[#000000] p-4 sm:p-6">
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+          {skillsBeingAssessed.length > 0 && (
+            <Card className="border-gray-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
                   <Target className="w-5 h-5 text-[#24c4b8]" />
-                  Role Fit Assessment
-                  {jobContext && <span className="text-white/60 font-normal text-sm ml-2">for {jobContext.roleTitle}</span>}
-                </h3>
-              </div>
-              <CardContent className="p-4 sm:p-6 space-y-6">
-                {/* JD Skills Match */}
-                {jdSkills.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-slate-900 mb-3 flex items-center gap-2">
-                      <BookOpen className="w-4 h-4 text-slate-500" />
-                      Skills from Job Description
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {jdSkills.slice(0, 10).map((skill, idx) => (
-                        <Badge key={idx} variant="outline" className="bg-[#000000]/5 border-[#000000]/20 text-[#000000]">
-                          {skill}
-                        </Badge>
-                      ))}
-                      {jdSkills.length > 10 && (
-                        <Badge variant="outline" className="bg-slate-100 text-slate-600">
-                          +{jdSkills.length - 10} more
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                <div className="grid md:grid-cols-2 gap-6">
-                  {/* Strengths */}
-                  <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
-                    <h4 className="text-sm font-medium text-emerald-800 mb-3 flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4" />
-                      Strong Areas ({strongSkills.length})
-                    </h4>
-                    {strongSkills.length > 0 ? (
-                      <ul className="space-y-2">
-                        {strongSkills.slice(0, 3).map((skill, idx) => (
-                          <li key={idx} className="flex items-center justify-between text-sm">
-                            <span className="text-emerald-900">{skill.dimension}</span>
-                            <span className="font-semibold text-emerald-700">{skill.score}/5</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-emerald-700/70">Keep practicing to build your strengths</p>
-                    )}
-                  </div>
-                  
-                  {/* Gaps */}
-                  <div className="bg-amber-50 rounded-xl p-4 border border-amber-100">
-                    <h4 className="text-sm font-medium text-amber-800 mb-3 flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4" />
-                      Areas to Improve ({skillGaps.length})
-                    </h4>
-                    {skillGaps.length > 0 ? (
-                      <ul className="space-y-2">
-                        {skillGaps.slice(0, 3).map((skill, idx) => (
-                          <li key={idx} className="flex items-center justify-between text-sm">
-                            <span className="text-amber-900">{skill.dimension}</span>
-                            <span className="font-semibold text-amber-700">{skill.score}/5</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-amber-700/70">Great job! No major gaps identified</p>
-                    )}
-                  </div>
+                  Skills Assessed in This Interview
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex flex-wrap gap-2">
+                  {skillsBeingAssessed.slice(0, 12).map((skill, idx) => (
+                    <Badge key={idx} variant="outline" className="bg-[#24c4b8]/5 border-[#24c4b8]/20 text-gray-700">
+                      {skill}
+                    </Badge>
+                  ))}
+                  {skillsBeingAssessed.length > 12 && (
+                    <Badge variant="outline" className="bg-gray-100 text-gray-500">
+                      +{skillsBeingAssessed.length - 12} more
+                    </Badge>
+                  )}
                 </div>
-                
-                {/* Recommendations */}
-                {skillGaps.length > 0 && (
-                  <div className="bg-[#24c4b8]/5 rounded-xl p-4 border border-[#24c4b8]/20">
-                    <h4 className="text-sm font-medium text-[#000000] mb-2 flex items-center gap-2">
-                      <GraduationCap className="w-4 h-4 text-[#24c4b8]" />
-                      Priority Focus
-                    </h4>
-                    <p className="text-sm text-gray-500">
-                      Based on your results, focus on <span className="font-medium text-[#000000]">{skillGaps[0]?.dimension}</span>
-                      {skillGaps[1] && <> and <span className="font-medium text-[#000000]">{skillGaps[1]?.dimension}</span></>} 
-                      {' '}to improve your interview performance for this role.
-                    </p>
-                  </div>
-                )}
               </CardContent>
             </Card>
           )}
 
-          {/* Key Wins */}
-          {analysis.wins && analysis.wins.length > 0 && (
-            <Card className="border-slate-200 rounded-2xl mb-6">
-              <CardContent className="p-4 sm:p-6">
-                <h4 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                  <Star className="w-5 h-5 text-amber-500" />
-                  Key Wins
-                </h4>
-                <ul className="space-y-3">
-                  {analysis.wins.slice(0, 4).map((win, idx) => (
-                    <li key={idx} className="text-sm text-slate-700 flex items-start gap-3 bg-slate-50 p-3 rounded-lg">
-                      <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                      <span>{win}</span>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#24c4b8]/10 flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-[#24c4b8]" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{totalAttempts}</div>
+                  <div className="text-xs text-gray-500">Total Attempts</div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-emerald-500" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{strongSkills.length}</div>
+                  <div className="text-xs text-gray-500">Strong Areas</div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-amber-500" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{skillGaps.length}</div>
+                  <div className="text-xs text-gray-500">Needs Improvement</div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                  {getTrendIcon(progressData.map(p => p.score || 0))}
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {attemptHistory?.bestScore?.toFixed(1) || averageScore.toFixed(1)}
+                  </div>
+                  <div className="text-xs text-gray-500">Best Score</div>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {progressData.length > 1 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-[#24c4b8]" />
+                  Progress Over Attempts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-48">
+                  {/* @ts-expect-error recharts type compatibility */}
+                  <ResponsiveContainer width="100%" height="100%">
+                    {/* @ts-expect-error recharts type compatibility */}
+                    <LineChart data={progressData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      {/* @ts-expect-error recharts type compatibility */}
+                      <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                      {/* @ts-expect-error recharts type compatibility */}
+                      <YAxis domain={[0, 5]} tick={{ fontSize: 12 }} />
+                      {/* @ts-expect-error recharts type compatibility */}
+                      <Tooltip 
+                        formatter={(value: number) => [`${value.toFixed(1)}/5`, 'Score']}
+                        labelFormatter={(label: string) => `Attempt: ${label}`}
+                      />
+                      {/* @ts-expect-error recharts type compatibility */}
+                      <Line type="monotone" dataKey="score" stroke="#24c4b8" strokeWidth={2} dot={{ fill: '#24c4b8', strokeWidth: 2 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card>
+            <CardHeader className="pb-3 border-b">
+              <CardTitle className="text-base flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-[#24c4b8]" />
+                Dimension Breakdown
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {analysis.dimensionScores?.map((dim, idx) => (
+                <div key={idx} className={`p-4 sm:p-5 ${idx !== (analysis.dimensionScores?.length || 0) - 1 ? "border-b border-gray-100" : ""}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium text-gray-900">{dim.dimension}</h4>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-lg font-bold ${getScoreColor(dim.score)}`}>{dim.score.toFixed(1)}</span>
+                      <span className="text-gray-400 text-sm">/5</span>
+                    </div>
+                  </div>
+                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-500 ${getProgressColor(dim.score)}`}
+                      style={{ width: `${(dim.score / 5) * 100}%` }}
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 mb-2">{dim.rationale}</p>
+                  {dim.improvement && (
+                    <div className="flex items-start gap-2 p-2.5 bg-[#24c4b8]/5 rounded-lg border border-[#24c4b8]/10">
+                      <Lightbulb className="w-4 h-4 text-[#24c4b8] flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-gray-700">{dim.improvement}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card className="border-emerald-200 bg-emerald-50/30">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2 text-emerald-800">
+                  <CheckCircle className="w-5 h-5" />
+                  What You Did Well
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <ul className="space-y-2">
+                  {(analysis.strengths || analysis.wins)?.slice(0, 5).map((s, idx) => (
+                    <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
+                      {s}
                     </li>
                   ))}
                 </ul>
               </CardContent>
             </Card>
-          )}
+
+            <Card className="border-amber-200 bg-amber-50/30">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2 text-amber-800">
+                  <AlertTriangle className="w-5 h-5" />
+                  Focus Areas for Improvement
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <ul className="space-y-2">
+                  {(analysis.improvements || analysis.risks)?.slice(0, 5).map((i, idx) => (
+                    <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 flex-shrink-0" />
+                      {i}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
 
           {analysis.summary && (
-            <Card className="border-slate-200 rounded-2xl mb-6">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg text-slate-900">Summary</CardTitle>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Summary</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-slate-700 leading-relaxed">{analysis.summary}</p>
+              <CardContent className="pt-0">
+                <p className="text-gray-700 leading-relaxed">{analysis.summary}</p>
               </CardContent>
             </Card>
           )}
 
-          <Tabs defaultValue="scores" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-flex bg-white border border-slate-200">
-              <TabsTrigger value="scores" className="data-[state=active]:bg-[#000000] data-[state=active]:text-white">Skills</TabsTrigger>
-              <TabsTrigger value="feedback" className="data-[state=active]:bg-[#000000] data-[state=active]:text-white">Feedback</TabsTrigger>
-              <TabsTrigger value="answers" className="data-[state=active]:bg-[#000000] data-[state=active]:text-white">Better Answers</TabsTrigger>
-              <TabsTrigger value="plan" className="data-[state=active]:bg-[#000000] data-[state=active]:text-white">7-Day Plan</TabsTrigger>
+          <Tabs defaultValue="answers" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:inline-flex bg-white border border-gray-200">
+              <TabsTrigger value="answers" className="data-[state=active]:bg-[#042c4c] data-[state=active]:text-white">Better Answers</TabsTrigger>
+              <TabsTrigger value="plan" className="data-[state=active]:bg-[#042c4c] data-[state=active]:text-white">7-Day Plan</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="scores">
-              <Card className="border-slate-200 rounded-2xl">
-                <CardHeader className="border-b border-slate-100 bg-[#fbfbfc]">
-                  <CardTitle className="flex items-center gap-2 text-[#000000]">
-                    <BarChart3 className="w-5 h-5 text-[#24c4b8]" />
-                    {jobContext || roleKitInfo ? (
-                      <span>Skills Assessed for {practiceTitle}</span>
-                    ) : (
-                      <span>Interview Skills Assessment</span>
-                    )}
-                  </CardTitle>
-                  {(interviewType || interviewMode) && (
-                    <p className="text-sm text-slate-500 mt-1">
-                      {getInterviewTypeLabel(interviewType, interviewMode)} focus areas
-                    </p>
-                  )}
-                </CardHeader>
-                <CardContent className="p-0">
-                  {analysis.dimensionScores?.map((dim, idx) => (
-                    <div key={idx} className={`p-4 sm:p-5 ${idx !== (analysis.dimensionScores?.length || 0) - 1 ? "border-b border-slate-100" : ""}`}>
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-semibold text-slate-900">{dim.dimension}</h4>
-                        <div className="flex items-center gap-2">
-                          <Badge className={`${getScoreBg(dim.score)} ${getScoreColor(dim.score)} border`}>
-                            {getScoreLabel(dim.score)}
-                          </Badge>
-                          <span className={`text-lg font-bold ${getScoreColor(dim.score)}`}>{dim.score}</span>
-                          <span className="text-slate-400">/5</span>
-                        </div>
-                      </div>
-                      <Progress value={dim.score * 20} className="h-2 mb-4" />
-                      <p className="text-sm text-slate-600 mb-3">{dim.rationale}</p>
-                      {dim.improvement && (
-                        <div className="flex items-start gap-3 p-3 bg-[#24c4b8]/5 rounded-xl border border-[#24c4b8]/20">
-                          <Lightbulb className="w-4 h-4 text-[#24c4b8] flex-shrink-0 mt-0.5" />
-                          <p className="text-sm text-[#000000]">{dim.improvement}</p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="feedback">
-              <div className="grid md:grid-cols-2 gap-6">
-                <Card className="border-emerald-200 bg-emerald-50/30 rounded-2xl">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-emerald-800">
-                      <CheckCircle className="w-5 h-5" />
-                      Strengths
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3">
-                      {analysis.strengths?.map((s, idx) => (
-                        <li key={idx} className="text-sm text-slate-700 flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
-                          {s}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-amber-200 bg-amber-50/30 rounded-2xl">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-amber-800">
-                      <AlertTriangle className="w-5 h-5" />
-                      Areas to Improve
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3">
-                      {analysis.improvements?.map((i, idx) => (
-                        <li key={idx} className="text-sm text-slate-700 flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 flex-shrink-0" />
-                          {i}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                {analysis.risks && analysis.risks.length > 0 && (
-                  <Card className="border-red-200 bg-red-50/30 rounded-2xl md:col-span-2">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-red-800">
-                        <AlertTriangle className="w-5 h-5" />
-                        Risk Flags
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-2">
-                        {analysis.risks.map((r, idx) => (
-                          <li key={idx} className="text-sm text-slate-700 flex items-start gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-                            {r}
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </TabsContent>
-
             <TabsContent value="answers">
-              <Card className="border-slate-200 rounded-2xl">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2 text-[#000000]">
+              <Card>
+                <CardHeader className="border-b pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
                     <MessageSquare className="w-5 h-5 text-[#24c4b8]" />
                     Improved Answer Examples
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                  {analysis.betterAnswers?.map((ba, idx) => (
-                    <div key={idx} className={`p-5 ${idx !== (analysis.betterAnswers?.length || 0) - 1 ? "border-b border-slate-100" : ""}`}>
-                      <div className="mb-3">
-                        <Badge variant="outline" className="mb-2 text-slate-900">Question</Badge>
-                        <p className="text-slate-900 font-medium">{ba.question}</p>
+                  {analysis.betterAnswers?.length ? (
+                    analysis.betterAnswers.map((ba, idx) => (
+                      <div key={idx} className={`p-4 sm:p-5 ${idx !== (analysis.betterAnswers?.length || 0) - 1 ? "border-b border-gray-100" : ""}`}>
+                        <div className="mb-3">
+                          <Badge variant="outline" className="mb-2 text-gray-700">Question</Badge>
+                          <p className="text-gray-900 font-medium">{ba.question}</p>
+                        </div>
+                        <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                          <Badge className="bg-emerald-600 mb-2 text-xs">Better Answer</Badge>
+                          <p className="text-gray-700 text-sm whitespace-pre-wrap">{ba.betterAnswer}</p>
+                        </div>
                       </div>
-                      <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
-                        <Badge className="bg-emerald-600 mb-2">Better Answer</Badge>
-                        <p className="text-slate-700 whitespace-pre-wrap">{ba.betterAnswer}</p>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="p-6 text-center text-gray-500">
+                      No specific answer improvements available for this session.
                     </div>
-                  ))}
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="plan">
-              <Card className="border-slate-200 rounded-2xl">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle className="flex items-center gap-2 text-[#000000]">
+              <Card>
+                <CardHeader className="border-b pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-[#24c4b8]" />
                     7-Day Practice Plan
-                    {(jobContext || roleKitInfo) && (
-                      <span className="text-sm font-normal text-slate-500 ml-2">
-                        Tailored for {practiceTitle}
-                      </span>
-                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                  {analysis.practicePlan?.map((day, idx) => (
-                    <div key={idx} className={`p-4 flex items-start gap-4 ${idx !== (analysis.practicePlan?.length || 0) - 1 ? "border-b border-slate-100" : ""}`}>
-                      <div className="w-12 h-12 rounded-xl bg-[#000000] flex flex-col items-center justify-center flex-shrink-0">
-                        <span className="text-xs text-white/60">Day</span>
-                        <span className="text-lg font-bold text-white">{day.day}</span>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-slate-900 font-medium mb-1">{day.task}</p>
-                        <div className="flex items-center gap-1 text-xs text-slate-500">
-                          <Target className="w-3 h-3" />
-                          {day.timeMinutes} minutes
+                  {analysis.practicePlan?.length ? (
+                    analysis.practicePlan.map((day, idx) => (
+                      <div key={idx} className={`p-4 flex items-start gap-4 ${idx !== (analysis.practicePlan?.length || 0) - 1 ? "border-b border-gray-100" : ""}`}>
+                        <div className="w-10 h-10 rounded-lg bg-[#042c4c] flex flex-col items-center justify-center flex-shrink-0">
+                          <span className="text-[10px] text-white/60">Day</span>
+                          <span className="text-sm font-bold text-white">{day.day}</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-gray-900 font-medium text-sm mb-1">{day.task}</p>
+                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                            <Clock className="w-3 h-3" />
+                            {day.timeMinutes} minutes
+                          </div>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="p-6 text-center text-gray-500">
+                      No practice plan available for this session.
                     </div>
-                  ))}
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
 
-          {/* Next Steps CTA */}
-          <div className="mt-8 bg-[#000000] rounded-2xl p-6 text-white">
+          <div className="bg-[#042c4c] rounded-2xl p-6 text-white">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h3 className="text-lg font-semibold mb-1">Ready to Improve?</h3>
@@ -814,7 +807,7 @@ export default function InterviewResultsPage() {
                     : 'Keep practicing to maintain your skills'}
                 </p>
               </div>
-              <Link to="/interview">
+              <Link to={jobContext?.id ? `/jobs/${jobContext.id}` : "/interview"}>
                 <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white gap-2">
                   <Play className="w-4 h-4" />
                   Practice Again

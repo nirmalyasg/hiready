@@ -2171,6 +2171,13 @@ interviewRouter.get("/analysis/:sessionId", requireAuth, async (req: Request, re
     let interviewMode: string | null = null;
     let roleKitInfo: { id: number; name: string; domain: string } | null = null;
     let jdSkills: string[] = [];
+    let planData: {
+      objective?: string;
+      skillsToAssess?: string[];
+      roundCategory?: string;
+      focusAreas?: string[];
+      companyContext?: { companyName?: string; roleTitle?: string; archetype?: string };
+    } | null = null;
 
     if (session) {
       const [config] = await db
@@ -2181,6 +2188,23 @@ interviewRouter.get("/analysis/:sessionId", requireAuth, async (req: Request, re
       if (config) {
         interviewType = config.interviewType;
         interviewMode = config.interviewMode;
+
+        // Get interview plan for this config
+        const [plan] = await db
+          .select()
+          .from(interviewPlans)
+          .where(eq(interviewPlans.interviewConfigId, config.id));
+        
+        if (plan?.planJson) {
+          const pj = plan.planJson as any;
+          planData = {
+            objective: pj.objective,
+            skillsToAssess: pj.skillsToAssess || pj.focusAreas || [],
+            roundCategory: pj.roundCategory,
+            focusAreas: pj.focusAreas || [],
+            companyContext: pj.companyContext,
+          };
+        }
 
         if (config.roleKitId) {
           const [kit] = await db.select().from(roleKits).where(eq(roleKits.id, config.roleKitId));
@@ -2216,6 +2240,31 @@ interviewRouter.get("/analysis/:sessionId", requireAuth, async (req: Request, re
             }
           }
         }
+        
+        // If no jdSkills from doc but we have plan skills, use those
+        if (jdSkills.length === 0 && planData?.skillsToAssess?.length) {
+          jdSkills = planData.skillsToAssess;
+        }
+      }
+    }
+    
+    // Calculate readiness band based on dimension scores
+    let readinessBand: { band: string; label: string; description: string } | null = null;
+    if (analysis.dimensionScores) {
+      const scores = analysis.dimensionScores as Array<{ score: number }>;
+      const avgScore = scores.length > 0 
+        ? scores.reduce((sum, d) => sum + d.score, 0) / scores.length 
+        : 0;
+      const percentScore = (avgScore / 5) * 100;
+      
+      if (percentScore >= 75) {
+        readinessBand = { band: "interview_ready", label: "Interview Ready", description: "You demonstrate strong competency across evaluated skills" };
+      } else if (percentScore >= 55) {
+        readinessBand = { band: "strong_foundation", label: "Strong Foundation", description: "Solid baseline with specific areas to sharpen" };
+      } else if (percentScore >= 35) {
+        readinessBand = { band: "developing", label: "Developing", description: "Growing skills that need focused practice" };
+      } else {
+        readinessBand = { band: "early_stage", label: "Early Stage", description: "Building foundational interview capabilities" };
       }
     }
     
@@ -2227,6 +2276,8 @@ interviewRouter.get("/analysis/:sessionId", requireAuth, async (req: Request, re
       interviewMode,
       roleKitInfo,
       jdSkills,
+      planData,
+      readinessBand,
       configId: session?.interviewConfigId || null,
     });
   } catch (error: any) {
