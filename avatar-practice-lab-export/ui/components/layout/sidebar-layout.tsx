@@ -99,28 +99,34 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             {isLoading ? (
               <div className="h-10 bg-white/5 rounded-lg animate-pulse" />
             ) : isAuthenticated && user ? (
-              <div className={cn("space-y-2", collapsed && "space-y-2")}>
-                <div className={cn(
-                  "flex items-center gap-2.5 px-2 py-1.5",
-                  collapsed && "justify-center px-0"
-                )}>
+              <div className={cn("space-y-1", collapsed && "space-y-1")}>
+                <Link
+                  to="/profile"
+                  className={cn(
+                    "flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all",
+                    isActive('/profile')
+                      ? "bg-[#24c4b8] text-white"
+                      : "text-gray-400 hover:text-white hover:bg-white/10",
+                    collapsed && "justify-center px-0"
+                  )}
+                >
                   {user.profileImageUrl ? (
                     <img
                       src={user.profileImageUrl}
                       alt={user.firstName || 'User'}
-                      className="w-8 h-8 rounded-full object-cover"
+                      className="w-7 h-7 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-[#cb6ce6] flex items-center justify-center">
-                      <User className="w-4 h-4 text-white" />
+                    <div className="w-7 h-7 rounded-full bg-[#cb6ce6] flex items-center justify-center">
+                      <User className="w-3.5 h-3.5 text-white" />
                     </div>
                   )}
                   <div className={cn("flex-1 min-w-0", collapsed && "hidden")}>
-                    <p className="text-sm font-medium text-white truncate">
-                      {user.firstName || user.username || 'User'}
+                    <p className="text-sm font-medium truncate">
+                      {user.firstName || user.username || 'Profile'}
                     </p>
                   </div>
-                </div>
+                </Link>
                 <button
                   onClick={async () => {
                     await fetch('/api/auth/logout', { method: 'POST' });
