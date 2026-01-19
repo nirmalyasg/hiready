@@ -6942,6 +6942,7 @@ avatarSimulator.post("/admin/full-data-migration", async (req, res) => {
       { table: "interview_sessions", pk: "id", isSerial: true },
       { table: "interview_analysis", pk: "id", isSerial: true },
       { table: "interview_artifacts", pk: "id", isSerial: true },
+      { table: "interview_assignments", pk: "id", isSerial: true },
     ];
     
     for (const { table, pk, isSerial } of migrationOrder) {
