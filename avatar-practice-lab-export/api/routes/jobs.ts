@@ -206,8 +206,11 @@ jobsRouter.post("/", requireAuth, async (req: Request, res: Response) => {
       }
     }
 
+    const placeholderTitles = ["new job", "job from paste", "untitled job", "untitled", ""];
+    const isPlaceholderTitle = placeholderTitles.includes(roleTitle.toLowerCase().trim());
+    
     const finalRoleTitle = parsedJd?.detectedRoleTitle || 
-      (parsedJd?.focusAreas?.[0] ? roleTitle.replace("Job from Paste", parsedJd.focusAreas[0]) : roleTitle);
+      (isPlaceholderTitle ? (parsedJd?.focusAreas?.[0] || "Untitled Role") : roleTitle);
     
     const roleKitMatch = await ensureRoleKitForJob(finalRoleTitle, jdText, parsedJd, companyName);
 
