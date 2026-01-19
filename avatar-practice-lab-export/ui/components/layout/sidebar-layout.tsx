@@ -72,9 +72,9 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f7fc]">
+    <div className="min-h-screen bg-[#f8f9fb]">
       <aside className={cn(
-        "hidden lg:block fixed top-0 left-0 h-full bg-[#000000] z-50 transition-all duration-300 ease-out",
+        "hidden lg:block fixed top-0 left-0 h-full bg-[#042c4c] z-50 transition-all duration-300 ease-out",
         collapsed ? "w-20" : "w-60"
       )}>
         <div className="flex flex-col h-full">
@@ -87,7 +87,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             </Link>
             {collapsed && (
               <Link to="/">
-                <div className="w-9 h-9 bg-[#24c4b8] rounded-xl flex items-center justify-center">
+                <div className="w-9 h-9 bg-[#ee7e65] rounded-xl flex items-center justify-center">
                   <Target className="w-4 h-4 text-white" />
                 </div>
               </Link>
@@ -118,10 +118,10 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                         className={cn(
                           "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
                           active 
-                            ? "bg-[#24c4b8] text-white shadow-lg shadow-[#24c4b8]/20" 
+                            ? "bg-[#ee7e65] text-white shadow-lg shadow-[#ee7e65]/20" 
                             : isPractice
                               ? "text-white hover:bg-white/10"
-                              : "text-gray-400 hover:text-white hover:bg-white/10",
+                              : "text-[#768c9c] hover:text-white hover:bg-white/10",
                           collapsed && "justify-center px-0"
                         )}
                       >
@@ -145,8 +145,8 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                   className={cn(
                     "flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all",
                     isActive('/profile')
-                      ? "bg-[#24c4b8] text-white"
-                      : "text-gray-400 hover:text-white hover:bg-white/10",
+                      ? "bg-[#ee7e65] text-white"
+                      : "text-[#768c9c] hover:text-white hover:bg-white/10",
                     collapsed && "justify-center px-0"
                   )}
                 >
@@ -157,7 +157,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                       className="w-7 h-7 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-7 h-7 rounded-full bg-[#cb6ce6] flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-full bg-[#ee7e65] flex items-center justify-center">
                       <User className="w-3.5 h-3.5 text-white" />
                     </div>
                   )}
@@ -173,7 +173,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                     window.location.href = '/';
                   }}
                   className={cn(
-                    "w-full flex items-center gap-2.5 px-3 py-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-all text-sm",
+                    "w-full flex items-center gap-2.5 px-3 py-2 text-[#768c9c] hover:text-white hover:bg-white/10 rounded-xl transition-all text-sm",
                     collapsed && "justify-center px-0"
                   )}
                 >
@@ -185,7 +185,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
               <Link
                 to="/login"
                 className={cn(
-                  "flex items-center justify-center gap-2 px-4 py-2.5 bg-[#24c4b8] text-white rounded-xl text-sm font-medium hover:bg-[#1db0a5] transition-colors",
+                  "flex items-center justify-center gap-2 px-4 py-2.5 bg-[#ee7e65] text-white rounded-xl text-sm font-medium hover:bg-[#e06d54] transition-colors",
                   collapsed && "px-3"
                 )}
               >

@@ -13,20 +13,20 @@ interface RoleKit {
   description: string | null;
 }
 
-const domainColors: Record<string, { bg: string; text: string; border: string; light: string }> = {
-  software: { bg: "bg-slate-900", text: "text-slate-900", border: "border-slate-900", light: "bg-slate-50" },
-  data: { bg: "bg-[#cb6ce6]", text: "text-[#cb6ce6]", border: "border-[#cb6ce6]", light: "bg-purple-50" },
-  product: { bg: "bg-[#24c4b8]", text: "text-[#24c4b8]", border: "border-[#24c4b8]", light: "bg-teal-50" },
-  design: { bg: "bg-amber-500", text: "text-amber-600", border: "border-amber-500", light: "bg-amber-50" },
-  sales: { bg: "bg-emerald-500", text: "text-emerald-600", border: "border-emerald-500", light: "bg-emerald-50" },
-  marketing: { bg: "bg-rose-500", text: "text-rose-600", border: "border-rose-500", light: "bg-rose-50" },
-  customer_success: { bg: "bg-sky-500", text: "text-sky-600", border: "border-sky-500", light: "bg-sky-50" },
-  operations: { bg: "bg-orange-500", text: "text-orange-600", border: "border-orange-500", light: "bg-orange-50" },
-  consulting: { bg: "bg-indigo-500", text: "text-indigo-600", border: "border-indigo-500", light: "bg-indigo-50" },
-  finance: { bg: "bg-green-600", text: "text-green-600", border: "border-green-600", light: "bg-green-50" },
-  hr: { bg: "bg-pink-500", text: "text-pink-600", border: "border-pink-500", light: "bg-pink-50" },
-  recruiting: { bg: "bg-violet-500", text: "text-violet-600", border: "border-violet-500", light: "bg-violet-50" },
-  engineering_management: { bg: "bg-slate-700", text: "text-slate-700", border: "border-slate-700", light: "bg-slate-50" },
+const domainIcons: Record<string, string> = {
+  software: "💻",
+  data: "📊",
+  product: "🎯",
+  design: "🎨",
+  sales: "💼",
+  marketing: "📢",
+  customer_success: "🤝",
+  operations: "⚙️",
+  consulting: "📋",
+  finance: "💰",
+  hr: "👥",
+  recruiting: "🔍",
+  engineering_management: "👔",
 };
 
 const formatDomain = (domain: string) => {
@@ -78,12 +78,10 @@ export default function InterviewRolesPage() {
     return acc;
   }, {} as Record<string, RoleKit[]>);
 
-  const getColors = (domain: string) => domainColors[domain] || { bg: "bg-slate-500", text: "text-slate-600", border: "border-slate-500", light: "bg-slate-50" };
-
   if (isLoading) {
     return (
       <SidebarLayout>
-        <div className="min-h-screen flex items-center justify-center bg-[#fbfbfc]">
+        <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb]">
           <LoadingSpinner />
         </div>
       </SidebarLayout>
@@ -92,11 +90,11 @@ export default function InterviewRolesPage() {
 
   return (
     <SidebarLayout>
-      <div className="min-h-screen bg-[#fbfbfc]">
-        <div className="bg-gradient-to-br from-[#000000] via-[#000000] to-[#1a1a2e] text-white py-10">
+      <div className="min-h-screen bg-[#f8f9fb]">
+        <div className="bg-gradient-to-br from-[#042c4c] via-[#042c4c] to-[#063d5c] text-white py-10">
           <div className="max-w-4xl mx-auto px-4 sm:px-6">
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-14 h-14 rounded-2xl bg-[#24c4b8] flex items-center justify-center shadow-lg shadow-[#24c4b8]/30">
+              <div className="w-14 h-14 rounded-2xl bg-[#ee7e65] flex items-center justify-center shadow-lg shadow-[#ee7e65]/30">
                 <Users className="w-7 h-7 text-white" />
               </div>
               <div>
@@ -113,7 +111,7 @@ export default function InterviewRolesPage() {
                 placeholder="Search roles by name, domain, or level..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 h-12 rounded-xl bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:bg-white/15 focus:border-[#24c4b8]"
+                className="pl-12 h-12 rounded-2xl bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:bg-white/15 focus:border-[#ee7e65]"
               />
               {searchTerm && (
                 <button 
@@ -130,7 +128,7 @@ export default function InterviewRolesPage() {
                 onClick={() => setSelectedDomain(null)}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                   !selectedDomain 
-                    ? "bg-[#24c4b8] text-white" 
+                    ? "bg-[#ee7e65] text-white" 
                     : "bg-white/10 text-white/70 hover:bg-white/20"
                 }`}
               >
@@ -138,14 +136,13 @@ export default function InterviewRolesPage() {
               </button>
               {allDomains.map(domain => {
                 const count = roleKits.filter(r => r.domain === domain).length;
-                const colors = getColors(domain);
                 return (
                   <button
                     key={domain}
                     onClick={() => setSelectedDomain(selectedDomain === domain ? null : domain)}
                     className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                       selectedDomain === domain 
-                        ? `${colors.bg} text-white` 
+                        ? "bg-[#ee7e65] text-white" 
                         : "bg-white/10 text-white/70 hover:bg-white/20"
                     }`}
                   >
@@ -159,7 +156,7 @@ export default function InterviewRolesPage() {
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
           {filteredRoles.length > 0 && (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-[#6c8194]">
               Showing {filteredRoles.length} of {roleKits.length} roles
               {searchTerm && ` matching "${searchTerm}"`}
               {selectedDomain && ` in ${formatDomain(selectedDomain)}`}
@@ -167,19 +164,19 @@ export default function InterviewRolesPage() {
           )}
 
           {Object.entries(groupedByDomain).map(([domain, roles]) => {
-            const colors = getColors(domain);
+            const icon = domainIcons[domain] || "📁";
             return (
               <section key={domain}>
-                <div className={`flex items-center gap-3 mb-4 pb-3 border-b-2 ${colors.border}`}>
-                  <div className={`w-10 h-10 ${colors.bg} rounded-xl flex items-center justify-center`}>
-                    <Briefcase className="w-5 h-5 text-white" />
+                <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[#768c9c]/30">
+                  <div className="w-10 h-10 bg-[#042c4c] rounded-2xl flex items-center justify-center text-lg">
+                    {icon}
                   </div>
                   <div className="flex-1">
-                    <h2 className={`text-lg font-bold ${colors.text}`}>
+                    <h2 className="text-lg font-bold text-[#042c4c]">
                       {formatDomain(domain)}
                     </h2>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${colors.bg} text-white`}>
+                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-[#042c4c] text-white">
                     {roles.length} {roles.length === 1 ? 'role' : 'roles'}
                   </span>
                 </div>
@@ -189,28 +186,28 @@ export default function InterviewRolesPage() {
                     <button
                       key={role.id}
                       onClick={() => navigate(`/interview/role/${role.id}`)}
-                      className={`w-full bg-white rounded-xl border-l-4 ${colors.border} border border-l-4 border-slate-200 p-4 text-left hover:shadow-lg hover:border-slate-300 transition-all group`}
+                      className="w-full bg-white rounded-2xl border border-[#768c9c]/20 p-4 text-left hover:shadow-lg hover:border-[#ee7e65]/50 transition-all group"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-slate-900 group-hover:text-[#24c4b8] transition-colors">
+                            <span className="font-semibold text-[#042c4c] group-hover:text-[#ee7e65] transition-colors">
                               {role.name}
                             </span>
                           </div>
                           <div className="flex items-center gap-2 mt-2">
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${colors.light} ${colors.text} font-medium`}>
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-[#f8f9fb] text-[#6c8194] font-medium border border-[#768c9c]/20">
                               {formatDomain(role.domain)}
                             </span>
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 capitalize">
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-[#f8f9fb] text-[#6c8194] capitalize border border-[#768c9c]/20">
                               {role.level}
                             </span>
                           </div>
                           {role.description && (
-                            <p className="text-sm text-slate-500 mt-2 line-clamp-2">{role.description}</p>
+                            <p className="text-sm text-[#6c8194] mt-2 line-clamp-2">{role.description}</p>
                           )}
                         </div>
-                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#24c4b8] transition-colors flex-shrink-0 mt-1" />
+                        <ChevronRight className="w-5 h-5 text-[#768c9c] group-hover:text-[#ee7e65] transition-colors flex-shrink-0 mt-1" />
                       </div>
                     </button>
                   ))}
@@ -220,12 +217,12 @@ export default function InterviewRolesPage() {
           })}
 
           {filteredRoles.length === 0 && (
-            <div className="text-center py-16 bg-white rounded-2xl border border-slate-200">
-              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Search className="w-8 h-8 text-slate-400" />
+            <div className="text-center py-16 bg-white rounded-2xl border border-[#768c9c]/20">
+              <div className="w-16 h-16 bg-[#f8f9fb] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Search className="w-8 h-8 text-[#768c9c]" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">No roles found</h3>
-              <p className="text-slate-500 max-w-sm mx-auto">
+              <h3 className="text-lg font-semibold text-[#042c4c] mb-2">No roles found</h3>
+              <p className="text-[#6c8194] max-w-sm mx-auto">
                 {searchTerm 
                   ? `No roles match "${searchTerm}". Try searching for "Product", "Data", or "Software".`
                   : "No roles available in this category."}
@@ -233,7 +230,7 @@ export default function InterviewRolesPage() {
               {(searchTerm || selectedDomain) && (
                 <button
                   onClick={() => { setSearchTerm(""); setSelectedDomain(null); }}
-                  className="mt-4 px-4 py-2 bg-[#24c4b8] text-white rounded-lg font-medium hover:bg-[#1db0a5] transition-colors"
+                  className="mt-4 px-4 py-2 bg-[#ee7e65] text-white rounded-2xl font-medium hover:bg-[#e06d54] transition-colors"
                 >
                   Clear filters
                 </button>
