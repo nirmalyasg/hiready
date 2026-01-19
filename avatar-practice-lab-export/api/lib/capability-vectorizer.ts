@@ -366,8 +366,7 @@ export type InterviewType =
   | "system_design" 
   | "sql" 
   | "analytics" 
-  | "product_sense"
-  | "panel";
+  | "product_sense";
 
 interface InterviewTypeConfig {
   type: InterviewType;
@@ -506,18 +505,6 @@ const INTERVIEW_TYPE_CONFIGS: InterviewTypeConfig[] = [
     weight: 3,
     minSkillMatches: 2,
   },
-  {
-    type: "panel",
-    label: "Panel Interview",
-    description: "Multi-stakeholder interview with leadership team",
-    triggerSkills: [
-      "executive engagement", "c-suite", "senior leadership",
-      "board presentation", "stakeholder management"
-    ],
-    triggerDomains: ["executive", "leadership", "director", "vp"],
-    weight: 2,
-    minSkillMatches: 2,
-  },
 ];
 
 export interface DerivedInterviewType {
@@ -618,7 +605,7 @@ export function deriveInterviewTypesFromSkills(
     
     // Boost for senior roles
     if (roleLevel && ["senior", "director", "vp", "executive"].includes(roleLevel)) {
-      if (config.type === "behavioral" || config.type === "panel" || config.type === "case_study") {
+      if (config.type === "behavioral" || config.type === "case_study") {
         score += 1;
       }
     }
