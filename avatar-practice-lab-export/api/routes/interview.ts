@@ -1506,6 +1506,207 @@ interviewRouter.post("/session/quick-start", requireAuth, async (req: Request, r
   }
 });
 
+// Quick start for role-kit based interview (no job target required)
+// Used by role-detail page to skip config and go directly to session
+interviewRouter.post("/session/quick-start-rolekit", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { roleKitId, roundCategory, focusAreas, practiceContext } = req.body;
+    
+    if (!roleKitId || !roundCategory) {
+      return res.status(400).json({ success: false, error: "roleKitId and roundCategory are required" });
+    }
+    
+    // Get role kit details
+    const [roleKit] = await db.select().from(roleKits).where(eq(roleKits.id, roleKitId));
+    if (!roleKit) {
+      return res.status(404).json({ success: false, error: "Role kit not found" });
+    }
+    
+    // Check access
+    const legacyUser = await getLegacyUserByAuthUserId(userId);
+    let legacyUserId: number | null = legacyUser?.id || null;
+    if (!legacyUserId && req.user?.username) {
+      const created = await getOrCreateLegacyUser(userId, req.user.username);
+      legacyUserId = created.id;
+    }
+    
+    if (legacyUserId) {
+      const accessCheck = await checkInterviewAccess(legacyUserId);
+      if (!accessCheck.hasAccess) {
+        return res.status(403).json({
+          success: false,
+          error: accessCheck.reason || "No interview access",
+          code: "NO_ACCESS",
+          upgradeRequired: true,
+        });
+      }
+      if (accessCheck.accessType === 'free') {
+        const consumed = await consumeFreeInterview(legacyUserId);
+        if (!consumed) {
+          return res.status(403).json({
+            success: false,
+            error: "No free interviews remaining",
+            code: "FREE_LIMIT_REACHED",
+            upgradeRequired: true,
+          });
+        }
+      }
+      (req as any).accessInfo = accessCheck;
+    }
+    
+    // Map roundCategory to interview type
+    type InterviewType = "hr" | "hiring_manager" | "technical" | "panel" | "case_study" | "behavioral" | "coding" | "sql" | "analytics" | "ml" | "case" | "system_design" | "product_sense" | "general" | "skill_practice";
+    const categoryToType: Record<string, InterviewType> = {
+      hr_screening: "hr",
+      hr: "hr",
+      hiring_manager: "hiring_manager",
+      behavioral: "behavioral",
+      culture_values: "behavioral",
+      bar_raiser: "behavioral",
+      case_study: "case_study",
+      case: "case",
+      technical_interview: "technical",
+      technical: "technical",
+      coding: "coding",
+      coding_assessment: "coding",
+      sql: "sql",
+      sql_assessment: "sql",
+      analytics: "analytics",
+      analytics_case: "analytics",
+      product_sense: "product_sense",
+      system_design: "system_design",
+      aptitude_assessment: "general",
+      panel_interview: "behavioral",
+      ml: "ml",
+    };
+    const interviewType: InterviewType = categoryToType[roundCategory] || "behavioral";
+    
+    // Determine interview mode
+    type InterviewMode = "coding_technical" | "case_problem_solving" | "behavioral" | "hiring_manager" | "system_deep_dive" | "role_based" | "custom" | "skill_only";
+    let interviewMode: InterviewMode = "role_based";
+    if (roundCategory === "coding" || roundCategory === "coding_assessment" || roundCategory === "technical") {
+      interviewMode = "coding_technical";
+    } else if (roundCategory === "case_study" || roundCategory === "case") {
+      interviewMode = "case_problem_solving";
+    } else if (roundCategory === "behavioral" || roundCategory === "culture_values") {
+      interviewMode = "behavioral";
+    } else if (roundCategory === "hiring_manager") {
+      interviewMode = "hiring_manager";
+    } else if (roundCategory === "system_design") {
+      interviewMode = "system_deep_dive";
+    }
+    
+    // Create config
+    const [config] = await db
+      .insert(interviewConfigs)
+      .values({
+        userId,
+        roleKitId,
+        interviewType,
+        style: "neutral",
+        seniority: roleKit.level || "mid",
+        interviewMode,
+      })
+      .returning();
+    
+    // Build plan JSON
+    const phaseName = categoryToType[roundCategory] === "hr" ? "HR Screening" :
+          categoryToType[roundCategory] === "hiring_manager" ? "Role Fit Discussion" :
+          categoryToType[roundCategory] === "behavioral" ? "Behavioral Interview" :
+          categoryToType[roundCategory] === "case_study" || categoryToType[roundCategory] === "case" ? "Case Study" :
+          categoryToType[roundCategory] === "technical" || categoryToType[roundCategory] === "coding" ? "Technical Assessment" :
+          categoryToType[roundCategory] === "system_design" ? "System Design" :
+          categoryToType[roundCategory] === "sql" ? "SQL Assessment" :
+          categoryToType[roundCategory] === "analytics" ? "Analytics Case" :
+          categoryToType[roundCategory] === "product_sense" ? "Product Sense" :
+          "Interview Round";
+    
+    const skillsToAssess = focusAreas || practiceContext?.focusAreas || (roleKit.skillsFocus as string[]) || [];
+    
+    const planJson = {
+      interviewType,
+      roundCategory,
+      phases: [
+        {
+          name: phaseName,
+          duration: 15,
+          objectives: skillsToAssess.slice(0, 5),
+          questionPatterns: [],
+        }
+      ],
+      triggers: [
+        {
+          type: "skill_probe",
+          source: roundCategory,
+          probeRules: skillsToAssess.map((s: string) => `Probe on ${s}`),
+        }
+      ],
+      focusAreas: skillsToAssess,
+      skillsToAssess,
+      roleContext: {
+        roleKitId,
+        roleName: roleKit.name,
+        level: roleKit.level,
+        domain: roleKit.domain,
+      },
+      objective: `Practice ${phaseName} for ${roleKit.name} role`,
+    };
+    
+    // Create plan
+    const [plan] = await db
+      .insert(interviewPlans)
+      .values({
+        interviewConfigId: config.id,
+        planJson,
+      })
+      .returning();
+    
+    // Get default rubric
+    const [defaultRubric] = await db.select().from(interviewRubrics).where(eq(interviewRubrics.isDefault, true));
+    
+    // Create session
+    const [session] = await db
+      .insert(interviewSessions)
+      .values({
+        interviewConfigId: config.id,
+        interviewPlanId: plan.id,
+        rubricId: defaultRubric?.id || null,
+        status: "created",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    
+    // Record usage
+    if (legacyUserId && (req as any).accessInfo) {
+      try {
+        await recordInterviewUsage(
+          legacyUserId,
+          (req as any).accessInfo.accessType,
+          undefined,
+          session.id,
+          interviewType
+        );
+      } catch (usageErr) {
+        console.error("Failed to record interview usage:", usageErr);
+      }
+    }
+    
+    console.log(`[Quick Start RoleKit] Created session ${session.id} for roleKit ${roleKitId}, round ${roundCategory}, skills: ${skillsToAssess.join(', ')}`);
+    
+    res.json({
+      success: true,
+      session: { ...session, plan: planJson },
+      configId: config.id,
+      planId: plan.id,
+    });
+  } catch (error: any) {
+    console.error("Error in quick-start-rolekit:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 interviewRouter.post("/session/:id/link-roleplay", requireAuth, async (req: Request, res: Response) => {
   try {
     const sessionId = parseInt(req.params.id);

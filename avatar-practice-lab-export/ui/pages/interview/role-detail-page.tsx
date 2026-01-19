@@ -4,7 +4,7 @@ import {
   ArrowLeft, Play, FileText, Code, Phone, User, Briefcase, 
   MessageCircle, Heart, TrendingUp, Clock, Target, LineChart, 
   Users, CheckCircle2, Award, Zap, BookOpen, Building2,
-  ChevronDown, ChevronUp, Sparkles, Info, RotateCcw, BarChart3
+  ChevronDown, ChevronUp, Sparkles, Info, RotateCcw, BarChart3, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SidebarLayout from "@/components/layout/sidebar-layout";
@@ -144,6 +144,7 @@ export default function RoleDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [startingRoundId, setStartingRoundId] = useState<string | null>(null);
   
   const accessGateOptions = {
     interviewSetId: roleKit?.id,
@@ -201,39 +202,67 @@ export default function RoleDetailPage() {
     fetchRoleData();
   }, [roleId]);
 
-  const handleStartPractice = (option: PracticeOption) => {
+  const handleStartPractice = async (option: PracticeOption) => {
     if (!checkAccess()) {
       return;
     }
     
-    const practiceContext = {
-      roundCategory: option.roundCategory,
-      taxonomy: option.taxonomy || {
-        label: option.label,
-        description: option.description,
-        typicalDuration: option.typicalDuration,
-      },
-      roleContext: {
-        roleKitId: roleKit?.id,
-        roleName: roleKit?.name,
-        level: roleKit?.level,
-        domain: roleKit?.domain,
-        skillsFocus: roleKit?.skillsFocus || [],
-      },
-      promptHints: {
-        avatarPersona: `${roleKit?.level} ${roleKit?.name} Interviewer`,
-        evaluationFocus: roleKit?.skillsFocus || [],
-        sampleQuestions: [],
-        companySpecificGuidance: `Focus on ${option.label} for ${roleKit?.name} role at ${roleKit?.level} level`,
-      },
-    };
-    sessionStorage.setItem("rolePracticeContext", JSON.stringify(practiceContext));
+    setStartingRoundId(option.id);
+    setError(null);
     
-    const params = new URLSearchParams({
-      roleKitId: String(roleKit?.id),
-      roundCategory: option.roundCategory,
-    });
-    navigate(`/interview/config?${params.toString()}`);
+    try {
+      const practiceContext = {
+        roundCategory: option.roundCategory,
+        taxonomy: option.taxonomy || {
+          label: option.label,
+          description: option.description,
+          typicalDuration: option.typicalDuration,
+        },
+        roleContext: {
+          roleKitId: roleKit?.id,
+          roleName: roleKit?.name,
+          level: roleKit?.level,
+          domain: roleKit?.domain,
+          skillsFocus: roleKit?.skillsFocus || [],
+        },
+        focusAreas: option.focusAreas || [],
+      };
+      
+      // Call quick-start API to create session directly
+      const response = await fetch("/api/interview/session/quick-start-rolekit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          roleKitId: roleKit?.id,
+          roundCategory: option.roundCategory,
+          focusAreas: option.focusAreas || [],
+          practiceContext,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        if (data.code === "NO_ACCESS" || data.code === "FREE_LIMIT_REACHED") {
+          setShowUpgradeModal(true);
+          return;
+        }
+        throw new Error(data.error || "Failed to start practice session");
+      }
+      
+      if (data.success && data.session?.id) {
+        // Navigate directly to session page
+        navigate(`/interview/session?interviewSessionId=${data.session.id}&configId=${data.configId}`);
+      } else {
+        throw new Error(data.error || "Failed to create session");
+      }
+    } catch (err: any) {
+      console.error("Error starting practice:", err);
+      setError(err.message || "Something went wrong");
+    } finally {
+      setStartingRoundId(null);
+    }
   };
 
   const getRoundHistory = (roundCategory: string): PracticeHistoryItem | null => {
@@ -417,13 +446,19 @@ export default function RoleDetailPage() {
                       <Button
                         onClick={() => handleStartPractice(option)}
                         size="sm"
+                        disabled={startingRoundId === option.id}
                         className={`h-7 px-2.5 text-xs font-medium ${
                           hasAttempted 
                             ? 'bg-slate-800 hover:bg-slate-700 text-white' 
                             : 'bg-[#ee7e65] hover:bg-[#e06a50] text-white'
-                        }`}
+                        } disabled:opacity-70`}
                       >
-                        {hasAttempted ? (
+                        {startingRoundId === option.id ? (
+                          <>
+                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                            Starting...
+                          </>
+                        ) : hasAttempted ? (
                           <>
                             <RotateCcw className="w-3 h-3 mr-1" />
                             Retake
