@@ -11,55 +11,83 @@ interface RoleKitMatch {
   alternativeMatches?: { roleKitId: number; roleKitName: string; confidence: "medium" | "low" }[];
 }
 
+// Domain patterns - only strong, specific keywords (removed generic terms)
 const ROLE_DOMAIN_MAP: Record<string, string[]> = {
   software: [
-    "software engineer", "software developer", "sde", "backend", "frontend", 
-    "fullstack", "full stack", "full-stack", "mobile developer", "ios developer", 
-    "android developer", "web developer", "developer", "engineer"
+    "software engineer", "software developer", "sde", "backend engineer", "frontend engineer", 
+    "fullstack engineer", "full stack developer", "full-stack developer", "mobile developer", 
+    "ios developer", "android developer", "web developer", "devops engineer", "site reliability",
+    "platform engineer", "systems engineer"
   ],
   data: [
     "data analyst", "data scientist", "data engineer", "ml engineer", 
-    "machine learning", "analytics", "bi analyst", "business intelligence",
-    "etl", "big data", "data science", "applied scientist"
+    "machine learning engineer", "analytics engineer", "bi analyst", "business intelligence analyst",
+    "data science", "applied scientist", "research scientist"
   ],
   product: [
-    "product manager", "pm", "product owner", "apm", "associate product manager",
-    "group product manager", "product lead"
+    "product manager", "product owner", "associate product manager",
+    "group product manager", "product lead", "technical product manager", "senior product manager"
   ],
   design: [
-    "product designer", "ux designer", "ui designer", "ux/ui", 
-    "interaction designer", "visual designer", "design"
+    "product designer", "ux designer", "ui designer", "ux/ui designer", 
+    "interaction designer", "visual designer", "graphic designer", "design lead"
   ],
   marketing: [
-    "marketing", "growth", "digital marketing", "performance marketing",
-    "brand marketing", "content marketing", "marketing manager"
+    "marketing manager", "growth manager", "digital marketing", "performance marketing",
+    "brand manager", "content marketing manager", "marketing lead", "marketing director"
   ],
   sales: [
-    "sales", "account executive", "account manager", "business development",
-    "sales executive", "enterprise sales", "sdr", "sales development"
+    "sales manager", "account executive", "sales executive", "business development manager",
+    "enterprise sales", "sales development representative", "sales director"
   ],
   customer_success: [
-    "customer success", "csm", "customer support", "client success"
+    "customer success manager", "csm", "customer support manager", "client success manager"
   ],
   operations: [
-    "operations", "ops", "supply chain", "logistics", "operations manager"
+    "operations manager", "supply chain manager", "logistics manager", "operations director"
   ],
   consulting: [
-    "consultant", "business analyst", "strategy", "management consulting"
+    "consultant", "management consultant", "strategy consultant", "business consultant"
   ],
   finance: [
-    "finance", "fp&a", "accounting", "financial analyst", "financial"
+    "finance manager", "fp&a analyst", "financial analyst", "accounting manager", 
+    "finance director", "controller"
   ],
   hr: [
-    "hr", "human resources", "people", "talent"
+    "hr manager", "human resources manager", "hr director", "hr business partner",
+    "hrbp", "compensation manager", "benefits manager"
   ],
   recruiting: [
-    "recruiter", "recruiting", "talent acquisition"
+    "recruiter", "talent acquisition", "recruiting manager", "sourcer"
   ],
   engineering_management: [
-    "engineering manager", "team lead", "tech lead", "engineering lead"
+    "engineering manager", "tech lead", "engineering director", "vp engineering",
+    "director of engineering"
   ],
 };
+
+// Calculate similarity score between two strings (0-1)
+function calculateTitleSimilarity(title1: string, title2: string): number {
+  const t1 = title1.toLowerCase().trim();
+  const t2 = title2.toLowerCase().trim();
+  
+  // Exact match
+  if (t1 === t2) return 1.0;
+  
+  // One contains the other
+  if (t1.includes(t2) || t2.includes(t1)) return 0.8;
+  
+  // Word overlap score
+  const words1 = new Set(t1.split(/\s+/).filter(w => w.length > 2));
+  const words2 = new Set(t2.split(/\s+/).filter(w => w.length > 2));
+  
+  if (words1.size === 0 || words2.size === 0) return 0;
+  
+  const intersection = [...words1].filter(w => words2.has(w)).length;
+  const union = new Set([...words1, ...words2]).size;
+  
+  return intersection / union;
+}
 
 export async function mapRoleTitleToRoleKit(
   roleTitle: string,
@@ -75,9 +103,15 @@ export async function mapRoleTitleToRoleKit(
     return null;
   }
 
+  // Step 1: Try exact/substring title matching (high confidence)
   for (const kit of allRoleKits) {
     const kitName = kit.name.toLowerCase();
-    if (kitName.includes(normalizedTitle) || normalizedTitle.includes(kitName.split(" - ")[0])) {
+    const kitBaseName = kitName.split(" - ")[0].trim();
+    
+    // Check for strong title match
+    if (kitBaseName === normalizedTitle || 
+        kitName.includes(normalizedTitle) || 
+        normalizedTitle.includes(kitBaseName)) {
       const alternatives = allRoleKits
         .filter(k => k.id !== kit.id && k.domain === kit.domain)
         .slice(0, 3)
@@ -93,48 +127,75 @@ export async function mapRoleTitleToRoleKit(
     }
   }
 
+  // Step 2: Domain detection with strict thresholds
+  // Title matches count more than JD matches
   let detectedDomain: string | null = null;
   let bestMatchScore = 0;
+  let titleMatchCount = 0;
   
   for (const [domain, patterns] of Object.entries(ROLE_DOMAIN_MAP)) {
-    const matchCount = patterns.filter(p => 
-      normalizedTitle.includes(p) || normalizedJd.includes(p)
-    ).length;
+    // Count title matches (weighted 2x)
+    const titleMatches = patterns.filter(p => normalizedTitle.includes(p)).length;
+    // Count JD matches (weighted 1x, only if title has at least 1 match)
+    const jdMatches = titleMatches > 0 
+      ? patterns.filter(p => normalizedJd.includes(p) && !normalizedTitle.includes(p)).length
+      : 0;
     
-    if (matchCount > bestMatchScore) {
-      bestMatchScore = matchCount;
+    const weightedScore = (titleMatches * 2) + jdMatches;
+    
+    if (weightedScore > bestMatchScore) {
+      bestMatchScore = weightedScore;
       detectedDomain = domain;
+      titleMatchCount = titleMatches;
     }
   }
   
-  if (detectedDomain) {
+  // Require at least 1 title match or 3+ total weighted score for valid domain detection
+  if (detectedDomain && (titleMatchCount >= 1 || bestMatchScore >= 3)) {
     const matchingKits = allRoleKits.filter(kit => kit.domain === detectedDomain);
     
     if (matchingKits.length > 0) {
-      const entryLevel = matchingKits.find(k => 
-        k.name.toLowerCase().includes("entry") || k.name.toLowerCase().includes("associate")
-      );
-      const midLevel = matchingKits.find(k => k.name.toLowerCase().includes("mid"));
-      
-      const isJunior = normalizedTitle.includes("junior") || 
-                       normalizedTitle.includes("associate") || 
-                       normalizedTitle.includes("entry") ||
-                       normalizedJd.includes("0-2 years") ||
-                       normalizedJd.includes("1-2 years") ||
-                       normalizedJd.includes("fresher");
-      
-      const isMid = normalizedTitle.includes("mid") || 
-                    normalizedTitle.includes("senior") ||
-                    normalizedJd.includes("3-5 years") ||
-                    normalizedJd.includes("4-6 years");
-      
+      // Find best matching kit by title similarity
       let selectedKit = matchingKits[0];
-      if (isJunior && entryLevel) {
-        selectedKit = entryLevel;
-      } else if (isMid && midLevel) {
-        selectedKit = midLevel;
-      } else if (entryLevel) {
-        selectedKit = entryLevel;
+      let bestSimilarity = 0;
+      
+      for (const kit of matchingKits) {
+        const similarity = calculateTitleSimilarity(roleTitle, kit.name);
+        if (similarity > bestSimilarity) {
+          bestSimilarity = similarity;
+          selectedKit = kit;
+        }
+      }
+      
+      // If no good similarity, check seniority level
+      if (bestSimilarity < 0.3) {
+        const isJunior = normalizedTitle.includes("junior") || 
+                         normalizedTitle.includes("associate") || 
+                         normalizedTitle.includes("entry") ||
+                         normalizedJd.includes("0-2 years") ||
+                         normalizedJd.includes("1-2 years") ||
+                         normalizedJd.includes("fresher");
+        
+        const isSenior = normalizedTitle.includes("senior") || 
+                         normalizedTitle.includes("lead") ||
+                         normalizedTitle.includes("principal") ||
+                         normalizedTitle.includes("director");
+        
+        const entryLevel = matchingKits.find(k => 
+          k.name.toLowerCase().includes("entry") || k.name.toLowerCase().includes("associate")
+        );
+        const midLevel = matchingKits.find(k => k.name.toLowerCase().includes("mid"));
+        const seniorLevel = matchingKits.find(k => k.name.toLowerCase().includes("senior"));
+        
+        if (isJunior && entryLevel) {
+          selectedKit = entryLevel;
+        } else if (isSenior && seniorLevel) {
+          selectedKit = seniorLevel;
+        } else if (midLevel) {
+          selectedKit = midLevel;
+        } else if (entryLevel) {
+          selectedKit = entryLevel;
+        }
       }
       
       const alternatives = matchingKits
@@ -142,10 +203,20 @@ export async function mapRoleTitleToRoleKit(
         .slice(0, 3)
         .map(k => ({ roleKitId: k.id, roleKitName: k.name, confidence: "medium" as const }));
       
+      // Confidence: high if 3+ weighted score OR good title similarity, medium if 2, low if 1
+      let confidence: "high" | "medium" | "low";
+      if (bestMatchScore >= 3 || bestSimilarity >= 0.5) {
+        confidence = "high";
+      } else if (bestMatchScore >= 2) {
+        confidence = "medium";
+      } else {
+        confidence = "low";
+      }
+      
       return {
         roleKitId: selectedKit.id,
         roleKitName: selectedKit.name,
-        confidence: bestMatchScore >= 2 ? "high" : "medium",
+        confidence,
         matchType: "domain",
         roleKitCategory: selectedKit.roleCategory,
         alternativeMatches: alternatives,
@@ -153,6 +224,7 @@ export async function mapRoleTitleToRoleKit(
     }
   }
 
+  // Step 3: Role family mapping (if provided)
   if (roleFamily) {
     const familyDomainMap: Record<string, string> = {
       tech: "software",
@@ -183,7 +255,7 @@ export async function mapRoleTitleToRoleKit(
         return {
           roleKitId: selectedKit.id,
           roleKitName: selectedKit.name,
-          confidence: "medium",
+          confidence: "low", // Role family alone is not strong enough
           matchType: "domain",
           roleKitCategory: selectedKit.roleCategory,
           alternativeMatches: alternatives,
@@ -192,6 +264,7 @@ export async function mapRoleTitleToRoleKit(
     }
   }
 
+  // Step 4: No match - return low confidence fallback
   const defaultKit = allRoleKits.find(k => k.domain === "software" && k.name.toLowerCase().includes("entry"));
   const topAlternatives = allRoleKits
     .filter(k => k.id !== (defaultKit?.id || allRoleKits[0].id))
@@ -239,13 +312,16 @@ export async function ensureRoleKitForJob(
 ): Promise<RoleKitMatch> {
   const existingMatch = await mapRoleTitleToRoleKit(roleTitle, null, jdText);
   
-  if (existingMatch && existingMatch.confidence !== "low") {
+  // Only accept high confidence matches - medium/low should create custom kit
+  if (existingMatch && existingMatch.confidence === "high") {
     return existingMatch;
   }
 
+  // Create a custom role kit for this specific job
   let detectedDomain = "general";
   const normalizedTitle = roleTitle.toLowerCase();
   
+  // Try to detect domain from title only (not JD, to avoid false matches)
   for (const [domain, patterns] of Object.entries(ROLE_DOMAIN_MAP)) {
     if (patterns.some(p => normalizedTitle.includes(p))) {
       detectedDomain = domain;
