@@ -153,7 +153,7 @@ export default function RoleDetailPage() {
   const [practiceHistory, setPracticeHistory] = useState<PracticeHistory | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails, setShowDetails] = useState(true);
   const [startingRoundId, setStartingRoundId] = useState<string | null>(null);
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const [pendingOption, setPendingOption] = useState<PracticeOption | null>(null);
