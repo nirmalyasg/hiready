@@ -108,7 +108,8 @@ export default function PracticePage() {
   };
 
   const minChars = 20;
-  const currentChars = customInput.length;
+  const trimmedInput = customInput.trim();
+  const currentChars = trimmedInput.length;
   const needsMore = minChars - currentChars;
 
   if (isLoading) {
