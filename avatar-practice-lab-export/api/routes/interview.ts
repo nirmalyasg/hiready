@@ -1771,6 +1771,18 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
       rubric = r;
     }
     
+    // Retrieve interview plan for focusAreas (round-specific skills to assess)
+    let planData: any = null;
+    let planFocusAreas: string[] = [];
+    if (session.interviewPlanId) {
+      const [plan] = await db.select().from(interviewPlans).where(eq(interviewPlans.id, session.interviewPlanId));
+      if (plan?.planJson) {
+        planData = plan.planJson as any;
+        planFocusAreas = planData.focusAreas || planData.skillsToAssess || [];
+        console.log(`[Interview Analysis] Session ${sessionId}: retrieved plan focusAreas: ${JSON.stringify(planFocusAreas)}`);
+      }
+    }
+    
     // Helper to extract skills from a parsed JD object
     const extractSkillsFromParsed = (parsed: any): string[] => {
       if (!parsed) return [];
@@ -1865,12 +1877,22 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
       }).filter((s: string) => s && s.trim().length > 0);
     };
 
-    // Build JD extract for dynamic rubric generation - prioritize structured parsedData
+    // Build JD extract for dynamic rubric generation
+    // Priority: 1) Plan focusAreas (round-specific) 2) JD structured data 3) jdSkills 4) roleKit skills
     let jdExtract: JDExtract | undefined;
     let jobTargetParsedData: any = null;
     
-    // First try to get structured JD extract from job target's parsed data
-    if (session.jobTargetId) {
+    // FIRST PRIORITY: Use plan's focusAreas (round-specific skills selected via semantic taxonomy)
+    if (planFocusAreas.length > 0) {
+      jdExtract = {
+        analysisDimensions: planFocusAreas,
+        interviewTopics: [],
+      };
+      console.log(`[Interview Analysis] Session ${sessionId}: ✅ USING PLAN FOCUS AREAS as primary dimensions: ${planFocusAreas.join(', ')}`);
+    }
+    
+    // SECOND PRIORITY: Try to get structured JD extract from job target's parsed data (only if no focusAreas)
+    if (!jdExtract && session.jobTargetId) {
       const [jobTarget] = await db.select().from(jobTargets).where(eq(jobTargets.id, session.jobTargetId));
       if (jobTarget) {
         // Check both jdParsed (from schema) and parsedData fields
@@ -2537,8 +2559,17 @@ function buildInterviewKnowledgeBase(data: {
         }
       });
     }
-    if (plan.focusAreas) {
-      kb += `Focus Areas: ${plan.focusAreas.join(", ")}\n`;
+    if (plan.focusAreas && plan.focusAreas.length > 0) {
+      kb += `\n=== SKILLS TO ASSESS (CRITICAL) ===\n`;
+      kb += `You MUST assess the candidate on these specific skills during this interview:\n`;
+      plan.focusAreas.forEach((skill: string, idx: number) => {
+        kb += `${idx + 1}. ${skill} - Ask at least one targeted question about this skill\n`;
+      });
+      kb += `\nFor each skill above:\n`;
+      kb += `- Ask a specific question that tests this skill directly\n`;
+      kb += `- Probe their depth of knowledge with follow-up questions\n`;
+      kb += `- Note their proficiency level (beginner/intermediate/advanced) based on their answers\n`;
+      kb += `- Cover ALL listed skills during the interview\n\n`;
     }
     if (plan.keyQuestions && Array.isArray(plan.keyQuestions)) {
       kb += `\nKey Questions to Cover:\n`;
