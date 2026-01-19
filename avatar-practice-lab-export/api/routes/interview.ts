@@ -1375,8 +1375,13 @@ interviewRouter.post("/session/quick-start", requireAuth, async (req: Request, r
       });
     }
     
-    // Check interview access using monetization system
-    const accessCheck = await checkInterviewAccess(legacyUserId, undefined, userId);
+    // Check interview access using monetization system with retake context
+    const retakeContext = {
+      authUserId: userId,
+      jobTargetId: jobTargetId.toString(),
+      interviewType: roundCategory
+    };
+    const accessCheck = await checkInterviewAccess(legacyUserId, undefined, userId, retakeContext);
     if (!accessCheck.hasAccess) {
       return res.status(403).json({
         success: false,
@@ -1385,6 +1390,7 @@ interviewRouter.post("/session/quick-start", requireAuth, async (req: Request, r
         upgradeRequired: true,
       });
     }
+    // Only consume free interview if this is a new session (not a retake)
     if (accessCheck.accessType === 'free') {
       const consumed = await consumeFreeInterview(legacyUserId);
       if (!consumed) {
@@ -1592,8 +1598,13 @@ interviewRouter.post("/session/quick-start-rolekit", requireAuth, async (req: Re
       });
     }
     
-    // Check interview access using monetization system
-    const accessCheck = await checkInterviewAccess(legacyUserId, undefined, userId);
+    // Check interview access using monetization system with retake context
+    const retakeContext = {
+      authUserId: userId,
+      roleKitId: roleKitId,
+      interviewType: roundCategory
+    };
+    const accessCheck = await checkInterviewAccess(legacyUserId, undefined, userId, retakeContext);
     if (!accessCheck.hasAccess) {
       return res.status(403).json({
         success: false,
@@ -1602,6 +1613,7 @@ interviewRouter.post("/session/quick-start-rolekit", requireAuth, async (req: Re
         upgradeRequired: true,
       });
     }
+    // Only consume free interview if this is a new session (not a retake)
     if (accessCheck.accessType === 'free') {
       const consumed = await consumeFreeInterview(legacyUserId);
       if (!consumed) {

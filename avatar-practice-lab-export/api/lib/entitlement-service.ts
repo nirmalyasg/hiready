@@ -7,11 +7,42 @@ import {
   interviewUsage,
   interviewSets,
   companyShareLinks,
-  subscriptions
+  subscriptions,
+  interviewAssignments
 } from "../../shared/schema.js";
-import { eq, and, gte, sql, or } from "drizzle-orm";
+import { eq, and, gte, sql, or, gt } from "drizzle-orm";
 
-export type AccessType = 'free' | 'purchased' | 'company_shared' | 'subscription';
+export type AccessType = 'free' | 'purchased' | 'company_shared' | 'subscription' | 'retake';
+
+export interface RetakeContext {
+  authUserId: string;
+  roleKitId?: number;
+  jobTargetId?: string;
+  interviewType: string;
+}
+
+export async function checkRetakeEligibility(
+  context: RetakeContext
+): Promise<boolean> {
+  const conditions: any[] = [
+    eq(interviewAssignments.userId, context.authUserId),
+    eq(interviewAssignments.interviewType, context.interviewType as any),
+    gt(interviewAssignments.attemptCount, 0)
+  ];
+  
+  if (context.roleKitId) {
+    conditions.push(eq(interviewAssignments.roleKitId, context.roleKitId));
+  }
+  if (context.jobTargetId) {
+    conditions.push(eq(interviewAssignments.jobTargetId, context.jobTargetId));
+  }
+  
+  const existingPractice = await db.query.interviewAssignments.findFirst({
+    where: and(...conditions)
+  });
+  
+  return !!existingPractice;
+}
 
 export interface UserAccessResult {
   hasAccess: boolean;
@@ -132,7 +163,8 @@ export async function getEntitlementStatus(userId: number, authUserId?: string):
 export async function checkInterviewAccess(
   userId: number, 
   interviewSetId?: number,
-  authUserId?: string
+  authUserId?: string,
+  retakeContext?: RetakeContext
 ): Promise<UserAccessResult> {
   const status = await getEntitlementStatus(userId, authUserId);
 
@@ -174,6 +206,18 @@ export async function checkInterviewAccess(
       reason: `Free interview available (${status.freeInterviewsRemaining} remaining)`,
       freeInterviewsRemaining: status.freeInterviewsRemaining
     };
+  }
+
+  if (retakeContext) {
+    const isRetakeEligible = await checkRetakeEligibility(retakeContext);
+    if (isRetakeEligible) {
+      return {
+        hasAccess: true,
+        accessType: 'retake',
+        reason: 'Retake allowed - previously practiced this round',
+        freeInterviewsRemaining: 0
+      };
+    }
   }
 
   return {

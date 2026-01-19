@@ -902,13 +902,13 @@ export default function JobDetailPage() {
                           size="sm"
                           disabled={isStarting}
                           className={`h-7 px-2.5 text-xs font-medium ${
-                            isFreeTierExhausted
+                            isFreeTierExhausted && !hasPracticed
                               ? 'bg-[#ee7e65] hover:bg-[#e06c52] text-white'
-                              : hasAccess
-                                ? hasPracticed 
-                                  ? 'bg-slate-800 hover:bg-slate-700 text-white' 
-                                  : 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white'
-                                : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                              : hasPracticed 
+                                ? 'bg-slate-800 hover:bg-slate-700 text-white' 
+                                : hasAccess
+                                  ? 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white'
+                                  : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
                           } disabled:opacity-70`}
                         >
                           {isStarting ? (
@@ -916,23 +916,21 @@ export default function JobDetailPage() {
                               <Loader2 className="w-3 h-3 mr-1 animate-spin" />
                               Starting...
                             </>
-                          ) : isFreeTierExhausted ? (
+                          ) : isFreeTierExhausted && !hasPracticed ? (
                             <>
                               <Zap className="w-3 h-3 mr-1" />
                               Upgrade
                             </>
+                          ) : hasPracticed ? (
+                            <>
+                              <RotateCcw className="w-3 h-3 mr-1" />
+                              Retake
+                            </>
                           ) : hasAccess ? (
-                            hasPracticed ? (
-                              <>
-                                <RotateCcw className="w-3 h-3 mr-1" />
-                                Retake
-                              </>
-                            ) : (
-                              <>
-                                <Play className="w-3 h-3 mr-1" />
-                                Start
-                              </>
-                            )
+                            <>
+                              <Play className="w-3 h-3 mr-1" />
+                              Start
+                            </>
                           ) : (
                             "Unlock"
                           )}

@@ -574,7 +574,7 @@ export default function RoleDetailPage() {
                         size="sm"
                         disabled={startingRoundId === option.id}
                         className={`h-7 px-2.5 text-xs font-medium ${
-                          isFreeTierExhausted
+                          isFreeTierExhausted && !hasAttempted
                             ? 'bg-[#ee7e65] hover:bg-[#e06c52] text-white'
                             : hasAttempted 
                               ? 'bg-slate-800 hover:bg-slate-700 text-white' 
@@ -586,7 +586,7 @@ export default function RoleDetailPage() {
                             <Loader2 className="w-3 h-3 mr-1 animate-spin" />
                             Starting...
                           </>
-                        ) : isFreeTierExhausted ? (
+                        ) : isFreeTierExhausted && !hasAttempted ? (
                           <>
                             <Zap className="w-3 h-3 mr-1" />
                             Upgrade
