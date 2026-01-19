@@ -29,7 +29,10 @@ import {
   BarChart3,
   Activity,
   Trophy,
-  ExternalLink
+  ExternalLink,
+  Building2,
+  Sparkles,
+  Filter
 } from "lucide-react";
 import { format } from "date-fns";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Area, AreaChart } from 'recharts';
@@ -373,42 +376,113 @@ export default function HireadyIndexPage() {
         </div>
 
         {allRoles.length > 1 && (
-          <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-            <div className="flex gap-3 min-w-max">
-              {allRoles.map((role) => {
-                const isSelected = selectedRole?.id === role.id && selectedRole?.type === role.type;
-                return (
-                  <button
-                    key={`${role.type}-${role.id}`}
-                    onClick={() => handleRoleSelect(role)}
-                    className={`flex-shrink-0 p-4 rounded-xl border-2 transition-all ${
-                      isSelected
-                        ? 'border-[#24c4b8] bg-[#24c4b8]/5 shadow-md'
-                        : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        isSelected ? 'bg-[#24c4b8]' : 'bg-gray-100'
-                      }`}>
-                        <Briefcase className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-gray-500'}`} />
-                      </div>
-                      <div className="text-left">
-                        <div className={`font-semibold truncate max-w-[180px] ${
-                          isSelected ? 'text-[#24c4b8]' : 'text-gray-900'
-                        }`}>
-                          {role.name}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {role.type === 'role_kit' ? 'Pre-built Role' : 'Custom Job'}
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
+          <Card className="overflow-hidden">
+            <div className="bg-gradient-to-r from-[#042c4c] to-[#0a3d68] px-5 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center">
+                    <Filter className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-sm">Select Role</h3>
+                    <p className="text-white/60 text-xs">Choose which role's readiness to view</p>
+                  </div>
+                </div>
+                <Badge className="bg-white/20 text-white border-0 text-xs">
+                  {allRoles.length} roles
+                </Badge>
+              </div>
             </div>
-          </div>
+            
+            <CardContent className="p-4">
+              {roles.roleKits.length > 0 && (
+                <div className="mb-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles className="w-4 h-4 text-[#24c4b8]" />
+                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Pre-built Roles</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {roles.roleKits.map((role) => {
+                      const isSelected = selectedRole?.id === role.id && selectedRole?.type === role.type;
+                      return (
+                        <button
+                          key={`role_kit-${role.id}`}
+                          onClick={() => handleRoleSelect(role)}
+                          className={`group relative flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                            isSelected
+                              ? 'border-[#24c4b8] bg-gradient-to-br from-[#24c4b8]/10 to-[#24c4b8]/5 shadow-sm'
+                              : 'border-gray-100 bg-gray-50/50 hover:border-gray-200 hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${
+                            isSelected ? 'bg-[#24c4b8] shadow-sm' : 'bg-white border border-gray-200 group-hover:border-gray-300'
+                          }`}>
+                            <Briefcase className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-gray-500'}`} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className={`font-medium text-sm truncate ${
+                              isSelected ? 'text-[#042c4c]' : 'text-gray-700'
+                            }`}>
+                              {role.name}
+                            </div>
+                          </div>
+                          {isSelected && (
+                            <div className="w-5 h-5 rounded-full bg-[#24c4b8] flex items-center justify-center flex-shrink-0">
+                              <Check className="w-3 h-3 text-white" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              
+              {roles.jobTargets.length > 0 && (
+                <div>
+                  {roles.roleKits.length > 0 && <div className="border-t border-gray-100 my-4" />}
+                  <div className="flex items-center gap-2 mb-3">
+                    <Building2 className="w-4 h-4 text-purple-500" />
+                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Custom Jobs</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {roles.jobTargets.map((role) => {
+                      const isSelected = selectedRole?.id === role.id && selectedRole?.type === role.type;
+                      return (
+                        <button
+                          key={`job_target-${role.id}`}
+                          onClick={() => handleRoleSelect(role)}
+                          className={`group relative flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                            isSelected
+                              ? 'border-purple-400 bg-gradient-to-br from-purple-50 to-purple-50/50 shadow-sm'
+                              : 'border-gray-100 bg-gray-50/50 hover:border-gray-200 hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${
+                            isSelected ? 'bg-purple-500 shadow-sm' : 'bg-white border border-gray-200 group-hover:border-gray-300'
+                          }`}>
+                            <Building2 className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-gray-500'}`} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className={`font-medium text-sm truncate ${
+                              isSelected ? 'text-purple-900' : 'text-gray-700'
+                            }`}>
+                              {role.name}
+                            </div>
+                          </div>
+                          {isSelected && (
+                            <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+                              <Check className="w-3 h-3 text-white" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         )}
 
         {isLoadingReport ? (
