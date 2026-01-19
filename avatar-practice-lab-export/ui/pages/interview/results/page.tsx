@@ -725,30 +725,61 @@ export default function InterviewResultsPage() {
             </Card>
           )}
 
-          <Card>
-            <CardHeader className="border-b pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-[#24c4b8]" />
-                Improved Answer Examples
-              </CardTitle>
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-[#042c4c] to-[#0a3d68] text-white pb-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle className="text-lg flex items-center gap-2 text-white">
+                    <MessageSquare className="w-5 h-5" />
+                    Improved Answer Examples
+                  </CardTitle>
+                  <p className="text-white/70 text-sm mt-1">
+                    Based on your profile and the {roleKitInfo?.name || planData?.companyContext?.roleTitle || 'target role'}
+                  </p>
+                </div>
+                <Badge className="bg-white/20 text-white border-0 text-xs">
+                  {analysis.betterAnswers?.length || 0} questions
+                </Badge>
+              </div>
             </CardHeader>
             <CardContent className="p-0">
               {analysis.betterAnswers?.length ? (
-                analysis.betterAnswers.map((ba, idx) => (
-                  <div key={idx} className={`p-4 sm:p-5 ${idx !== (analysis.betterAnswers?.length || 0) - 1 ? "border-b border-gray-100" : ""}`}>
-                    <div className="mb-3">
-                      <Badge variant="outline" className="mb-2 text-gray-700">Question Asked</Badge>
-                      <p className="text-gray-900 font-medium">{ba.question}</p>
+                <div className="divide-y divide-gray-100">
+                  {analysis.betterAnswers.map((ba, idx) => (
+                    <div key={idx} className="p-5 sm:p-6">
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#042c4c] text-white flex items-center justify-center text-sm font-semibold">
+                          {idx + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="mb-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Interviewer Question</span>
+                            </div>
+                            <p className="text-gray-900 font-medium text-base leading-relaxed">{ba.question}</p>
+                          </div>
+                          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-4 border border-emerald-200/60">
+                            <div className="flex items-center gap-2 mb-3">
+                              <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                                <Lightbulb className="w-3 h-3 text-white" />
+                              </div>
+                              <span className="text-sm font-semibold text-emerald-700">Stronger Answer</span>
+                              <span className="text-xs text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">Personalized</span>
+                            </div>
+                            <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{ba.betterAnswer}</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                      <Badge className="bg-emerald-600 mb-2 text-xs">Stronger Answer</Badge>
-                      <p className="text-gray-700 text-sm whitespace-pre-wrap">{ba.betterAnswer}</p>
-                    </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               ) : (
-                <div className="p-6 text-center text-gray-500">
-                  No specific answer improvements available for this session.
+                <div className="p-8 text-center">
+                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                    <MessageSquare className="w-6 h-6 text-gray-400" />
+                  </div>
+                  <p className="text-gray-500 mb-2">No specific answer improvements available</p>
+                  <p className="text-gray-400 text-sm">Complete an interview session to see personalized feedback</p>
                 </div>
               )}
             </CardContent>
