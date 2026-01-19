@@ -4,7 +4,7 @@ import {
   ArrowLeft, Play, FileText, Code, Phone, User, Briefcase, 
   MessageCircle, Heart, TrendingUp, Clock, Target, LineChart, 
   Users, CheckCircle2, Award, Zap, BookOpen, Building2,
-  ChevronDown, ChevronUp, Sparkles, Info
+  ChevronDown, ChevronUp, Sparkles, Info, RotateCcw, BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SidebarLayout from "@/components/layout/sidebar-layout";
@@ -52,6 +52,25 @@ interface PracticeOption {
     taskType: string;
     expectedSignals: string[];
   } | null;
+}
+
+interface PracticeHistoryItem {
+  interviewType: string;
+  attemptCount: number;
+  latestScore: number | null;
+  bestScore: number | null;
+  latestSessionId: number | null;
+  bestSessionId: number | null;
+  lastPracticedAt: string | null;
+}
+
+interface PracticeHistory {
+  practiceHistory: Record<string, PracticeHistoryItem>;
+  summary: {
+    totalAttempts: number;
+    roundsPracticed: number;
+    averageScore: number | null;
+  };
 }
 
 const domainLabels: Record<string, string> = {
@@ -121,6 +140,7 @@ export default function RoleDetailPage() {
   const navigate = useNavigate();
   const [roleKit, setRoleKit] = useState<RoleKit | null>(null);
   const [practiceOptions, setPracticeOptions] = useState<PracticeOption[]>([]);
+  const [practiceHistory, setPracticeHistory] = useState<PracticeHistory | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -139,6 +159,8 @@ export default function RoleDetailPage() {
       try {
         setIsLoading(true);
         setError(null);
+        
+        // Fetch role kit and practice options
         const response = await fetch(`/api/interview/role-kits/${roleId}/practice-options`);
         const data = await response.json();
         
@@ -152,6 +174,21 @@ export default function RoleDetailPage() {
           setPracticeOptions(data.options || []);
         } else {
           setError(data.error || "Failed to load role data");
+          return;
+        }
+        
+        // Fetch practice history (authenticated endpoint)
+        try {
+          const historyResponse = await fetch(`/api/interview/role-kits/${roleId}/practice-history`);
+          if (historyResponse.ok) {
+            const historyData = await historyResponse.json();
+            if (historyData.success) {
+              setPracticeHistory(historyData);
+            }
+          }
+        } catch {
+          // Practice history is optional, don't fail the whole page
+          console.log("Could not fetch practice history");
         }
       } catch (err) {
         console.error("Error fetching role data:", err);
@@ -199,6 +236,11 @@ export default function RoleDetailPage() {
     navigate(`/interview/config?${params.toString()}`);
   };
 
+  const getRoundHistory = (roundCategory: string): PracticeHistoryItem | null => {
+    if (!practiceHistory?.practiceHistory) return null;
+    return practiceHistory.practiceHistory[roundCategory] || null;
+  };
+
   if (isLoading) {
     return (
       <SidebarLayout>
@@ -226,6 +268,7 @@ export default function RoleDetailPage() {
   const domainLabel = domainLabels[roleKit.domain] || roleKit.domain;
   const domainIcon = domainIcons[roleKit.domain] || <Briefcase className="w-4 h-4" />;
   const totalDuration = roleKit.estimatedDuration ? Math.round(roleKit.estimatedDuration / 60) : practiceOptions.length * 30;
+  const hasPracticeHistory = practiceHistory && practiceHistory.summary.totalAttempts > 0;
 
   return (
     <SidebarLayout>
@@ -259,8 +302,28 @@ export default function RoleDetailPage() {
                   </span>
                   <span className="text-slate-600">•</span>
                   <span className="text-xs text-slate-400">{practiceOptions.length} rounds</span>
+                  {hasPracticeHistory && (
+                    <>
+                      <span className="text-slate-600">•</span>
+                      <span className="text-xs text-emerald-400 flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" />
+                        {practiceHistory.summary.totalAttempts} practiced
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
+              {hasPracticeHistory && (
+                <Button
+                  onClick={() => navigate(`/hiready-index?roleKitId=${roleKit.id}`)}
+                  size="sm"
+                  variant="outline"
+                  className="hidden sm:flex h-8 px-3 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white text-xs"
+                >
+                  <BarChart3 className="w-3.5 h-3.5 mr-1.5" />
+                  View Index
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -274,6 +337,11 @@ export default function RoleDetailPage() {
                 <Target className="w-4 h-4 text-slate-500" />
                 Interview Rounds
               </h2>
+              {hasPracticeHistory && (
+                <span className="text-xs text-slate-500">
+                  {practiceHistory.summary.roundsPracticed}/{practiceOptions.length} completed
+                </span>
+              )}
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -284,16 +352,22 @@ export default function RoleDetailPage() {
                   bg: "bg-slate-100"
                 };
                 const focusAreas = option.focusAreas || [];
+                const history = getRoundHistory(option.roundCategory);
+                const hasAttempted = history && history.attemptCount > 0;
                 
                 return (
                   <div
                     key={option.id}
-                    className="bg-white rounded-xl border border-slate-200 p-3 hover:border-slate-300 hover:shadow-md transition-all group"
+                    className={`bg-white rounded-xl border p-3 hover:shadow-md transition-all group ${
+                      hasAttempted ? 'border-emerald-200' : 'border-slate-200 hover:border-slate-300'
+                    }`}
                   >
                     <div className="flex items-start gap-2.5">
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="w-5 h-5 rounded-full bg-slate-900 text-white text-[10px] font-bold flex items-center justify-center">
-                          {idx + 1}
+                        <span className={`w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center ${
+                          hasAttempted ? 'bg-emerald-500 text-white' : 'bg-slate-900 text-white'
+                        }`}>
+                          {hasAttempted ? <CheckCircle2 className="w-3 h-3" /> : idx + 1}
                         </span>
                         <div className={`w-7 h-7 rounded-lg ${config.bg} ${config.color} flex items-center justify-center`}>
                           {config.icon}
@@ -305,13 +379,32 @@ export default function RoleDetailPage() {
                       </div>
                     </div>
                     
+                    {/* Practice Stats (if attempted) */}
+                    {hasAttempted && (
+                      <div className="mt-2 flex items-center gap-3 text-[10px]">
+                        <span className="text-slate-500">
+                          {history.attemptCount} attempt{history.attemptCount > 1 ? 's' : ''}
+                        </span>
+                        {history.bestScore !== null && (
+                          <span className="text-emerald-600 font-medium">
+                            Best: {history.bestScore}%
+                          </span>
+                        )}
+                        {history.latestScore !== null && history.latestScore !== history.bestScore && (
+                          <span className="text-slate-500">
+                            Latest: {history.latestScore}%
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    
                     <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] text-slate-500 flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           {option.typicalDuration}
                         </span>
-                        {focusAreas.length > 0 && (
+                        {focusAreas.length > 0 && !hasAttempted && (
                           <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-[9px] font-medium truncate max-w-[80px]">
                             {focusAreas[0]}
                           </span>
@@ -320,10 +413,23 @@ export default function RoleDetailPage() {
                       <Button
                         onClick={() => handleStartPractice(option)}
                         size="sm"
-                        className="h-7 px-2.5 bg-[#ee7e65] hover:bg-[#e06a50] text-white text-xs font-medium"
+                        className={`h-7 px-2.5 text-xs font-medium ${
+                          hasAttempted 
+                            ? 'bg-slate-800 hover:bg-slate-700 text-white' 
+                            : 'bg-[#ee7e65] hover:bg-[#e06a50] text-white'
+                        }`}
                       >
-                        <Play className="w-3 h-3 mr-1" />
-                        Start
+                        {hasAttempted ? (
+                          <>
+                            <RotateCcw className="w-3 h-3 mr-1" />
+                            Retake
+                          </>
+                        ) : (
+                          <>
+                            <Play className="w-3 h-3 mr-1" />
+                            Start
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -331,6 +437,19 @@ export default function RoleDetailPage() {
               })}
             </div>
           </div>
+
+          {/* Mobile View Index Button */}
+          {hasPracticeHistory && (
+            <div className="sm:hidden mb-4">
+              <Button
+                onClick={() => navigate(`/hiready-index?roleKitId=${roleKit.id}`)}
+                className="w-full h-10 bg-slate-900 hover:bg-slate-800 text-white"
+              >
+                <BarChart3 className="w-4 h-4 mr-2" />
+                View HiReady Index
+              </Button>
+            </div>
+          )}
 
           {/* Collapsible Role Details */}
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">

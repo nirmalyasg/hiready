@@ -419,6 +419,112 @@ interviewRouter.get("/role-kits/:id/practice-options", async (req: Request, res:
   }
 });
 
+// Get user's practice history for a role kit (attempts, scores per round)
+interviewRouter.get("/role-kits/:id/practice-history", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const roleKitId = parseInt(req.params.id);
+    
+    if (isNaN(roleKitId)) {
+      return res.status(400).json({ success: false, error: "Invalid role kit ID" });
+    }
+    
+    // Get all assignments for this user + role kit
+    // Assignments are the authoritative source for attempt counts and scores
+    // They are updated by the interview-progress router after each session
+    const assignments = await db
+      .select()
+      .from(interviewAssignments)
+      .where(and(
+        eq(interviewAssignments.userId, userId),
+        eq(interviewAssignments.roleKitId, roleKitId)
+      ));
+    
+    // Build practice history per interview type
+    // Key by both interviewType AND common roundCategory aliases for UI lookup
+    const practiceHistory: Record<string, {
+      interviewType: string;
+      attemptCount: number;
+      latestScore: number | null;
+      bestScore: number | null;
+      latestSessionId: number | null;
+      bestSessionId: number | null;
+      lastPracticedAt: string | null;
+    }> = {};
+    
+    // Interview type to round category mappings (both directions)
+    const typeToRoundCategory: Record<string, string[]> = {
+      hr: ["hr", "hr_screening"],
+      hiring_manager: ["hiring_manager"],
+      technical: ["technical", "technical_interview"],
+      coding: ["coding", "coding_assessment"],
+      system_design: ["system_design"],
+      behavioral: ["behavioral"],
+      case_study: ["case_study", "case"],
+      case: ["case_study", "case"],
+      product_sense: ["product_sense", "product"],
+      product: ["product_sense", "product"],
+      analytics: ["analytics"],
+      sql: ["sql"],
+      ml: ["ml"],
+      panel: ["panel"],
+      general: ["general"],
+      skill_practice: ["skill_practice"],
+    };
+    
+    for (const assignment of assignments) {
+      const historyEntry = {
+        interviewType: assignment.interviewType,
+        attemptCount: assignment.attemptCount || 0,
+        latestScore: assignment.latestScore !== null 
+          ? Math.round((assignment.latestScore / 5) * 100) 
+          : null,
+        bestScore: assignment.bestScore !== null 
+          ? Math.round((assignment.bestScore / 5) * 100) 
+          : null,
+        latestSessionId: assignment.latestSessionId,
+        bestSessionId: assignment.bestSessionId,
+        lastPracticedAt: assignment.updatedAt?.toISOString() || null,
+      };
+      
+      // Add entry for the interview type
+      practiceHistory[assignment.interviewType] = historyEntry;
+      
+      // Also add aliases so UI can lookup by roundCategory
+      const aliases = typeToRoundCategory[assignment.interviewType] || [];
+      for (const alias of aliases) {
+        if (alias !== assignment.interviewType) {
+          practiceHistory[alias] = historyEntry;
+        }
+      }
+    }
+    
+    // Calculate overall stats
+    const totalAttempts = assignments.reduce((sum, a) => sum + (a.attemptCount || 0), 0);
+    const roundsPracticed = assignments.length;
+    const scoresForAvg = assignments
+      .filter(a => a.latestScore !== null)
+      .map(a => Math.round((a.latestScore! / 5) * 100));
+    const avgScore = scoresForAvg.length > 0 
+      ? scoresForAvg.reduce((sum, s) => sum + s, 0) / scoresForAvg.length 
+      : 0;
+    
+    res.json({
+      success: true,
+      roleKitId,
+      practiceHistory,
+      summary: {
+        totalAttempts,
+        roundsPracticed,
+        averageScore: avgScore > 0 ? Math.round(avgScore) : null,
+      },
+    });
+  } catch (error: any) {
+    console.error("Error fetching practice history:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ===================================================================
 // Document Upload & Parsing Endpoints
 // ===================================================================
