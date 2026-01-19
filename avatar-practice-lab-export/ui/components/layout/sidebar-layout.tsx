@@ -82,11 +82,11 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             "h-16 flex items-center px-5",
             collapsed && "justify-center px-0"
           )}>
-            <Link to="/" className={cn("flex items-center gap-2.5", collapsed && "hidden")}>
+            <Link to="/interview" className={cn("flex items-center gap-2.5", collapsed && "hidden")}>
               <img src={logoImg} alt="Hiready" className="h-8 brightness-0 invert" />
             </Link>
             {collapsed && (
-              <Link to="/">
+              <Link to="/interview">
                 <div className="w-9 h-9 bg-[#ee7e65] rounded-xl flex items-center justify-center">
                   <Target className="w-4 h-4 text-white" />
                 </div>
