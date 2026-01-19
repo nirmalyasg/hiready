@@ -94,7 +94,7 @@ export default function InterviewPracticePage() {
   
   const [savedJobs, setSavedJobs] = useState<JobTarget[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
-  const [addMode, setAddMode] = useState<AddMode>(null);
+  const [addMode, setAddMode] = useState<AddMode>("url");
   const [url, setUrl] = useState("");
   const [pasteText, setPasteText] = useState("");
   const [title, setTitle] = useState("");
@@ -115,21 +115,23 @@ export default function InterviewPracticePage() {
           fetch("/api/jobs")
         ]);
         
+        if (rolesRes.ok) {
+          const rolesData = await rolesRes.json();
+          if (rolesData.success) {
+            setRoleKits(rolesData.roleKits);
+            setFilteredKits(rolesData.roleKits);
+          }
+        }
+        
+        if (jobsRes.ok) {
+          const jobsData = await jobsRes.json();
+          if (jobsData.success) {
+            setSavedJobs(jobsData.jobs.filter((j: JobTarget) => j.status !== "archived"));
+          }
+        }
+        
         if (!rolesRes.ok && !jobsRes.ok) {
           setFetchError("Unable to load practice options. Please refresh the page.");
-          return;
-        }
-        
-        const rolesData = await rolesRes.json();
-        const jobsData = await jobsRes.json();
-        
-        if (rolesData.success) {
-          setRoleKits(rolesData.roleKits);
-          setFilteredKits(rolesData.roleKits);
-        }
-        
-        if (jobsData.success) {
-          setSavedJobs(jobsData.jobs.filter((j: JobTarget) => j.status !== "archived"));
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -532,11 +534,6 @@ export default function InterviewPracticePage() {
                   </div>
                 )}
 
-                {!addMode && (
-                  <p className="text-sm text-slate-500 text-center py-4">
-                    Select how you'd like to add your job above
-                  </p>
-                )}
               </div>
             )}
           </section>
@@ -677,7 +674,7 @@ export default function InterviewPracticePage() {
                       </div>
                       
                       {kit.description && (
-                        <p className="text-xs text-slate-500 line-clamp-2 mt-2 pl-13">
+                        <p className="text-xs text-slate-500 line-clamp-2 mt-2 ml-[52px]">
                           {kit.description}
                         </p>
                       )}
