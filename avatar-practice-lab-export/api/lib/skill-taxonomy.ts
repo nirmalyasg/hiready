@@ -308,8 +308,8 @@ export const SKILL_TO_CATEGORIES: Record<string, SkillCategory[]> = {
 // Map interview round types to relevant skill categories
 // Listed in priority order - first categories are most relevant
 export const ROUND_TO_CATEGORIES: Record<string, SkillCategory[]> = {
-  technical: ["architecture", "programming", "algorithms", "tools"],
-  coding: ["programming", "algorithms", "data_sql"],
+  technical: ["programming", "algorithms", "architecture", "tools", "data_sql"],  // Covers coding + system design
+  coding: ["programming", "algorithms", "data_sql"],  // Kept for backward compatibility
   sql: ["data_sql", "analytics", "architecture"],
   behavioral: ["communication", "leadership"],  // Strict: only soft skills
   hiring_manager: ["leadership", "communication", "business"],  // Strict: soft + business skills

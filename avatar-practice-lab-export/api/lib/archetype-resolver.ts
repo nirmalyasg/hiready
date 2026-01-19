@@ -527,9 +527,10 @@ const COMPONENT_TO_ROUND: Record<keyof CompanyInterviewComponents, { name: strin
 
 // Maps role archetype common_interview_types to company component keys
 // Role interview types → Which company components are relevant for that role
+// Note: "technical" now consolidates coding/algorithms/system design into one round
 const ROLE_INTERVIEW_TYPE_TO_COMPONENTS: Record<string, (keyof CompanyInterviewComponents)[]> = {
-  "technical": ["technicalDsaSql", "codingChallenge", "systemDesign"],
-  "coding": ["codingChallenge", "technicalDsaSql"],
+  "technical": ["technicalDsaSql", "systemDesign"],  // Consolidated: covers coding, DSA, system design
+  "coding": ["technicalDsaSql"],  // Backward compat: maps to same component as technical
   "hiring_manager": ["hiringManager"],
   "behavioral": ["behavioral"],
   "hr": ["hrScreen"],
@@ -546,8 +547,8 @@ const ROLE_INTERVIEW_TYPE_TO_COMPONENTS: Record<string, (keyof CompanyInterviewC
 const COMPONENT_TO_ROLE_TYPES: Record<keyof CompanyInterviewComponents, string[]> = {
   aptitude: ["aptitude"],
   hrScreen: ["hr"],
-  codingChallenge: ["technical", "coding"],
-  technicalDsaSql: ["technical", "coding"],
+  codingChallenge: ["coding"],  // Only explicit coding type, not technical (consolidated)
+  technicalDsaSql: ["technical", "coding"],  // Technical covers DSA/coding
   systemDesign: ["technical"],
   caseStudy: ["case", "product", "portfolio"],
   behavioral: ["behavioral", "sales_roleplay"],
@@ -894,7 +895,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
     icon: "code",
     practiceMode: "live_interview",
     taskTypes: ["coding_explain", "debugging", "code_modification", "code_review"],
-    typicalSkills: ["Problem Solving", "System Design", "Technical Depth", "Code Quality"],
+    typicalSkills: ["Data Structures", "Algorithms", "Problem Solving", "System Design", "Code Quality"],
   },
   coding: { 
     label: "Coding Assessment", 
