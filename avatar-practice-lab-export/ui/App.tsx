@@ -31,6 +31,7 @@ import DatabaseAdminPage from './pages/admin/database-admin';
 import AdminDashboard from './pages/admin/admin-dashboard';
 import UserDetailPage from './pages/admin/user-detail-page';
 import InterviewPracticePage from './pages/interview/page';
+import InterviewRolesPage from './pages/interview/roles-page';
 import InterviewRoleDetailPage from './pages/interview/role-detail-page';
 import InterviewByTypePage from './pages/interview/by-type-page';
 import InterviewConfigPage from './pages/interview/config/page';
@@ -98,6 +99,7 @@ export default function App() {
         <Route path="/admin/users/:userId" element={<UserDetailPage />} />
         <Route path="/admin/database" element={<DatabaseAdminPage />} />
         <Route path="/interview" element={<ProtectedRoute><InterviewPracticePage /></ProtectedRoute>} />
+        <Route path="/interview/roles" element={<ProtectedRoute><InterviewRolesPage /></ProtectedRoute>} />
         <Route path="/interview/role/:roleId" element={<ProtectedRoute><InterviewRoleDetailPage /></ProtectedRoute>} />
         <Route path="/interview/by-type" element={<ProtectedRoute><InterviewByTypePage /></ProtectedRoute>} />
         <Route path="/interview/config" element={<ProtectedRoute><InterviewConfigPage /></ProtectedRoute>} />

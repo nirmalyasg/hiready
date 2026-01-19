@@ -297,7 +297,7 @@ export default function InterviewPracticePage() {
                 </div>
               </div>
               <button 
-                onClick={() => navigate("/interview/by-type")}
+                onClick={() => navigate("/interview/roles")}
                 className="text-sm text-slate-600 font-medium hover:underline"
               >
                 Browse all →
