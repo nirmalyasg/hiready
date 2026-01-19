@@ -218,3 +218,73 @@ export async function mapRoleTitleToRoleKit(
     alternativeMatches: topAlternatives,
   };
 }
+
+interface JDParsedData {
+  requiredSkills?: string[];
+  preferredSkills?: string[];
+  experienceLevel?: string;
+  responsibilities?: string[];
+  companyContext?: string;
+  focusAreas?: string[];
+  detectedRoleTitle?: string;
+  analysisDimensions?: string[];
+  interviewTopics?: string[];
+}
+
+export async function ensureRoleKitForJob(
+  roleTitle: string,
+  jdText: string | null,
+  jdParsed: JDParsedData | null,
+  companyName: string | null
+): Promise<RoleKitMatch> {
+  const existingMatch = await mapRoleTitleToRoleKit(roleTitle, null, jdText);
+  
+  if (existingMatch && existingMatch.confidence !== "low") {
+    return existingMatch;
+  }
+
+  let detectedDomain = "general";
+  const normalizedTitle = roleTitle.toLowerCase();
+  
+  for (const [domain, patterns] of Object.entries(ROLE_DOMAIN_MAP)) {
+    if (patterns.some(p => normalizedTitle.includes(p))) {
+      detectedDomain = domain;
+      break;
+    }
+  }
+
+  const skillsFocus = [
+    ...(jdParsed?.requiredSkills || []),
+    ...(jdParsed?.preferredSkills || []),
+  ].slice(0, 10);
+
+  const interviewTopics = jdParsed?.interviewTopics || jdParsed?.focusAreas || [];
+
+  const kitName = companyName 
+    ? `${roleTitle} at ${companyName}`
+    : roleTitle;
+
+  const [newKit] = await db
+    .insert(roleKits)
+    .values({
+      name: kitName,
+      level: "entry",
+      domain: detectedDomain,
+      description: `Custom role kit for ${roleTitle}${companyName ? ` at ${companyName}` : ""}`,
+      skillsFocus: skillsFocus.length > 0 ? skillsFocus : null,
+      defaultInterviewTypes: ["hr", "technical", "behavioral"],
+      trackTags: ["custom"],
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .returning();
+
+  return {
+    roleKitId: newKit.id,
+    roleKitName: newKit.name,
+    confidence: "high",
+    matchType: "exact",
+    roleKitCategory: null,
+  };
+}

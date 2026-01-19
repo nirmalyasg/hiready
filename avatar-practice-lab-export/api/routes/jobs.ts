@@ -25,7 +25,7 @@ import {
 } from "../../shared/practice-context.js";
 import { execSync } from "child_process";
 import { resolveAndSaveJobArchetypes, resolveCompanyArchetype, resolveRoleArchetype, listAllRoleArchetypes, listAllCompanyArchetypes, getRoleInterviewStructure, getUnifiedInterviewPlan, getEnrichedInterviewPlan, getRoleTaskBlueprints } from "../lib/archetype-resolver.js";
-import { mapRoleTitleToRoleKit } from "../lib/role-kit-mapper.js";
+import { mapRoleTitleToRoleKit, ensureRoleKitForJob } from "../lib/role-kit-mapper.js";
 
 let cachedChromiumPath: string | null = null;
 
@@ -209,7 +209,7 @@ jobsRouter.post("/", requireAuth, async (req: Request, res: Response) => {
     const finalRoleTitle = parsedJd?.detectedRoleTitle || 
       (parsedJd?.focusAreas?.[0] ? roleTitle.replace("Job from Paste", parsedJd.focusAreas[0]) : roleTitle);
     
-    const roleKitMatch = await mapRoleTitleToRoleKit(finalRoleTitle, null, jdText);
+    const roleKitMatch = await ensureRoleKitForJob(finalRoleTitle, jdText, parsedJd, companyName);
 
     const [newJob] = await db
       .insert(jobTargets)
@@ -222,7 +222,7 @@ jobsRouter.post("/", requireAuth, async (req: Request, res: Response) => {
         jdParsed: parsedJd,
         source,
         status: "saved",
-        roleKitId: roleKitMatch?.roleKitId || null,
+        roleKitId: roleKitMatch.roleKitId,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -312,7 +312,7 @@ jobsRouter.post("/import-linkedin", requireAuth, async (req: Request, res: Respo
     }
 
     const finalRoleTitle = parsedJd?.detectedRoleTitle || scraped.title || "Untitled Role";
-    const roleKitMatch = await mapRoleTitleToRoleKit(finalRoleTitle, null, scraped.description);
+    const roleKitMatch = await ensureRoleKitForJob(finalRoleTitle, scraped.description, parsedJd, scraped.company);
 
     const [newJob] = await db
       .insert(jobTargets)
@@ -326,7 +326,7 @@ jobsRouter.post("/import-linkedin", requireAuth, async (req: Request, res: Respo
         jdParsed: parsedJd,
         source: "linkedin",
         status: "saved",
-        roleKitId: roleKitMatch?.roleKitId || null,
+        roleKitId: roleKitMatch.roleKitId,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -451,7 +451,7 @@ jobsRouter.post("/job-targets", requireAuth, async (req: Request, res: Response)
       });
     }
 
-    const roleKitMatch = await mapRoleTitleToRoleKit(roleTitle, null, jdText);
+    const roleKitMatch = await ensureRoleKitForJob(roleTitle, jdText, null, companyName);
 
     const [newJob] = await db
       .insert(jobTargets)
@@ -464,7 +464,7 @@ jobsRouter.post("/job-targets", requireAuth, async (req: Request, res: Response)
         location: location || null,
         source: source || "manual",
         status: "saved",
-        roleKitId: roleKitMatch?.roleKitId || null,
+        roleKitId: roleKitMatch.roleKitId,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -593,6 +593,48 @@ jobsRouter.patch("/job-targets/:id/role-kit", requireAuth, async (req: Request, 
     res.json({ success: true, job: updated });
   } catch (error: any) {
     console.error("Error updating job role kit:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+jobsRouter.post("/job-targets/:id/auto-map-role-kit", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const jobId = req.params.id;
+
+    const [existing] = await db
+      .select()
+      .from(jobTargets)
+      .where(and(eq(jobTargets.id, jobId), eq(jobTargets.userId, userId)));
+
+    if (!existing) {
+      return res.status(404).json({ success: false, error: "Job target not found" });
+    }
+
+    const roleKitMatch = await ensureRoleKitForJob(
+      existing.roleTitle,
+      existing.jdText,
+      existing.jdParsed as any,
+      existing.companyName
+    );
+
+    const [updated] = await db
+      .update(jobTargets)
+      .set({ 
+        roleKitId: roleKitMatch.roleKitId,
+        updatedAt: new Date() 
+      })
+      .where(eq(jobTargets.id, jobId))
+      .returning();
+
+    res.json({ 
+      success: true, 
+      mapped: true,
+      job: updated, 
+      roleKitMatch 
+    });
+  } catch (error: any) {
+    console.error("Error auto-mapping role kit:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -939,7 +981,7 @@ jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res:
         }
       }
 
-      const roleKitMatch = await mapRoleTitleToRoleKit(jobData.title, null, jobData.description);
+      const roleKitMatch = await ensureRoleKitForJob(jobData.title, jobData.description, jdParsed, jobData.company);
 
       const [newJob] = await db
         .insert(jobTargets)
@@ -953,7 +995,7 @@ jobsRouter.post("/job-targets/parse-url", requireAuth, async (req: Request, res:
           jobUrl: url,
           source: portal,
           status: "saved",
-          roleKitId: roleKitMatch?.roleKitId || null,
+          roleKitId: roleKitMatch.roleKitId,
           createdAt: new Date(),
           updatedAt: new Date(),
         })

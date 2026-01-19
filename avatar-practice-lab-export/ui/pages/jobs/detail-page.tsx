@@ -146,6 +146,27 @@ interface CompanyData {
   hasContext: boolean;
 }
 
+interface PracticeHistoryItem {
+  interviewType: string;
+  attemptCount: number;
+  latestScore: number | null;
+  bestScore: number | null;
+  latestSessionId: number | null;
+  bestSessionId: number | null;
+  lastPracticedAt: string | null;
+}
+
+interface PracticeHistoryResponse {
+  success: boolean;
+  roleKitId: number;
+  practiceHistory: Record<string, PracticeHistoryItem>;
+  summary: {
+    totalAttempts: number;
+    roundsPracticed: number;
+    averageScore: number | null;
+  };
+}
+
 const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
   saved: { label: "Saved", bg: "bg-slate-100", text: "text-slate-600" },
   applied: { label: "Applied", bg: "bg-[#cb6ce6]/20", text: "text-[#000000]" },
@@ -195,8 +216,15 @@ export default function JobDetailPage() {
   const [roleKits, setRoleKits] = useState<RoleKit[]>([]);
   const [showRoleSelector, setShowRoleSelector] = useState(false);
   const [isSavingRole, setIsSavingRole] = useState(false);
+  const [isAutoMapping, setIsAutoMapping] = useState(false);
+  const [practiceHistory, setPracticeHistory] = useState<PracticeHistoryResponse | null>(null);
   
   const matchedRoleKit = roleKits.find(r => r.id === job?.roleKitId);
+
+  const getRoundHistory = (roundCategory: string): PracticeHistoryItem | null => {
+    if (!practiceHistory?.practiceHistory) return null;
+    return practiceHistory.practiceHistory[roundCategory] || null;
+  };
   const interviewSetId = job?.roleKitId ?? undefined;
   const interviewSetName = matchedRoleKit?.name ? `${matchedRoleKit.name} Interview Set` : job?.roleTitle ? `${job.roleTitle} Interview Set` : undefined;
   
@@ -249,6 +277,41 @@ export default function JobDetailPage() {
         if (roleKitsData.success) {
           setRoleKits(roleKitsData.roleKits || []);
         }
+
+        if (jobData.success && jobData.job?.roleKitId) {
+          const historyRes = await fetch(`/api/interview/role-kits/${jobData.job.roleKitId}/practice-history`);
+          const historyData = await historyRes.json();
+          if (historyData.success) {
+            setPracticeHistory(historyData);
+          }
+        } else if (jobData.success && jobData.job && !jobData.job.roleKitId) {
+          setIsAutoMapping(true);
+          try {
+            const mapRes = await fetch(`/api/jobs/job-targets/${jobData.job.id}/auto-map-role-kit`, {
+              method: "POST",
+            });
+            const mapData = await mapRes.json();
+            if (mapData.success && mapData.mapped) {
+              setJob(prev => prev ? { ...prev, roleKitId: mapData.roleKitMatch.roleKitId } : null);
+              
+              const historyRes = await fetch(`/api/interview/role-kits/${mapData.roleKitMatch.roleKitId}/practice-history`);
+              const historyData = await historyRes.json();
+              if (historyData.success) {
+                setPracticeHistory(historyData);
+              }
+              
+              const entRes = await fetch(`/api/payments/entitlements?roleKitId=${mapData.roleKitMatch.roleKitId}`, { credentials: "include" });
+              const entData = await entRes.json();
+              if (entData.success) {
+                setEntitlements(entData);
+              }
+            }
+          } catch (mapError) {
+            console.error("Error auto-mapping role kit:", mapError);
+          } finally {
+            setIsAutoMapping(false);
+          }
+        }
       } catch (error) {
         console.error("Error fetching job:", error);
       } finally {
@@ -279,6 +342,16 @@ export default function JobDetailPage() {
         if (entitlementsData.success) {
           setEntitlements(entitlementsData);
         }
+
+        if (roleKitId) {
+          const historyRes = await fetch(`/api/interview/role-kits/${roleKitId}/practice-history`);
+          const historyData = await historyRes.json();
+          if (historyData.success) {
+            setPracticeHistory(historyData);
+          }
+        } else {
+          setPracticeHistory(null);
+        }
       }
     } catch (error) {
       console.error("Error updating role kit:", error);
@@ -303,6 +376,40 @@ export default function JobDetailPage() {
       console.error("Error parsing JD:", error);
     } finally {
       setIsParsing(false);
+    }
+  };
+
+  const handleAutoMapRoleKit = async (jobData: JobTarget) => {
+    if (isAutoMapping) return;
+    
+    setIsAutoMapping(true);
+    try {
+      const response = await fetch(`/api/jobs/job-targets/${jobData.id}/auto-map-role-kit`, {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (data.success && data.mapped) {
+        setJob(prev => prev ? { 
+          ...prev, 
+          roleKitId: data.roleKitMatch.roleKitId 
+        } : null);
+
+        const historyRes = await fetch(`/api/interview/role-kits/${data.roleKitMatch.roleKitId}/practice-history`);
+        const historyData = await historyRes.json();
+        if (historyData.success) {
+          setPracticeHistory(historyData);
+        }
+
+        const entitlementsRes = await fetch(`/api/payments/entitlements?roleKitId=${data.roleKitMatch.roleKitId}`, { credentials: "include" });
+        const entitlementsData = await entitlementsRes.json();
+        if (entitlementsData.success) {
+          setEntitlements(entitlementsData);
+        }
+      }
+    } catch (error) {
+      console.error("Error auto-mapping role kit:", error);
+    } finally {
+      setIsAutoMapping(false);
     }
   };
 
@@ -530,14 +637,11 @@ export default function JobDetailPage() {
                         : "Please select a role to continue practicing"}
                     </p>
                   </div>
-                  {!job?.roleKitId && (
-                    <Button
-                      onClick={() => setShowRoleSelector(true)}
-                      size="sm"
-                      className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white text-xs"
-                    >
-                      Select Role
-                    </Button>
+                  {!job?.roleKitId && isAutoMapping && (
+                    <div className="flex items-center gap-2 text-sm text-slate-500">
+                      <div className="w-4 h-4 border-2 border-[#24c4b8] border-t-transparent rounded-full animate-spin" />
+                      <span>Detecting role...</span>
+                    </div>
                   )}
                 </div>
               )}
@@ -565,6 +669,36 @@ export default function JobDetailPage() {
             </div>
           )}
 
+          {practiceHistory && practiceHistory.summary.totalAttempts > 0 && (
+            <div className="bg-gradient-to-r from-[#24c4b8]/5 to-transparent rounded-lg border border-[#24c4b8]/20 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-[#24c4b8]/10 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-[#24c4b8]" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-slate-900 text-sm">Practice Progress</p>
+                    <p className="text-xs text-slate-500">
+                      {practiceHistory.summary.totalAttempts} total sessions
+                      {practiceHistory.summary.averageScore !== null && (
+                        <> • Avg: {practiceHistory.summary.averageScore}%</>
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => job?.roleKitId && navigate(`/hiready-index?roleKitId=${job.roleKitId}`)}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs border-[#24c4b8]/30 text-[#24c4b8] hover:bg-[#24c4b8]/10"
+                >
+                  View HiReady Index
+                  <ExternalLink className="w-3 h-3 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
+
           {practiceOptions.length > 0 && (
             <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
               <div className="px-4 py-3 border-b border-slate-100">
@@ -578,6 +712,8 @@ export default function JobDetailPage() {
               <div className="p-2">
                 {practiceOptions.map((option, idx) => {
                   const config = categoryConfig[option.roundCategory] || { icon: <FileText className="w-4 h-4" />, color: "text-slate-600", bg: "bg-slate-50" };
+                  const history = getRoundHistory(option.roundCategory);
+                  const hasPracticed = history && history.attemptCount > 0;
                   return (
                     <div
                       key={option.id}
@@ -587,19 +723,40 @@ export default function JobDetailPage() {
                         {config.icon}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-900 text-sm truncate">{option.label}</p>
-                        <p className="text-xs text-slate-500">{option.typicalDuration}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-slate-900 text-sm truncate">{option.label}</p>
+                          {hasPracticed && (
+                            <span className="px-1.5 py-0.5 bg-[#24c4b8]/10 text-[#24c4b8] rounded text-[10px] font-medium">
+                              {history.attemptCount} {history.attemptCount === 1 ? "attempt" : "attempts"}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs text-slate-500">{option.typicalDuration}</p>
+                          {hasPracticed && history.latestScore !== null && (
+                            <span className="text-xs text-slate-400">
+                              • Last: {history.latestScore}%
+                              {history.bestScore !== null && history.bestScore > history.latestScore && (
+                                <span className="text-emerald-600 ml-1">Best: {history.bestScore}%</span>
+                              )}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <Button
                         onClick={() => handleStartPracticeOption(option)}
                         size="sm"
                         className={`h-8 px-3 text-xs ${
                           accessCheck?.hasAccess
-                            ? "bg-[#24c4b8] hover:bg-[#1db0a5] text-white"
+                            ? hasPracticed 
+                              ? "bg-[#24c4b8]/10 hover:bg-[#24c4b8]/20 text-[#24c4b8] border border-[#24c4b8]/30"
+                              : "bg-[#24c4b8] hover:bg-[#1db0a5] text-white"
                             : "bg-slate-100 hover:bg-slate-200 text-slate-600"
                         }`}
                       >
-                        {accessCheck?.hasAccess ? "Start" : "Unlock"}
+                        {accessCheck?.hasAccess 
+                          ? (hasPracticed ? "Retake" : "Start") 
+                          : "Unlock"}
                       </Button>
                     </div>
                   );
