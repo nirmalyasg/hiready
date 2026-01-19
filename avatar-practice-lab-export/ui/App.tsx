@@ -49,6 +49,8 @@ import CodingLabAvatarSelectPage from './pages/exercise-mode/coding-lab/avatar-s
 import CodingLabSessionPage from './pages/exercise-mode/coding-lab/session-page';
 import CodingLabResultsPage from './pages/exercise-mode/coding-lab/results-page';
 import ProfilePage from './pages/profile/page';
+import SettingsPage from './pages/profile/settings-page';
+import AccountPage from './pages/profile/account-page';
 import JobsPage from './pages/jobs/page';
 import JobDetailPage from './pages/jobs/detail-page';
 import PublicSharePage from './pages/share/page';
@@ -114,6 +116,8 @@ export default function App() {
         <Route path="/exercise-mode/coding-lab/session" element={<ProtectedRoute><CodingLabSessionPage /></ProtectedRoute>} />
         <Route path="/exercise-mode/coding-lab/results" element={<ProtectedRoute><CodingLabResultsPage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/profile/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+        <Route path="/profile/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
         <Route path="/jobs" element={<ProtectedRoute><JobsPage /></ProtectedRoute>} />
         <Route path="/jobs/:jobId" element={<ProtectedRoute><JobDetailPage /></ProtectedRoute>} />
         <Route path="/hiready-index" element={<ProtectedRoute><HireadyIndexPage /></ProtectedRoute>} />
