@@ -885,6 +885,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
   icon: string;
   practiceMode: "live_interview" | "coding_lab" | "case_study" | "presentation";
   taskTypes: string[];
+  typicalSkills: string[];
 }> = {
   technical: { 
     label: "Technical Interview", 
@@ -893,6 +894,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
     icon: "code",
     practiceMode: "live_interview",
     taskTypes: ["coding_explain", "debugging", "code_modification", "code_review"],
+    typicalSkills: ["Problem Solving", "System Design", "Technical Depth", "Code Quality"],
   },
   coding: { 
     label: "Coding Assessment", 
@@ -901,6 +903,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
     icon: "terminal",
     practiceMode: "coding_lab",
     taskTypes: ["coding_explain", "debugging", "code_modification"],
+    typicalSkills: ["Data Structures", "Algorithms", "Code Quality", "Problem Solving"],
   },
   hiring_manager: { 
     label: "Hiring Manager Round", 
@@ -909,6 +912,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
     icon: "user",
     practiceMode: "live_interview",
     taskTypes: ["behavioral_star", "execution_scenario"],
+    typicalSkills: ["Leadership", "Communication", "Team Fit", "Strategic Thinking"],
   },
   behavioral: { 
     label: "Behavioral Interview", 
@@ -917,6 +921,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
     icon: "message-circle",
     practiceMode: "live_interview",
     taskTypes: ["behavioral_star"],
+    typicalSkills: ["STAR Method", "Collaboration", "Conflict Resolution", "Adaptability"],
   },
   hr: { 
     label: "HR Screening", 
@@ -925,6 +930,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
     icon: "phone",
     practiceMode: "live_interview",
     taskTypes: ["behavioral_star"],
+    typicalSkills: ["Communication", "Cultural Fit", "Career Goals", "Professionalism"],
   },
   case: { 
     label: "Case Study", 
@@ -933,6 +939,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
     icon: "briefcase",
     practiceMode: "case_study",
     taskTypes: ["case_interview", "metrics_case", "execution_scenario"],
+    typicalSkills: ["Structured Thinking", "Business Acumen", "Analysis", "Recommendations"],
   },
   product: { 
     label: "Product Sense", 
@@ -941,6 +948,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
     icon: "layout",
     practiceMode: "case_study",
     taskTypes: ["case_interview", "metrics_case", "execution_scenario"],
+    typicalSkills: ["Product Thinking", "Prioritization", "User Empathy", "Metrics"],
   },
   portfolio: { 
     label: "Portfolio Review", 
@@ -949,6 +957,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
     icon: "image",
     practiceMode: "presentation",
     taskTypes: ["portfolio_walkthrough", "insight_storytelling"],
+    typicalSkills: ["Design Process", "Storytelling", "Visual Communication", "Critique Handling"],
   },
   sales_roleplay: { 
     label: "Sales Roleplay", 
@@ -957,6 +966,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
     icon: "dollar-sign",
     practiceMode: "live_interview",
     taskTypes: ["behavioral_star"],
+    typicalSkills: ["Persuasion", "Objection Handling", "Value Proposition", "Closing"],
   },
   aptitude: { 
     label: "Aptitude Assessment", 
@@ -965,6 +975,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
     icon: "brain",
     practiceMode: "live_interview",
     taskTypes: [],
+    typicalSkills: ["Logical Reasoning", "Quantitative Skills", "Verbal Ability", "Pattern Recognition"],
   },
   group: { 
     label: "Group Discussion", 
@@ -973,6 +984,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
     icon: "users",
     practiceMode: "live_interview",
     taskTypes: [],
+    typicalSkills: ["Communication", "Teamwork", "Active Listening", "Persuasion"],
   },
   sql: { 
     label: "SQL Assessment", 
@@ -981,6 +993,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
     icon: "database",
     practiceMode: "coding_lab",
     taskTypes: ["sql_case"],
+    typicalSkills: ["SQL Queries", "Query Optimization", "Database Design", "Data Modeling"],
   },
   analytics: { 
     label: "Analytics Case", 
@@ -989,6 +1002,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
     icon: "bar-chart",
     practiceMode: "case_study",
     taskTypes: ["metrics_investigation", "insight_storytelling"],
+    typicalSkills: ["Data Analysis", "Metric Definition", "Insight Generation", "Storytelling"],
   },
   ml: { 
     label: "ML/AI Round", 
@@ -997,6 +1011,7 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
     icon: "cpu",
     practiceMode: "live_interview",
     taskTypes: ["coding_explain", "code_review"],
+    typicalSkills: ["ML Algorithms", "Model Design", "Feature Engineering", "Evaluation Metrics"],
   },
 };
 
@@ -1016,6 +1031,9 @@ export async function getRolePracticeOptions(
   // Get all task blueprints for this role
   const allBlueprints = await getRoleTaskBlueprints(roleArchetypeId);
   
+  // Get role-specific skills to blend with round-type skills
+  const roleSkills = (archetype.primarySkillDimensions as string[]) || [];
+  
   // Build practice options from interview types
   const options: RolePracticeOption[] = [];
   
@@ -1028,8 +1046,13 @@ export async function getRolePracticeOptions(
       metadata.taskTypes.includes(b.taskType)
     );
     
-    // Get focus areas from primary skill dimensions
-    const focusAreas = (archetype.primarySkillDimensions as string[]) || [];
+    // Use round-type specific skills, blended with first role-specific skill if available
+    // This gives each round its own relevant skills while keeping role context
+    const roundSkills = [...metadata.typicalSkills];
+    if (roleSkills.length > 0 && !roundSkills.includes(roleSkills[0])) {
+      // Add top role skill to show role relevance (replace last generic skill)
+      roundSkills[roundSkills.length - 1] = roleSkills[0];
+    }
     
     options.push({
       id: `${roleArchetypeId}-${interviewType}`,
@@ -1039,7 +1062,7 @@ export async function getRolePracticeOptions(
       typicalDuration: metadata.typicalDuration,
       icon: metadata.icon,
       practiceMode: metadata.practiceMode,
-      focusAreas: focusAreas.slice(0, 3),
+      focusAreas: roundSkills.slice(0, 3),
       blueprints: matchingBlueprints,
     });
   }
