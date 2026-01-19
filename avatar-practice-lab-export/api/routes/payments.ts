@@ -170,16 +170,53 @@ paymentsRouter.get("/subscription-status", requireAuth, async (req: Request, res
       (s) => s.planType === "role_pack" && s.roleKitId
     );
 
+    const completedSessions = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(interviewSessions)
+      .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+      .where(
+        and(
+          eq(interviewConfigs.userId, userId),
+          eq(interviewSessions.status, "analyzed")
+        )
+      );
+
+    const sessionsCompleted = Number(completedSessions[0]?.count || 0);
+    const freeTrialUsed = sessionsCompleted >= 1;
+    const hasRolePack = rolePacks.length > 0;
+
+    const activePlans: Array<{planType: string; roleKitId: number | null; roleKitName: string | null; expiresAt: string}> = [];
+    if (proSubscription) {
+      activePlans.push({
+        planType: 'pro',
+        roleKitId: null,
+        roleKitName: null,
+        expiresAt: proSubscription.expiresAt?.toISOString() || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      });
+    }
+    for (const rp of rolePacks) {
+      activePlans.push({
+        planType: 'role_pack',
+        roleKitId: rp.roleKitId,
+        roleKitName: null,
+        expiresAt: rp.expiresAt?.toISOString() || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      });
+    }
+
     res.json({
       success: true,
       hasPro: !!proSubscription,
+      hasRolePack,
       planType: proSubscription?.planType || null,
-      proExpiresAt: proSubscription?.currentPeriodEnd || null,
+      proExpiresAt: proSubscription?.expiresAt || null,
       rolePacks: rolePacks.map((rp) => ({
         roleKitId: rp.roleKitId,
         jobTargetId: rp.jobTargetId,
         createdAt: rp.createdAt,
       })),
+      activePlans,
+      freeTrialUsed,
+      sessionsCompleted,
     });
   } catch (error: any) {
     console.error("Error fetching subscription status:", error);
