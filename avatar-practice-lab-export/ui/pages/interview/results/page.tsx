@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { ChevronRight, TrendingUp, Target, CheckCircle, AlertTriangle, Calendar, ArrowRight, Award, MessageSquare, Lightbulb, Star, BarChart3, Briefcase, Play, ArrowUp, ArrowDown, Minus, Building2, Code, Users, Zap, BookOpen, GraduationCap, Share2, Copy, Check, RotateCcw, Clock, ChevronDown, ChevronUp, Activity } from "lucide-react";
+import { ChevronRight, TrendingUp, Target, CheckCircle, AlertTriangle, ArrowRight, Award, MessageSquare, Lightbulb, Star, BarChart3, Briefcase, Play, ArrowUp, ArrowDown, Minus, Building2, Code, Users, Zap, BookOpen, GraduationCap, Share2, Copy, Check, RotateCcw, Clock, ChevronDown, ChevronUp, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -24,12 +23,6 @@ interface BetterAnswer {
   betterAnswer: string;
 }
 
-interface PracticePlanDay {
-  day: number;
-  task: string;
-  timeMinutes: number;
-}
-
 interface InterviewAnalysis {
   id: number;
   overallRecommendation: string | null;
@@ -40,7 +33,6 @@ interface InterviewAnalysis {
   risks: string[] | null;
   roleFitNotes: string[] | null;
   betterAnswers: BetterAnswer[] | null;
-  practicePlan: PracticePlanDay[] | null;
   wins: string[] | null;
   improvements: string[] | null;
 }
@@ -733,77 +725,34 @@ export default function InterviewResultsPage() {
             </Card>
           )}
 
-          <Tabs defaultValue="answers" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:inline-flex bg-white border border-gray-200">
-              <TabsTrigger value="answers" className="data-[state=active]:bg-[#042c4c] data-[state=active]:text-white">Better Answers</TabsTrigger>
-              <TabsTrigger value="plan" className="data-[state=active]:bg-[#042c4c] data-[state=active]:text-white">7-Day Plan</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="answers">
-              <Card>
-                <CardHeader className="border-b pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-[#24c4b8]" />
-                    Improved Answer Examples
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  {analysis.betterAnswers?.length ? (
-                    analysis.betterAnswers.map((ba, idx) => (
-                      <div key={idx} className={`p-4 sm:p-5 ${idx !== (analysis.betterAnswers?.length || 0) - 1 ? "border-b border-gray-100" : ""}`}>
-                        <div className="mb-3">
-                          <Badge variant="outline" className="mb-2 text-gray-700">Question</Badge>
-                          <p className="text-gray-900 font-medium">{ba.question}</p>
-                        </div>
-                        <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                          <Badge className="bg-emerald-600 mb-2 text-xs">Better Answer</Badge>
-                          <p className="text-gray-700 text-sm whitespace-pre-wrap">{ba.betterAnswer}</p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="p-6 text-center text-gray-500">
-                      No specific answer improvements available for this session.
+          <Card>
+            <CardHeader className="border-b pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-[#24c4b8]" />
+                Improved Answer Examples
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {analysis.betterAnswers?.length ? (
+                analysis.betterAnswers.map((ba, idx) => (
+                  <div key={idx} className={`p-4 sm:p-5 ${idx !== (analysis.betterAnswers?.length || 0) - 1 ? "border-b border-gray-100" : ""}`}>
+                    <div className="mb-3">
+                      <Badge variant="outline" className="mb-2 text-gray-700">Question Asked</Badge>
+                      <p className="text-gray-900 font-medium">{ba.question}</p>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="plan">
-              <Card>
-                <CardHeader className="border-b pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-[#24c4b8]" />
-                    7-Day Practice Plan
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  {analysis.practicePlan?.length ? (
-                    analysis.practicePlan.map((day, idx) => (
-                      <div key={idx} className={`p-4 flex items-start gap-4 ${idx !== (analysis.practicePlan?.length || 0) - 1 ? "border-b border-gray-100" : ""}`}>
-                        <div className="w-10 h-10 rounded-lg bg-[#042c4c] flex flex-col items-center justify-center flex-shrink-0">
-                          <span className="text-[10px] text-white/60">Day</span>
-                          <span className="text-sm font-bold text-white">{day.day}</span>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-gray-900 font-medium text-sm mb-1">{day.task}</p>
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <Clock className="w-3 h-3" />
-                            {day.timeMinutes} minutes
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="p-6 text-center text-gray-500">
-                      No practice plan available for this session.
+                    <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                      <Badge className="bg-emerald-600 mb-2 text-xs">Stronger Answer</Badge>
+                      <p className="text-gray-700 text-sm whitespace-pre-wrap">{ba.betterAnswer}</p>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                  </div>
+                ))
+              ) : (
+                <div className="p-6 text-center text-gray-500">
+                  No specific answer improvements available for this session.
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           <div className="bg-[#042c4c] rounded-2xl p-6 text-white">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
