@@ -191,6 +191,7 @@ export default function InterviewResultsPage() {
   const [isRetaking, setIsRetaking] = useState(false);
   const [showAttemptHistory, setShowAttemptHistory] = useState(false);
   const [configId, setConfigId] = useState<number | null>(null);
+  const [sessionDurationMinutes, setSessionDurationMinutes] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchAnalysis = async () => {
@@ -210,6 +211,7 @@ export default function InterviewResultsPage() {
           setPlanData(data.planData || null);
           setReadinessBand(data.readinessBand || null);
           setConfigId(data.configId || null);
+          setSessionDurationMinutes(data.sessionDurationMinutes || null);
           
           if (data.jobContext) {
             setJobContext(data.jobContext);
@@ -432,6 +434,12 @@ export default function InterviewResultsPage() {
                     )}
                     {readinessBand && (
                       <p className="text-xs text-gray-600 mt-2">{readinessBand.description}</p>
+                    )}
+                    {sessionDurationMinutes !== null && (
+                      <div className="flex items-center gap-1.5 mt-2 text-xs text-gray-500">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>Session duration: {sessionDurationMinutes} min</span>
+                      </div>
                     )}
                   </div>
                 </div>

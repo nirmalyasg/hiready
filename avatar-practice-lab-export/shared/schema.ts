@@ -898,6 +898,8 @@ export const interviewSessions = pgTable("interview_sessions", {
     .$type<"created" | "running" | "ended" | "analyzed">()
     .notNull()
     .default("created"),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

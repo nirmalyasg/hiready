@@ -509,6 +509,18 @@ export default function JobDetailPage() {
 
   const readiness = job.readinessScore || 0;
   const status = statusConfig[job.status] || statusConfig.saved;
+  
+  // Calculate total prep time from practice options typicalDuration values
+  const totalPrepTime = practiceOptions.reduce((acc, option) => {
+    // Parse typicalDuration like "10-15 min" to get min and max
+    const match = option.typicalDuration?.match(/(\d+)-?(\d+)?/);
+    if (match) {
+      const min = parseInt(match[1]) || 10;
+      const max = parseInt(match[2]) || min;
+      return { min: acc.min + min, max: acc.max + max };
+    }
+    return { min: acc.min + 10, max: acc.max + 15 }; // Default fallback
+  }, { min: 0, max: 0 });
 
   return (
     <SidebarLayout>
@@ -553,7 +565,7 @@ export default function JobDetailPage() {
             </div>
             
             {/* Stats Bar */}
-            <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-white/10">
+            <div className="grid grid-cols-4 gap-3 mt-6 pt-4 border-t border-white/10">
               <div className="text-center">
                 <p className="text-2xl font-bold text-[#24c4b8]">{readiness}%</p>
                 <p className="text-xs text-white/60">Readiness</p>
@@ -564,9 +576,17 @@ export default function JobDetailPage() {
                 </div>
                 <p className="text-xs text-white/60 mt-1">Status</p>
               </div>
-              <div className="text-center">
+              <div className="text-center border-r border-white/10">
                 <p className="text-2xl font-bold text-white">{practiceOptions.length}</p>
                 <p className="text-xs text-white/60">Rounds</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl font-bold text-white">
+                  {totalPrepTime.min === totalPrepTime.max 
+                    ? `${totalPrepTime.min}` 
+                    : `${totalPrepTime.min}-${totalPrepTime.max}`}
+                </p>
+                <p className="text-xs text-white/60">Est. Minutes</p>
               </div>
             </div>
           </div>

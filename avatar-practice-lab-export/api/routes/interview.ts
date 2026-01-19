@@ -1075,7 +1075,7 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
       jobDescription: jdParsed,
       jobTarget: jobTargetData,
       roundCategory: roundCategory || null,
-      targetDuration: typicalDuration || "30-45 min",
+      targetDuration: typicalDuration || "10-15 min",
       // Pre-generated questions with JD context (company-specific, role-appropriate complexity)
       preGeneratedQuestions: generatedQuestions.length > 0 ? generatedQuestions.map(q => ({
         question: q.question,
@@ -1514,6 +1514,7 @@ interviewRouter.post("/session/:id/link-roleplay", requireAuth, async (req: Requ
       .set({
         roleplaySessionId,
         status: "running",
+        startedAt: new Date(),
         updatedAt: new Date(),
       })
       .where(eq(interviewSessions.id, sessionId))
@@ -1534,6 +1535,7 @@ interviewRouter.post("/session/:id/end", requireAuth, async (req: Request, res: 
       .update(interviewSessions)
       .set({
         status: "ended",
+        completedAt: new Date(),
         updatedAt: new Date(),
       })
       .where(eq(interviewSessions.id, sessionId))
@@ -2268,6 +2270,28 @@ interviewRouter.get("/analysis/:sessionId", requireAuth, async (req: Request, re
       }
     }
     
+    // Calculate session duration from timestamps with fallback
+    let sessionDurationMinutes: number | null = null;
+    if (session) {
+      if (session.startedAt && session.completedAt) {
+        const startMs = new Date(session.startedAt).getTime();
+        const endMs = new Date(session.completedAt).getTime();
+        sessionDurationMinutes = Math.round((endMs - startMs) / (1000 * 60));
+      } else if (session.startedAt && session.updatedAt) {
+        // Fallback: use updatedAt if completedAt not set (e.g., session cancelled/errored)
+        const startMs = new Date(session.startedAt).getTime();
+        const endMs = new Date(session.updatedAt).getTime();
+        sessionDurationMinutes = Math.round((endMs - startMs) / (1000 * 60));
+      } else if (session.createdAt && session.updatedAt) {
+        // Final fallback: use createdAt to updatedAt
+        const startMs = new Date(session.createdAt).getTime();
+        const endMs = new Date(session.updatedAt).getTime();
+        const mins = Math.round((endMs - startMs) / (1000 * 60));
+        // Only use if reasonable (less than 60 mins)
+        sessionDurationMinutes = mins > 0 && mins < 60 ? mins : null;
+      }
+    }
+    
     res.json({ 
       success: true, 
       analysis, 
@@ -2279,6 +2303,12 @@ interviewRouter.get("/analysis/:sessionId", requireAuth, async (req: Request, re
       planData,
       readinessBand,
       configId: session?.interviewConfigId || null,
+      sessionDurationMinutes,
+      sessionTimestamps: session ? { 
+        startedAt: session.startedAt, 
+        completedAt: session.completedAt,
+        createdAt: session.createdAt,
+      } : null,
     });
   } catch (error: any) {
     console.error("Error fetching analysis:", error);
