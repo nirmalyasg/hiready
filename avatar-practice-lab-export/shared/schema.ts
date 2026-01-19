@@ -658,6 +658,27 @@ export const roleKits = pgTable("role_kits", {
   trackTags: jsonb("track_tags").$type<string[]>(),
   roleArchetypeId: varchar("role_archetype_id"),
   roleCategory: text("role_category").$type<"tech" | "data" | "product" | "sales" | "business">(),
+  // Enriched role kit fields (matching custom jobs data richness)
+  typicalResponsibilities: jsonb("typical_responsibilities").$type<string[]>(),
+  interviewTopics: jsonb("interview_topics").$type<{
+    category: string;
+    topics: string[];
+  }[]>(),
+  evaluationFocus: jsonb("evaluation_focus").$type<{
+    dimension: string;
+    lookFor: string[];
+    redFlags: string[];
+  }[]>(),
+  dayInLifeContext: text("day_in_life_context"),
+  expectedExperience: jsonb("expected_experience").$type<{
+    mustHave: string[];
+    niceToHave: string[];
+  }>(),
+  salaryRange: jsonb("salary_range").$type<{
+    min: number;
+    max: number;
+    currency: string;
+  }>(),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
