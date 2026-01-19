@@ -24,7 +24,7 @@ import {
   PracticeMode
 } from "../../shared/practice-context.js";
 import { execSync } from "child_process";
-import { resolveAndSaveJobArchetypes, resolveCompanyArchetype, resolveRoleArchetype, listAllRoleArchetypes, listAllCompanyArchetypes, getRoleInterviewStructure, getUnifiedInterviewPlan, getEnrichedInterviewPlan, getRoleTaskBlueprints } from "../lib/archetype-resolver.js";
+import { resolveAndSaveJobArchetypes, resolveCompanyArchetype, resolveRoleArchetype, listAllRoleArchetypes, listAllCompanyArchetypes, getRoleInterviewStructure, getUnifiedInterviewPlan, getEnrichedInterviewPlan, getEnrichedInterviewPlanWithSkills, getRoleTaskBlueprints } from "../lib/archetype-resolver.js";
 import { mapRoleTitleToRoleKit, ensureRoleKitForJob, reprocessAllJobs, normalizeTitle, detectDomain, detectSeniority } from "../lib/role-kit-mapper.js";
 
 let cachedChromiumPath: string | null = null;
@@ -1334,14 +1334,17 @@ jobsRouter.get("/job-targets/:id/practice-options", requireAuth, async (req: Req
     );
     const companyNotes = blueprintData?.blueprint?.notes || null;
     
-    const interviewPlan = await getEnrichedInterviewPlan(
+    // Use skill-based interview plan when JD text is available
+    const interviewPlan = await getEnrichedInterviewPlanWithSkills(
       job.roleArchetypeId || null,
       job.roleFamily || null,
       job.companyArchetype || null,
       job.archetypeConfidence as "high" | "medium" | "low" | null,
       parsed?.experienceLevel || null,
       companyNotes,
-      job.companyName || null
+      job.companyName || null,
+      job.jdText || null,  // Pass JD text for skill-based derivation
+      job.roleTitle || null
     );
     
     const technicalCategories = ["technical_interview", "coding_assessment", "system_design", "coding"];

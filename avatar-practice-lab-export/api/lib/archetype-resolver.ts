@@ -1,7 +1,7 @@
 import { db } from "../db.js";
 import { companies, roleArchetypes, roleInterviewStructureDefaults, jobTargets, roleTaskBlueprints } from "../../shared/schema.js";
 import { eq, sql, ilike, and } from "drizzle-orm";
-import { extractSkillsFromText, type SkillTag } from "./capability-vectorizer.js";
+import { extractSkillsFromText, type SkillTag, deriveInterviewTypesFromSkills, type InterviewTypeDerivation, type DerivedInterviewType } from "./capability-vectorizer.js";
 
 export type CompanyArchetype = 
   | "startup" | "enterprise" | "regulated" | "consumer" | "saas" | "fintech" | "edtech" | "services" | "industrial"
@@ -1085,6 +1085,170 @@ export async function getEnrichedInterviewPlan(
     phases: enrichedPhases,
   };
 }
+
+// ============================================================================
+// SKILL-BASED INTERVIEW PLAN
+// Dynamically determines interview types based on JD-extracted skills
+// ============================================================================
+
+export interface SkillBasedInterviewPhase {
+  name: string;
+  category: string;
+  description: string;
+  mins: number;
+  confidence: "high" | "medium" | "low";
+  matchedSkills: string[];
+  provenance: "skill_derived";
+}
+
+export interface SkillBasedInterviewPlan {
+  phases: SkillBasedInterviewPhase[];
+  totalMins: number;
+  derivation: InterviewTypeDerivation;
+  roleTitle: string;
+  companyName: string | null;
+}
+
+// Map interview type to phase display info
+const INTERVIEW_TYPE_TO_PHASE: Record<string, { 
+  name: string; 
+  mins: number; 
+  category: string; 
+  description: string;
+  practiceMode: "live_interview" | "coding_lab" | "case_study" | "presentation";
+}> = {
+  hr: { name: "HR Screening", mins: 15, category: "hr", description: "Culture fit, motivation, and basic qualifications", practiceMode: "live_interview" },
+  hiring_manager: { name: "Hiring Manager Interview", mins: 30, category: "hiring_manager", description: "Role fit, team dynamics, and domain expertise", practiceMode: "live_interview" },
+  behavioral: { name: "Behavioral Interview", mins: 30, category: "behavioral", description: "STAR-format questions about past experiences", practiceMode: "live_interview" },
+  technical: { name: "Technical Interview", mins: 45, category: "technical", description: "Deep-dive into technical skills and knowledge", practiceMode: "live_interview" },
+  coding: { name: "Coding Assessment", mins: 60, category: "coding", description: "Live coding, algorithms, and data structures", practiceMode: "coding_lab" },
+  system_design: { name: "System Design", mins: 45, category: "system_design", description: "Architecture and scalability discussions", practiceMode: "live_interview" },
+  case_study: { name: "Case Study", mins: 45, category: "case_study", description: "Business problem solving and structured thinking", practiceMode: "case_study" },
+  sql: { name: "SQL Assessment", mins: 30, category: "sql", description: "Database queries and data manipulation", practiceMode: "coding_lab" },
+  analytics: { name: "Analytics Case", mins: 45, category: "analytics", description: "Data analysis and insights generation", practiceMode: "case_study" },
+  product_sense: { name: "Product Sense", mins: 45, category: "product_sense", description: "Product thinking, user empathy, and prioritization", practiceMode: "case_study" },
+  panel: { name: "Panel Interview", mins: 45, category: "panel", description: "Multi-stakeholder interview with leadership team", practiceMode: "live_interview" },
+};
+
+/**
+ * Generate interview plan based on skills extracted from JD
+ * This replaces the archetype-based approach with dynamic skill analysis
+ */
+export function getSkillBasedInterviewPlan(
+  jdText: string,
+  roleTitle: string,
+  roleLevel?: string | null,
+  companyName?: string | null
+): SkillBasedInterviewPlan {
+  // Derive interview types from JD skills
+  const derivation = deriveInterviewTypesFromSkills(jdText, roleTitle, roleLevel);
+  
+  // Convert derived types to interview phases
+  const phases: SkillBasedInterviewPhase[] = derivation.recommendedTypes.map(derived => {
+    const phaseConfig = INTERVIEW_TYPE_TO_PHASE[derived.type];
+    
+    return {
+      name: phaseConfig?.name || derived.label,
+      category: derived.type,
+      description: phaseConfig?.description || derived.description,
+      mins: phaseConfig?.mins || 30,
+      confidence: derived.confidence,
+      matchedSkills: derived.matchedSkills,
+      provenance: "skill_derived" as const,
+    };
+  });
+  
+  const totalMins = phases.reduce((sum, p) => sum + p.mins, 0);
+  
+  return {
+    phases,
+    totalMins,
+    derivation,
+    roleTitle,
+    companyName: companyName || null,
+  };
+}
+
+/**
+ * Get enriched interview plan with skill-based derivation
+ * Falls back to archetype-based if JD text is unavailable
+ */
+export async function getEnrichedInterviewPlanWithSkills(
+  roleArchetypeId: string | null,
+  roleFamily: string | null,
+  companyArchetype: string | null,
+  archetypeConfidence: "high" | "medium" | "low" | null,
+  experienceLevel: string | null,
+  companyNotes: string | null = null,
+  companyName: string | null = null,
+  jdText: string | null = null,
+  roleTitle: string | null = null
+): Promise<EnrichedInterviewPlan & { skillDerivation?: InterviewTypeDerivation }> {
+  // If JD text is available, use skill-based derivation
+  if (jdText && jdText.length > 100 && roleTitle) {
+    const skillPlan = getSkillBasedInterviewPlan(jdText, roleTitle, experienceLevel, companyName);
+    
+    // Get task blueprints for enrichment
+    const allBlueprints = await getRoleTaskBlueprints(roleArchetypeId);
+    
+    // Convert to enriched phases format
+    const enrichedPhases: EnrichedInterviewPhase[] = skillPlan.phases.map((phase, index) => {
+      const taskTypes = PHASE_TO_TASK_TYPES[phase.name] || [];
+      const matchingBlueprints = allBlueprints.filter(b => taskTypes.includes(b.taskType));
+      const phaseId = `skill-${phase.category}-${index}`;
+      const phaseConfig = INTERVIEW_TYPE_TO_PHASE[phase.category];
+      
+      return {
+        name: phase.name,
+        mins: phase.mins,
+        category: phase.category,
+        practiceMode: phaseConfig?.practiceMode || "live_interview",
+        description: phase.description,
+        subphases: phase.matchedSkills.slice(0, 3),
+        provenance: "role" as const,
+        phaseId,
+        blueprints: matchingBlueprints,
+      };
+    });
+    
+    const seniority: "entry" | "mid" | "senior" = 
+      experienceLevel === "senior" || experienceLevel === "lead" || experienceLevel === "executive" ? "senior" :
+      experienceLevel === "entry" ? "entry" : "mid";
+    
+    return {
+      roleArchetype: {
+        id: roleArchetypeId || "skill_derived",
+        name: roleTitle || "Unknown Role",
+        family: roleFamily,
+      },
+      companyArchetype: {
+        type: companyArchetype || "unknown",
+        confidence: archetypeConfidence || "low",
+      },
+      phases: enrichedPhases,
+      emphasisWeights: {},
+      companyNotes: companyNotes || null,
+      seniority,
+      skillDerivation: skillPlan.derivation,
+    };
+  }
+  
+  // Fall back to archetype-based plan
+  const basePlan = await getEnrichedInterviewPlan(
+    roleArchetypeId,
+    roleFamily,
+    companyArchetype,
+    archetypeConfidence,
+    experienceLevel,
+    companyNotes,
+    companyName
+  );
+  
+  return basePlan;
+}
+
+// Re-export for convenience
+export { deriveInterviewTypesFromSkills, type InterviewTypeDerivation, type DerivedInterviewType };
 
 export interface EmployerInterviewPhase {
   name: string;
