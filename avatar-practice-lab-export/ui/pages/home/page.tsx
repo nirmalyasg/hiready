@@ -11,7 +11,6 @@ import {
   Award,
   Shield,
   Briefcase,
-  Play,
   GraduationCap,
   Building2,
   Clock,
@@ -168,12 +167,6 @@ export default function HomePage() {
                   <Button size="lg" className="w-full sm:w-auto bg-[#24c4b8] hover:bg-[#1db0a5] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#24c4b8]/30 border-0 group">
                     Start Free Practice
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-                <Link to="/demo">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-base bg-white/5 border-white/20 text-white hover:bg-white/10 gap-2">
-                    <Play className="w-4 h-4" />
-                    Watch Demo
                   </Button>
                 </Link>
               </div>
