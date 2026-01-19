@@ -9,7 +9,8 @@ import {
   ChevronLeft,
   Briefcase,
   Award,
-  Layers
+  Layers,
+  TrendingUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -26,18 +27,37 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
 }
 
+interface NavSection {
+  title?: string;
+  items: NavItem[];
+}
+
 export function SidebarLayout({ children }: SidebarLayoutProps) {
   const location = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
-  const navItems: NavItem[] = [
-    { href: '/avatar/dashboard', label: 'Dashboard', icon: Home },
-    { href: '/interview', label: 'Practice', icon: Target },
-    { href: '/interview/by-type', label: 'By Type', icon: Layers },
-    { href: '/avatar/results', label: 'Results', icon: BarChart3 },
-    { href: '/hiready-index', label: 'Hiready Index', icon: Award },
-    { href: '/jobs', label: 'Jobs', icon: Briefcase },
+  const navSections: NavSection[] = [
+    {
+      items: [
+        { href: '/interview', label: 'Practice', icon: Target },
+      ]
+    },
+    {
+      title: 'PREPARE',
+      items: [
+        { href: '/jobs', label: 'Jobs', icon: Briefcase },
+        { href: '/interview/by-type', label: 'By Type', icon: Layers },
+      ]
+    },
+    {
+      title: 'PROGRESS',
+      items: [
+        { href: '/avatar/dashboard', label: 'Dashboard', icon: Home },
+        { href: '/hiready-index', label: 'HiReady Index', icon: TrendingUp },
+        { href: '/avatar/results', label: 'Results', icon: BarChart3 },
+      ]
+    },
   ];
 
   const isActive = (href: string) => {
@@ -73,28 +93,45 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             )}
           </div>
 
-          <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
-              
-              return (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                    active 
-                      ? "bg-[#24c4b8] text-white shadow-lg shadow-[#24c4b8]/20" 
-                      : "text-gray-400 hover:text-white hover:bg-white/10",
-                    collapsed && "justify-center px-0"
-                  )}
-                >
-                  <Icon className="w-[18px] h-[18px] flex-shrink-0" />
-                  <span className={cn(collapsed && "hidden")}>{item.label}</span>
-                </Link>
-              );
-            })}
+          <nav className="flex-1 px-3 py-2 overflow-y-auto">
+            {navSections.map((section, sectionIndex) => (
+              <div key={sectionIndex} className={cn(sectionIndex > 0 && "mt-5")}>
+                {section.title && !collapsed && (
+                  <p className="px-3 mb-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+                    {section.title}
+                  </p>
+                )}
+                {section.title && collapsed && (
+                  <div className="h-px bg-white/10 mx-2 mb-2" />
+                )}
+                <div className="space-y-1">
+                  {section.items.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActive(item.href);
+                    const isPractice = item.href === '/interview';
+                    
+                    return (
+                      <Link
+                        key={item.href}
+                        to={item.href}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                          active 
+                            ? "bg-[#24c4b8] text-white shadow-lg shadow-[#24c4b8]/20" 
+                            : isPractice
+                              ? "text-white hover:bg-white/10"
+                              : "text-gray-400 hover:text-white hover:bg-white/10",
+                          collapsed && "justify-center px-0"
+                        )}
+                      >
+                        <Icon className="w-[18px] h-[18px] flex-shrink-0" />
+                        <span className={cn(collapsed && "hidden")}>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
 
           <div className="p-3 mt-auto">

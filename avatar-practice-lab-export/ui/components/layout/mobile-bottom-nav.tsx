@@ -9,10 +9,10 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { path: "/avatar/dashboard", icon: Home, label: "Home" },
   { path: "/interview", icon: Target, label: "Practice" },
-  { path: "/hiready-index", icon: Award, label: "Score" },
   { path: "/jobs", icon: Briefcase, label: "Jobs" },
+  { path: "/hiready-index", icon: Award, label: "Score" },
+  { path: "/avatar/dashboard", icon: Home, label: "Dashboard" },
 ];
 
 export default function MobileBottomNav() {
