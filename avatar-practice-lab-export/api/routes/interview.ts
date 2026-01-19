@@ -1222,34 +1222,41 @@ interviewRouter.post("/session/start", requireAuth, async (req: Request, res: Re
       legacyUserId = created.id;
     }
     
-    // Check interview access using new monetization system
-    if (legacyUserId) {
-      const accessCheck = await checkInterviewAccess(legacyUserId, undefined, authUserId);
-      if (!accessCheck.hasAccess) {
+    // Require legacy user for access control
+    if (!legacyUserId) {
+      return res.status(500).json({
+        success: false,
+        error: "Unable to resolve user for access control",
+        code: "USER_RESOLUTION_FAILED",
+      });
+    }
+    
+    // Check interview access using monetization system
+    const accessCheck = await checkInterviewAccess(legacyUserId, undefined, authUserId);
+    if (!accessCheck.hasAccess) {
+      return res.status(403).json({
+        success: false,
+        error: accessCheck.reason || "No interview access",
+        code: "NO_ACCESS",
+        upgradeRequired: true,
+      });
+    }
+    
+    // Consume free interview credit if using free tier
+    if (accessCheck.accessType === 'free') {
+      const consumed = await consumeFreeInterview(legacyUserId);
+      if (!consumed) {
         return res.status(403).json({
           success: false,
-          error: accessCheck.reason || "No interview access",
-          code: "NO_ACCESS",
+          error: "No free interviews remaining",
+          code: "FREE_LIMIT_REACHED",
           upgradeRequired: true,
         });
       }
-      
-      // Consume free interview credit if using free tier
-      if (accessCheck.accessType === 'free') {
-        const consumed = await consumeFreeInterview(legacyUserId);
-        if (!consumed) {
-          return res.status(403).json({
-            success: false,
-            error: "No free interviews remaining",
-            code: "FREE_LIMIT_REACHED",
-            upgradeRequired: true,
-          });
-        }
-      }
-      
-      // Store access info for usage tracking
-      (req as any).accessInfo = accessCheck;
     }
+    
+    // Store access info for usage tracking
+    (req as any).accessInfo = accessCheck;
     
     const [config] = await db
       .select()
@@ -1351,7 +1358,7 @@ interviewRouter.post("/session/quick-start", requireAuth, async (req: Request, r
       return res.status(404).json({ success: false, error: "Job target not found" });
     }
     
-    // Check access
+    // Check access - resolve legacy user
     const legacyUser = await getLegacyUserByAuthUserId(userId);
     let legacyUserId: number | null = legacyUser?.id || null;
     if (!legacyUserId && req.user?.username) {
@@ -1359,29 +1366,37 @@ interviewRouter.post("/session/quick-start", requireAuth, async (req: Request, r
       legacyUserId = created.id;
     }
     
-    if (legacyUserId) {
-      const accessCheck = await checkInterviewAccess(legacyUserId, undefined, userId);
-      if (!accessCheck.hasAccess) {
+    // Require legacy user for access control
+    if (!legacyUserId) {
+      return res.status(500).json({
+        success: false,
+        error: "Unable to resolve user for access control",
+        code: "USER_RESOLUTION_FAILED",
+      });
+    }
+    
+    // Check interview access using monetization system
+    const accessCheck = await checkInterviewAccess(legacyUserId, undefined, userId);
+    if (!accessCheck.hasAccess) {
+      return res.status(403).json({
+        success: false,
+        error: accessCheck.reason || "No interview access",
+        code: "NO_ACCESS",
+        upgradeRequired: true,
+      });
+    }
+    if (accessCheck.accessType === 'free') {
+      const consumed = await consumeFreeInterview(legacyUserId);
+      if (!consumed) {
         return res.status(403).json({
           success: false,
-          error: accessCheck.reason || "No interview access",
-          code: "NO_ACCESS",
+          error: "No free interviews remaining",
+          code: "FREE_LIMIT_REACHED",
           upgradeRequired: true,
         });
       }
-      if (accessCheck.accessType === 'free') {
-        const consumed = await consumeFreeInterview(legacyUserId);
-        if (!consumed) {
-          return res.status(403).json({
-            success: false,
-            error: "No free interviews remaining",
-            code: "FREE_LIMIT_REACHED",
-            upgradeRequired: true,
-          });
-        }
-      }
-      (req as any).accessInfo = accessCheck;
     }
+    (req as any).accessInfo = accessCheck;
     
     // Comprehensive roundCategory to interviewType mapping
     type InterviewType = "hr" | "hiring_manager" | "technical" | "panel" | "case_study" | "behavioral" | "coding" | "sql" | "analytics" | "ml" | "case" | "system_design" | "product_sense" | "general" | "skill_practice";
@@ -1560,7 +1575,7 @@ interviewRouter.post("/session/quick-start-rolekit", requireAuth, async (req: Re
       return res.status(404).json({ success: false, error: "Role kit not found" });
     }
     
-    // Check access
+    // Check access - resolve legacy user
     const legacyUser = await getLegacyUserByAuthUserId(userId);
     let legacyUserId: number | null = legacyUser?.id || null;
     if (!legacyUserId && req.user?.username) {
@@ -1568,29 +1583,37 @@ interviewRouter.post("/session/quick-start-rolekit", requireAuth, async (req: Re
       legacyUserId = created.id;
     }
     
-    if (legacyUserId) {
-      const accessCheck = await checkInterviewAccess(legacyUserId, undefined, userId);
-      if (!accessCheck.hasAccess) {
+    // Require legacy user for access control
+    if (!legacyUserId) {
+      return res.status(500).json({
+        success: false,
+        error: "Unable to resolve user for access control",
+        code: "USER_RESOLUTION_FAILED",
+      });
+    }
+    
+    // Check interview access using monetization system
+    const accessCheck = await checkInterviewAccess(legacyUserId, undefined, userId);
+    if (!accessCheck.hasAccess) {
+      return res.status(403).json({
+        success: false,
+        error: accessCheck.reason || "No interview access",
+        code: "NO_ACCESS",
+        upgradeRequired: true,
+      });
+    }
+    if (accessCheck.accessType === 'free') {
+      const consumed = await consumeFreeInterview(legacyUserId);
+      if (!consumed) {
         return res.status(403).json({
           success: false,
-          error: accessCheck.reason || "No interview access",
-          code: "NO_ACCESS",
+          error: "No free interviews remaining",
+          code: "FREE_LIMIT_REACHED",
           upgradeRequired: true,
         });
       }
-      if (accessCheck.accessType === 'free') {
-        const consumed = await consumeFreeInterview(legacyUserId);
-        if (!consumed) {
-          return res.status(403).json({
-            success: false,
-            error: "No free interviews remaining",
-            code: "FREE_LIMIT_REACHED",
-            upgradeRequired: true,
-          });
-        }
-      }
-      (req as any).accessInfo = accessCheck;
     }
+    (req as any).accessInfo = accessCheck;
     
     // Map roundCategory to interview type
     type InterviewType = "hr" | "hiring_manager" | "technical" | "panel" | "case_study" | "behavioral" | "coding" | "sql" | "analytics" | "ml" | "case" | "system_design" | "product_sense" | "general" | "skill_practice";

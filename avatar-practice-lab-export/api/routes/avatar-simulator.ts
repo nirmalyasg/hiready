@@ -745,45 +745,52 @@ avatarSimulator.post("/session/start", async (req, res) => {
       });
     }
     
+    // Require legacy user for access control
+    if (!legacyUserId) {
+      return res.status(500).json({
+        success: false,
+        error: "Unable to resolve user for access control",
+        code: "USER_RESOLUTION_FAILED",
+      });
+    }
+    
     // Check if user already has an active session
-    if (legacyUserId) {
-      const existingSession = await storage.getUserActiveHeygenSession(legacyUserId);
-      if (existingSession) {
-        return res.status(409).json({
-          success: false,
-          error: "User already has an active session",
-          existingSessionId: existingSession.id,
-        });
-      }
-      
-      // Check interview access entitlement
-      const accessCheck = await checkInterviewAccess(legacyUserId, undefined, authUserId);
-      if (!accessCheck.hasAccess) {
+    const existingSession = await storage.getUserActiveHeygenSession(legacyUserId);
+    if (existingSession) {
+      return res.status(409).json({
+        success: false,
+        error: "User already has an active session",
+        existingSessionId: existingSession.id,
+      });
+    }
+    
+    // Check interview access entitlement
+    const accessCheck = await checkInterviewAccess(legacyUserId, undefined, authUserId);
+    if (!accessCheck.hasAccess) {
+      return res.status(403).json({
+        success: false,
+        error: "Access denied",
+        code: "NO_ACCESS",
+        reason: accessCheck.reason,
+        upgradeRequired: true
+      });
+    }
+    
+    // Consume free interview credit if using free tier
+    if (accessCheck.accessType === 'free') {
+      const consumed = await consumeFreeInterview(legacyUserId);
+      if (!consumed) {
         return res.status(403).json({
           success: false,
-          error: "Access denied",
-          code: "NO_ACCESS",
-          reason: accessCheck.reason,
+          error: "No free interviews remaining",
+          code: "FREE_LIMIT_REACHED",
           upgradeRequired: true
         });
       }
-      
-      // Consume free interview credit if using free tier
-      if (accessCheck.accessType === 'free') {
-        const consumed = await consumeFreeInterview(legacyUserId);
-        if (!consumed) {
-          return res.status(403).json({
-            success: false,
-            error: "No free interviews remaining",
-            code: "FREE_LIMIT_REACHED",
-            upgradeRequired: true
-          });
-        }
-      }
-      
-      // Store access info for later recording
-      (req as any).accessInfo = accessCheck;
     }
+    
+    // Store access info for later recording
+    (req as any).accessInfo = accessCheck;
     
     // Check concurrent session limit
     const activeCount = await storage.getActiveHeygenSessionsCount();
