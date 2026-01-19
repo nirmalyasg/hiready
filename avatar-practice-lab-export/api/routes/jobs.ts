@@ -1350,6 +1350,29 @@ jobsRouter.get("/job-targets/:id/practice-options", requireAuth, async (req: Req
     const technicalCategories = ["technical_interview", "coding_assessment", "system_design", "coding"];
     const seenCategories = new Set<string>();
     
+    // Get skills matched per interview type from derivation
+    const skillDerivation = interviewPlan.skillDerivation;
+    const getSkillsForType = (category: string): string[] => {
+      if (!skillDerivation?.recommendedTypes) return [];
+      const matched = skillDerivation.recommendedTypes.find(t => t.type === category);
+      return matched?.matchedSkills || [];
+    };
+    
+    // Interview type objectives based on the stage
+    const interviewObjectives: Record<string, string> = {
+      hr: "Assess cultural fit, communication skills, and career motivation",
+      hiring_manager: "Evaluate domain expertise, role fit, and team dynamics",
+      behavioral: "Explore past experiences using STAR format to predict future behavior",
+      case_study: "Test structured problem-solving and business acumen",
+      technical: "Verify technical depth, coding skills, and engineering fundamentals",
+      technical_interview: "Verify technical depth, coding skills, and engineering fundamentals",
+      coding: "Evaluate algorithmic thinking and code implementation skills",
+      system_design: "Assess ability to design scalable systems and make architectural decisions",
+      sql: "Test database querying skills and data manipulation proficiency",
+      analytics: "Evaluate data analysis skills and insight generation ability",
+      product_sense: "Assess product thinking, user empathy, and prioritization skills",
+    };
+    
     const options = interviewPlan.phases
       .filter((phase) => {
         const normalizedCategory = technicalCategories.includes(phase.category) 
@@ -1370,6 +1393,18 @@ jobsRouter.get("/job-targets/:id/practice-options", requireAuth, async (req: Req
         const normalizedCategory = isTechnical ? "technical_interview" : phase.category;
         const taxonomy = ROUND_TAXONOMY[normalizedCategory as RoundCategory];
         
+        // Get matched skills for this interview type
+        const matchedSkills = isTechnical 
+          ? [...new Set([
+              ...getSkillsForType("technical"),
+              ...getSkillsForType("coding"),
+              ...getSkillsForType("system_design")
+            ])]
+          : getSkillsForType(phase.category);
+        
+        // Get objective for this interview type
+        const objective = interviewObjectives[normalizedCategory] || phase.description;
+        
         return {
           id: `${jobId}-${phase.phaseId}`,
           phaseId: phase.phaseId,
@@ -1380,6 +1415,8 @@ jobsRouter.get("/job-targets/:id/practice-options", requireAuth, async (req: Req
           description: isTechnical 
             ? "Technical problem solving including coding, system design, and domain expertise verification"
             : phase.description,
+          objective,
+          skillsAssessed: matchedSkills,
           practiceMode: "live_interview" as PracticeMode,
           typicalDuration: taxonomy?.typicalDuration || "10-15 min",
           icon: taxonomy?.icon || "code",

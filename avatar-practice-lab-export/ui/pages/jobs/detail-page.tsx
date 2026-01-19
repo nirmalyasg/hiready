@@ -129,6 +129,8 @@ interface PracticeOption {
   roundCategory: RoundCategory;
   label: string;
   description: string;
+  objective?: string;
+  skillsAssessed?: string[];
   practiceMode: PracticeMode;
   typicalDuration: string;
   icon: string;
@@ -731,7 +733,10 @@ export default function JobDetailPage() {
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-2">
+                        {option.objective && (
+                          <p className="text-xs text-slate-600 mt-0.5 line-clamp-1">{option.objective}</p>
+                        )}
+                        <div className="flex items-center gap-2 mt-0.5">
                           <p className="text-xs text-slate-500">{option.typicalDuration}</p>
                           {hasPracticed && history.latestScore !== null && (
                             <span className="text-xs text-slate-400">
@@ -742,6 +747,23 @@ export default function JobDetailPage() {
                             </span>
                           )}
                         </div>
+                        {option.skillsAssessed && option.skillsAssessed.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {option.skillsAssessed.slice(0, 4).map((skill, skillIdx) => (
+                              <span 
+                                key={skillIdx} 
+                                className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-medium"
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                            {option.skillsAssessed.length > 4 && (
+                              <span className="px-1.5 py-0.5 text-slate-500 text-[10px]">
+                                +{option.skillsAssessed.length - 4} more
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <Button
                         onClick={() => handleStartPracticeOption(option)}
