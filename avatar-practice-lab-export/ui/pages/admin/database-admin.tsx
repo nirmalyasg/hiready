@@ -417,9 +417,10 @@ INSERT INTO public.skills VALUES (1, 'Communication', 'Effective communication s
                 <div className="mb-4 text-sm text-blue-800 space-y-1">
                   <p>This will run all migration files and seed data:</p>
                   <ul className="list-disc list-inside ml-2 space-y-1">
-                    <li>Execute all SQL migration files (001-007)</li>
+                    <li>Execute all SQL migration files (001-017)</li>
                     <li>Seed users, skills, scenarios, avatars, personas, tones</li>
                     <li>Seed admin settings, budget guards, cultural presets</li>
+                    <li>Seed interview practice data, role kits, rubrics, companies</li>
                   </ul>
                 </div>
                 <Button
@@ -532,10 +533,11 @@ INSERT INTO public.skills VALUES (1, 'Communication', 'Effective communication s
                 <div className="mb-4 text-sm text-orange-800 space-y-1">
                   <p>This comprehensive migration will:</p>
                   <ul className="list-disc list-inside ml-2 space-y-1">
-                    <li>Create all missing tables in production</li>
+                    <li>Create all missing tables in production (17 migration files)</li>
                     <li>Migrate users, avatars, skills, scenarios, tones, personas</li>
-                    <li>Migrate cultural presets and custom scenarios</li>
-                    <li>Migrate all session data, transcripts, and analysis</li>
+                    <li>Migrate interview data: role kits, plans, sessions, analysis</li>
+                    <li>Migrate cultural presets, custom scenarios, question bank</li>
+                    <li>Migrate all session data, transcripts, and subscriptions</li>
                   </ul>
                 </div>
                 <Button

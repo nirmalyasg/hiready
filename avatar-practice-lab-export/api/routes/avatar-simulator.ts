@@ -5869,7 +5869,21 @@ avatarSimulator.post("/admin/run-sql-seeds", async (req, res) => {
     const path = await import("path");
     
     const seedsDir = path.join(process.cwd(), "database", "seeds");
-    const seedFiles = ["init.sql", "cultural_presets.sql", "avatars.sql", "personas.sql", "tones.sql", "scenarios.sql"];
+    const seedFiles = [
+      "init.sql",
+      "cultural_presets.sql", 
+      "avatars.sql", 
+      "personas.sql", 
+      "tones.sql", 
+      "scenarios.sql",
+      "interview_practice.sql",
+      "interview_practice_enhanced.sql",
+      "interview_intelligence.sql",
+      "role_interview_structure_defaults.sql",
+      "role_task_blueprints.sql",
+      "role_archetypes.sql",
+      "companies_india.sql"
+    ];
 
     const details: string[] = [];
     const errors: string[] = [];
@@ -5950,7 +5964,21 @@ avatarSimulator.post("/admin/run-full-setup", async (req, res) => {
     details.push("");
     details.push("=== Running Seeds ===");
     const seedsDir = path.join(process.cwd(), "database", "seeds");
-    const seedFiles = ["init.sql", "cultural_presets.sql", "avatars.sql", "personas.sql", "tones.sql", "scenarios.sql"];
+    const seedFiles = [
+      "init.sql",
+      "cultural_presets.sql", 
+      "avatars.sql", 
+      "personas.sql", 
+      "tones.sql", 
+      "scenarios.sql",
+      "interview_practice.sql",
+      "interview_practice_enhanced.sql",
+      "interview_intelligence.sql",
+      "role_interview_structure_defaults.sql",
+      "role_task_blueprints.sql",
+      "role_archetypes.sql",
+      "companies_india.sql"
+    ];
 
     for (const file of seedFiles) {
       const filePath = path.join(seedsDir, file);
@@ -6021,7 +6049,21 @@ avatarSimulator.post("/admin/seed-production", async (req, res) => {
     // Run seed SQL files (uses ON CONFLICT to preserve existing data)
     details.push("=== Running Seed Files ===");
     const seedsDir = path.join(process.cwd(), "database", "seeds");
-    const seedFiles = ["init.sql", "cultural_presets.sql", "avatars.sql", "personas.sql", "tones.sql", "scenarios.sql"];
+    const seedFiles = [
+      "init.sql",
+      "cultural_presets.sql", 
+      "avatars.sql", 
+      "personas.sql", 
+      "tones.sql", 
+      "scenarios.sql",
+      "interview_practice.sql",
+      "interview_practice_enhanced.sql",
+      "interview_intelligence.sql",
+      "role_interview_structure_defaults.sql",
+      "role_task_blueprints.sql",
+      "role_archetypes.sql",
+      "companies_india.sql"
+    ];
 
     for (const file of seedFiles) {
       const filePath = path.join(seedsDir, file);
@@ -6059,7 +6101,12 @@ avatarSimulator.post("/admin/seed-production", async (req, res) => {
         "custom_scenarios", "custom_scenario_skill_mappings",
         "api_usage_events", "api_cost_daily_rollup",
         "user_login_events", "session_journey_events",
-        "budget_alerts", "heygen_queue", "user_media_preferences"
+        "budget_alerts", "heygen_queue", "user_media_preferences",
+        "user_documents", "user_profile_extracted", "interview_configs",
+        "interview_plans", "interview_sessions", "interview_analysis",
+        "interview_artifacts", "job_targets", "career_memory",
+        "interview_assignments", "user_subscriptions", "role_packs",
+        "subscription_plans", "seo_pages", "question_bank"
       ];
 
       for (const tableName of transactionalTables) {
