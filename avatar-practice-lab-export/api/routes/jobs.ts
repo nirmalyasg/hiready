@@ -25,7 +25,7 @@ import {
 } from "../../shared/practice-context.js";
 import { execSync } from "child_process";
 import { resolveAndSaveJobArchetypes, resolveCompanyArchetype, resolveRoleArchetype, listAllRoleArchetypes, listAllCompanyArchetypes, getRoleInterviewStructure, getUnifiedInterviewPlan, getEnrichedInterviewPlan, getRoleTaskBlueprints } from "../lib/archetype-resolver.js";
-import { mapRoleTitleToRoleKit, ensureRoleKitForJob } from "../lib/role-kit-mapper.js";
+import { mapRoleTitleToRoleKit, ensureRoleKitForJob, reprocessAllJobs, normalizeTitle, detectDomain, detectSeniority } from "../lib/role-kit-mapper.js";
 
 let cachedChromiumPath: string | null = null;
 
@@ -635,6 +635,52 @@ jobsRouter.post("/job-targets/:id/auto-map-role-kit", requireAuth, async (req: R
     });
   } catch (error: any) {
     console.error("Error auto-mapping role kit:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Reprocess all jobs to fix mismatched role kits
+jobsRouter.post("/reprocess-role-kits", requireAuth, async (req: Request, res: Response) => {
+  try {
+    console.log("Starting reprocessing of all jobs for role kit mapping...");
+    const results = await reprocessAllJobs();
+    
+    console.log(`Reprocessing complete: ${results.processed} processed, ${results.updated} updated, ${results.errors} errors`);
+    
+    res.json({ 
+      success: true, 
+      ...results,
+      summary: `Processed ${results.processed} jobs. Updated ${results.updated} role kit assignments. ${results.errors} errors.`
+    });
+  } catch (error: any) {
+    console.error("Error reprocessing role kits:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Preview role kit derivation for a title without creating
+jobsRouter.post("/preview-role-kit-derivation", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { roleTitle, jdText } = req.body;
+    
+    if (!roleTitle) {
+      return res.status(400).json({ success: false, error: "roleTitle is required" });
+    }
+    
+    const normalizedTitle = normalizeTitle(roleTitle);
+    const domain = detectDomain(roleTitle, jdText);
+    const seniority = detectSeniority(roleTitle, jdText);
+    
+    res.json({
+      success: true,
+      original: roleTitle,
+      normalized: normalizedTitle,
+      domain,
+      seniority,
+      suggestedKitName: `${normalizedTitle} - ${domain.charAt(0).toUpperCase() + domain.slice(1)} (${seniority.charAt(0).toUpperCase() + seniority.slice(1)})`
+    });
+  } catch (error: any) {
+    console.error("Error previewing role kit derivation:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
