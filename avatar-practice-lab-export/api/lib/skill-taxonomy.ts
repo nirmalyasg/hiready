@@ -311,9 +311,9 @@ export const ROUND_TO_CATEGORIES: Record<string, SkillCategory[]> = {
   technical: ["architecture", "programming", "algorithms", "tools"],
   coding: ["programming", "algorithms", "data_sql"],
   sql: ["data_sql", "analytics", "architecture"],
-  behavioral: ["communication", "leadership", "process"],
-  hiring_manager: ["leadership", "communication", "business", "domain"],
-  hr: ["communication", "leadership", "process"],
+  behavioral: ["communication", "leadership"],  // Strict: only soft skills
+  hiring_manager: ["leadership", "communication", "business"],  // Strict: soft + business skills
+  hr: ["communication", "leadership"],  // Strict: only soft skills
   case: ["business", "analytics", "product", "communication"],
   product: ["product", "analytics", "business", "design"],
   analytics: ["analytics", "data_sql", "business"],
@@ -321,7 +321,7 @@ export const ROUND_TO_CATEGORIES: Record<string, SkillCategory[]> = {
   portfolio: ["design", "communication", "product"],
   sales_roleplay: ["sales", "communication", "business"],
   aptitude: ["algorithms", "analytics", "communication"],
-  group: ["communication", "leadership", "collaboration"],
+  group: ["communication", "leadership"],  // Strict: only soft skills
 };
 
 /**
@@ -377,6 +377,9 @@ export function getSkillRelevanceScore(skill: string, roundType: string): number
   return score;
 }
 
+// Soft skill rounds that should use default soft skills when role has no matching skills
+const SOFT_SKILL_ROUNDS = ["behavioral", "hiring_manager", "hr", "group"];
+
 /**
  * Get the most relevant skills from a list for a specific interview round type
  * Returns skills sorted by relevance, limited to count
@@ -405,7 +408,16 @@ export function getSkillsForRound(
     return a.originalIndex - b.originalIndex;
   });
   
-  // If no skills have relevance score, fall back to returning in original order
+  // For soft skill rounds, ONLY return skills that actually match the round categories
+  // Don't pad with unrelated technical skills
+  if (SOFT_SKILL_ROUNDS.includes(roundType)) {
+    const matchingSkills = scoredSkills.filter(s => s.score > 0);
+    // Return only matching skills (even if fewer than count)
+    // The caller will supplement with defaults if needed
+    return matchingSkills.slice(0, count).map(s => s.skill);
+  }
+  
+  // For technical rounds, check if any skills have relevance score
   const hasRelevantSkills = scoredSkills.some(s => s.score > 0);
   
   if (!hasRelevantSkills) {
@@ -413,7 +425,7 @@ export function getSkillsForRound(
     return roleSkills.slice(0, count);
   }
   
-  // Return top scoring skills
+  // Return top scoring skills (including 0-score for padding if needed for technical rounds)
   return scoredSkills.slice(0, count).map(s => s.skill);
 }
 

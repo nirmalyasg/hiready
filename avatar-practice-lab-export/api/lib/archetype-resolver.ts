@@ -1015,6 +1015,8 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
   },
 };
 
+import { getSkillsForRound, getDefaultSkillsForRound } from "./skill-taxonomy.js";
+
 export async function getRolePracticeOptions(
   roleArchetypeId: string,
   experienceLevel: string | null,
@@ -1038,25 +1040,6 @@ export async function getRolePracticeOptions(
   // Build practice options from interview types
   const options: RolePracticeOption[] = [];
   
-  // Map interview types to skill indices for variety
-  // This ensures each round gets different skills from the required skills list
-  const skillRotation: Record<string, number[]> = {
-    technical: [0, 2, 3],    // Primary technical skills
-    coding: [3, 0, 2],       // Coding-focused skills
-    sql: [0, 2, 1],          // SQL/data-focused skills
-    hiring_manager: [1, 4, 0], // Process/debugging + context
-    behavioral: [1, 4, 3],   // Soft skills + technical context
-    hr: [0, 1, 4],           // Overview of key skills
-    case: [2, 0, 1],         // Analytical skills
-    product: [2, 1, 0],      // Product-oriented
-    analytics: [0, 2, 1],    // Analytics focused
-    ml: [3, 2, 0],           // ML/programming focused
-    portfolio: [2, 1, 0],    // Design/process focused
-    sales_roleplay: [1, 0, 4], // Communication focused
-    aptitude: [0, 3, 2],     // Analytical
-    group: [1, 4, 0],        // Collaboration focused
-  };
-  
   for (const interviewType of interviewTypes) {
     const metadata = INTERVIEW_TYPE_METADATA[interviewType];
     if (!metadata) continue;
@@ -1066,28 +1049,25 @@ export async function getRolePracticeOptions(
       metadata.taskTypes.includes(b.taskType)
     );
     
-    // Get skills for this round from required skills, using rotation indices
-    // This directly links round skills to the role's actual required skills
-    const indices = skillRotation[interviewType] || [0, 1, 2];
-    const roundSkills: string[] = [];
+    // Use semantic skill taxonomy to select the most relevant skills for this round type
+    // This uses category-based matching (programming, data_sql, leadership, etc.)
+    let roundSkills = getSkillsForRound(requiredSkills, interviewType, 3);
     
-    for (const idx of indices) {
-      if (idx < requiredSkills.length && !roundSkills.includes(requiredSkills[idx])) {
-        roundSkills.push(requiredSkills[idx]);
+    // For soft skill rounds, if we have fewer than 3 matching skills from the role,
+    // supplement with default soft skills for that round type
+    if (roundSkills.length < 3) {
+      const defaults = getDefaultSkillsForRound(interviewType);
+      for (const defaultSkill of defaults) {
+        if (roundSkills.length >= 3) break;
+        if (!roundSkills.includes(defaultSkill)) {
+          roundSkills.push(defaultSkill);
+        }
       }
     }
     
-    // If we don't have enough skills, pad with remaining required skills
-    for (const skill of requiredSkills) {
-      if (roundSkills.length >= 3) break;
-      if (!roundSkills.includes(skill)) {
-        roundSkills.push(skill);
-      }
-    }
-    
-    // Fallback to interview-type typical skills if role has no skills defined
+    // If still no skills, use all defaults
     if (roundSkills.length === 0) {
-      roundSkills.push(...metadata.typicalSkills.slice(0, 3));
+      roundSkills = getDefaultSkillsForRound(interviewType);
     }
     
     options.push({
@@ -1098,7 +1078,7 @@ export async function getRolePracticeOptions(
       typicalDuration: metadata.typicalDuration,
       icon: metadata.icon,
       practiceMode: metadata.practiceMode,
-      focusAreas: roundSkills.slice(0, 3),
+      focusAreas: roundSkills,
       blueprints: matchingBlueprints,
     });
   }
