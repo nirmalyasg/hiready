@@ -8,7 +8,8 @@ import {
   LogOut, 
   ChevronLeft,
   Briefcase,
-  Award
+  Award,
+  Layers
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -33,6 +34,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   const navItems: NavItem[] = [
     { href: '/avatar/dashboard', label: 'Dashboard', icon: Home },
     { href: '/interview', label: 'Practice', icon: Target },
+    { href: '/interview/by-type', label: 'By Type', icon: Layers },
     { href: '/avatar/results', label: 'Results', icon: BarChart3 },
     { href: '/hiready-index', label: 'Hiready Index', icon: Award },
     { href: '/jobs', label: 'Jobs', icon: Briefcase },

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { 
   Search, ChevronRight, Briefcase, GraduationCap, Code, LineChart, Users, Megaphone, 
-  Clock, ArrowRight, Building2, Filter, Check, ChevronDown, X, Plus, Link2, FileText,
-  Loader2, MapPin, MessageSquare, TrendingUp, Brain, Database, BarChart3, Target, Sparkles
+  Clock, ArrowRight, Building2, Check, ChevronDown, X, Plus, Link2, FileText,
+  Loader2, MapPin, Target, Sparkles, ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +32,6 @@ interface JobTarget {
 }
 
 type AddMode = "url" | "paste" | "manual" | null;
-type SelectedPath = "role" | "skill" | "custom" | null;
 
 const domainIcons: Record<string, any> = {
   software: Code,
@@ -66,53 +65,6 @@ const domainColors: Record<string, string> = {
   engineering_management: "bg-[#000000]",
 };
 
-const interviewModeOptions = [
-  { 
-    id: "coding_technical", 
-    label: "Coding & Technical Tasks", 
-    description: "Solve, explain, debug, or modify technical problems",
-    icon: Code,
-    color: "bg-[#000000]",
-    interviewMode: "coding_technical",
-    duration: "15 min",
-    includes: ["Coding", "Debugging", "Code Review", "SQL", "ML Basics"],
-    roleCategories: ["tech", "data"],
-  },
-  { 
-    id: "case_problem_solving", 
-    label: "Case & Problem Solving", 
-    description: "Structured thinking for ambiguous problems",
-    icon: Briefcase,
-    color: "bg-[#cb6ce6]",
-    interviewMode: "case_problem_solving",
-    duration: "15 min",
-    includes: ["Business Cases", "Product Cases", "Analytics Cases", "Strategy"],
-    roleCategories: ["product", "business", "data"],
-  },
-  { 
-    id: "behavioral", 
-    label: "Behavioral and Leadership", 
-    description: "Past behavior, judgment, ownership and leadership",
-    icon: MessageSquare,
-    color: "bg-[#24c4b8]",
-    interviewMode: "behavioral",
-    duration: "15 min",
-    includes: ["STAR Stories", "Conflict Handling", "Leadership", "Failure Stories"],
-    roleCategories: ["all"],
-  },
-  { 
-    id: "hiring_manager", 
-    label: "HR Interview", 
-    description: "Role fit, motivation, culture and career alignment",
-    icon: Users,
-    color: "bg-gray-500",
-    interviewMode: "hiring_manager",
-    duration: "15 min",
-    includes: ["Why This Role", "Culture Fit", "Career Goals", "Role Expectations"],
-    roleCategories: ["all"],
-  },
-];
-
 const getLevelConfig = (level: string) => {
   switch (level) {
     case "entry":
@@ -139,7 +91,6 @@ export default function InterviewPracticePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [selectedPath, setSelectedPath] = useState<SelectedPath>(null);
   
   const [savedJobs, setSavedJobs] = useState<JobTarget[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
@@ -152,10 +103,7 @@ export default function InterviewPracticePage() {
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  
-  const [customStep, setCustomStep] = useState<"details" | "round">("details");
-  const [selectedCustomRound, setSelectedCustomRound] = useState<string | null>(null);
-  const [customJobDetails, setCustomJobDetails] = useState<{ title: string; company: string; jdText?: string } | null>(null);
+  const [showAddJob, setShowAddJob] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -219,20 +167,6 @@ export default function InterviewPracticePage() {
 
   const handleSelectJob = (job: JobTarget) => {
     navigate(`/jobs/${job.id}`);
-  };
-
-  const handleInterviewMode = (mode: typeof interviewModeOptions[0]) => {
-    sessionStorage.setItem("interviewModeContext", JSON.stringify({
-      interviewMode: mode.interviewMode,
-      taxonomy: {
-        label: mode.label,
-        description: mode.description,
-        typicalDuration: mode.duration,
-        includes: mode.includes,
-      },
-      roleCategories: mode.roleCategories,
-    }));
-    navigate(`/interview/mode-setup?mode=${mode.interviewMode}`);
   };
 
   const handleAddViaUrl = async () => {
@@ -325,74 +259,19 @@ export default function InterviewPracticePage() {
 
   const resetForm = () => {
     setAddMode(null);
+    setShowAddJob(false);
     setUrl("");
     setPasteText("");
     setTitle("");
     setCompany("");
     setLocation("");
     setError(null);
-    setCustomStep("details");
-    setSelectedCustomRound(null);
-    setCustomJobDetails(null);
-  };
-
-  const handleProceedToRoundSelection = () => {
-    setCustomJobDetails({ title, company, jdText: pasteText || undefined });
-    setCustomStep("round");
-  };
-
-  const handleStartCustomInterview = async () => {
-    if (!customJobDetails || !selectedCustomRound) return;
-    
-    setAdding(true);
-    setError(null);
-    
-    try {
-      const response = await fetch("/api/interview/config", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          interviewMode: selectedCustomRound,
-          customJobTitle: customJobDetails.title,
-          customCompany: customJobDetails.company,
-          customJdText: customJobDetails.jdText,
-          style: "neutral",
-          mode: "custom",
-        }),
-      });
-
-      const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.error || "Failed to create session");
-      }
-
-      const selectedMode = interviewModeOptions.find(m => m.interviewMode === selectedCustomRound);
-      sessionStorage.setItem("interviewModeSetup", JSON.stringify({
-        interviewMode: selectedCustomRound,
-        taxonomy: selectedMode ? {
-          label: selectedMode.label,
-          description: selectedMode.description,
-          typicalDuration: selectedMode.duration,
-          includes: selectedMode.includes,
-        } : null,
-        customJobTitle: customJobDetails.title,
-        customCompany: customJobDetails.company,
-        configId: data.config.id,
-      }));
-
-      navigate(`/interview/config?configId=${data.config.id}&interviewMode=${selectedCustomRound}`);
-    } catch (err: any) {
-      console.error("Error starting custom interview:", err);
-      setError(err.message || "Something went wrong");
-    } finally {
-      setAdding(false);
-    }
   };
 
   if (isLoading) {
     return (
       <SidebarLayout>
-        <div className="flex justify-center items-center h-[60vh]">
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
           <LoadingSpinner />
         </div>
       </SidebarLayout>
@@ -402,437 +281,286 @@ export default function InterviewPracticePage() {
   return (
     <SidebarLayout>
       <div className="min-h-screen bg-[#fbfbfc]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8 pb-20 sm:pb-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6 pb-20 sm:pb-12">
           
           {/* Hero Header */}
           <div className="bg-gradient-to-br from-[#000000] to-[#1a0a2e] rounded-2xl p-6 sm:p-8 text-white shadow-xl">
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">Interview Practice</h1>
-            <p className="text-white/70 text-sm sm:text-base max-w-xl">
-              AI-powered practice sessions to ace your interviews. Choose your path and start building confidence.
+            <p className="text-white/70 text-sm sm:text-base max-w-xl mb-4">
+              Practice for your target jobs or use role templates. AI-powered sessions with detailed feedback.
             </p>
-            <div className="flex items-center gap-4 mt-4 pt-4 border-t border-white/10">
+            <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-[#24c4b8] flex items-center justify-center">
-                  <Target className="w-4 h-4 text-white" />
+                  <Briefcase className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-sm text-white/80">{roleKits.length}+ Role Kits</span>
+                <span className="text-sm text-white/80">{savedJobs.length} Target Jobs</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                  <Brain className="w-4 h-4 text-white" />
+                  <Target className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-sm text-white/80">AI Feedback</span>
+                <span className="text-sm text-white/80">{roleKits.length}+ Role Templates</span>
               </div>
             </div>
           </div>
 
-        {fetchError && (
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm">
-            <p className="font-medium mb-1">Unable to load content</p>
-            <p className="text-amber-700">{fetchError}</p>
-            <button 
-              onClick={() => window.location.reload()}
-              className="mt-2 text-amber-600 hover:underline font-medium"
-            >
-              Refresh page
-            </button>
-          </div>
-        )}
+          {fetchError && (
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm">
+              <p className="font-medium mb-1">Unable to load content</p>
+              <p className="text-amber-700">{fetchError}</p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="mt-2 text-amber-600 hover:underline font-medium"
+              >
+                Refresh page
+              </button>
+            </div>
+          )}
 
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center justify-between">
-            <span>{error}</span>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center justify-between">
+              <span>{error}</span>
+              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
 
-        {/* Three-card choice when no path is selected */}
-        {!selectedPath && (
-          <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-3 sm:gap-5">
-            {/* Practice by Role */}
-            <button
-              onClick={() => setSelectedPath("role")}
-              className="w-full group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 sm:p-6 hover:border-[#000000] hover:shadow-xl transition-all duration-300"
-            >
-              <div className="flex sm:flex-col items-center sm:items-start gap-4 sm:gap-0">
-                <div className="w-14 h-14 rounded-2xl bg-[#000000] flex items-center justify-center sm:mb-4 flex-shrink-0 shadow-lg shadow-[#000000]/20">
-                  <Briefcase className="w-7 h-7 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-lg sm:text-xl font-bold text-[#000000] mb-1 sm:mb-2 group-hover:text-[#24c4b8] transition-colors">
-                    Practice by Role
-                  </h2>
-                  <p className="text-gray-500 text-sm line-clamp-2 sm:line-clamp-none sm:mb-4">
-                    {roleKits.length}+ role kits: Engineer, PM, Analyst...
-                  </p>
-                  <div className="hidden sm:flex items-center gap-2 text-[#000000] font-semibold text-sm group-hover:text-[#24c4b8] transition-colors">
-                    <span>Browse roles</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-[#cb6ce6] group-hover:text-[#24c4b8] sm:hidden" />
-              </div>
-            </button>
-
-            {/* Practice by Interview Type */}
-            <button
-              onClick={() => setSelectedPath("skill")}
-              className="w-full group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 sm:p-6 hover:border-[#24c4b8] hover:shadow-xl transition-all duration-300"
-            >
-              <div className="flex sm:flex-col items-center sm:items-start gap-4 sm:gap-0">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#24c4b8] to-[#1db0a5] flex items-center justify-center sm:mb-4 flex-shrink-0 shadow-lg shadow-[#24c4b8]/30">
-                  <Target className="w-7 h-7 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-lg sm:text-xl font-bold text-[#000000] mb-1 sm:mb-2 group-hover:text-[#24c4b8] transition-colors">
-                    Practice by Type
-                  </h2>
-                  <p className="text-gray-500 text-sm line-clamp-2 sm:line-clamp-none sm:mb-4">
-                    Coding, Case Study, Behavioral, HR...
-                  </p>
-                  <div className="hidden sm:flex items-center gap-2 text-[#24c4b8] font-semibold text-sm">
-                    <span>Choose type</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-[#cb6ce6] group-hover:text-[#24c4b8] sm:hidden" />
-              </div>
-            </button>
-
-            {/* Custom Interview */}
-            <button
-              onClick={() => setSelectedPath("custom")}
-              className="w-full group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 sm:p-6 hover:border-[#cb6ce6] hover:shadow-xl transition-all duration-300"
-            >
-              <div className="flex sm:flex-col items-center sm:items-start gap-4 sm:gap-0">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#cb6ce6] to-[gray-500] flex items-center justify-center sm:mb-4 flex-shrink-0 shadow-lg shadow-[#cb6ce6]/30">
-                  <Sparkles className="w-7 h-7 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-lg sm:text-xl font-bold text-[#000000] mb-1 sm:mb-2 group-hover:text-[#24c4b8] transition-colors">
-                    Custom Interview
-                  </h2>
-                  <p className="text-gray-500 text-sm line-clamp-2 sm:line-clamp-none sm:mb-4">
-                    Tailored questions for your specific job
-                  </p>
-                  <div className="hidden sm:flex items-center gap-2 text-[#cb6ce6] font-semibold text-sm group-hover:text-[#24c4b8] transition-colors">
-                    <span>Get started</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                  {savedJobs.length > 0 && (
-                    <div className="hidden sm:block mt-3 pt-3 border-t border-slate-100">
-                      <p className="text-xs text-gray-500">{savedJobs.length} saved job{savedJobs.length !== 1 ? 's' : ''}</p>
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 sm:hidden">
-                  {savedJobs.length > 0 && (
-                    <span className="text-xs text-white bg-[#24c4b8] px-2 py-0.5 rounded-full font-medium">{savedJobs.length} jobs</span>
-                  )}
-                  <ChevronRight className="w-5 h-5 text-[#cb6ce6] group-hover:text-[#24c4b8]" />
-                </div>
-              </div>
-            </button>
-          </div>
-        )}
-
-        {/* Custom interview details */}
-        {selectedPath === "custom" && (
+          {/* Section 1: Your Target Jobs - Primary */}
           <section>
-            <button
-              onClick={() => { 
-                if (customStep === "round") {
-                  setCustomStep("details");
-                } else {
-                  setSelectedPath(null); 
-                  resetForm(); 
-                }
-              }}
-              className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 mb-4 transition-colors"
-            >
-              <ChevronRight className="w-4 h-4 rotate-180" />
-              {customStep === "round" ? "Back to job details" : "Back to options"}
-            </button>
-
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-                <Target className="w-6 h-6 text-white" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#24c4b8] flex items-center justify-center">
+                  <Briefcase className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900">Your Target Jobs</h2>
+                  <p className="text-xs text-slate-500">Practice for specific positions you're applying to</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">Custom Interview</h2>
-                <p className="text-sm text-slate-500">
-                  {customStep === "details" ? "Step 1: Enter job details" : "Step 2: Select interview round"}
-                </p>
-              </div>
+              {savedJobs.length > 0 && (
+                <button 
+                  onClick={() => navigate("/jobs")}
+                  className="text-sm text-[#24c4b8] font-medium hover:underline hidden sm:block"
+                >
+                  Manage all →
+                </button>
+              )}
             </div>
 
-            {customStep === "details" && (
-              <div className="space-y-4">
-                {/* Import from URL option */}
-                <div className="bg-white rounded-2xl border border-slate-200 p-5">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                      <Link2 className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-slate-900">Import from URL</p>
-                      <p className="text-xs text-slate-500">Paste a job link from LinkedIn, Indeed, Naukri, etc.</p>
-                    </div>
-                  </div>
-                  {addMode === "url" ? (
-                    <div className="space-y-3">
-                      <Input
-                        placeholder="https://linkedin.com/jobs/... or https://indeed.com/..."
-                        value={url}
-                        onChange={(e) => { setUrl(e.target.value); setError(null); }}
-                        className="rounded-xl"
-                      />
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => { setAddMode(null); setUrl(""); setError(null); }}
-                          className="rounded-xl"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          onClick={handleAddViaUrl}
-                          disabled={adding || !url.trim()}
-                          className="flex-1 bg-blue-600 hover:bg-blue-700 rounded-xl"
-                        >
-                          {adding ? (
-                            <>
-                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              Importing...
-                            </>
-                          ) : (
-                            <>
-                              <Link2 className="w-4 h-4 mr-2" />
-                              Import Job
-                            </>
-                          )}
-                        </Button>
+            {savedJobs.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+                {savedJobs.slice(0, 6).map((job) => (
+                  <button
+                    key={job.id}
+                    onClick={() => handleSelectJob(job)}
+                    className="group text-left bg-white border border-slate-200 rounded-xl p-4 hover:border-[#24c4b8] hover:shadow-lg transition-all"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-[#24c4b8]/10 flex items-center justify-center flex-shrink-0">
+                        <Building2 className="w-5 h-5 text-[#24c4b8]" />
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-slate-900 truncate group-hover:text-[#24c4b8] transition-colors">
+                          {job.roleTitle}
+                        </h3>
+                        {job.companyName && (
+                          <p className="text-sm text-slate-500 truncate">{job.companyName}</p>
+                        )}
+                        {job.location && (
+                          <p className="text-xs text-slate-400 truncate flex items-center gap-1 mt-1">
+                            <MapPin className="w-3 h-3" />
+                            {job.location}
+                          </p>
+                        )}
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-[#24c4b8] flex-shrink-0 mt-1" />
                     </div>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      onClick={() => setAddMode("url")}
-                      className="w-full rounded-xl border-dashed border-2 h-11 text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
-                    >
-                      <Link2 className="w-4 h-4 mr-2" />
-                      Paste job URL to import
-                    </Button>
-                  )}
-                </div>
+                  </button>
+                ))}
+              </div>
+            ) : null}
 
+            {/* Add New Job Card */}
+            {!showAddJob ? (
+              <button
+                onClick={() => setShowAddJob(true)}
+                className="w-full group text-left bg-white border-2 border-dashed border-slate-300 rounded-xl p-5 hover:border-[#24c4b8] hover:bg-[#24c4b8]/5 transition-all"
+              >
                 <div className="flex items-center gap-4">
-                  <div className="flex-1 h-px bg-slate-200" />
-                  <span className="text-xs font-medium text-slate-400 uppercase">or enter manually</span>
-                  <div className="flex-1 h-px bg-slate-200" />
+                  <div className="w-12 h-12 rounded-xl bg-[#24c4b8]/10 flex items-center justify-center group-hover:bg-[#24c4b8]/20 transition-colors">
+                    <Plus className="w-6 h-6 text-[#24c4b8]" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-900 group-hover:text-[#24c4b8] transition-colors">
+                      Add a Target Job
+                    </h3>
+                    <p className="text-sm text-slate-500">
+                      Import from URL, paste job description, or enter manually
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ) : (
+              <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-semibold text-slate-900">Add a Target Job</h3>
+                  <button onClick={resetForm} className="text-slate-400 hover:text-slate-600">
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
 
-                {/* Manual entry form */}
-                <div className="bg-white rounded-2xl border border-slate-200 p-5">
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-900 mb-2">Job Title *</label>
-                      <Input
-                        placeholder="e.g., Product Manager, Software Engineer"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="rounded-xl"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-900 mb-2">Company</label>
-                      <Input
-                        placeholder="e.g., Google, Amazon, Microsoft"
-                        value={company}
-                        onChange={(e) => setCompany(e.target.value)}
-                        className="rounded-xl"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-900 mb-2">Job Description (Optional)</label>
-                      <Textarea
-                        placeholder="Paste the job description here for more tailored questions..."
-                        value={pasteText}
-                        onChange={(e) => setPasteText(e.target.value)}
-                        className="rounded-xl min-h-[80px]"
-                      />
-                    </div>
+                {/* Tab buttons */}
+                <div className="flex gap-2 border-b border-slate-200 pb-3">
+                  <button
+                    onClick={() => setAddMode("url")}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                      addMode === "url" ? "bg-[#24c4b8] text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    <Link2 className="w-4 h-4 inline mr-1.5" />
+                    Import URL
+                  </button>
+                  <button
+                    onClick={() => setAddMode("paste")}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                      addMode === "paste" ? "bg-[#24c4b8] text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    <FileText className="w-4 h-4 inline mr-1.5" />
+                    Paste JD
+                  </button>
+                  <button
+                    onClick={() => setAddMode("manual")}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                      addMode === "manual" ? "bg-[#24c4b8] text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    <Sparkles className="w-4 h-4 inline mr-1.5" />
+                    Manual
+                  </button>
+                </div>
+
+                {addMode === "url" && (
+                  <div className="space-y-3">
+                    <Input
+                      placeholder="https://linkedin.com/jobs/... or https://indeed.com/..."
+                      value={url}
+                      onChange={(e) => { setUrl(e.target.value); setError(null); }}
+                      className="rounded-xl"
+                    />
                     <Button
-                      onClick={handleProceedToRoundSelection}
-                      disabled={!title.trim()}
-                      className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-base font-medium"
+                      onClick={handleAddViaUrl}
+                      disabled={adding || !url.trim()}
+                      className="w-full bg-[#24c4b8] hover:bg-[#1db0a5] rounded-xl"
                     >
-                      Continue to Interview Round
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                      {adding ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Importing...
+                        </>
+                      ) : (
+                        <>
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          Import Job
+                        </>
+                      )}
                     </Button>
                   </div>
-                </div>
+                )}
 
-                {/* Saved Jobs section */}
-                {savedJobs.length > 0 && (
-                  <div className="bg-white rounded-2xl border border-slate-200 p-5">
-                    <div className="flex items-center justify-between mb-4">
-                      <p className="text-sm font-medium text-slate-900">YOUR SAVED JOBS ({savedJobs.length})</p>
-                      <button
-                        onClick={() => navigate("/jobs")}
-                        className="text-sm text-slate-700 hover:underline font-medium"
-                      >
-                        Manage all jobs →
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {savedJobs.slice(0, 4).map((job) => (
-                        <button
-                          key={job.id}
-                          onClick={() => handleSelectJob(job)}
-                          className="text-left p-3 rounded-xl border border-slate-200 hover:border-slate-400 hover:shadow-sm transition-all group flex items-center gap-3"
-                        >
-                          <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-slate-700/10 transition-colors">
-                            <Briefcase className="w-4 h-4 text-slate-500 group-hover:text-slate-700" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-medium text-slate-900 truncate text-sm">{job.roleTitle}</p>
-                            {job.companyName && (
-                              <p className="text-xs text-slate-400 truncate">{job.companyName}</p>
-                            )}
-                          </div>
-                          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-700 flex-shrink-0" />
-                        </button>
-                      ))}
-                    </div>
+                {addMode === "paste" && (
+                  <div className="space-y-3">
+                    <Textarea
+                      placeholder="Paste the full job description here..."
+                      value={pasteText}
+                      onChange={(e) => { setPasteText(e.target.value); setError(null); }}
+                      className="rounded-xl min-h-[120px]"
+                    />
+                    <Button
+                      onClick={handleAddViaPaste}
+                      disabled={adding || !pasteText.trim()}
+                      className="w-full bg-[#24c4b8] hover:bg-[#1db0a5] rounded-xl"
+                    >
+                      {adding ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        "Create Job"
+                      )}
+                    </Button>
                   </div>
+                )}
+
+                {addMode === "manual" && (
+                  <div className="space-y-3">
+                    <Input
+                      placeholder="Job Title *"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="rounded-xl"
+                    />
+                    <Input
+                      placeholder="Company Name (optional)"
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
+                      className="rounded-xl"
+                    />
+                    <Textarea
+                      placeholder="Job Description (optional - helps generate better questions)"
+                      value={pasteText}
+                      onChange={(e) => setPasteText(e.target.value)}
+                      className="rounded-xl min-h-[80px]"
+                    />
+                    <Button
+                      onClick={handleAddManual}
+                      disabled={adding || !title.trim()}
+                      className="w-full bg-[#24c4b8] hover:bg-[#1db0a5] rounded-xl"
+                    >
+                      {adding ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        "Create Job"
+                      )}
+                    </Button>
+                  </div>
+                )}
+
+                {!addMode && (
+                  <p className="text-sm text-slate-500 text-center py-4">
+                    Select how you'd like to add your job above
+                  </p>
                 )}
               </div>
             )}
-
-            {customStep === "round" && customJobDetails && (
-              <div className="space-y-4">
-                <div className="bg-slate-50 rounded-xl border border-slate-200 p-4">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Practicing for</p>
-                  <p className="font-semibold text-slate-900">{customJobDetails.title}</p>
-                  {customJobDetails.company && (
-                    <p className="text-sm text-slate-500">{customJobDetails.company}</p>
-                  )}
-                </div>
-
-                <div className="bg-white rounded-2xl border border-slate-200 p-5">
-                  <label className="block text-sm font-medium text-slate-900 mb-4">Select Interview Round</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {interviewModeOptions.map((mode) => {
-                      const IconComponent = mode.icon;
-                      return (
-                        <button
-                          key={mode.id}
-                          onClick={() => setSelectedCustomRound(mode.interviewMode)}
-                          className={`text-left p-4 rounded-xl border-2 transition-all ${
-                            selectedCustomRound === mode.interviewMode
-                              ? "border-emerald-500 bg-emerald-50"
-                              : "border-slate-200 hover:border-slate-300"
-                          }`}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className={`w-10 h-10 rounded-lg ${mode.color} flex items-center justify-center flex-shrink-0`}>
-                              <IconComponent className="w-5 h-5 text-white" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-slate-900 text-sm">{mode.label}</p>
-                              <p className="text-xs text-slate-500 mt-0.5">{mode.description}</p>
-                            </div>
-                            {selectedCustomRound === mode.interviewMode && (
-                              <Check className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <Button
-                  onClick={handleStartCustomInterview}
-                  disabled={!selectedCustomRound || adding}
-                  className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-lg font-semibold"
-                >
-                  {adding ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Setting up...
-                    </>
-                  ) : (
-                    <>
-                      Start Practice
-                      <ArrowRight className="w-5 h-5 ml-2" />
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
           </section>
-        )}
 
-        {/* Saved jobs section - shown separately */}
-        {selectedPath === "custom" && customStep === "details" && savedJobs.length > 0 && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-5">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">
-                Your Saved Jobs ({savedJobs.length})
-              </p>
-              <button
-                onClick={() => navigate("/jobs")}
-                className="text-xs text-slate-700 hover:underline font-medium"
-              >
-                Manage all jobs →
-              </button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {savedJobs.slice(0, 4).map((job) => (
-                <button
-                  key={job.id}
-                  onClick={() => handleSelectJob(job)}
-                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-slate-400 hover:bg-slate-700/5 transition-all group text-left"
-                >
-                  <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 group-hover:bg-slate-700/10 transition-colors">
-                    <Building2 className="w-4 h-4 text-slate-500 group-hover:text-slate-700" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-slate-900 text-sm truncate">{job.roleTitle}</p>
-                    {job.companyName && (
-                      <p className="text-xs text-slate-400 truncate">{job.companyName}</p>
-                    )}
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-700 flex-shrink-0" />
-                </button>
-              ))}
-            </div>
+          {/* Divider */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-px bg-slate-200" />
+            <span className="text-xs font-medium text-slate-400 uppercase">or practice with templates</span>
+            <div className="flex-1 h-px bg-slate-200" />
           </div>
-        )}
 
-        {/* Practice by Role */}
-        {selectedPath === "role" && (
+          {/* Section 2: Role Templates - Secondary */}
           <section>
-            <button
-              onClick={() => setSelectedPath(null)}
-              className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 mb-4 transition-colors"
-            >
-              <ChevronRight className="w-4 h-4 rotate-180" />
-              Back
-            </button>
-
-            <div className="flex items-center gap-3 mb-5 sm:mb-6">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-900 flex items-center justify-center flex-shrink-0">
-                <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center">
+                  <Target className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900">Role Templates</h2>
+                  <p className="text-xs text-slate-500">General practice for common roles</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900">Practice by Role</h2>
-                <p className="text-xs sm:text-sm text-slate-500">Choose a role kit for your target position</p>
-              </div>
+              <span className="text-xs text-slate-400">{filteredKits.length} templates</span>
             </div>
 
             {/* Search and Filter */}
@@ -848,14 +576,14 @@ export default function InterviewPracticePage() {
                 />
               </div>
               
-              {/* Horizontal scroll filter chips on mobile */}
+              {/* Horizontal scroll filter chips */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
                 <button
                   onClick={() => setSelectedDomain(null)}
                   className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                     !selectedDomain
                       ? "bg-slate-900 text-white"
-                      : "bg-white border border-slate-200 text-slate-600"
+                      : "bg-white border border-slate-200 text-slate-600 hover:border-slate-400"
                   }`}
                 >
                   All
@@ -867,7 +595,7 @@ export default function InterviewPracticePage() {
                     className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                       selectedDomain === domain
                         ? "bg-slate-700 text-white"
-                        : "bg-white border border-slate-200 text-slate-600"
+                        : "bg-white border border-slate-200 text-slate-600 hover:border-slate-400"
                     }`}
                   >
                     {formatDomain(domain)}
@@ -899,14 +627,11 @@ export default function InterviewPracticePage() {
                     )}
                   </div>
                 )}
-                <span className="text-xs text-slate-400 ml-auto whitespace-nowrap pl-2">
-                  {filteredKits.length} roles
-                </span>
               </div>
             </div>
 
             {filteredKits.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-xl sm:rounded-2xl border border-slate-200">
+              <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
                 <div className="w-12 h-12 mx-auto mb-3 bg-slate-100 rounded-xl flex items-center justify-center">
                   <Briefcase className="w-6 h-6 text-slate-400" />
                 </div>
@@ -919,7 +644,7 @@ export default function InterviewPracticePage() {
                 </Button>
               </div>
             ) : (
-              <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filteredKits.map((kit) => {
                   const IconComponent = domainIcons[kit.domain] || Briefcase;
                   const bgColor = domainColors[kit.domain] || "bg-slate-500";
@@ -929,61 +654,39 @@ export default function InterviewPracticePage() {
                     <button
                       key={kit.id}
                       onClick={() => handleSelectRole(kit)}
-                      className="w-full group text-left bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:shadow-lg hover:border-slate-400 transition-all"
+                      className="group text-left bg-white border border-slate-200 rounded-xl p-4 hover:shadow-lg hover:border-slate-400 transition-all"
                     >
-                      {/* Mobile: horizontal layout */}
-                      <div className="flex sm:hidden items-center gap-3">
-                        <div className={`w-10 h-10 ${bgColor} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                      <div className="flex items-start gap-3">
+                        <div className={`w-10 h-10 ${bgColor} rounded-lg flex items-center justify-center flex-shrink-0`}>
                           <IconComponent className="w-5 h-5 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 mb-0.5">
                             <h3 className="font-semibold text-slate-900 truncate group-hover:text-slate-700">
                               {kit.name}
                             </h3>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${levelConfig.color} flex-shrink-0`}>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${levelConfig.color}`}>
                               {levelConfig.label}
                             </span>
+                            <span className="text-xs text-slate-400">{formatDomain(kit.domain)}</span>
                           </div>
-                          <p className="text-xs text-slate-500">{formatDomain(kit.domain)}</p>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-700 flex-shrink-0" />
+                        <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-700 flex-shrink-0 mt-1" />
                       </div>
-
-                      {/* Desktop: vertical card layout */}
-                      <div className="hidden sm:block">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className={`w-10 h-10 ${bgColor} rounded-xl flex items-center justify-center`}>
-                            <IconComponent className="w-5 h-5 text-white" />
-                          </div>
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${levelConfig.color}`}>
-                            {levelConfig.label}
-                          </span>
-                        </div>
-
-                        <h3 className="font-semibold text-slate-900 mb-0.5 group-hover:text-slate-700 transition-colors">
-                          {kit.name}
-                        </h3>
-                        <p className="text-xs text-slate-500 mb-3">
-                          {formatDomain(kit.domain)}
+                      
+                      {kit.description && (
+                        <p className="text-xs text-slate-500 line-clamp-2 mt-2 pl-13">
+                          {kit.description}
                         </p>
-
-                        {kit.description && (
-                          <p className="text-xs text-slate-500 line-clamp-2 mb-4">
-                            {kit.description}
-                          </p>
-                        )}
-
-                        <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                          <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                            <Clock className="w-3.5 h-3.5" />
-                            <span>{kit.estimatedDuration || 30} min</span>
-                          </div>
-                          <span className="inline-flex items-center gap-1 text-sm font-medium text-slate-700 group-hover:gap-2 transition-all">
-                            Start
-                            <ArrowRight className="w-4 h-4" />
-                          </span>
-                        </div>
+                      )}
+                      
+                      <div className="flex items-center gap-2 mt-3 pt-2 border-t border-slate-100">
+                        <span className="text-xs text-slate-400 flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {kit.estimatedDuration || 30} min
+                        </span>
                       </div>
                     </button>
                   );
@@ -991,92 +694,6 @@ export default function InterviewPracticePage() {
               </div>
             )}
           </section>
-        )}
-
-        {/* Practice by Interview Type */}
-        {selectedPath === "skill" && (
-          <section>
-            <button
-              onClick={() => setSelectedPath(null)}
-              className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 mb-4 transition-colors"
-            >
-              <ChevronRight className="w-4 h-4 rotate-180" />
-              Back
-            </button>
-
-            <div className="flex items-center gap-3 mb-5 sm:mb-6">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                <Target className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900">Practice by Type</h2>
-                <p className="text-xs sm:text-sm text-slate-500">Choose the interview type to focus on</p>
-              </div>
-            </div>
-
-            <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
-              {interviewModeOptions.map((mode) => {
-                const IconComponent = mode.icon;
-                return (
-                  <button
-                    key={mode.id}
-                    onClick={() => handleInterviewMode(mode)}
-                    className="w-full group text-left bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:shadow-lg hover:border-purple-200 transition-all"
-                  >
-                    {/* Mobile: horizontal compact layout */}
-                    <div className="flex sm:hidden items-center gap-3">
-                      <div className={`w-10 h-10 ${mode.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                        <IconComponent className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-slate-900 mb-0.5 group-hover:text-purple-700">
-                          {mode.label}
-                        </h3>
-                        <p className="text-xs text-slate-500 line-clamp-1">
-                          {mode.description}
-                        </p>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-purple-500 flex-shrink-0" />
-                    </div>
-
-                    {/* Desktop: full card layout */}
-                    <div className="hidden sm:block">
-                      <div className={`w-12 h-12 ${mode.color} rounded-xl flex items-center justify-center mb-4`}>
-                        <IconComponent className="w-6 h-6 text-white" />
-                      </div>
-                      <h3 className="font-semibold text-slate-900 text-base mb-1 group-hover:text-purple-700 transition-colors">
-                        {mode.label}
-                      </h3>
-                      <p className="text-sm text-slate-500 mb-3">
-                        {mode.description}
-                      </p>
-                      <div className="flex flex-wrap gap-1.5 mb-4">
-                        {mode.includes.slice(0, 3).map((item, idx) => (
-                          <span key={idx} className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
-                            {item}
-                          </span>
-                        ))}
-                        {mode.includes.length > 3 && (
-                          <span className="text-xs text-slate-400">+{mode.includes.length - 3}</span>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                        <span className="text-xs text-slate-400 flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {mode.duration}
-                        </span>
-                        <span className="inline-flex items-center gap-1 text-sm font-medium text-purple-600 group-hover:gap-2 transition-all">
-                          Start
-                          <ArrowRight className="w-4 h-4" />
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-        )}
         </div>
       </div>
     </SidebarLayout>
