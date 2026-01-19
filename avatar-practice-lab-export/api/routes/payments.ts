@@ -185,21 +185,33 @@ paymentsRouter.get("/subscription-status", requireAuth, async (req: Request, res
     const freeTrialUsed = sessionsCompleted >= 1;
     const hasRolePack = rolePacks.length > 0;
 
-    const activePlans: Array<{planType: string; roleKitId: number | null; roleKitName: string | null; expiresAt: string}> = [];
+    const roleKitIds = rolePacks.filter(rp => rp.roleKitId).map(rp => rp.roleKitId as number);
+    const roleKitNames: Record<number, string> = {};
+    if (roleKitIds.length > 0) {
+      const kits = await db
+        .select({ id: roleKits.id, name: roleKits.name })
+        .from(roleKits)
+        .where(sql`${roleKits.id} = ANY(ARRAY[${sql.raw(roleKitIds.join(','))}]::int[])`);
+      for (const kit of kits) {
+        roleKitNames[kit.id] = kit.name;
+      }
+    }
+
+    const activePlans: Array<{planType: string; roleKitId: number | null; roleKitName: string | null; expiresAt: string | null}> = [];
     if (proSubscription) {
       activePlans.push({
         planType: 'pro',
         roleKitId: null,
         roleKitName: null,
-        expiresAt: proSubscription.expiresAt?.toISOString() || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        expiresAt: proSubscription.expiresAt?.toISOString() || null,
       });
     }
     for (const rp of rolePacks) {
       activePlans.push({
         planType: 'role_pack',
         roleKitId: rp.roleKitId,
-        roleKitName: null,
-        expiresAt: rp.expiresAt?.toISOString() || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        roleKitName: rp.roleKitId ? (roleKitNames[rp.roleKitId] || null) : null,
+        expiresAt: rp.expiresAt?.toISOString() || null,
       });
     }
 

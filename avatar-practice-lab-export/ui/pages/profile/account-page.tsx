@@ -12,7 +12,7 @@ interface SubscriptionStatus {
     planType: string;
     roleKitId?: number | null;
     roleKitName?: string | null;
-    expiresAt: string;
+    expiresAt: string | null;
   }>;
   freeTrialUsed: boolean;
   sessionsCompleted: number;
@@ -187,9 +187,11 @@ export default function AccountPage() {
                           {plan.planType === 'pro' ? 'Pro Plan' : plan.roleKitName || 'Role Pack'}
                         </span>
                       </div>
-                      <span className="text-sm text-emerald-600">
-                        Expires {formatDate(plan.expiresAt)}
-                      </span>
+                      {plan.expiresAt && (
+                        <span className="text-sm text-emerald-600">
+                          Expires {formatDate(plan.expiresAt)}
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
