@@ -405,9 +405,13 @@ export default function RoleDetailPage() {
                           {option.typicalDuration}
                         </span>
                         {focusAreas.length > 0 && !hasAttempted && (
-                          <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-[9px] font-medium truncate max-w-[80px]">
-                            {focusAreas[0]}
-                          </span>
+                          <div className="flex items-center gap-1 flex-wrap">
+                            {focusAreas.slice(0, 3).map((area, idx) => (
+                              <span key={idx} className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded text-[9px] font-medium truncate max-w-[70px]">
+                                {area}
+                              </span>
+                            ))}
+                          </div>
                         )}
                       </div>
                       <Button

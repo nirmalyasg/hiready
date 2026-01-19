@@ -360,12 +360,23 @@ export function getSkillCategories(skill: string): SkillCategory[] {
 export function getSkillRelevanceScore(skill: string, roundType: string): number {
   const skillCategories = getSkillCategories(skill);
   const roundCategories = ROUND_TO_CATEGORIES[roundType] || [];
-  
-  if (skillCategories.length === 0 || roundCategories.length === 0) {
-    return 0;
-  }
+  const normalizedSkill = skill.toLowerCase().trim();
+  const normalizedRound = roundType.toLowerCase().trim();
   
   let score = 0;
+  
+  // Bonus: Exact skill-to-round name match (e.g., "SQL" skill for "sql" round)
+  // This ensures skills named after the round type rank highest
+  if (normalizedSkill === normalizedRound || 
+      normalizedSkill.includes(normalizedRound) || 
+      normalizedRound.includes(normalizedSkill)) {
+    score += 100; // High bonus for exact/partial name match
+  }
+  
+  if (skillCategories.length === 0 || roundCategories.length === 0) {
+    return score;
+  }
+  
   for (const skillCat of skillCategories) {
     const priorityIndex = roundCategories.indexOf(skillCat);
     if (priorityIndex !== -1) {
