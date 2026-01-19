@@ -430,11 +430,45 @@ export default function JobDetailPage() {
     }
   };
 
-  const handleStartPracticeOption = (option: PracticeOption) => {
+  const [isStarting, setIsStarting] = useState(false);
+  
+  const handleStartPracticeOption = async (option: PracticeOption) => {
     if (!checkAccess()) {
       return;
     }
-    navigate(`/interview/config?jobTargetId=${job?.id}&roundCategory=${option.roundCategory}`);
+    
+    setIsStarting(true);
+    try {
+      // Use quick-start endpoint to skip config page and go directly to session
+      const response = await fetch("/api/interview/session/quick-start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          jobTargetId: job?.id,
+          roundCategory: option.roundCategory,
+          objective: option.objective,
+          skillsAssessed: option.skillsAssessed,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.status === 403 && data.upgradeRequired) {
+        setShowUpgradeModal(true);
+        return;
+      }
+      
+      if (data.success) {
+        navigate(`/interview/session?interviewSessionId=${data.session.id}&configId=${data.configId}`);
+      } else {
+        console.error("Failed to start session:", data.error);
+      }
+    } catch (error) {
+      console.error("Error starting practice:", error);
+    } finally {
+      setIsStarting(false);
+    }
   };
 
 
@@ -733,9 +767,6 @@ export default function JobDetailPage() {
                             </span>
                           )}
                         </div>
-                        {option.objective && (
-                          <p className="text-xs text-slate-600 mt-0.5 line-clamp-1">{option.objective}</p>
-                        )}
                         <div className="flex items-center gap-2 mt-0.5">
                           <p className="text-xs text-slate-500">{option.typicalDuration}</p>
                           {hasPracticed && history.latestScore !== null && (
@@ -747,27 +778,11 @@ export default function JobDetailPage() {
                             </span>
                           )}
                         </div>
-                        {option.skillsAssessed && option.skillsAssessed.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1.5">
-                            {option.skillsAssessed.slice(0, 4).map((skill, skillIdx) => (
-                              <span 
-                                key={skillIdx} 
-                                className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-medium"
-                              >
-                                {skill}
-                              </span>
-                            ))}
-                            {option.skillsAssessed.length > 4 && (
-                              <span className="px-1.5 py-0.5 text-slate-500 text-[10px]">
-                                +{option.skillsAssessed.length - 4} more
-                              </span>
-                            )}
-                          </div>
-                        )}
                       </div>
                       <Button
                         onClick={() => handleStartPracticeOption(option)}
                         size="sm"
+                        disabled={isStarting}
                         className={`h-8 px-3 text-xs ${
                           accessCheck?.hasAccess
                             ? hasPracticed 
@@ -776,7 +791,7 @@ export default function JobDetailPage() {
                             : "bg-slate-100 hover:bg-slate-200 text-slate-600"
                         }`}
                       >
-                        {accessCheck?.hasAccess 
+                        {isStarting ? "..." : accessCheck?.hasAccess 
                           ? (hasPracticed ? "Retake" : "Start") 
                           : "Unlock"}
                       </Button>

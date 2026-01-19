@@ -1295,6 +1295,215 @@ interviewRouter.post("/session/start", requireAuth, async (req: Request, res: Re
   }
 });
 
+// Quick start endpoint - combines config creation, plan generation, and session start
+// Used by job detail page to skip the config page and go directly to interview
+interviewRouter.post("/session/quick-start", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { jobTargetId, roundCategory, objective, skillsAssessed } = req.body;
+    
+    if (!jobTargetId || !roundCategory) {
+      return res.status(400).json({ success: false, error: "jobTargetId and roundCategory are required" });
+    }
+    
+    // Get job target details
+    const [job] = await db.select().from(jobTargets).where(eq(jobTargets.id, jobTargetId));
+    if (!job) {
+      return res.status(404).json({ success: false, error: "Job target not found" });
+    }
+    
+    // Check access
+    const legacyUser = await getLegacyUserByAuthUserId(userId);
+    let legacyUserId: number | null = legacyUser?.id || null;
+    if (!legacyUserId && req.user?.username) {
+      const created = await getOrCreateLegacyUser(userId, req.user.username);
+      legacyUserId = created.id;
+    }
+    
+    if (legacyUserId) {
+      const accessCheck = await checkInterviewAccess(legacyUserId);
+      if (!accessCheck.hasAccess) {
+        return res.status(403).json({
+          success: false,
+          error: accessCheck.reason || "No interview access",
+          code: "NO_ACCESS",
+          upgradeRequired: true,
+        });
+      }
+      if (accessCheck.accessType === 'free') {
+        const consumed = await consumeFreeInterview(legacyUserId);
+        if (!consumed) {
+          return res.status(403).json({
+            success: false,
+            error: "No free interviews remaining",
+            code: "FREE_LIMIT_REACHED",
+            upgradeRequired: true,
+          });
+        }
+      }
+      (req as any).accessInfo = accessCheck;
+    }
+    
+    // Comprehensive roundCategory to interviewType mapping
+    type InterviewType = "hr" | "hiring_manager" | "technical" | "panel" | "case_study" | "behavioral" | "coding" | "sql" | "analytics" | "ml" | "case" | "system_design" | "product_sense" | "general" | "skill_practice";
+    const categoryToType: Record<string, InterviewType> = {
+      hr_screening: "hr",
+      hr: "hr",
+      hiring_manager: "hiring_manager",
+      behavioral: "behavioral",
+      culture_values: "behavioral",
+      bar_raiser: "behavioral",
+      case_study: "case_study",
+      case: "case",
+      technical_interview: "technical",
+      technical: "technical",
+      coding: "coding",
+      coding_assessment: "coding",
+      sql: "sql",
+      sql_assessment: "sql",
+      analytics: "analytics",
+      analytics_case: "analytics",
+      product_sense: "product_sense",
+      system_design: "system_design",
+      aptitude_assessment: "general",
+      panel_interview: "behavioral",
+      ml: "ml",
+    };
+    const interviewType: InterviewType = categoryToType[roundCategory] || "behavioral";
+    
+    // Determine seniority from job parsed data
+    const jdParsed = job.jdParsed as any;
+    let seniority: "entry" | "mid" | "senior" = "mid";
+    if (jdParsed?.experienceLevel) {
+      const level = jdParsed.experienceLevel.toLowerCase();
+      if (level.includes("senior") || level.includes("lead") || level.includes("principal") || level.includes("director")) {
+        seniority = "senior";
+      } else if (level.includes("junior") || level.includes("entry") || level.includes("associate")) {
+        seniority = "entry";
+      }
+    }
+    
+    // Determine interview mode based on category
+    type InterviewMode = "coding_technical" | "case_problem_solving" | "behavioral" | "hiring_manager" | "system_deep_dive" | "role_based" | "custom" | "skill_only";
+    let interviewMode: InterviewMode = "role_based";
+    if (roundCategory === "coding" || roundCategory === "coding_assessment") {
+      interviewMode = "coding_technical";
+    } else if (roundCategory === "case_study" || roundCategory === "case") {
+      interviewMode = "case_problem_solving";
+    } else if (roundCategory === "behavioral" || roundCategory === "culture_values") {
+      interviewMode = "behavioral";
+    } else if (roundCategory === "hiring_manager") {
+      interviewMode = "hiring_manager";
+    } else if (roundCategory === "system_design") {
+      interviewMode = "system_deep_dive";
+    }
+    
+    // Create config
+    const [config] = await db
+      .insert(interviewConfigs)
+      .values({
+        userId,
+        roleKitId: job.roleKitId || null,
+        interviewType,
+        style: "neutral",
+        seniority,
+        interviewMode,
+        jobTargetId,
+      })
+      .returning();
+    
+    // Build comprehensive plan JSON with all expected fields
+    const phaseName = categoryToType[roundCategory] === "hr" ? "HR Screening" :
+          categoryToType[roundCategory] === "hiring_manager" ? "Role Fit Discussion" :
+          categoryToType[roundCategory] === "behavioral" ? "Behavioral Interview" :
+          categoryToType[roundCategory] === "case_study" || categoryToType[roundCategory] === "case" ? "Case Study" :
+          categoryToType[roundCategory] === "technical" || categoryToType[roundCategory] === "coding" ? "Technical Assessment" :
+          categoryToType[roundCategory] === "system_design" ? "System Design" :
+          categoryToType[roundCategory] === "sql" ? "SQL Assessment" :
+          categoryToType[roundCategory] === "analytics" ? "Analytics Case" :
+          categoryToType[roundCategory] === "product_sense" ? "Product Sense" :
+          "Interview Round";
+    
+    const planJson = {
+      interviewType,
+      roundCategory,
+      phases: [
+        {
+          name: phaseName,
+          duration: 15,
+          objectives: skillsAssessed?.slice(0, 5) || [objective || `Evaluate candidate for ${job.roleTitle}`],
+          questionPatterns: [],
+        }
+      ],
+      triggers: [
+        {
+          type: "skill_probe",
+          source: roundCategory,
+          probeRules: skillsAssessed?.map((s: string) => `Probe on ${s}`) || [],
+        }
+      ],
+      focusAreas: skillsAssessed || [],
+      companyContext: {
+        companyName: job.companyName,
+        roleTitle: job.roleTitle,
+        archetype: job.companyArchetype,
+      },
+      objective: objective || `Evaluate candidate for ${job.roleTitle} at ${job.companyName || 'the company'}`,
+      skillsToAssess: skillsAssessed || [],
+    };
+    
+    // Create plan
+    const [plan] = await db
+      .insert(interviewPlans)
+      .values({
+        interviewConfigId: config.id,
+        planJson,
+      })
+      .returning();
+    
+    // Get default rubric
+    const [defaultRubric] = await db.select().from(interviewRubrics).where(eq(interviewRubrics.isDefault, true));
+    
+    // Create session
+    const [session] = await db
+      .insert(interviewSessions)
+      .values({
+        interviewConfigId: config.id,
+        interviewPlanId: plan.id,
+        rubricId: defaultRubric?.id || null,
+        status: "created",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    
+    // Record usage
+    if (legacyUserId && (req as any).accessInfo) {
+      try {
+        await recordInterviewUsage(
+          legacyUserId,
+          (req as any).accessInfo.accessType,
+          undefined,
+          session.id,
+          interviewType
+        );
+      } catch (usageErr) {
+        console.error("Failed to record interview usage:", usageErr);
+      }
+    }
+    
+    res.json({
+      success: true,
+      session: { ...session, plan: planJson },
+      configId: config.id,
+      planId: plan.id,
+    });
+  } catch (error: any) {
+    console.error("Error in quick-start:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 interviewRouter.post("/session/:id/link-roleplay", requireAuth, async (req: Request, res: Response) => {
   try {
     const sessionId = parseInt(req.params.id);
