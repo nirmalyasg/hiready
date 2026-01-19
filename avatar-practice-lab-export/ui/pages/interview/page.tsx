@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { 
-  Briefcase, Building2, Target, Sparkles, Mic, ChevronRight, Plus, ArrowRight
+  Briefcase, Building2, Target, ChevronRight, Plus, Link2, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import SidebarLayout from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -46,8 +47,9 @@ const formatDomain = (domain: string) => {
 
 export default function InterviewPracticePage() {
   const navigate = useNavigate();
-  const [customInput, setCustomInput] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [jobInput, setJobInput] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const [savedJobs, setSavedJobs] = useState<JobTarget[]>([]);
   const [roleKits, setRoleKits] = useState<RoleKit[]>([]);
@@ -84,17 +86,56 @@ export default function InterviewPracticePage() {
     fetchData();
   }, []);
 
-  const handleStartCustom = async () => {
-    if (customInput.trim().length < 20) return;
+  const isUrl = (text: string) => {
+    const trimmed = text.trim();
+    return trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.includes("linkedin.com") || trimmed.includes("indeed.com");
+  };
+
+  const handleAddJob = async () => {
+    const trimmed = jobInput.trim();
+    if (!trimmed) return;
     
-    setIsGenerating(true);
+    setIsAdding(true);
+    setError(null);
+    
     try {
-      sessionStorage.setItem("customPracticeIntent", customInput.trim());
-      navigate("/interview/custom?source=intent");
-    } catch (error) {
-      console.error("Error:", error);
+      if (isUrl(trimmed)) {
+        const response = await fetch("/api/jobs/job-targets/parse-url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: trimmed }),
+        });
+        const data = await response.json();
+        
+        if (data.error === "IMPORT_BLOCKED") {
+          setError(data.message || "This site requires login. Please paste the job description instead.");
+          return;
+        }
+        if (data.success && data.duplicate && data.existingJobId) {
+          navigate(`/jobs/${data.existingJobId}`);
+          return;
+        }
+        if (!data.success) throw new Error(data.error || data.message);
+        navigate(`/jobs/${data.job.id}`);
+      } else {
+        const response = await fetch("/api/jobs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roleTitle: "New Job", jdText: trimmed, source: "manual" }),
+        });
+        const data = await response.json();
+        
+        if (data.success && data.duplicate && data.existingJobId) {
+          navigate(`/jobs/${data.existingJobId}`);
+          return;
+        }
+        if (!data.success) throw new Error(data.error);
+        navigate(`/jobs/${data.job.id}`);
+      }
+    } catch (e: any) {
+      setError(e.message || "Failed to add job. Please try again.");
     } finally {
-      setIsGenerating(false);
+      setIsAdding(false);
     }
   };
 
@@ -106,10 +147,8 @@ export default function InterviewPracticePage() {
     navigate(`/interview/role/${kit.id}`);
   };
 
-  const minChars = 20;
-  const trimmedInput = customInput.trim();
-  const currentChars = trimmedInput.length;
-  const needsMore = Math.max(0, minChars - currentChars);
+  const trimmedInput = jobInput.trim();
+  const hasInput = trimmedInput.length > 0;
 
   if (isLoading) {
     return (
@@ -126,55 +165,57 @@ export default function InterviewPracticePage() {
       <div className="min-h-screen bg-[#fbfbfc]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
           
-          {/* Section 1: Custom Conversation Input */}
+          {/* Section 1: Add Job Input */}
           <section className="text-center">
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-              What conversation are you preparing for?
+              What job are you preparing for?
             </h1>
             <p className="text-slate-500 text-sm sm:text-base mb-6">
-              Describe your situation and we'll create a practice session
+              Paste a job description or enter a job listing URL
             </p>
 
             <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm">
-              <div className="relative">
-                <Textarea
-                  placeholder="I need to tell my manager I can't meet the deadline..."
-                  value={customInput}
-                  onChange={(e) => setCustomInput(e.target.value)}
-                  className="min-h-[120px] resize-none border-0 focus:ring-0 text-base sm:text-lg text-slate-700 placeholder:text-slate-400 p-0"
-                />
-                <div className="absolute right-2 top-2 flex items-center gap-2">
-                  <span className="text-xs text-slate-400 uppercase tracking-wide">EN</span>
-                  <button className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors">
-                    <Mic className="w-4 h-4 text-slate-500" />
-                  </button>
-                </div>
-              </div>
+              <Textarea
+                placeholder="Paste job description or enter URL (e.g., https://linkedin.com/jobs/...)"
+                value={jobInput}
+                onChange={(e) => { setJobInput(e.target.value); setError(null); }}
+                className="min-h-[120px] resize-none border-slate-200 focus:border-[#24c4b8] focus:ring-[#24c4b8]/20 text-base text-slate-700 placeholder:text-slate-400 rounded-xl"
+              />
               
-              <div className="mt-4 pt-4 border-t border-slate-100">
+              {error && (
+                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                  {error}
+                </div>
+              )}
+              
+              <div className="mt-4">
                 <Button
-                  onClick={handleStartCustom}
-                  disabled={currentChars < minChars || isGenerating}
+                  onClick={handleAddJob}
+                  disabled={!hasInput || isAdding}
                   className={`w-full h-12 rounded-xl text-base font-semibold transition-all ${
-                    currentChars >= minChars
+                    hasInput
                       ? "bg-[#24c4b8] hover:bg-[#1db0a5] text-white"
-                      : "bg-pink-200 text-pink-700 cursor-not-allowed"
+                      : "bg-slate-200 text-slate-400 cursor-not-allowed"
                   }`}
                 >
-                  {isGenerating ? (
+                  {isAdding ? (
                     <>
-                      <LoadingSpinner className="w-4 h-4 mr-2" />
-                      Creating session...
-                    </>
-                  ) : currentChars < minChars ? (
-                    <>
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Add {needsMore} more character{needsMore !== 1 ? "s" : ""}...
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {isUrl(trimmedInput) ? "Importing..." : "Processing..."}
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Create Practice Session
+                      {isUrl(trimmedInput) ? (
+                        <>
+                          <Link2 className="w-4 h-4 mr-2" />
+                          Import Job from URL
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Job
+                        </>
+                      )}
                     </>
                   )}
                 </Button>
@@ -235,20 +276,11 @@ export default function InterviewPracticePage() {
                 ))}
               </div>
             ) : (
-              <button
-                onClick={() => navigate("/jobs")}
-                className="w-full text-left bg-white border-2 border-dashed border-slate-200 rounded-xl p-4 hover:border-[#24c4b8] hover:bg-[#24c4b8]/5 transition-all group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-[#24c4b8]/10">
-                    <Plus className="w-4 h-4 text-slate-400 group-hover:text-[#24c4b8]" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-slate-700 group-hover:text-[#24c4b8] text-sm">Add a target job</p>
-                    <p className="text-xs text-slate-500">Import from URL or paste description</p>
-                  </div>
-                </div>
-              </button>
+              <div className="text-center py-6 bg-white rounded-xl border border-slate-200">
+                <Briefcase className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm text-slate-500">No target jobs yet</p>
+                <p className="text-xs text-slate-400 mt-1">Add one above to start practicing</p>
+              </div>
             )}
           </section>
 
