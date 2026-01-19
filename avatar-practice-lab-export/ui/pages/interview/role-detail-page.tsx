@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { 
   ArrowLeft, Play, FileText, Code, Phone, User, Briefcase, 
   MessageCircle, Heart, TrendingUp, Clock, Target, LineChart, 
   Users, CheckCircle2, Award, Zap, BookOpen, Building2,
-  ChevronDown, ChevronUp, Sparkles, Info, RotateCcw, BarChart3, Loader2
+  ChevronDown, ChevronUp, Sparkles, Info, RotateCcw, BarChart3, Loader2,
+  Upload, X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SidebarLayout from "@/components/layout/sidebar-layout";
@@ -145,6 +147,24 @@ export default function RoleDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [startingRoundId, setStartingRoundId] = useState<string | null>(null);
+  const [showProfilePrompt, setShowProfilePrompt] = useState(false);
+  const [pendingOption, setPendingOption] = useState<PracticeOption | null>(null);
+  
+  // Check if user has uploaded a resume
+  const { data: documentsData, isError: resumeCheckError } = useQuery({
+    queryKey: ['/api/interview/documents', 'resume'],
+    queryFn: async () => {
+      const res = await fetch('/api/interview/documents?docType=resume', {
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to fetch documents');
+      return res.json();
+    },
+    retry: 1,
+  });
+  
+  // If fetch fails, assume user has resume (don't show friction modal on errors)
+  const hasResume = resumeCheckError || (documentsData?.documents?.length > 0);
   
   const accessGateOptions = {
     interviewSetId: roleKit?.id,
@@ -202,8 +222,15 @@ export default function RoleDetailPage() {
     fetchRoleData();
   }, [roleId]);
 
-  const handleStartPractice = async (option: PracticeOption) => {
+  const handleStartPractice = async (option: PracticeOption, bypassProfileCheck = false) => {
     if (!checkAccess()) {
+      return;
+    }
+    
+    // Check if user has resume - if not, show prompt (unless bypassed)
+    if (!hasResume && !bypassProfileCheck) {
+      setPendingOption(option);
+      setShowProfilePrompt(true);
       return;
     }
     
@@ -580,6 +607,79 @@ export default function RoleDetailPage() {
         title="Unlock Interview Access"
         description={`Unlock ${roleKit?.name || 'this role'} interviews to continue practicing.`}
       />
+      
+      {/* Profile Prompt Modal */}
+      {showProfilePrompt && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-amber-600" />
+                </div>
+                <button
+                  onClick={() => {
+                    setShowProfilePrompt(false);
+                    setPendingOption(null);
+                  }}
+                  className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                Get Personalized Feedback
+              </h3>
+              <p className="text-slate-600 text-sm mb-6">
+                Upload your resume to receive AI-powered feedback tailored to your experience. 
+                We'll reference your actual projects, roles, and achievements to suggest stronger answers.
+              </p>
+              
+              <div className="bg-slate-50 rounded-xl p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <Sparkles className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-slate-800 mb-1">With your resume:</p>
+                    <ul className="text-xs text-slate-600 space-y-1">
+                      <li>• "Better Answers" use your real experience</li>
+                      <li>• Feedback references your actual projects</li>
+                      <li>• Suggestions align with your career level</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-col gap-3">
+                <Button
+                  onClick={() => {
+                    setShowProfilePrompt(false);
+                    setPendingOption(null);
+                    navigate("/profile");
+                  }}
+                  className="w-full bg-gradient-to-r from-[#042c4c] to-[#0a3d68] text-white hover:from-[#0a3d68] hover:to-[#042c4c]"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Resume
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setShowProfilePrompt(false);
+                    if (pendingOption) {
+                      handleStartPractice(pendingOption, true);
+                      setPendingOption(null);
+                    }
+                  }}
+                  className="w-full text-slate-500 hover:text-slate-700"
+                >
+                  Continue without resume
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </SidebarLayout>
   );
 }
