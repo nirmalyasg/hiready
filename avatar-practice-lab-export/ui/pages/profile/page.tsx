@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, LogOut, ChevronRight, Settings, HelpCircle, Shield, FileText, Upload, Trash2, Check, Loader2, Sparkles } from 'lucide-react';
+import { User, Mail, LogOut, ChevronRight, Settings, HelpCircle, Shield, FileText, Upload, Trash2, Check, Loader2, Sparkles, Briefcase, Code, Award, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import SidebarLayout from '@/components/layout/sidebar-layout';
@@ -11,6 +11,35 @@ interface UserDocument {
   docType: string;
   mimeType: string;
   createdAt: string;
+}
+
+interface WorkHistoryItem {
+  company: string;
+  role: string;
+  duration: string;
+  highlights: string[];
+}
+
+interface ProjectItem {
+  name: string;
+  description: string;
+  technologies: string[];
+  impact: string;
+}
+
+interface RiskFlag {
+  type: string;
+  description: string;
+  severity: "low" | "medium" | "high";
+}
+
+interface ExtractedProfile {
+  headline: string | null;
+  workHistory: WorkHistoryItem[] | null;
+  projects: ProjectItem[] | null;
+  skills: string[] | null;
+  riskFlags: RiskFlag[] | null;
+  updatedAt: string;
 }
 
 export default function ProfilePage() {
@@ -30,7 +59,18 @@ export default function ProfilePage() {
     enabled: isAuthenticated,
   });
 
+  const { data: profileData, isLoading: profileLoading } = useQuery({
+    queryKey: ['/api/interview/user-profile'],
+    queryFn: async () => {
+      const res = await fetch('/api/interview/user-profile');
+      const data = await res.json();
+      return data;
+    },
+    enabled: isAuthenticated,
+  });
+
   const latestResume = documentsData?.documents?.[0] as UserDocument | undefined;
+  const extractedProfile = profileData?.profile as ExtractedProfile | null;
 
   const deleteMutation = useMutation({
     mutationFn: async (docId: number) => {
@@ -64,6 +104,7 @@ export default function ProfilePage() {
           method: 'POST',
         });
         queryClient.invalidateQueries({ queryKey: ['/api/interview/documents'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/interview/user-profile'] });
       }
     } catch (error) {
       console.error('Error uploading resume:', error);
@@ -226,6 +267,140 @@ export default function ProfilePage() {
               </div>
             )}
           </div>
+
+          {/* Extracted Profile Section */}
+          {extractedProfile && (
+            <div className="bg-white rounded-2xl p-5 shadow-xl shadow-slate-200/50 border border-slate-100 space-y-5">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="font-bold text-[#000000]">AI-Extracted Profile</h3>
+              </div>
+
+              {/* Headline */}
+              {extractedProfile.headline && (
+                <div className="bg-gradient-to-r from-slate-50 to-slate-100/50 rounded-xl p-4 border border-slate-200">
+                  <p className="text-sm text-slate-600 mb-1">Professional Summary</p>
+                  <p className="text-[#000000] font-medium">{extractedProfile.headline}</p>
+                </div>
+              )}
+
+              {/* Skills */}
+              {extractedProfile.skills && extractedProfile.skills.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Code className="w-4 h-4 text-[#24c4b8]" />
+                    <p className="text-sm font-semibold text-slate-700">Skills</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {extractedProfile.skills.map((skill, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1.5 bg-[#24c4b8]/10 text-[#24c4b8] rounded-full text-sm font-medium"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Work History */}
+              {extractedProfile.workHistory && extractedProfile.workHistory.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Briefcase className="w-4 h-4 text-[#cb6ce6]" />
+                    <p className="text-sm font-semibold text-slate-700">Work Experience</p>
+                  </div>
+                  <div className="space-y-3">
+                    {extractedProfile.workHistory.map((job, idx) => (
+                      <div key={idx} className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <p className="font-semibold text-[#000000]">{job.role}</p>
+                            <p className="text-sm text-slate-600">{job.company}</p>
+                          </div>
+                          <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-200">
+                            {job.duration}
+                          </span>
+                        </div>
+                        {job.highlights && job.highlights.length > 0 && (
+                          <ul className="mt-2 space-y-1">
+                            {job.highlights.slice(0, 3).map((highlight, hIdx) => (
+                              <li key={hIdx} className="text-sm text-slate-600 flex items-start gap-2">
+                                <span className="text-[#24c4b8] mt-1">•</span>
+                                {highlight}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Projects */}
+              {extractedProfile.projects && extractedProfile.projects.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Award className="w-4 h-4 text-amber-500" />
+                    <p className="text-sm font-semibold text-slate-700">Key Projects</p>
+                  </div>
+                  <div className="space-y-3">
+                    {extractedProfile.projects.map((project, idx) => (
+                      <div key={idx} className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                        <p className="font-semibold text-[#000000] mb-1">{project.name}</p>
+                        <p className="text-sm text-slate-600 mb-2">{project.description}</p>
+                        {project.technologies && project.technologies.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {project.technologies.map((tech, tIdx) => (
+                              <span
+                                key={tIdx}
+                                className="px-2 py-0.5 bg-white text-slate-600 rounded text-xs border border-slate-200"
+                              >
+                                {tech}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {project.impact && (
+                          <p className="text-sm text-emerald-600 mt-2 flex items-center gap-1">
+                            <Check className="w-3.5 h-3.5" />
+                            {project.impact}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Risk Flags (if any) */}
+              {extractedProfile.riskFlags && extractedProfile.riskFlags.length > 0 && (
+                <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle className="w-4 h-4 text-amber-600" />
+                    <p className="text-sm font-semibold text-amber-800">Areas to Address</p>
+                  </div>
+                  <ul className="space-y-1">
+                    {extractedProfile.riskFlags.map((flag, idx) => (
+                      <li key={idx} className="text-sm text-amber-700">
+                        • {flag.description}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {profileLoading && (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="w-5 h-5 animate-spin text-[#cb6ce6]" />
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="bg-white rounded-2xl overflow-hidden shadow-xl shadow-slate-200/50 border border-slate-100">
             {menuItems.map((item, index) => {

@@ -770,6 +770,37 @@ interviewRouter.delete("/documents/:id", requireAuth, async (req: Request, res: 
   }
 });
 
+// Get user's extracted profile
+interviewRouter.get("/user-profile", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    
+    const [profile] = await db
+      .select()
+      .from(userProfileExtracted)
+      .where(eq(userProfileExtracted.userId, userId));
+    
+    if (!profile) {
+      return res.json({ success: true, profile: null });
+    }
+    
+    res.json({
+      success: true,
+      profile: {
+        headline: profile.headline,
+        workHistory: profile.workHistory,
+        projects: profile.projects,
+        skills: profile.skillsClaimed,
+        riskFlags: profile.riskFlags,
+        updatedAt: profile.updatedAt,
+      },
+    });
+  } catch (error: any) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ===================================================================
 // Interview Config Endpoints
 // ===================================================================
