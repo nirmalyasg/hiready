@@ -1,12 +1,12 @@
 import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Settings, CreditCard, LogOut, Loader2, Mail, Sparkles } from 'lucide-react';
+import { User, CreditCard, LogOut, Loader2, Mail, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import SidebarLayout from '@/components/layout/sidebar-layout';
 
 interface ProfileLayoutProps {
   children: ReactNode;
-  activeTab: 'profile' | 'settings' | 'account';
+  activeTab: 'profile' | 'account';
 }
 
 export default function ProfileLayout({ children, activeTab }: ProfileLayoutProps) {
@@ -20,7 +20,6 @@ export default function ProfileLayout({ children, activeTab }: ProfileLayoutProp
 
   const tabs = [
     { id: 'profile' as const, label: 'Profile', icon: User, path: '/profile' },
-    { id: 'settings' as const, label: 'Settings', icon: Settings, path: '/profile/settings' },
     { id: 'account' as const, label: 'Account', icon: CreditCard, path: '/profile/account' },
   ];
 
