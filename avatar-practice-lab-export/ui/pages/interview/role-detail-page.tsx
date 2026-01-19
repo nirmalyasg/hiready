@@ -120,27 +120,29 @@ const levelConfig: Record<string, { label: string; bg: string; text: string }> =
 };
 
 const categoryConfig: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
-  hr_screening: { icon: <Phone className="w-3.5 h-3.5" />, color: "text-emerald-600", bg: "bg-emerald-100" },
-  hr: { icon: <Phone className="w-3.5 h-3.5" />, color: "text-emerald-600", bg: "bg-emerald-100" },
-  hiring_manager: { icon: <User className="w-3.5 h-3.5" />, color: "text-blue-600", bg: "bg-blue-100" },
-  technical_interview: { icon: <Code className="w-3.5 h-3.5" />, color: "text-violet-600", bg: "bg-violet-100" },
-  technical: { icon: <Code className="w-3.5 h-3.5" />, color: "text-violet-600", bg: "bg-violet-100" },
-  coding: { icon: <Code className="w-3.5 h-3.5" />, color: "text-indigo-600", bg: "bg-indigo-100" },
-  coding_assessment: { icon: <Code className="w-3.5 h-3.5" />, color: "text-indigo-600", bg: "bg-indigo-100" },
-  system_design: { icon: <Code className="w-3.5 h-3.5" />, color: "text-purple-600", bg: "bg-purple-100" },
-  sql: { icon: <LineChart className="w-3.5 h-3.5" />, color: "text-cyan-600", bg: "bg-cyan-100" },
-  analytics: { icon: <LineChart className="w-3.5 h-3.5" />, color: "text-teal-600", bg: "bg-teal-100" },
-  ml: { icon: <Briefcase className="w-3.5 h-3.5" />, color: "text-fuchsia-600", bg: "bg-fuchsia-100" },
-  case_study: { icon: <Briefcase className="w-3.5 h-3.5" />, color: "text-orange-600", bg: "bg-orange-100" },
-  case: { icon: <Briefcase className="w-3.5 h-3.5" />, color: "text-orange-600", bg: "bg-orange-100" },
-  product: { icon: <Briefcase className="w-3.5 h-3.5" />, color: "text-emerald-600", bg: "bg-emerald-100" },
-  portfolio: { icon: <Briefcase className="w-3.5 h-3.5" />, color: "text-pink-600", bg: "bg-pink-100" },
-  sales_roleplay: { icon: <User className="w-3.5 h-3.5" />, color: "text-amber-600", bg: "bg-amber-100" },
-  behavioral: { icon: <MessageCircle className="w-3.5 h-3.5" />, color: "text-amber-600", bg: "bg-amber-100" },
-  culture_values: { icon: <Heart className="w-3.5 h-3.5" />, color: "text-pink-600", bg: "bg-pink-100" },
-  bar_raiser: { icon: <TrendingUp className="w-3.5 h-3.5" />, color: "text-red-600", bg: "bg-red-100" },
-  aptitude: { icon: <TrendingUp className="w-3.5 h-3.5" />, color: "text-slate-600", bg: "bg-slate-100" },
-  group: { icon: <Users className="w-3.5 h-3.5" />, color: "text-sky-600", bg: "bg-sky-100" },
+  hr_screening: { icon: <Phone className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
+  hr: { icon: <Phone className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
+  hiring_manager: { icon: <User className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  technical_interview: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
+  technical: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
+  coding: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
+  coding_assessment: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
+  system_design: { icon: <Code className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  sql: { icon: <Code className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
+  analytics: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  ml: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
+  case_study: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
+  case: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
+  product: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
+  portfolio: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  sales_roleplay: { icon: <User className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
+  behavioral: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
+  culture_values: { icon: <Heart className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
+  bar_raiser: { icon: <TrendingUp className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
+  aptitude: { icon: <TrendingUp className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
+  aptitude_assessment: { icon: <TrendingUp className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
+  group: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  group_discussion: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
 };
 
 export default function RoleDetailPage() {
@@ -335,9 +337,9 @@ export default function RoleDetailPage() {
   return (
     <SidebarLayout>
       <div className="min-h-screen bg-slate-50">
-        {/* Compact Header */}
+        {/* Compact Header - matches job detail page */}
         <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white">
-          <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="max-w-6xl mx-auto px-4 py-4">
             <button
               onClick={() => navigate("/interview")}
               className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors mb-3"
@@ -351,12 +353,17 @@ export default function RoleDetailPage() {
                 {domainIcon}
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-lg font-bold truncate">{roleKit.name}</h1>
-                <div className="flex flex-wrap items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h1 className="text-lg font-bold truncate">{roleKit.name}</h1>
                   <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${level.bg} ${level.text}`}>
                     {level.label}
                   </span>
-                  <span className="text-xs text-slate-400">{domainLabel}</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-slate-400 flex items-center gap-1">
+                    <Briefcase className="w-3 h-3" />
+                    {domainLabel}
+                  </span>
                   <span className="text-slate-600">•</span>
                   <span className="text-xs text-slate-400 flex items-center gap-1">
                     <Clock className="w-3 h-3" />
@@ -391,7 +398,59 @@ export default function RoleDetailPage() {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-5xl mx-auto px-4 py-4">
+        <div className="max-w-6xl mx-auto px-4 py-4 space-y-4">
+          {/* Quick Practice CTA - matches job detail page */}
+          {practiceOptions.length > 0 && (
+            <Button
+              onClick={() => handleStartPractice(practiceOptions[0])}
+              disabled={startingRoundId === practiceOptions[0]?.id}
+              className="w-full h-14 bg-[#24c4b8] hover:bg-[#1db0a5] text-white font-semibold rounded-xl shadow-lg shadow-[#24c4b8]/25 text-base gap-2"
+            >
+              {startingRoundId === practiceOptions[0]?.id ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Starting...
+                </>
+              ) : (
+                <>
+                  <Play className="w-5 h-5" />
+                  Start Practice Session
+                </>
+              )}
+            </Button>
+          )}
+
+          {/* Practice Progress - matches job detail page */}
+          {hasPracticeHistory && (
+            <div className="bg-gradient-to-r from-[#24c4b8]/5 to-transparent rounded-lg border border-[#24c4b8]/20 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-[#24c4b8]/10 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-[#24c4b8]" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-slate-900 text-sm">Practice Progress</p>
+                    <p className="text-xs text-slate-500">
+                      {practiceHistory.summary.totalAttempts} total sessions
+                      {practiceHistory.summary.averageScore !== null && (
+                        <> • Avg: {practiceHistory.summary.averageScore}%</>
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => navigate(`/hiready-index?roleKitId=${roleKit.id}`)}
+                  size="sm"
+                  variant="outline"
+                  className="h-8 px-3 text-xs border-[#24c4b8]/30 text-[#24c4b8] hover:bg-[#24c4b8]/10"
+                >
+                  <BarChart3 className="w-3.5 h-3.5 mr-1.5" />
+                  View Progress
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Interview Rounds Grid - Primary Focus */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-3">
@@ -483,7 +542,7 @@ export default function RoleDetailPage() {
                         className={`h-7 px-2.5 text-xs font-medium ${
                           hasAttempted 
                             ? 'bg-slate-800 hover:bg-slate-700 text-white' 
-                            : 'bg-[#ee7e65] hover:bg-[#e06a50] text-white'
+                            : 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white'
                         } disabled:opacity-70`}
                       >
                         {startingRoundId === option.id ? (
@@ -509,19 +568,6 @@ export default function RoleDetailPage() {
               })}
             </div>
           </div>
-
-          {/* Mobile View Index Button */}
-          {hasPracticeHistory && (
-            <div className="sm:hidden mb-4">
-              <Button
-                onClick={() => navigate(`/hiready-index?roleKitId=${roleKit.id}`)}
-                className="w-full h-10 bg-slate-900 hover:bg-slate-800 text-white"
-              >
-                <BarChart3 className="w-4 h-4 mr-2" />
-                View HiReady Index
-              </Button>
-            </div>
-          )}
 
           {/* Collapsible Role Details */}
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
