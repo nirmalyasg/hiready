@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, LogOut, ChevronRight, Settings, HelpCircle, Shield, FileText, Upload, Trash2, Check, Loader2, Sparkles, Briefcase, Code, Award, AlertTriangle } from 'lucide-react';
+import { User, Mail, LogOut, ChevronRight, Settings, HelpCircle, Shield, FileText, Upload, Trash2, Check, Loader2, Sparkles, Briefcase, Code, Award, AlertTriangle, CreditCard, Crown, Zap } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import SidebarLayout from '@/components/layout/sidebar-layout';
@@ -42,12 +42,26 @@ interface ExtractedProfile {
   updatedAt: string;
 }
 
+interface SubscriptionStatus {
+  hasPro: boolean;
+  hasRolePack: boolean;
+  activePlans: Array<{
+    planType: string;
+    roleKitId?: number | null;
+    roleKitName?: string | null;
+    expiresAt: string;
+  }>;
+  freeTrialUsed: boolean;
+  sessionsCompleted: number;
+}
+
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isCreatingPortal, setIsCreatingPortal] = useState(false);
 
   const { data: documentsData, isLoading: docsLoading } = useQuery({
     queryKey: ['/api/interview/documents', 'resume'],
@@ -69,8 +83,19 @@ export default function ProfilePage() {
     enabled: isAuthenticated,
   });
 
+  const { data: subscriptionData, isLoading: subscriptionLoading } = useQuery({
+    queryKey: ['/api/payments/subscription-status'],
+    queryFn: async () => {
+      const res = await fetch('/api/payments/subscription-status');
+      const data = await res.json();
+      return data;
+    },
+    enabled: isAuthenticated,
+  });
+
   const latestResume = documentsData?.documents?.[0] as UserDocument | undefined;
   const extractedProfile = profileData?.profile as ExtractedProfile | null;
+  const subscriptionStatus = subscriptionData as SubscriptionStatus | null;
 
   const deleteMutation = useMutation({
     mutationFn: async (docId: number) => {
@@ -99,20 +124,15 @@ export default function ProfilePage() {
       });
       const uploadData = await uploadRes.json();
 
-      if (uploadData.success && uploadData.document?.id) {
-        await fetch(`/api/interview/documents/${uploadData.document.id}/parse`, {
-          method: 'POST',
-        });
+      if (uploadData.success) {
         queryClient.invalidateQueries({ queryKey: ['/api/interview/documents'] });
         queryClient.invalidateQueries({ queryKey: ['/api/interview/user-profile'] });
       }
     } catch (error) {
-      console.error('Error uploading resume:', error);
+      console.error('Upload failed:', error);
     } finally {
       setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -121,11 +141,29 @@ export default function ProfilePage() {
     window.location.href = '/';
   };
 
+  const handleManageSubscription = async () => {
+    setIsCreatingPortal(true);
+    try {
+      const res = await fetch('/api/stripe/portal-session');
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else if (data.error) {
+        console.error('Portal session error:', data.error);
+        navigate('/pricing');
+      }
+    } catch (error) {
+      console.error('Failed to create portal session:', error);
+    } finally {
+      setIsCreatingPortal(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <SidebarLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="w-8 h-8 border-2 border-[#24c4b8] border-t-transparent rounded-full animate-spin" />
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-[#24c4b8]" />
         </div>
       </SidebarLayout>
     );
@@ -146,6 +184,15 @@ export default function ProfilePage() {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
+
+  const getCurrentPlanInfo = () => {
+    if (!subscriptionStatus) return { name: 'Free', color: 'slate', icon: Zap };
+    if (subscriptionStatus.hasPro) return { name: 'Pro', color: 'purple', icon: Crown };
+    if (subscriptionStatus.hasRolePack) return { name: 'Role Pack', color: 'teal', icon: Briefcase };
+    return { name: 'Free', color: 'slate', icon: Zap };
+  };
+
+  const planInfo = getCurrentPlanInfo();
 
   return (
     <SidebarLayout>
@@ -181,6 +228,127 @@ export default function ProfilePage() {
         </div>
 
         <div className="max-w-lg mx-auto px-4 -mt-6 pb-8 space-y-4">
+          
+          {/* Subscription & Account Section */}
+          <div className="bg-white rounded-2xl p-5 shadow-xl shadow-slate-200/50 border border-slate-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-[#000000] flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                  planInfo.name === 'Pro' ? 'bg-gradient-to-br from-purple-500 to-purple-600' :
+                  planInfo.name === 'Role Pack' ? 'bg-gradient-to-br from-[#24c4b8] to-[#1db0a5]' :
+                  'bg-gradient-to-br from-slate-400 to-slate-500'
+                }`}>
+                  <CreditCard className="w-4 h-4 text-white" />
+                </div>
+                Subscription
+              </h3>
+            </div>
+
+            {subscriptionLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="w-5 h-5 animate-spin text-[#cb6ce6]" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Current Plan */}
+                <div className={`rounded-xl p-4 border ${
+                  planInfo.name === 'Pro' ? 'bg-purple-50 border-purple-200' :
+                  planInfo.name === 'Role Pack' ? 'bg-[#24c4b8]/10 border-[#24c4b8]/30' :
+                  'bg-slate-50 border-slate-200'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        planInfo.name === 'Pro' ? 'bg-purple-100' :
+                        planInfo.name === 'Role Pack' ? 'bg-[#24c4b8]/20' :
+                        'bg-slate-100'
+                      }`}>
+                        <planInfo.icon className={`w-5 h-5 ${
+                          planInfo.name === 'Pro' ? 'text-purple-600' :
+                          planInfo.name === 'Role Pack' ? 'text-[#24c4b8]' :
+                          'text-slate-500'
+                        }`} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-[#000000]">{planInfo.name} Plan</p>
+                        <p className="text-sm text-slate-500">
+                          {planInfo.name === 'Pro' ? 'Unlimited access to all features' :
+                           planInfo.name === 'Role Pack' ? 'Access to purchased role interviews' :
+                           'Free tier with limited sessions'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Usage Stats */}
+                {subscriptionStatus && (
+                  <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                    <p className="text-sm font-medium text-slate-700 mb-2">Usage</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-600">Sessions completed</span>
+                      <span className="font-semibold text-[#000000]">{subscriptionStatus.sessionsCompleted || 0}</span>
+                    </div>
+                    {!subscriptionStatus.hasPro && (
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-sm text-slate-600">Free trial</span>
+                        <span className={`text-sm font-medium ${subscriptionStatus.freeTrialUsed ? 'text-slate-400' : 'text-emerald-600'}`}>
+                          {subscriptionStatus.freeTrialUsed ? 'Used' : 'Available'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Active Plans */}
+                {subscriptionStatus?.activePlans && subscriptionStatus.activePlans.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-700">Active Subscriptions</p>
+                    {subscriptionStatus.activePlans.map((plan, idx) => (
+                      <div key={idx} className="bg-emerald-50 rounded-lg p-3 border border-emerald-200">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-emerald-800">
+                            {plan.planType === 'pro' ? 'Pro Plan' : plan.roleKitName || 'Role Pack'}
+                          </span>
+                          <span className="text-xs text-emerald-600">
+                            Expires {formatDate(plan.expiresAt)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  {planInfo.name === 'Free' ? (
+                    <button
+                      onClick={() => navigate('/pricing')}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-[#24c4b8] to-[#1db0a5] rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[#24c4b8]/25"
+                    >
+                      <Crown className="w-4 h-4" />
+                      Upgrade to Pro
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleManageSubscription}
+                      disabled={isCreatingPortal}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-[#000000] bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50"
+                    >
+                      {isCreatingPortal ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <CreditCard className="w-4 h-4" />
+                      )}
+                      Manage Billing
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Resume Section */}
           <div className="bg-white rounded-2xl p-5 shadow-xl shadow-slate-200/50 border border-slate-100">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-[#000000] flex items-center gap-2">
@@ -351,25 +519,16 @@ export default function ProfilePage() {
                   <div className="space-y-3">
                     {extractedProfile.projects.map((project, idx) => (
                       <div key={idx} className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                        <p className="font-semibold text-[#000000] mb-1">{project.name}</p>
-                        <p className="text-sm text-slate-600 mb-2">{project.description}</p>
+                        <p className="font-semibold text-[#000000]">{project.name}</p>
+                        <p className="text-sm text-slate-600 mt-1">{project.description}</p>
                         {project.technologies && project.technologies.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex flex-wrap gap-1.5 mt-2">
                             {project.technologies.map((tech, tIdx) => (
-                              <span
-                                key={tIdx}
-                                className="px-2 py-0.5 bg-white text-slate-600 rounded text-xs border border-slate-200"
-                              >
+                              <span key={tIdx} className="px-2 py-0.5 bg-slate-200 text-slate-600 rounded text-xs">
                                 {tech}
                               </span>
                             ))}
                           </div>
-                        )}
-                        {project.impact && (
-                          <p className="text-sm text-emerald-600 mt-2 flex items-center gap-1">
-                            <Check className="w-3.5 h-3.5" />
-                            {project.impact}
-                          </p>
                         )}
                       </div>
                     ))}
