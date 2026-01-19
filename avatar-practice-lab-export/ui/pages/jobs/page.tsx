@@ -140,7 +140,7 @@ export default function JobsPage() {
       setIsParsingUrl(true);
       setUrlError("");
       
-      const response = await fetch("/api/jobs/parse-url", {
+      const response = await fetch("/api/jobs/job-targets/parse-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: pastedUrl }),
@@ -153,8 +153,13 @@ export default function JobsPage() {
         setAddDialogOpen(false);
         setAddMode(null);
         setPastedUrl("");
+      } else if (data.success && data.duplicate) {
+        setUrlError(`This job is already saved: ${data.message}`);
+      } else if (data.error === "IMPORT_BLOCKED") {
+        // LinkedIn or other sites requiring login
+        setUrlError(data.message || "This site requires login. Please copy the job description and paste it instead.");
       } else {
-        setUrlError(data.error || "Could not parse this URL. Try pasting the job description manually.");
+        setUrlError(data.message || data.error || "Could not parse this URL. Try pasting the job description manually.");
       }
     } catch (error) {
       console.error("Error parsing URL:", error);
