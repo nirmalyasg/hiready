@@ -179,7 +179,9 @@ export default function RoleDetailPage() {
     interviewSetName: roleKit?.name ? `${roleKit.name} Interview Set` : undefined,
     context: 'role' as const
   };
-  const { checkAccess, showUpgradeModal, setShowUpgradeModal } = useAccessGate(accessGateOptions);
+  const { checkAccess, showUpgradeModal, setShowUpgradeModal, hasAccess, accessCheck, isLoading: accessLoading } = useAccessGate(accessGateOptions);
+  
+  const isFreeTierExhausted = !accessLoading && !hasAccess && accessCheck?.freeInterviewsRemaining === 0;
 
   useEffect(() => {
     const fetchRoleData = async () => {
@@ -399,17 +401,49 @@ export default function RoleDetailPage() {
 
         {/* Main Content */}
         <div className="max-w-6xl mx-auto px-4 py-4 space-y-4">
+          {/* Free Trial Exhausted Banner */}
+          {isFreeTierExhausted && (
+            <div className="bg-gradient-to-r from-[#ee7e65]/10 to-[#ee7e65]/5 border border-[#ee7e65]/30 rounded-xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#ee7e65]/15 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-[#ee7e65]" />
+                </div>
+                <div>
+                  <p className="font-medium text-slate-900 text-sm">Free trial completed</p>
+                  <p className="text-xs text-slate-600">Upgrade to continue practicing interviews</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => setShowUpgradeModal(true)}
+                className="bg-[#ee7e65] hover:bg-[#e06c52] text-white font-medium"
+                size="sm"
+              >
+                <Zap className="w-4 h-4 mr-1.5" />
+                Upgrade Now
+              </Button>
+            </div>
+          )}
+          
           {/* Quick Practice CTA - matches job detail page */}
           {practiceOptions.length > 0 && (
             <Button
               onClick={() => handleStartPractice(practiceOptions[0])}
               disabled={startingRoundId === practiceOptions[0]?.id}
-              className="w-full h-14 bg-[#24c4b8] hover:bg-[#1db0a5] text-white font-semibold rounded-xl shadow-lg shadow-[#24c4b8]/25 text-base gap-2"
+              className={`w-full h-14 font-semibold rounded-xl shadow-lg text-base gap-2 ${
+                isFreeTierExhausted
+                  ? 'bg-[#ee7e65] hover:bg-[#e06c52] text-white shadow-[#ee7e65]/25'
+                  : 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white shadow-[#24c4b8]/25'
+              }`}
             >
               {startingRoundId === practiceOptions[0]?.id ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
                   Starting...
+                </>
+              ) : isFreeTierExhausted ? (
+                <>
+                  <Zap className="w-5 h-5" />
+                  Upgrade to Practice
                 </>
               ) : (
                 <>
@@ -540,15 +574,22 @@ export default function RoleDetailPage() {
                         size="sm"
                         disabled={startingRoundId === option.id}
                         className={`h-7 px-2.5 text-xs font-medium ${
-                          hasAttempted 
-                            ? 'bg-slate-800 hover:bg-slate-700 text-white' 
-                            : 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white'
+                          isFreeTierExhausted
+                            ? 'bg-[#ee7e65] hover:bg-[#e06c52] text-white'
+                            : hasAttempted 
+                              ? 'bg-slate-800 hover:bg-slate-700 text-white' 
+                              : 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white'
                         } disabled:opacity-70`}
                       >
                         {startingRoundId === option.id ? (
                           <>
                             <Loader2 className="w-3 h-3 mr-1 animate-spin" />
                             Starting...
+                          </>
+                        ) : isFreeTierExhausted ? (
+                          <>
+                            <Zap className="w-3 h-3 mr-1" />
+                            Upgrade
                           </>
                         ) : hasAttempted ? (
                           <>

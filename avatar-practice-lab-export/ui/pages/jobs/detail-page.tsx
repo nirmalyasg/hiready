@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Building2, MapPin, Sparkles, Play, FileText, Code, CheckCircle2, AlertCircle, MoreVertical, Trash2, ChevronDown, ChevronUp, Phone, User, Briefcase, MessageCircle, Heart, TrendingUp, ExternalLink, Lock, Crown, Clock, Target, BarChart3, RotateCcw, Loader2 } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, Sparkles, Play, FileText, Code, CheckCircle2, AlertCircle, MoreVertical, Trash2, ChevronDown, ChevronUp, Phone, User, Briefcase, MessageCircle, Heart, TrendingUp, ExternalLink, Lock, Crown, Clock, Target, BarChart3, RotateCcw, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SidebarLayout from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -230,11 +230,13 @@ export default function JobDetailPage() {
   const interviewSetId = job?.roleKitId ?? undefined;
   const interviewSetName = matchedRoleKit?.name ? `${matchedRoleKit.name} Interview Set` : job?.roleTitle ? `${job.roleTitle} Interview Set` : undefined;
   
-  const { checkAccess, showUpgradeModal, setShowUpgradeModal, accessCheck } = useAccessGate({
+  const { checkAccess, showUpgradeModal, setShowUpgradeModal, accessCheck, hasAccess, isLoading: accessLoading } = useAccessGate({
     interviewSetId,
     interviewSetName,
     context: 'job'
   });
+  
+  const isFreeTierExhausted = !accessLoading && !hasAccess && accessCheck?.freeInterviewsRemaining === 0;
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -610,14 +612,50 @@ export default function JobDetailPage() {
             </div>
           </div>
 
+          {/* Free Trial Exhausted Banner */}
+          {isFreeTierExhausted && (
+            <div className="bg-gradient-to-r from-[#ee7e65]/10 to-[#ee7e65]/5 border border-[#ee7e65]/30 rounded-xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#ee7e65]/15 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-[#ee7e65]" />
+                </div>
+                <div>
+                  <p className="font-medium text-slate-900 text-sm">Free trial completed</p>
+                  <p className="text-xs text-slate-600">Upgrade to continue practicing interviews</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => setShowUpgradeModal(true)}
+                className="bg-[#ee7e65] hover:bg-[#e06c52] text-white font-medium"
+                size="sm"
+              >
+                <Zap className="w-4 h-4 mr-1.5" />
+                Upgrade Now
+              </Button>
+            </div>
+          )}
+          
           {/* Quick Practice CTA */}
-          {practiceOptions.length > 0 && entitlements?.canStartSession && (
+          {practiceOptions.length > 0 && (
             <Button
               onClick={() => handleStartPracticeOption(practiceOptions[0])}
-              className="w-full h-14 bg-[#24c4b8] hover:bg-[#1db0a5] text-white font-semibold rounded-xl shadow-lg shadow-[#24c4b8]/25 text-base gap-2"
+              className={`w-full h-14 font-semibold rounded-xl shadow-lg text-base gap-2 ${
+                isFreeTierExhausted
+                  ? 'bg-[#ee7e65] hover:bg-[#e06c52] text-white shadow-[#ee7e65]/25'
+                  : 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white shadow-[#24c4b8]/25'
+              }`}
             >
-              <Play className="w-5 h-5" />
-              Start Practice Session
+              {isFreeTierExhausted ? (
+                <>
+                  <Zap className="w-5 h-5" />
+                  Upgrade to Practice
+                </>
+              ) : (
+                <>
+                  <Play className="w-5 h-5" />
+                  Start Practice Session
+                </>
+              )}
             </Button>
           )}
 
@@ -864,11 +902,13 @@ export default function JobDetailPage() {
                           size="sm"
                           disabled={isStarting}
                           className={`h-7 px-2.5 text-xs font-medium ${
-                            accessCheck?.hasAccess
-                              ? hasPracticed 
-                                ? 'bg-slate-800 hover:bg-slate-700 text-white' 
-                                : 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white'
-                              : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                            isFreeTierExhausted
+                              ? 'bg-[#ee7e65] hover:bg-[#e06c52] text-white'
+                              : hasAccess
+                                ? hasPracticed 
+                                  ? 'bg-slate-800 hover:bg-slate-700 text-white' 
+                                  : 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white'
+                                : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
                           } disabled:opacity-70`}
                         >
                           {isStarting ? (
@@ -876,7 +916,12 @@ export default function JobDetailPage() {
                               <Loader2 className="w-3 h-3 mr-1 animate-spin" />
                               Starting...
                             </>
-                          ) : accessCheck?.hasAccess ? (
+                          ) : isFreeTierExhausted ? (
+                            <>
+                              <Zap className="w-3 h-3 mr-1" />
+                              Upgrade
+                            </>
+                          ) : hasAccess ? (
                             hasPracticed ? (
                               <>
                                 <RotateCcw className="w-3 h-3 mr-1" />
