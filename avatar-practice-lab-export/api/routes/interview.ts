@@ -1967,6 +1967,22 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
       }
     }
     
+    // Fallback: If no resume attached to config, try to get user's profile from userProfileExtracted
+    const userId = req.user!.id;
+    if (!resumeParsed) {
+      const [userProfile] = await db.select().from(userProfileExtracted).where(eq(userProfileExtracted.userId, userId));
+      if (userProfile) {
+        resumeParsed = {
+          headline: userProfile.headline,
+          workHistory: userProfile.workHistory,
+          skills: userProfile.skillsClaimed,
+          projects: userProfile.projects,
+          riskFlags: userProfile.riskFlags,
+        };
+        console.log(`[Interview Analysis] Session ${sessionId}: Using user profile from userProfileExtracted for feedback personalization`);
+      }
+    }
+    
     if (session.rubricId) {
       const [r] = await db.select().from(interviewRubrics).where(eq(interviewRubrics.id, session.rubricId));
       rubric = r;
@@ -2217,11 +2233,24 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
     
     const evaluatorResult = JSON.parse(evaluatorResponse.choices[0].message.content || "{}");
     
+    // Build job context for feedback
+    const jobContext = {
+      roleTitle: roleKitData?.name || config?.interviewType || 'General',
+      domain: roleKitData?.domain || 'general',
+      companyContext: planData?.companyContext || null,
+      focusAreas: planFocusAreas.length > 0 ? planFocusAreas : (jdExtract?.analysisDimensions || []),
+    };
+    
     const feedbackResponse = await openaiEval.chat.completions.create({
       model: "gpt-4o",
       messages: [
         { role: "system", content: FEEDBACK_WRITER_PROMPT },
-        { role: "user", content: JSON.stringify({ evaluatorResult, transcript }) },
+        { role: "user", content: JSON.stringify({ 
+          evaluatorResult, 
+          transcript, 
+          candidateProfile: resumeParsed || null,
+          jobContext,
+        }) },
       ],
       response_format: { type: "json_object" },
       temperature: 0.4,
@@ -2252,7 +2281,7 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
         risks: evaluatorResult.risks || null,
         roleFitNotes: evaluatorResult.role_fit_notes || null,
         betterAnswers: feedbackResult.better_answers || null,
-        practicePlan: feedbackResult.practice_plan_7_days || null,
+        practicePlan: null,
         wins: feedbackResult.wins || null,
         improvements: feedbackResult.improvements || null,
         createdAt: new Date(),
@@ -2265,7 +2294,6 @@ interviewRouter.post("/session/:id/analyze", requireAuth, async (req: Request, r
       .where(eq(interviewSessions.id, sessionId));
     
     // Update skill patterns for career memory (failure pattern detection)
-    const userId = req.user!.id;
     const dimensionScores = evaluatorResult.dimension_scores || [];
     
     for (const dimScore of dimensionScores) {
@@ -3237,34 +3265,36 @@ OUTPUT FORMAT (STRICT JSON)
 const FEEDBACK_WRITER_PROMPT = `You are a career coach writing actionable feedback after an interview practice.
 
 GOAL
-Turn the evaluator JSON into a practical improvement plan.
+Turn the evaluator JSON into practical improvements. For EACH question asked by the interviewer in the transcript, generate a personalized "stronger answer" tailored to the candidate's profile.
+
+INPUTS YOU WILL RECEIVE
+- evaluatorResult: The scoring and assessment of the interview
+- transcript: The full conversation between interviewer and candidate  
+- candidateProfile: The candidate's resume/profile data (work history, skills, achievements)
+- jobContext: The role and company they're interviewing for
 
 RULES
 - Keep it structured and specific.
 - Provide:
-  1) 3 key wins
-  2) 3 key improvements
-  3) rewrite 2 answers (better versions) using the candidate's context
-  4) 7-day practice plan (10-15 min/day)
+  1) 3 key wins (things the candidate did well)
+  2) 3 key improvements (areas to work on)
+  3) For EACH interviewer question in the transcript, write a "stronger answer" that:
+     - Uses specific examples from the candidate's profile (company names, projects, metrics)
+     - Is tailored to the job context and role requirements
+     - Follows STAR format (Situation, Task, Action, Result) where applicable
+     - Includes concrete numbers/metrics from their experience when available
+     - Is realistic and authentic to their background
 - Do not shame. Be direct and helpful.
 - Avoid buzzwords.
+- If candidateProfile is empty, write generic strong answers but note they would be stronger with a resume uploaded.
 
 OUTPUT FORMAT (STRICT JSON)
 {
   "wins": ["...", "...", "..."],
   "improvements": ["...", "...", "..."],
   "better_answers": [
-    { "question": "...", "better_answer": "..." },
-    { "question": "...", "better_answer": "..." }
-  ],
-  "practice_plan_7_days": [
-    { "day": 1, "task": "...", "time_minutes": 15 },
-    { "day": 2, "task": "...", "time_minutes": 15 },
-    { "day": 3, "task": "...", "time_minutes": 15 },
-    { "day": 4, "task": "...", "time_minutes": 15 },
-    { "day": 5, "task": "...", "time_minutes": 15 },
-    { "day": 6, "task": "...", "time_minutes": 15 },
-    { "day": 7, "task": "...", "time_minutes": 15 }
+    { "question": "exact question from transcript", "better_answer": "personalized stronger response using candidate's profile..." },
+    { "question": "next question from transcript", "better_answer": "personalized stronger response..." }
   ]
 }`;
 
