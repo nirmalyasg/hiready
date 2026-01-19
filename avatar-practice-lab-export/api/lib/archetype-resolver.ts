@@ -1017,7 +1017,8 @@ const INTERVIEW_TYPE_METADATA: Record<string, {
 
 export async function getRolePracticeOptions(
   roleArchetypeId: string,
-  experienceLevel: string | null
+  experienceLevel: string | null,
+  roleKitSkills?: string[]
 ): Promise<RolePracticeOption[]> {
   // Get role archetype details
   const archetype = await getRoleArchetypeDetails(roleArchetypeId);
@@ -1031,11 +1032,30 @@ export async function getRolePracticeOptions(
   // Get all task blueprints for this role
   const allBlueprints = await getRoleTaskBlueprints(roleArchetypeId);
   
-  // Get role-specific skills to blend with round-type skills
-  const roleSkills = (archetype.primarySkillDimensions as string[]) || [];
+  // Use role kit skills if provided, otherwise fall back to archetype skills
+  const requiredSkills = roleKitSkills || (archetype.primarySkillDimensions as string[]) || [];
   
   // Build practice options from interview types
   const options: RolePracticeOption[] = [];
+  
+  // Map interview types to skill indices for variety
+  // This ensures each round gets different skills from the required skills list
+  const skillRotation: Record<string, number[]> = {
+    technical: [0, 2, 3],    // Primary technical skills
+    coding: [3, 0, 2],       // Coding-focused skills
+    sql: [0, 2, 1],          // SQL/data-focused skills
+    hiring_manager: [1, 4, 0], // Process/debugging + context
+    behavioral: [1, 4, 3],   // Soft skills + technical context
+    hr: [0, 1, 4],           // Overview of key skills
+    case: [2, 0, 1],         // Analytical skills
+    product: [2, 1, 0],      // Product-oriented
+    analytics: [0, 2, 1],    // Analytics focused
+    ml: [3, 2, 0],           // ML/programming focused
+    portfolio: [2, 1, 0],    // Design/process focused
+    sales_roleplay: [1, 0, 4], // Communication focused
+    aptitude: [0, 3, 2],     // Analytical
+    group: [1, 4, 0],        // Collaboration focused
+  };
   
   for (const interviewType of interviewTypes) {
     const metadata = INTERVIEW_TYPE_METADATA[interviewType];
@@ -1046,12 +1066,28 @@ export async function getRolePracticeOptions(
       metadata.taskTypes.includes(b.taskType)
     );
     
-    // Use round-type specific skills, blended with first role-specific skill if available
-    // This gives each round its own relevant skills while keeping role context
-    const roundSkills = [...metadata.typicalSkills];
-    if (roleSkills.length > 0 && !roundSkills.includes(roleSkills[0])) {
-      // Add top role skill to show role relevance (replace last generic skill)
-      roundSkills[roundSkills.length - 1] = roleSkills[0];
+    // Get skills for this round from required skills, using rotation indices
+    // This directly links round skills to the role's actual required skills
+    const indices = skillRotation[interviewType] || [0, 1, 2];
+    const roundSkills: string[] = [];
+    
+    for (const idx of indices) {
+      if (idx < requiredSkills.length && !roundSkills.includes(requiredSkills[idx])) {
+        roundSkills.push(requiredSkills[idx]);
+      }
+    }
+    
+    // If we don't have enough skills, pad with remaining required skills
+    for (const skill of requiredSkills) {
+      if (roundSkills.length >= 3) break;
+      if (!roundSkills.includes(skill)) {
+        roundSkills.push(skill);
+      }
+    }
+    
+    // Fallback to interview-type typical skills if role has no skills defined
+    if (roundSkills.length === 0) {
+      roundSkills.push(...metadata.typicalSkills.slice(0, 3));
     }
     
     options.push({

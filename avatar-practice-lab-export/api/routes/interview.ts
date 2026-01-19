@@ -359,7 +359,9 @@ interviewRouter.get("/role-kits/:id/practice-options", async (req: Request, res:
     }
     
     // Use the new helper that reads directly from role_archetypes.common_interview_types
-    const practiceOptions = await getRolePracticeOptions(roleArchetypeId, kit.level);
+    // Pass role kit's actual required skills to link them with interview rounds
+    const roleKitSkills = (kit.skillsFocus as string[]) || [];
+    const practiceOptions = await getRolePracticeOptions(roleArchetypeId, kit.level, roleKitSkills);
     
     if (practiceOptions.length === 0) {
       return res.status(500).json({ success: false, error: "No practice options available for this role" });
