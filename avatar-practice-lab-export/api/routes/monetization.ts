@@ -42,7 +42,7 @@ router.get("/entitlements", async (req: Request, res: Response) => {
       return res.status(500).json({ error: "Failed to resolve user" });
     }
 
-    const status = await getEntitlementStatus(legacyUserId);
+    const status = await getEntitlementStatus(legacyUserId, authUserId);
     res.json(status);
   } catch (error) {
     console.error("Error fetching entitlements:", error);
@@ -66,7 +66,7 @@ router.get("/access-check", async (req: Request, res: Response) => {
       ? parseInt(req.query.interviewSetId as string) 
       : undefined;
 
-    const access = await checkInterviewAccess(legacyUserId, interviewSetId);
+    const access = await checkInterviewAccess(legacyUserId, interviewSetId, authUserId);
     res.json(access);
   } catch (error) {
     console.error("Error checking access:", error);
@@ -305,7 +305,7 @@ router.post("/use-free-interview", async (req: Request, res: Response) => {
 
     const { interviewType, sessionId } = req.body;
 
-    const access = await checkInterviewAccess(legacyUserId);
+    const access = await checkInterviewAccess(legacyUserId, undefined, authUserId);
     
     if (!access.hasAccess) {
       return res.status(403).json({ 

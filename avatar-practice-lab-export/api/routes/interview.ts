@@ -1224,7 +1224,7 @@ interviewRouter.post("/session/start", requireAuth, async (req: Request, res: Re
     
     // Check interview access using new monetization system
     if (legacyUserId) {
-      const accessCheck = await checkInterviewAccess(legacyUserId);
+      const accessCheck = await checkInterviewAccess(legacyUserId, undefined, authUserId);
       if (!accessCheck.hasAccess) {
         return res.status(403).json({
           success: false,
@@ -1360,7 +1360,7 @@ interviewRouter.post("/session/quick-start", requireAuth, async (req: Request, r
     }
     
     if (legacyUserId) {
-      const accessCheck = await checkInterviewAccess(legacyUserId);
+      const accessCheck = await checkInterviewAccess(legacyUserId, undefined, userId);
       if (!accessCheck.hasAccess) {
         return res.status(403).json({
           success: false,
@@ -1569,7 +1569,7 @@ interviewRouter.post("/session/quick-start-rolekit", requireAuth, async (req: Re
     }
     
     if (legacyUserId) {
-      const accessCheck = await checkInterviewAccess(legacyUserId);
+      const accessCheck = await checkInterviewAccess(legacyUserId, undefined, userId);
       if (!accessCheck.hasAccess) {
         return res.status(403).json({
           success: false,

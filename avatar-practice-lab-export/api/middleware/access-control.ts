@@ -4,6 +4,16 @@ import {
   consumeFreeInterview, 
   recordInterviewUsage 
 } from "../lib/entitlement-service.js";
+import { db } from "../db.js";
+import { users } from "../../shared/schema.js";
+import { eq } from "drizzle-orm";
+
+async function getLegacyUserId(authUserId: string): Promise<number | null> {
+  const user = await db.query.users.findFirst({
+    where: eq(users.authUserId, authUserId)
+  });
+  return user?.id ?? null;
+}
 
 export async function requireInterviewAccess(
   req: Request, 
@@ -11,19 +21,27 @@ export async function requireInterviewAccess(
   next: NextFunction
 ) {
   try {
-    const userId = (req as any).user?.id;
+    const authUserId = (req as any).user?.id;
     
-    if (!userId) {
+    if (!authUserId) {
       return res.status(401).json({ 
         error: "Authentication required",
         code: "AUTH_REQUIRED"
       });
     }
 
+    const legacyUserId = await getLegacyUserId(authUserId);
+    if (!legacyUserId) {
+      return res.status(500).json({ 
+        error: "User not found",
+        code: "USER_NOT_FOUND"
+      });
+    }
+
     const interviewSetId = req.body?.interviewSetId || req.query?.interviewSetId;
     const parsedSetId = interviewSetId ? parseInt(interviewSetId) : undefined;
 
-    const access = await checkInterviewAccess(userId, parsedSetId);
+    const access = await checkInterviewAccess(legacyUserId, parsedSetId, authUserId);
 
     if (!access.hasAccess) {
       return res.status(403).json({
@@ -35,6 +53,7 @@ export async function requireInterviewAccess(
     }
 
     (req as any).accessInfo = access;
+    (req as any).legacyUserId = legacyUserId;
     next();
   } catch (error) {
     console.error("Access control error:", error);

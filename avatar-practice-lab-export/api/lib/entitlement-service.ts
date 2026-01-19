@@ -6,9 +6,10 @@ import {
   companyShareLinkAccess,
   interviewUsage,
   interviewSets,
-  companyShareLinks
+  companyShareLinks,
+  subscriptions
 } from "../../shared/schema.js";
-import { eq, and, gte, sql } from "drizzle-orm";
+import { eq, and, gte, sql, or } from "drizzle-orm";
 
 export type AccessType = 'free' | 'purchased' | 'company_shared' | 'subscription';
 
@@ -29,6 +30,9 @@ export interface EntitlementStatus {
   subscriptionExpiresAt?: Date;
   purchasedSets: { id: number; name: string }[];
   sharedAccessSets: { id: number; name: string }[];
+  hasPro?: boolean;
+  hasRolePack?: boolean;
+  subscriptionType?: 'stripe' | 'razorpay' | null;
 }
 
 export async function getOrCreateEntitlement(userId: number) {
@@ -45,7 +49,7 @@ export async function getOrCreateEntitlement(userId: number) {
   return newEntitlement;
 }
 
-export async function getEntitlementStatus(userId: number): Promise<EntitlementStatus> {
+export async function getEntitlementStatus(userId: number, authUserId?: string): Promise<EntitlementStatus> {
   const entitlement = await getOrCreateEntitlement(userId);
 
   const activeSubscription = await db.query.paymentSubscriptions.findFirst({
@@ -55,6 +59,39 @@ export async function getEntitlementStatus(userId: number): Promise<EntitlementS
       gte(paymentSubscriptions.currentPeriodEnd, new Date())
     )
   });
+
+  let hasPro = false;
+  let hasRolePack = false;
+  let razorpaySubscriptionExpiry: Date | undefined;
+  let subscriptionType: 'stripe' | 'razorpay' | null = null;
+
+  if (authUserId) {
+    const razorpaySubscriptions = await db
+      .select()
+      .from(subscriptions)
+      .where(and(
+        eq(subscriptions.userId, authUserId),
+        eq(subscriptions.status, 'active'),
+        or(
+          gte(subscriptions.expiresAt, new Date()),
+          sql`${subscriptions.expiresAt} IS NULL`
+        )
+      ));
+
+    for (const sub of razorpaySubscriptions) {
+      if (sub.planType === 'pro') {
+        hasPro = true;
+        razorpaySubscriptionExpiry = sub.expiresAt ?? undefined;
+        subscriptionType = 'razorpay';
+      } else if (sub.planType === 'role_pack') {
+        hasRolePack = true;
+        if (!razorpaySubscriptionExpiry) {
+          razorpaySubscriptionExpiry = sub.expiresAt ?? undefined;
+        }
+        subscriptionType = 'razorpay';
+      }
+    }
+  }
 
   const purchases = await db
     .select({
@@ -77,21 +114,27 @@ export async function getEntitlementStatus(userId: number): Promise<EntitlementS
     .innerJoin(interviewSets, eq(companyShareLinkAccess.interviewSetId, interviewSets.id))
     .where(eq(companyShareLinkAccess.userId, userId));
 
+  const hasActiveSubscription = !!activeSubscription || hasPro || hasRolePack;
+
   return {
-    tier: activeSubscription ? 'subscriber' : (purchases.length > 0 || sharedAccess.length > 0 ? 'set_access' : 'free'),
+    tier: hasActiveSubscription ? 'subscriber' : (purchases.length > 0 || sharedAccess.length > 0 ? 'set_access' : 'free'),
     freeInterviewsRemaining: entitlement.freeInterviewsRemaining,
-    isSubscriber: !!activeSubscription,
-    subscriptionExpiresAt: activeSubscription?.currentPeriodEnd ?? undefined,
+    isSubscriber: hasActiveSubscription,
+    subscriptionExpiresAt: activeSubscription?.currentPeriodEnd ?? razorpaySubscriptionExpiry,
     purchasedSets: purchases,
-    sharedAccessSets: sharedAccess
+    sharedAccessSets: sharedAccess,
+    hasPro,
+    hasRolePack,
+    subscriptionType: activeSubscription ? 'stripe' : subscriptionType
   };
 }
 
 export async function checkInterviewAccess(
   userId: number, 
-  interviewSetId?: number
+  interviewSetId?: number,
+  authUserId?: string
 ): Promise<UserAccessResult> {
-  const status = await getEntitlementStatus(userId);
+  const status = await getEntitlementStatus(userId, authUserId);
 
   if (status.isSubscriber) {
     return {

@@ -757,7 +757,7 @@ avatarSimulator.post("/session/start", async (req, res) => {
       }
       
       // Check interview access entitlement
-      const accessCheck = await checkInterviewAccess(legacyUserId);
+      const accessCheck = await checkInterviewAccess(legacyUserId, undefined, authUserId);
       if (!accessCheck.hasAccess) {
         return res.status(403).json({
           success: false,
