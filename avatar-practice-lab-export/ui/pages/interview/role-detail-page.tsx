@@ -24,6 +24,12 @@ interface RoleKit {
   estimatedDuration: number | null;
   coreCompetencies: string[] | null;
   defaultInterviewTypes: string[] | null;
+  typicalResponsibilities: string[] | null;
+  interviewTopics: { category: string; topics: string[] }[] | null;
+  evaluationFocus: { dimension: string; lookFor: string[]; redFlags: string[] }[] | null;
+  dayInLifeContext: string | null;
+  expectedExperience: { mustHave: string[]; niceToHave: string[] } | null;
+  salaryRange: { min: number; max: number; currency: string } | null;
 }
 
 interface PracticeOption {
@@ -525,7 +531,7 @@ export default function RoleDetailPage() {
             >
               <div className="flex items-center gap-2">
                 <Info className="w-4 h-4 text-slate-400" />
-                <span className="text-sm font-medium text-slate-700">Role Details & Evaluation Criteria</span>
+                <span className="text-sm font-medium text-slate-700">Role Details & Interview Guide</span>
               </div>
               {showDetails ? (
                 <ChevronUp className="w-4 h-4 text-slate-400" />
@@ -535,7 +541,7 @@ export default function RoleDetailPage() {
             </button>
             
             {showDetails && (
-              <div className="px-4 pb-4 border-t border-slate-100">
+              <div className="px-4 pb-4 border-t border-slate-100 space-y-5">
                 {/* Description */}
                 {roleKit.description && (
                   <div className="pt-4">
@@ -544,52 +550,187 @@ export default function RoleDetailPage() {
                   </div>
                 )}
                 
-                {/* Skills */}
-                {roleKit.skillsFocus && roleKit.skillsFocus.length > 0 && (
-                  <div className="pt-4">
-                    <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                      <Zap className="w-3 h-3" />
-                      Required Skills
+                {/* Day in the Life */}
+                {roleKit.dayInLifeContext && (
+                  <div className="p-3 bg-gradient-to-r from-slate-50 to-slate-100/50 rounded-lg border border-slate-200/50">
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                      <Clock className="w-3 h-3" />
+                      Day in the Life
                     </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {roleKit.skillsFocus.map((skill, idx) => (
-                        <span 
-                          key={idx} 
-                          className="px-2 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-medium"
-                        >
-                          {skill}
-                        </span>
+                    <p className="text-sm text-slate-600 leading-relaxed">{roleKit.dayInLifeContext}</p>
+                  </div>
+                )}
+
+                {/* Typical Responsibilities */}
+                {roleKit.typicalResponsibilities && roleKit.typicalResponsibilities.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                      <Target className="w-3 h-3" />
+                      Typical Responsibilities
+                    </p>
+                    <ul className="space-y-1.5">
+                      {roleKit.typicalResponsibilities.map((resp, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm text-slate-600">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-2 flex-shrink-0" />
+                          {resp}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {/* Skills & Competencies Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Required Skills */}
+                  {roleKit.skillsFocus && roleKit.skillsFocus.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                        <Zap className="w-3 h-3" />
+                        Required Skills
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {roleKit.skillsFocus.map((skill, idx) => (
+                          <span 
+                            key={idx} 
+                            className="px-2 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-medium"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Core Competencies */}
+                  {roleKit.coreCompetencies && roleKit.coreCompetencies.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Core Competencies</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {roleKit.coreCompetencies.map((comp, idx) => (
+                          <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs">
+                            {comp}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Expected Experience */}
+                {roleKit.expectedExperience && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {roleKit.expectedExperience.mustHave && roleKit.expectedExperience.mustHave.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                          Must Have
+                        </p>
+                        <ul className="space-y-1">
+                          {roleKit.expectedExperience.mustHave.map((item, idx) => (
+                            <li key={idx} className="flex items-start gap-2 text-xs text-slate-600">
+                              <span className="w-1 h-1 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0" />
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {roleKit.expectedExperience.niceToHave && roleKit.expectedExperience.niceToHave.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                          <Sparkles className="w-3 h-3 text-amber-500" />
+                          Nice to Have
+                        </p>
+                        <ul className="space-y-1">
+                          {roleKit.expectedExperience.niceToHave.map((item, idx) => (
+                            <li key={idx} className="flex items-start gap-2 text-xs text-slate-600">
+                              <span className="w-1 h-1 rounded-full bg-amber-500 mt-1.5 flex-shrink-0" />
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Interview Topics */}
+                {roleKit.interviewTopics && roleKit.interviewTopics.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                      <BookOpen className="w-3 h-3" />
+                      Common Interview Topics
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {roleKit.interviewTopics.map((topicGroup, idx) => (
+                        <div key={idx} className="p-2.5 bg-slate-50 rounded-lg border border-slate-100">
+                          <p className="text-xs font-semibold text-slate-700 mb-1.5">{topicGroup.category}</p>
+                          <div className="flex flex-wrap gap-1">
+                            {topicGroup.topics.slice(0, 4).map((topic, tIdx) => (
+                              <span key={tIdx} className="px-1.5 py-0.5 bg-white text-slate-600 rounded text-[10px] border border-slate-200">
+                                {topic}
+                              </span>
+                            ))}
+                            {topicGroup.topics.length > 4 && (
+                              <span className="px-1.5 py-0.5 text-slate-400 text-[10px]">
+                                +{topicGroup.topics.length - 4} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       ))}
                     </div>
                   </div>
                 )}
                 
-                {/* Evaluation Criteria */}
-                <div className="pt-4">
-                  <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                    <Award className="w-3 h-3" />
-                    Evaluation Criteria
-                  </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {(roleKit.skillsFocus || ['Communication', 'Problem Solving', 'Technical Depth']).slice(0, 6).map((skill, idx) => (
-                      <div key={idx} className="flex items-center gap-1.5 text-xs text-slate-600">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-500 flex-shrink-0" />
-                        <span className="truncate">{typeof skill === 'string' ? skill : skill}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Core Competencies */}
-                {roleKit.coreCompetencies && roleKit.coreCompetencies.length > 0 && (
-                  <div className="pt-4">
-                    <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Core Competencies</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {roleKit.coreCompetencies.map((comp, idx) => (
-                        <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs">
-                          {comp}
-                        </span>
+                {/* Evaluation Focus */}
+                {roleKit.evaluationFocus && roleKit.evaluationFocus.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                      <Award className="w-3 h-3" />
+                      What Interviewers Look For
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {roleKit.evaluationFocus.map((evalItem, idx) => (
+                        <div key={idx} className="p-3 bg-white rounded-lg border border-slate-200">
+                          <p className="text-xs font-semibold text-slate-800 mb-2">{evalItem.dimension}</p>
+                          <div className="space-y-2">
+                            <div>
+                              <p className="text-[10px] text-emerald-600 font-medium mb-1">Look for:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {evalItem.lookFor.slice(0, 3).map((item, lIdx) => (
+                                  <span key={lIdx} className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded text-[10px]">
+                                    {item}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-[10px] text-red-500 font-medium mb-1">Red flags:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {evalItem.redFlags.slice(0, 2).map((item, rIdx) => (
+                                  <span key={rIdx} className="px-1.5 py-0.5 bg-red-50 text-red-600 rounded text-[10px]">
+                                    {item}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Salary Range */}
+                {roleKit.salaryRange && (
+                  <div className="pt-2 border-t border-slate-100">
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <TrendingUp className="w-3.5 h-3.5" />
+                      <span>Typical salary range: </span>
+                      <span className="font-semibold text-slate-700">
+                        ${(roleKit.salaryRange.min / 1000).toFixed(0)}k - ${(roleKit.salaryRange.max / 1000).toFixed(0)}k {roleKit.salaryRange.currency}
+                      </span>
                     </div>
                   </div>
                 )}

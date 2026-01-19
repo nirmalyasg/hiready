@@ -412,6 +412,12 @@ interviewRouter.get("/role-kits/:id/practice-options", async (req: Request, res:
         estimatedDuration: kit.estimatedDuration,
         coreCompetencies: kit.coreCompetencies,
         defaultInterviewTypes: kit.defaultInterviewTypes,
+        typicalResponsibilities: kit.typicalResponsibilities,
+        interviewTopics: kit.interviewTopics,
+        evaluationFocus: kit.evaluationFocus,
+        dayInLifeContext: kit.dayInLifeContext,
+        expectedExperience: kit.expectedExperience,
+        salaryRange: kit.salaryRange,
       },
       options,
     });
