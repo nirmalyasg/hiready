@@ -1852,7 +1852,7 @@ adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
           ORDER BY ia.created_at DESC
           LIMIT 1
         )::int as "hireadyIndex"
-      FROM auth_users u
+      FROM users u
       JOIN company_share_link_access csla ON csla.user_id = u.id
       JOIN company_share_links csl ON csl.id = csla.share_link_id
       JOIN interview_sets iset ON iset.id = csl.interview_set_id
