@@ -1731,3 +1731,147 @@ adminRouter.post("/jobs/:jobId/share-token", requireAdmin, async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+adminRouter.put("/jobs/:jobId/interview-plan", requireAdmin, async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const { phases, totalMins } = req.body;
+
+    if (!phases || !Array.isArray(phases)) {
+      return res.status(400).json({ success: false, error: "Invalid phases data" });
+    }
+
+    const jobResult = await db.execute(sql`
+      SELECT id, generated_interview_plan FROM employer_jobs WHERE id = ${jobId} LIMIT 1
+    `);
+    
+    if (jobResult.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "Job not found" });
+    }
+
+    const currentPlan = (jobResult.rows[0] as any).generated_interview_plan || {};
+    const updatedPlan = {
+      ...currentPlan,
+      phases,
+      totalMins
+    };
+
+    const interviewTypes = [...new Set(phases.map((p: any) => p.category).filter(Boolean))];
+
+    await db.execute(sql`
+      UPDATE employer_jobs 
+      SET generated_interview_plan = ${JSON.stringify(updatedPlan)}::jsonb,
+          assessment_config = jsonb_set(
+            jsonb_set(
+              COALESCE(assessment_config, '{}'::jsonb),
+              '{totalDuration}',
+              ${totalMins}::text::jsonb
+            ),
+            '{interviewTypes}',
+            ${JSON.stringify(interviewTypes)}::jsonb
+          ),
+          updated_at = NOW()
+      WHERE id = ${jobId}
+    `);
+
+    res.json({ success: true, plan: updatedPlan });
+  } catch (error: any) {
+    console.error("Error updating interview plan:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
+  try {
+    const { jobId } = req.params;
+
+    const [job] = await db.select().from(employerJobs).where(eq(employerJobs.id, jobId)).limit(1);
+    if (!job) {
+      return res.status(404).json({ success: false, error: "Job not found" });
+    }
+
+    const interviewSetResult = await db.execute(sql`
+      SELECT id FROM interview_sets 
+      WHERE job_description LIKE ${'%employerJobId:' + jobId + '%'}
+      OR name = ${job.title}
+      LIMIT 1
+    `);
+
+    if (interviewSetResult.rows.length === 0) {
+      return res.json({ success: true, candidates: [] });
+    }
+
+    const interviewSetId = (interviewSetResult.rows[0] as any).id;
+
+    const candidates = await db.execute(sql`
+      SELECT DISTINCT ON (u.id)
+        u.id as "userId",
+        u.username,
+        u.email,
+        u.first_name as "firstName",
+        u.last_name as "lastName",
+        (
+          SELECT s.ended_at 
+          FROM avatar_sessions s 
+          WHERE s.user_id = u.id 
+          AND s.ended_at IS NOT NULL
+          AND s.feedback_data IS NOT NULL
+          AND (s.interview_set_id = ${interviewSetId} OR s.metadata->>'interviewSetId' = ${interviewSetId.toString()})
+          ORDER BY s.ended_at DESC 
+          LIMIT 1
+        ) as "completedAt",
+        (
+          SELECT COUNT(*)::int 
+          FROM avatar_sessions s 
+          WHERE s.user_id = u.id 
+          AND (s.interview_set_id = ${interviewSetId} OR s.metadata->>'interviewSetId' = ${interviewSetId.toString()})
+        ) as "sessionCount",
+        (
+          SELECT s.created_at 
+          FROM avatar_sessions s 
+          WHERE s.user_id = u.id 
+          AND (s.interview_set_id = ${interviewSetId} OR s.metadata->>'interviewSetId' = ${interviewSetId.toString()})
+          ORDER BY s.created_at DESC 
+          LIMIT 1
+        ) as "lastSessionDate",
+        (
+          SELECT s.feedback_data->>'overallScore' 
+          FROM avatar_sessions s 
+          WHERE s.user_id = u.id 
+          AND s.feedback_data IS NOT NULL
+          AND (s.interview_set_id = ${interviewSetId} OR s.metadata->>'interviewSetId' = ${interviewSetId.toString()})
+          ORDER BY s.created_at DESC 
+          LIMIT 1
+        )::int as "overallScore",
+        (
+          SELECT ROUND((
+            COALESCE((s.feedback_data->>'technicalScore')::numeric, 0) * 0.3 +
+            COALESCE((s.feedback_data->>'communicationScore')::numeric, 0) * 0.25 +
+            COALESCE((s.feedback_data->>'structureScore')::numeric, 0) * 0.2 +
+            COALESCE((s.feedback_data->>'confidenceScore')::numeric, 0) * 0.15 +
+            COALESCE((s.feedback_data->>'relevanceScore')::numeric, 0) * 0.1
+          ))::int
+          FROM avatar_sessions s 
+          WHERE s.user_id = u.id 
+          AND s.feedback_data IS NOT NULL
+          AND (s.interview_set_id = ${interviewSetId} OR s.metadata->>'interviewSetId' = ${interviewSetId.toString()})
+          ORDER BY s.created_at DESC 
+          LIMIT 1
+        ) as "hireadyIndex"
+      FROM users u
+      LEFT JOIN user_entitlements ue ON ue.user_id = u.id AND ue.interview_set_id = ${interviewSetId}
+      WHERE ue.id IS NOT NULL
+      OR EXISTS (
+        SELECT 1 FROM avatar_sessions s 
+        WHERE s.user_id = u.id 
+        AND (s.interview_set_id = ${interviewSetId} OR s.metadata->>'interviewSetId' = ${interviewSetId.toString()})
+      )
+      ORDER BY u.id, "lastSessionDate" DESC NULLS LAST
+    `);
+
+    res.json({ success: true, candidates: candidates.rows });
+  } catch (error: any) {
+    console.error("Error fetching job candidates:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});

@@ -35,7 +35,14 @@ import {
   Search,
   Briefcase,
   Menu,
-  X
+  X,
+  Plus,
+  Trash2,
+  Copy,
+  Edit2,
+  Save,
+  Link2,
+  Award
 } from "lucide-react";
 import {
   LineChart,
@@ -1768,6 +1775,13 @@ function CostsPage() {
   );
 }
 
+interface InterviewPhase {
+  name: string;
+  description: string;
+  mins: number;
+  category: string;
+}
+
 interface AdminJob {
   id: string;
   companyId: string;
@@ -1778,7 +1792,12 @@ interface AdminJob {
   applyLinkSlug: string;
   candidateCount: number;
   shareToken: string | null;
-  generatedInterviewPlan: any;
+  generatedInterviewPlan: {
+    phases?: InterviewPhase[];
+    totalMins?: number;
+    totalMinutes?: number;
+    roleArchetype?: { id?: string; name?: string };
+  } | null;
   createdAt: string;
 }
 
@@ -1786,6 +1805,19 @@ interface AdminCompany {
   id: string;
   name: string;
   domain: string | null;
+}
+
+interface JobCandidate {
+  userId: string;
+  username: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  completedAt: string | null;
+  hireadyIndex: number | null;
+  overallScore: number | null;
+  sessionCount: number;
+  lastSessionDate: string | null;
 }
 
 function JobsPage() {
@@ -1796,6 +1828,12 @@ function JobsPage() {
   const [selectedJob, setSelectedJob] = useState<AdminJob | null>(null);
   const [creating, setCreating] = useState(false);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
+  const [editingPlan, setEditingPlan] = useState<string | null>(null);
+  const [editedPhases, setEditedPhases] = useState<InterviewPhase[]>([]);
+  const [savingPlan, setSavingPlan] = useState(false);
+  const [candidates, setCandidates] = useState<JobCandidate[]>([]);
+  const [loadingCandidates, setLoadingCandidates] = useState(false);
+  const [showCandidates, setShowCandidates] = useState<string | null>(null);
   
   const [newJob, setNewJob] = useState({
     companyId: "",
@@ -1879,6 +1917,76 @@ function JobsPage() {
     navigator.clipboard.writeText(link);
     setCopiedToken(job.id);
     setTimeout(() => setCopiedToken(null), 2000);
+  }
+
+  function startEditingPlan(job: AdminJob) {
+    const phases = job.generatedInterviewPlan?.phases || [];
+    setEditedPhases([...phases]);
+    setEditingPlan(job.id);
+  }
+
+  function cancelEditingPlan() {
+    setEditingPlan(null);
+    setEditedPhases([]);
+  }
+
+  function updatePhase(index: number, field: keyof InterviewPhase, value: string | number) {
+    const updated = [...editedPhases];
+    updated[index] = { ...updated[index], [field]: value };
+    setEditedPhases(updated);
+  }
+
+  function addPhase() {
+    setEditedPhases([
+      ...editedPhases,
+      { name: "New Phase", description: "Description", mins: 5, category: "general" }
+    ]);
+  }
+
+  function removePhase(index: number) {
+    setEditedPhases(editedPhases.filter((_, i) => i !== index));
+  }
+
+  async function saveInterviewPlan(jobId: string) {
+    setSavingPlan(true);
+    try {
+      const totalMins = editedPhases.reduce((sum, p) => sum + p.mins, 0);
+      const res = await fetch(`/api/admin/jobs/${jobId}/interview-plan`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phases: editedPhases, totalMins })
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        setJobs(jobs.map(j => j.id === jobId ? { 
+          ...j, 
+          generatedInterviewPlan: { ...j.generatedInterviewPlan, phases: editedPhases, totalMins } 
+        } : j));
+        setEditingPlan(null);
+        setEditedPhases([]);
+      }
+    } catch (err) {
+      console.error("Error saving interview plan:", err);
+    } finally {
+      setSavingPlan(false);
+    }
+  }
+
+  async function fetchJobCandidates(jobId: string) {
+    setLoadingCandidates(true);
+    setShowCandidates(jobId);
+    try {
+      const res = await fetch(`/api/admin/jobs/${jobId}/candidates`);
+      const data = await res.json();
+      if (data.success) {
+        setCandidates(data.candidates);
+      }
+    } catch (err) {
+      console.error("Error fetching candidates:", err);
+    } finally {
+      setLoadingCandidates(false);
+    }
   }
 
   if (loading) {
@@ -1994,9 +2102,9 @@ function JobsPage() {
                     </div>
                     <p className="text-sm text-slate-500 mb-3">{job.companyName || 'No company'}</p>
                     
-                    {job.generatedInterviewPlan && (
+                    {job.generatedInterviewPlan && editingPlan !== job.id && (
                       <div className="flex gap-2 flex-wrap mb-3">
-                        {job.generatedInterviewPlan.phases?.map((phase: any, idx: number) => (
+                        {job.generatedInterviewPlan.phases?.map((phase: InterviewPhase, idx: number) => (
                           <Badge key={idx} variant="outline" className="text-xs">
                             {phase.name} ({phase.mins}min)
                           </Badge>
@@ -2005,10 +2113,13 @@ function JobsPage() {
                     )}
                     
                     <div className="flex items-center gap-4 text-xs text-slate-400">
-                      <span className="flex items-center gap-1">
+                      <button 
+                        className="flex items-center gap-1 hover:text-[#24c4b8] transition-colors cursor-pointer"
+                        onClick={() => fetchJobCandidates(job.id)}
+                      >
                         <Users className="h-3 w-3" />
                         {job.candidateCount} candidates
-                      </span>
+                      </button>
                       <span>Created {new Date(job.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
@@ -2017,42 +2128,244 @@ function JobsPage() {
                     {!job.shareToken ? (
                       <Button 
                         size="sm" 
-                        variant="outline"
+                        className="bg-[#24c4b8] hover:bg-[#1db0a5] gap-2"
                         onClick={() => generateShareToken(job.id)}
                       >
-                        Generate Link
+                        <Link2 className="h-3 w-3" />
+                        Generate Share Link
                       </Button>
                     ) : (
+                      <div className="flex flex-col items-end gap-1">
+                        <Button 
+                          size="sm" 
+                          className={`gap-2 ${copiedToken === job.id ? 'bg-green-500 hover:bg-green-600' : 'bg-[#24c4b8] hover:bg-[#1db0a5]'}`}
+                          onClick={() => copyShareLink(job)}
+                        >
+                          {copiedToken === job.id ? (
+                            <>
+                              <CheckCircle className="h-3 w-3" />
+                              Link Copied!
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="h-3 w-3" />
+                              Copy Share Link
+                            </>
+                          )}
+                        </Button>
+                        <code className="text-[10px] text-slate-400 bg-slate-100 px-2 py-1 rounded max-w-[200px] truncate">
+                          /invite/{job.shareToken}
+                        </code>
+                      </div>
+                    )}
+                    <div className="flex gap-1">
                       <Button 
                         size="sm" 
-                        variant="outline"
-                        onClick={() => copyShareLink(job)}
-                        className="gap-2"
+                        variant="ghost"
+                        onClick={() => setSelectedJob(selectedJob?.id === job.id ? null : job)}
                       >
-                        {copiedToken === job.id ? (
-                          <>
-                            <CheckCircle className="h-3 w-3 text-green-500" />
-                            Copied!
-                          </>
-                        ) : (
-                          <>
-                            <FileText className="h-3 w-3" />
-                            Copy Link
-                          </>
-                        )}
+                        {selectedJob?.id === job.id ? 'Hide Details' : 'View Details'}
                       </Button>
-                    )}
-                    <Button 
-                      size="sm" 
-                      variant="ghost"
-                      onClick={() => setSelectedJob(selectedJob?.id === job.id ? null : job)}
-                    >
-                      {selectedJob?.id === job.id ? 'Hide Details' : 'View Details'}
-                    </Button>
+                      {job.generatedInterviewPlan && (
+                        <Button 
+                          size="sm" 
+                          variant="ghost"
+                          onClick={() => startEditingPlan(job)}
+                          className="gap-1"
+                        >
+                          <Edit2 className="h-3 w-3" />
+                          Edit Plan
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
+
+                {editingPlan === job.id && (
+                  <div className="mt-4 pt-4 border-t border-slate-100">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-medium text-slate-700">Edit Interview Plan</h4>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={cancelEditingPlan}>
+                          Cancel
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          className="bg-[#24c4b8] hover:bg-[#1db0a5] gap-1"
+                          onClick={() => saveInterviewPlan(job.id)}
+                          disabled={savingPlan}
+                        >
+                          <Save className="h-3 w-3" />
+                          {savingPlan ? 'Saving...' : 'Save Changes'}
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {editedPhases.map((phase, idx) => (
+                        <div key={idx} className="bg-slate-50 rounded-lg p-3 flex gap-3 items-start">
+                          <div className="flex-1 grid grid-cols-5 gap-2">
+                            <div>
+                              <label className="text-xs text-slate-500 block mb-1">Phase Name</label>
+                              <input
+                                type="text"
+                                value={phase.name}
+                                onChange={(e) => updatePhase(idx, 'name', e.target.value)}
+                                className="w-full px-2 py-1 border border-slate-200 rounded text-sm"
+                              />
+                            </div>
+                            <div className="col-span-2">
+                              <label className="text-xs text-slate-500 block mb-1">Description</label>
+                              <input
+                                type="text"
+                                value={phase.description}
+                                onChange={(e) => updatePhase(idx, 'description', e.target.value)}
+                                className="w-full px-2 py-1 border border-slate-200 rounded text-sm"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs text-slate-500 block mb-1">Category</label>
+                              <select
+                                value={phase.category}
+                                onChange={(e) => updatePhase(idx, 'category', e.target.value)}
+                                className="w-full px-2 py-1 border border-slate-200 rounded text-sm bg-white"
+                              >
+                                <option value="hr">HR</option>
+                                <option value="technical">Technical</option>
+                                <option value="behavioral">Behavioral</option>
+                                <option value="case_study">Case Study</option>
+                                <option value="problem_solving">Problem Solving</option>
+                                <option value="general">General</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-xs text-slate-500 block mb-1">Duration (min)</label>
+                              <input
+                                type="number"
+                                value={phase.mins}
+                                onChange={(e) => updatePhase(idx, 'mins', parseInt(e.target.value) || 0)}
+                                className="w-full px-2 py-1 border border-slate-200 rounded text-sm"
+                                min={1}
+                              />
+                            </div>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="text-red-500 hover:bg-red-50 mt-5"
+                            onClick={() => removePhase(idx)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="w-full gap-2"
+                        onClick={addPhase}
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add Phase
+                      </Button>
+                      
+                      <div className="text-sm text-slate-500 text-right">
+                        Total Duration: <strong>{editedPhases.reduce((sum, p) => sum + p.mins, 0)} minutes</strong>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {showCandidates === job.id && (
+                  <div className="mt-4 pt-4 border-t border-slate-100">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        Candidates ({candidates.length})
+                      </h4>
+                      <Button size="sm" variant="ghost" onClick={() => setShowCandidates(null)}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    {loadingCandidates ? (
+                      <div className="flex justify-center py-4">
+                        <LoadingSpinner />
+                      </div>
+                    ) : candidates.length === 0 ? (
+                      <div className="text-center py-6 text-slate-400">
+                        <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No candidates have accessed this job yet</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-slate-100">
+                              <th className="text-left py-2 px-2 font-medium text-slate-600">Candidate</th>
+                              <th className="text-center py-2 px-2 font-medium text-slate-600">Sessions</th>
+                              <th className="text-center py-2 px-2 font-medium text-slate-600">
+                                <span className="flex items-center justify-center gap-1">
+                                  <Award className="h-3 w-3" />
+                                  Hiready Index
+                                </span>
+                              </th>
+                              <th className="text-center py-2 px-2 font-medium text-slate-600">Status</th>
+                              <th className="text-right py-2 px-2 font-medium text-slate-600">Last Activity</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {candidates.map((candidate) => (
+                              <tr key={candidate.userId} className="border-b border-slate-50 hover:bg-slate-50">
+                                <td className="py-2 px-2">
+                                  <div>
+                                    <p className="font-medium text-slate-900">
+                                      {candidate.firstName && candidate.lastName 
+                                        ? `${candidate.firstName} ${candidate.lastName}` 
+                                        : candidate.username}
+                                    </p>
+                                    <p className="text-xs text-slate-400">{candidate.email}</p>
+                                  </div>
+                                </td>
+                                <td className="text-center py-2 px-2">{candidate.sessionCount}</td>
+                                <td className="text-center py-2 px-2">
+                                  {candidate.hireadyIndex !== null ? (
+                                    <span className={`font-semibold ${
+                                      candidate.hireadyIndex >= 80 ? 'text-green-600' :
+                                      candidate.hireadyIndex >= 60 ? 'text-yellow-600' :
+                                      'text-red-500'
+                                    }`}>
+                                      {candidate.hireadyIndex}
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-400">—</span>
+                                  )}
+                                </td>
+                                <td className="text-center py-2 px-2">
+                                  {candidate.completedAt ? (
+                                    <Badge className="bg-green-100 text-green-700 text-xs">Completed</Badge>
+                                  ) : candidate.sessionCount > 0 ? (
+                                    <Badge className="bg-yellow-100 text-yellow-700 text-xs">In Progress</Badge>
+                                  ) : (
+                                    <Badge className="bg-slate-100 text-slate-600 text-xs">Not Started</Badge>
+                                  )}
+                                </td>
+                                <td className="text-right py-2 px-2 text-slate-500">
+                                  {candidate.lastSessionDate 
+                                    ? new Date(candidate.lastSessionDate).toLocaleDateString()
+                                    : '—'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
                 
-                {selectedJob?.id === job.id && (
+                {selectedJob?.id === job.id && editingPlan !== job.id && showCandidates !== job.id && (
                   <div className="mt-4 pt-4 border-t border-slate-100">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
@@ -2072,7 +2385,7 @@ function JobsPage() {
                             <div>
                               <strong>Phases:</strong>
                               <ul className="list-disc list-inside mt-1">
-                                {job.generatedInterviewPlan.phases?.map((phase: any, idx: number) => (
+                                {job.generatedInterviewPlan.phases?.map((phase: InterviewPhase, idx: number) => (
                                   <li key={idx}>{phase.name}: {phase.description}</li>
                                 ))}
                               </ul>
