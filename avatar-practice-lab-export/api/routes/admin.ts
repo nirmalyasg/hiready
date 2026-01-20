@@ -1809,7 +1809,7 @@ adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
       ? (interviewSetResult.rows[0] as any).id 
       : null;
 
-    const candidates = await db.execute(sql`
+    const candidatesResult = await db.execute(sql`
       SELECT DISTINCT ON (u.id)
         u.id as "userId",
         u.username,
@@ -1846,15 +1846,7 @@ adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
           WHERE jt.id IS NOT NULL AND ic.job_target_id = jt.id
           ORDER BY isess.created_at DESC 
           LIMIT 1
-        ) as "lastSessionDate",
-        (
-          SELECT ROUND(AVG((elem->>'score')::numeric) * 12.5)::int
-          FROM interview_analysis ia
-          JOIN interview_sessions isess ON isess.id = ia.interview_session_id
-          JOIN interview_configs ic ON ic.id = isess.interview_config_id,
-          LATERAL jsonb_array_elements(ia.dimension_scores) AS elem
-          WHERE jt.id IS NOT NULL AND ic.job_target_id = jt.id
-        ) as "hireadyIndex"
+        ) as "lastSessionDate"
       FROM users u
       JOIN company_share_link_access csla ON csla.user_id = u.id
       JOIN company_share_links csl ON csl.id = csla.share_link_id
@@ -1866,7 +1858,22 @@ adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
       ORDER BY u.id, csla.accessed_at DESC
     `);
 
-    res.json({ success: true, candidates: candidates.rows });
+    // Calculate HiReady Index for each candidate using the same function as user view
+    const candidates = await Promise.all(
+      candidatesResult.rows.map(async (candidate: any) => {
+        let hireadyIndex = null;
+        if (candidate.authUserId && candidate.jobTargetId) {
+          const hiready = await calculateConsolidatedHireadyIndex(
+            candidate.authUserId,
+            { jobTargetId: candidate.jobTargetId }
+          );
+          hireadyIndex = hiready?.overallScore ?? null;
+        }
+        return { ...candidate, hireadyIndex };
+      })
+    );
+
+    res.json({ success: true, candidates });
   } catch (error: any) {
     console.error("Error fetching job candidates:", error);
     res.status(500).json({ success: false, error: error.message });
