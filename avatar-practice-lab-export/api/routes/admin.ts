@@ -27,6 +27,7 @@ import {
 import { eq, desc, sql, and, gte, lte, count, sum, avg } from "drizzle-orm";
 import { requireAdmin, populateUserRole } from "../middleware/auth.js";
 import { buildEmployerInterviewPlan } from "../lib/archetype-resolver.js";
+import { calculateConsolidatedHireadyIndex } from "../lib/hiready-index.js";
 
 export const adminRouter = Router();
 
@@ -1908,18 +1909,14 @@ adminRouter.get("/candidate-report/:jobTargetId", requireAdmin, async (req: Requ
       return res.status(403).json({ success: false, error: "Access denied - not a company job" });
     }
 
-    // Get session history
+    // Get session history for display
     const sessionsResult = await db.execute(sql`
       SELECT 
         isess.id as "sessionId",
         isess.status,
         isess.created_at as "createdAt",
         ic.interview_type as "interviewType",
-        ia.id as "analysisId",
-        ia.dimension_scores as "dimensionScores",
-        ia.summary,
-        ia.strengths,
-        ia.improvements
+        ia.id as "analysisId"
       FROM interview_sessions isess
       JOIN interview_configs ic ON ic.id = isess.interview_config_id
       LEFT JOIN interview_analysis ia ON ia.interview_session_id = isess.id
@@ -1927,59 +1924,11 @@ adminRouter.get("/candidate-report/:jobTargetId", requireAdmin, async (req: Requ
       ORDER BY isess.created_at DESC
     `);
 
-    // Calculate HiReady Index
-    let hireadyIndex = null;
-    const analyzedSessions = sessionsResult.rows.filter((s: any) => s.analysisId);
-    
-    if (analyzedSessions.length > 0) {
-      const allScores: number[] = [];
-      const dimensionAggregates: Record<string, { total: number; count: number }> = {};
-
-      for (const session of analyzedSessions) {
-        const dimScores = (session as any).dimensionScores;
-        if (Array.isArray(dimScores)) {
-          for (const dim of dimScores) {
-            allScores.push(dim.score);
-            if (!dimensionAggregates[dim.dimension]) {
-              dimensionAggregates[dim.dimension] = { total: 0, count: 0 };
-            }
-            dimensionAggregates[dim.dimension].total += dim.score;
-            dimensionAggregates[dim.dimension].count += 1;
-          }
-        }
-      }
-
-      const avgScore = allScores.length > 0 
-        ? allScores.reduce((a, b) => a + b, 0) / allScores.length 
-        : 0;
-      
-      const overallScore = Math.round(avgScore * 12.5);
-      
-      const dimensionScores = Object.entries(dimensionAggregates).map(([dimension, data]) => ({
-        dimension,
-        score: Math.round((data.total / data.count) * 12.5),
-        rawScore: data.total / data.count
-      }));
-
-      // Aggregate strengths and improvements
-      const allStrengths: string[] = [];
-      const allImprovements: string[] = [];
-      for (const session of analyzedSessions) {
-        const s = session as any;
-        if (Array.isArray(s.strengths)) allStrengths.push(...s.strengths);
-        if (Array.isArray(s.improvements)) allImprovements.push(...s.improvements);
-      }
-
-      hireadyIndex = {
-        overallScore,
-        readinessLevel: overallScore >= 80 ? 'Interview Ready' : overallScore >= 60 ? 'Developing' : 'Needs Practice',
-        dimensionScores,
-        strengths: [...new Set(allStrengths)].slice(0, 5),
-        improvements: [...new Set(allImprovements)].slice(0, 5),
-        totalSessions: sessionsResult.rows.length,
-        analyzedSessions: analyzedSessions.length
-      };
-    }
+    // Use the same calculation function as the user view for consistency
+    const hireadyIndex = await calculateConsolidatedHireadyIndex(
+      jobTarget.userId,
+      { jobTargetId }
+    );
 
     res.json({
       success: true,
