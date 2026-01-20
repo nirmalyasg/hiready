@@ -1816,6 +1816,7 @@ adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
         u.display_name as "displayName",
         csla.accessed_at as "claimedAt",
         jt.id as "jobTargetId",
+        au.id as "authUserId",
         CASE 
           WHEN jt.id IS NOT NULL AND EXISTS (
             SELECT 1 FROM interview_sessions isess
@@ -1857,7 +1858,8 @@ adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
       JOIN company_share_link_access csla ON csla.user_id = u.id
       JOIN company_share_links csl ON csl.id = csla.share_link_id
       JOIN interview_sets iset ON iset.id = csl.interview_set_id
-      LEFT JOIN job_targets jt ON jt.user_id = u.id::varchar AND jt.source = 'company'
+      LEFT JOIN auth_users au ON au.username = u.username OR au.email = u.email
+      LEFT JOIN job_targets jt ON jt.user_id = au.id AND jt.source = 'company'
       WHERE iset.job_description LIKE ${'%employerJobId:' + jobId + '%'} 
          OR iset.name = ${job.title}
       ORDER BY u.id, csla.accessed_at DESC

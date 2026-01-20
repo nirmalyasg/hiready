@@ -8,9 +8,11 @@ import {
   interviewSets,
   companyShareLinks,
   subscriptions,
-  interviewAssignments
+  interviewAssignments,
+  jobTargets
 } from "../../shared/schema.js";
 import { eq, and, gte, sql, or, gt } from "drizzle-orm";
+import { randomUUID } from "crypto";
 
 export type AccessType = 'free' | 'purchased' | 'company_shared' | 'subscription' | 'retake';
 
