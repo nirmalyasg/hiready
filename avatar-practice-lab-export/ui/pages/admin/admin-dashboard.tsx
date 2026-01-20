@@ -1835,6 +1835,9 @@ function JobsPage() {
   const [candidates, setCandidates] = useState<JobCandidate[]>([]);
   const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [showCandidates, setShowCandidates] = useState<string | null>(null);
+  const [viewingCandidateReport, setViewingCandidateReport] = useState<string | null>(null);
+  const [candidateReport, setCandidateReport] = useState<any>(null);
+  const [loadingReport, setLoadingReport] = useState(false);
   
   const [newJob, setNewJob] = useState({
     companyId: "",
@@ -1989,6 +1992,28 @@ function JobsPage() {
       setLoadingCandidates(false);
     }
   }
+
+  async function fetchCandidateReport(jobTargetId: string) {
+    setLoadingReport(true);
+    setCandidateReport(null);
+    try {
+      const res = await fetch(`/api/admin/candidate-report/${jobTargetId}`);
+      const data = await res.json();
+      if (data.success) {
+        setCandidateReport(data);
+      }
+    } catch (err) {
+      console.error("Error fetching candidate report:", err);
+    } finally {
+      setLoadingReport(false);
+    }
+  }
+
+  useEffect(() => {
+    if (viewingCandidateReport) {
+      fetchCandidateReport(viewingCandidateReport);
+    }
+  }, [viewingCandidateReport]);
 
   if (loading) {
     return (
@@ -2368,9 +2393,9 @@ function JobsPage() {
                                       size="sm"
                                       variant="ghost"
                                       className="text-xs text-[#24c4b8] hover:text-[#1db0a5] hover:bg-[#24c4b8]/10 gap-1"
-                                      onClick={() => window.open(`/jobs/${candidate.jobTargetId}`, '_blank')}
+                                      onClick={() => setViewingCandidateReport(candidate.jobTargetId)}
                                     >
-                                      <ExternalLink className="h-3 w-3" />
+                                      <BarChart3 className="h-3 w-3" />
                                       View Report
                                     </Button>
                                   ) : (
@@ -2426,6 +2451,178 @@ function JobsPage() {
           ))
         )}
       </div>
+
+      {/* Candidate Report Modal */}
+      {viewingCandidateReport && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-slate-900">Candidate Report</h3>
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                onClick={() => { setViewingCandidateReport(null); setCandidateReport(null); }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="p-4">
+              {loadingReport ? (
+                <div className="flex justify-center py-8">
+                  <LoadingSpinner />
+                </div>
+              ) : candidateReport ? (
+                <div className="space-y-6">
+                  {/* Candidate Info */}
+                  <div className="bg-slate-50 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-[#24c4b8]/20 rounded-full flex items-center justify-center">
+                        <User className="h-6 w-6 text-[#24c4b8]" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-slate-900">
+                          {candidateReport.candidate.firstName || candidateReport.candidate.lastName 
+                            ? `${candidateReport.candidate.firstName || ''} ${candidateReport.candidate.lastName || ''}`.trim()
+                            : candidateReport.candidate.username}
+                        </h4>
+                        <p className="text-sm text-slate-500">{candidateReport.candidate.email}</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 text-sm text-slate-600">
+                      <span className="font-medium">Role:</span> {candidateReport.jobTarget.roleTitle}
+                      {candidateReport.jobTarget.companyName && (
+                        <span> at {candidateReport.jobTarget.companyName}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* HiReady Index */}
+                  {candidateReport.hireadyIndex ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-slate-900 flex items-center gap-2">
+                          <Award className="h-5 w-5 text-[#24c4b8]" />
+                          HiReady Index
+                        </h4>
+                        <div className={`text-2xl font-bold ${
+                          candidateReport.hireadyIndex.overallScore >= 80 ? 'text-green-600' :
+                          candidateReport.hireadyIndex.overallScore >= 60 ? 'text-yellow-600' :
+                          'text-red-500'
+                        }`}>
+                          {candidateReport.hireadyIndex.overallScore}/100
+                        </div>
+                      </div>
+                      
+                      <Badge className={`${
+                        candidateReport.hireadyIndex.overallScore >= 80 ? 'bg-green-100 text-green-700' :
+                        candidateReport.hireadyIndex.overallScore >= 60 ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {candidateReport.hireadyIndex.readinessLevel}
+                      </Badge>
+
+                      {/* Dimension Scores */}
+                      <div className="space-y-2">
+                        <h5 className="text-sm font-medium text-slate-700">Dimension Scores</h5>
+                        <div className="grid grid-cols-2 gap-2">
+                          {candidateReport.hireadyIndex.dimensionScores.map((dim: any, idx: number) => (
+                            <div key={idx} className="bg-slate-50 rounded p-2 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-slate-600">{dim.dimension}</span>
+                                <span className={`font-medium ${
+                                  dim.score >= 80 ? 'text-green-600' :
+                                  dim.score >= 60 ? 'text-yellow-600' :
+                                  'text-red-500'
+                                }`}>{dim.score}</span>
+                              </div>
+                              <div className="mt-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                <div 
+                                  className={`h-full ${
+                                    dim.score >= 80 ? 'bg-green-500' :
+                                    dim.score >= 60 ? 'bg-yellow-500' :
+                                    'bg-red-500'
+                                  }`}
+                                  style={{ width: `${dim.score}%` }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Strengths & Improvements */}
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {candidateReport.hireadyIndex.strengths?.length > 0 && (
+                          <div>
+                            <h5 className="text-sm font-medium text-green-700 mb-2">Strengths</h5>
+                            <ul className="text-sm text-slate-600 space-y-1">
+                              {candidateReport.hireadyIndex.strengths.map((s: string, i: number) => (
+                                <li key={i} className="flex items-start gap-1">
+                                  <CheckCircle className="h-3 w-3 text-green-500 mt-1 flex-shrink-0" />
+                                  <span>{s}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {candidateReport.hireadyIndex.improvements?.length > 0 && (
+                          <div>
+                            <h5 className="text-sm font-medium text-orange-700 mb-2">Areas for Improvement</h5>
+                            <ul className="text-sm text-slate-600 space-y-1">
+                              {candidateReport.hireadyIndex.improvements.map((s: string, i: number) => (
+                                <li key={i} className="flex items-start gap-1">
+                                  <AlertCircle className="h-3 w-3 text-orange-500 mt-1 flex-shrink-0" />
+                                  <span>{s}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-slate-500">
+                      <AlertCircle className="h-8 w-8 mx-auto mb-2 text-slate-400" />
+                      <p>No analyzed sessions yet</p>
+                      <p className="text-sm">The candidate hasn't completed any practice sessions</p>
+                    </div>
+                  )}
+
+                  {/* Session History */}
+                  {candidateReport.sessions?.length > 0 && (
+                    <div>
+                      <h5 className="text-sm font-medium text-slate-700 mb-2">Session History</h5>
+                      <div className="space-y-2">
+                        {candidateReport.sessions.map((session: any) => (
+                          <div key={session.sessionId} className="bg-slate-50 rounded p-2 flex justify-between items-center text-sm">
+                            <div>
+                              <span className="font-medium text-slate-700">{session.interviewType}</span>
+                              <span className="text-slate-400 ml-2">
+                                {new Date(session.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <Badge className={`${
+                              session.hasAnalysis ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'
+                            } text-xs`}>
+                              {session.hasAnalysis ? 'Analyzed' : session.status}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-slate-500">
+                  <AlertCircle className="h-8 w-8 mx-auto mb-2 text-slate-400" />
+                  <p>Unable to load report</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

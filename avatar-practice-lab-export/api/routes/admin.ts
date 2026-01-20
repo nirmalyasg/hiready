@@ -1871,3 +1871,142 @@ adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+// Admin view of candidate job target and HiReady Index
+adminRouter.get("/candidate-report/:jobTargetId", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { jobTargetId } = req.params;
+
+    // Fetch job target details
+    const jobTargetResult = await db.execute(sql`
+      SELECT 
+        jt.id,
+        jt.user_id as "userId",
+        jt.role_title as "roleTitle",
+        jt.company_name as "companyName",
+        jt.jd_text as "jdText",
+        jt.source,
+        jt.status,
+        jt.created_at as "createdAt",
+        au.username,
+        au.email,
+        au.first_name as "firstName",
+        au.last_name as "lastName"
+      FROM job_targets jt
+      JOIN auth_users au ON au.id = jt.user_id
+      WHERE jt.id = ${jobTargetId}
+    `);
+
+    if (jobTargetResult.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "Job target not found" });
+    }
+
+    const jobTarget = jobTargetResult.rows[0] as any;
+
+    // Verify this is a company-sourced job (admin can only view company jobs)
+    if (jobTarget.source !== 'company') {
+      return res.status(403).json({ success: false, error: "Access denied - not a company job" });
+    }
+
+    // Get session history
+    const sessionsResult = await db.execute(sql`
+      SELECT 
+        isess.id as "sessionId",
+        isess.status,
+        isess.created_at as "createdAt",
+        ic.interview_type as "interviewType",
+        ia.id as "analysisId",
+        ia.dimension_scores as "dimensionScores",
+        ia.summary,
+        ia.strengths,
+        ia.improvements
+      FROM interview_sessions isess
+      JOIN interview_configs ic ON ic.id = isess.interview_config_id
+      LEFT JOIN interview_analysis ia ON ia.interview_session_id = isess.id
+      WHERE ic.job_target_id = ${jobTargetId}
+      ORDER BY isess.created_at DESC
+    `);
+
+    // Calculate HiReady Index
+    let hireadyIndex = null;
+    const analyzedSessions = sessionsResult.rows.filter((s: any) => s.analysisId);
+    
+    if (analyzedSessions.length > 0) {
+      const allScores: number[] = [];
+      const dimensionAggregates: Record<string, { total: number; count: number }> = {};
+
+      for (const session of analyzedSessions) {
+        const dimScores = (session as any).dimensionScores;
+        if (Array.isArray(dimScores)) {
+          for (const dim of dimScores) {
+            allScores.push(dim.score);
+            if (!dimensionAggregates[dim.dimension]) {
+              dimensionAggregates[dim.dimension] = { total: 0, count: 0 };
+            }
+            dimensionAggregates[dim.dimension].total += dim.score;
+            dimensionAggregates[dim.dimension].count += 1;
+          }
+        }
+      }
+
+      const avgScore = allScores.length > 0 
+        ? allScores.reduce((a, b) => a + b, 0) / allScores.length 
+        : 0;
+      
+      const overallScore = Math.round(avgScore * 12.5);
+      
+      const dimensionScores = Object.entries(dimensionAggregates).map(([dimension, data]) => ({
+        dimension,
+        score: Math.round((data.total / data.count) * 12.5),
+        rawScore: data.total / data.count
+      }));
+
+      // Aggregate strengths and improvements
+      const allStrengths: string[] = [];
+      const allImprovements: string[] = [];
+      for (const session of analyzedSessions) {
+        const s = session as any;
+        if (Array.isArray(s.strengths)) allStrengths.push(...s.strengths);
+        if (Array.isArray(s.improvements)) allImprovements.push(...s.improvements);
+      }
+
+      hireadyIndex = {
+        overallScore,
+        readinessLevel: overallScore >= 80 ? 'Interview Ready' : overallScore >= 60 ? 'Developing' : 'Needs Practice',
+        dimensionScores,
+        strengths: [...new Set(allStrengths)].slice(0, 5),
+        improvements: [...new Set(allImprovements)].slice(0, 5),
+        totalSessions: sessionsResult.rows.length,
+        analyzedSessions: analyzedSessions.length
+      };
+    }
+
+    res.json({
+      success: true,
+      candidate: {
+        username: jobTarget.username,
+        email: jobTarget.email,
+        firstName: jobTarget.firstName,
+        lastName: jobTarget.lastName
+      },
+      jobTarget: {
+        id: jobTarget.id,
+        roleTitle: jobTarget.roleTitle,
+        companyName: jobTarget.companyName,
+        status: jobTarget.status,
+        createdAt: jobTarget.createdAt
+      },
+      hireadyIndex,
+      sessions: sessionsResult.rows.map((s: any) => ({
+        sessionId: s.sessionId,
+        status: s.status,
+        createdAt: s.createdAt,
+        interviewType: s.interviewType,
+        hasAnalysis: !!s.analysisId
+      }))
+    });
+  } catch (error: any) {
+    console.error("Error fetching candidate report:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
