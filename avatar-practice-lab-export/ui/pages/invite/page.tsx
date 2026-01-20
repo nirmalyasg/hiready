@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, ArrowRight, Building2, Briefcase, Loader2, AlertCircle, LogIn } from 'lucide-react';
 import { useValidateShareToken, useClaimShareToken } from '@/hooks/use-entitlements';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/useAuth';
 import logoImg from '@/assets/logo.png';
 
 export default function InvitePage() {
