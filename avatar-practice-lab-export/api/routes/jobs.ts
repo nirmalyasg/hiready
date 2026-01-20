@@ -26,6 +26,7 @@ import {
 import { execSync } from "child_process";
 import { resolveAndSaveJobArchetypes, resolveCompanyArchetype, resolveRoleArchetype, listAllRoleArchetypes, listAllCompanyArchetypes, getRoleInterviewStructure, getUnifiedInterviewPlan, getEnrichedInterviewPlan, getEnrichedInterviewPlanWithSkills, getRoleTaskBlueprints } from "../lib/archetype-resolver.js";
 import { mapRoleTitleToRoleKit, ensureRoleKitForJob, reprocessAllJobs, normalizeTitle, detectDomain, detectSeniority } from "../lib/role-kit-mapper.js";
+import { calculateConsolidatedHireadyIndex } from "../lib/hiready-index.js";
 
 let cachedChromiumPath: string | null = null;
 
@@ -2318,6 +2319,80 @@ jobsRouter.post("/job-targets/:id/resolve-archetypes", requireAuth, async (req: 
     res.json({ success: true, job: updated, archetypeInfo });
   } catch (error: any) {
     console.error("Error resolving job archetypes:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get HiReady Index for a job target (applicant view)
+jobsRouter.get("/job-targets/:id/hiready-index", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const jobId = req.params.id;
+
+    // Verify job target belongs to user
+    const [jobTarget] = await db
+      .select()
+      .from(jobTargets)
+      .where(and(eq(jobTargets.id, jobId), eq(jobTargets.userId, userId)));
+
+    if (!jobTarget) {
+      return res.status(404).json({ success: false, error: "Job target not found" });
+    }
+
+    // Get session count for this job
+    const sessionCountResult = await db
+      .select({ count: count() })
+      .from(interviewSessions)
+      .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+      .where(
+        and(
+          eq(interviewConfigs.userId, userId),
+          eq(interviewConfigs.jobTargetId, jobId)
+        )
+      );
+
+    const totalSessions = sessionCountResult[0]?.count || 0;
+
+    // Get analyzed session count
+    const analyzedCountResult = await db
+      .select({ count: count() })
+      .from(interviewSessions)
+      .innerJoin(interviewConfigs, eq(interviewSessions.interviewConfigId, interviewConfigs.id))
+      .where(
+        and(
+          eq(interviewConfigs.userId, userId),
+          eq(interviewConfigs.jobTargetId, jobId),
+          eq(interviewSessions.status, "analyzed")
+        )
+      );
+
+    const analyzedSessions = analyzedCountResult[0]?.count || 0;
+
+    // Calculate consolidated HiReady Index
+    const hireadyIndex = await calculateConsolidatedHireadyIndex(userId, { jobTargetId: jobId });
+
+    // Determine status
+    let status: "not_started" | "in_progress" | "completed" = "not_started";
+    if (totalSessions > 0) {
+      status = analyzedSessions > 0 ? "completed" : "in_progress";
+    }
+
+    res.json({
+      success: true,
+      status,
+      totalSessions,
+      analyzedSessions,
+      hireadyIndex,
+      jobTarget: {
+        id: jobTarget.id,
+        roleTitle: jobTarget.roleTitle,
+        companyName: jobTarget.companyName,
+        source: jobTarget.source,
+        lastPracticedAt: jobTarget.lastPracticedAt,
+      }
+    });
+  } catch (error: any) {
+    console.error("Error fetching HiReady Index:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

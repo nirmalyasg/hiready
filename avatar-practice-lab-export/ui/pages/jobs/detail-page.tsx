@@ -23,6 +23,38 @@ interface Entitlements {
   pricing?: any;
 }
 
+interface HireadyIndexData {
+  success: boolean;
+  status: "not_started" | "in_progress" | "completed";
+  totalSessions: number;
+  analyzedSessions: number;
+  hireadyIndex: {
+    overallScore: number;
+    readinessLevel: string;
+    dimensionScores: Array<{
+      dimension: string;
+      score: number;
+      evidence: string[];
+    }>;
+    strengths: string[];
+    improvements: string[];
+    completedInterviewTypes: string[];
+    sessionBreakdown: Array<{
+      sessionId: number;
+      interviewType: string;
+      score: number;
+      date: string;
+    }>;
+  } | null;
+  jobTarget: {
+    id: string;
+    roleTitle: string;
+    companyName: string | null;
+    source: string | null;
+    lastPracticedAt: string | null;
+  };
+}
+
 interface JobTarget {
   id: string;
   userId: string;
@@ -220,6 +252,7 @@ export default function JobDetailPage() {
   const [isSavingRole, setIsSavingRole] = useState(false);
   const [isAutoMapping, setIsAutoMapping] = useState(false);
   const [practiceHistory, setPracticeHistory] = useState<PracticeHistoryResponse | null>(null);
+  const [hireadyData, setHireadyData] = useState<HireadyIndexData | null>(null);
   
   const matchedRoleKit = roleKits.find(r => r.id === job?.roleKitId);
 
@@ -244,17 +277,19 @@ export default function JobDetailPage() {
       
       try {
         setIsLoading(true);
-        const [jobRes, optionsRes, entitlementsRes, roleKitsRes] = await Promise.all([
+        const [jobRes, optionsRes, entitlementsRes, roleKitsRes, hireadyRes] = await Promise.all([
           fetch(`/api/jobs/job-targets/${jobId}`),
           fetch(`/api/jobs/job-targets/${jobId}/practice-options`),
           fetch(`/api/payments/entitlements?jobTargetId=${jobId}`, { credentials: "include" }),
           fetch(`/api/interview/role-kits`),
+          fetch(`/api/jobs/job-targets/${jobId}/hiready-index`),
         ]);
         
         const jobData = await jobRes.json();
         const optionsData = await optionsRes.json();
         const entitlementsData = await entitlementsRes.json();
         const roleKitsData = await roleKitsRes.json();
+        const hireadyDataResult = await hireadyRes.json();
         
         if (jobData.success) {
           setJob(jobData.job);
@@ -280,6 +315,10 @@ export default function JobDetailPage() {
 
         if (roleKitsData.success) {
           setRoleKits(roleKitsData.roleKits || []);
+        }
+
+        if (hireadyDataResult.success) {
+          setHireadyData(hireadyDataResult);
         }
 
         if (jobData.success && jobData.job?.roleKitId) {
@@ -809,6 +848,162 @@ export default function JobDetailPage() {
                   <ExternalLink className="w-3 h-3 ml-1" />
                 </Button>
               </div>
+            </div>
+          )}
+
+          {/* HiReady Performance Summary for Company-Source Jobs */}
+          {hireadyData && (job?.source === 'company' || hireadyData.totalSessions > 0) && (
+            <div className="mb-4 bg-gradient-to-br from-purple-50 to-white rounded-xl border border-purple-100 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                    <BarChart3 className="w-4 h-4 text-purple-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-semibold text-slate-900">Your Performance</h2>
+                    <p className="text-xs text-slate-500">HiReady Index for this role</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                    hireadyData.status === 'completed' ? 'bg-green-100 text-green-700' :
+                    hireadyData.status === 'in_progress' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-slate-100 text-slate-600'
+                  }`}>
+                    {hireadyData.status === 'completed' ? 'Completed' :
+                     hireadyData.status === 'in_progress' ? 'In Progress' : 'Not Started'}
+                  </span>
+                </div>
+              </div>
+
+              {hireadyData.hireadyIndex ? (
+                <div className="space-y-4">
+                  {/* Overall Score */}
+                  <div className="flex items-center gap-4">
+                    <div className="flex-shrink-0">
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold border-4 ${
+                        hireadyData.hireadyIndex.overallScore >= 80 ? 'border-green-400 text-green-600 bg-green-50' :
+                        hireadyData.hireadyIndex.overallScore >= 60 ? 'border-yellow-400 text-yellow-600 bg-yellow-50' :
+                        'border-red-400 text-red-600 bg-red-50'
+                      }`}>
+                        {hireadyData.hireadyIndex.overallScore}
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-900">HiReady Index</p>
+                      <p className={`text-xs font-medium ${
+                        hireadyData.hireadyIndex.readinessLevel === 'interview_ready' ? 'text-green-600' :
+                        hireadyData.hireadyIndex.readinessLevel === 'almost_ready' ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {hireadyData.hireadyIndex.readinessLevel === 'interview_ready' ? 'Interview Ready' :
+                         hireadyData.hireadyIndex.readinessLevel === 'almost_ready' ? 'Almost Ready' :
+                         hireadyData.hireadyIndex.readinessLevel === 'needs_work' ? 'Needs Work' : 'Not Ready'}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-1">
+                        Based on {hireadyData.analyzedSessions} analyzed session{hireadyData.analyzedSessions !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Dimension Scores */}
+                  {hireadyData.hireadyIndex.dimensionScores && hireadyData.hireadyIndex.dimensionScores.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2">
+                      {hireadyData.hireadyIndex.dimensionScores.slice(0, 6).map((dim, idx) => (
+                        <div key={idx} className="bg-white rounded-lg p-2 border border-slate-100">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-slate-600 truncate">{dim.dimension}</span>
+                            <span className={`text-xs font-semibold ${
+                              dim.score >= 80 ? 'text-green-600' :
+                              dim.score >= 60 ? 'text-yellow-600' : 'text-red-500'
+                            }`}>{dim.score}%</span>
+                          </div>
+                          <div className="mt-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full ${
+                                dim.score >= 80 ? 'bg-green-500' :
+                                dim.score >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                              }`}
+                              style={{ width: `${dim.score}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Strengths and Improvements */}
+                  {((hireadyData.hireadyIndex.strengths && hireadyData.hireadyIndex.strengths.length > 0) || 
+                    (hireadyData.hireadyIndex.improvements && hireadyData.hireadyIndex.improvements.length > 0)) && (
+                  <div className="grid grid-cols-2 gap-3">
+                    {hireadyData.hireadyIndex.strengths && hireadyData.hireadyIndex.strengths.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-green-700 mb-1">Strengths</p>
+                        <ul className="space-y-1">
+                          {hireadyData.hireadyIndex.strengths.slice(0, 3).map((s, i) => (
+                            <li key={i} className="text-xs text-slate-600 flex items-start gap-1">
+                              <CheckCircle2 className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />
+                              <span className="line-clamp-2">{s}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {hireadyData.hireadyIndex.improvements && hireadyData.hireadyIndex.improvements.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-amber-700 mb-1">Areas to Improve</p>
+                        <ul className="space-y-1">
+                          {hireadyData.hireadyIndex.improvements.slice(0, 3).map((s, i) => (
+                            <li key={i} className="text-xs text-slate-600 flex items-start gap-1">
+                              <AlertCircle className="w-3 h-3 text-amber-500 mt-0.5 flex-shrink-0" />
+                              <span className="line-clamp-2">{s}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  )}
+
+                  {/* Session Breakdown with Links */}
+                  {hireadyData.hireadyIndex.sessionBreakdown && hireadyData.hireadyIndex.sessionBreakdown.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-700 mb-2">Recent Sessions</p>
+                      <div className="space-y-1">
+                        {hireadyData.hireadyIndex.sessionBreakdown.slice(0, 3).map((session, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => navigate(`/interview/results?sessionId=${session.sessionId}`)}
+                            className="w-full flex items-center justify-between p-2 bg-white rounded-lg border border-slate-100 hover:border-purple-200 hover:bg-purple-50/50 transition-colors group"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-medium text-slate-700 group-hover:text-purple-700">{session.interviewType}</span>
+                              <span className="text-[10px] text-slate-400">
+                                {new Date(session.date).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-xs font-semibold ${
+                                session.score >= 80 ? 'text-green-600' :
+                                session.score >= 60 ? 'text-yellow-600' : 'text-red-500'
+                              }`}>{session.score}%</span>
+                              <ExternalLink className="w-3 h-3 text-slate-300 group-hover:text-purple-500" />
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+                    <Play className="w-5 h-5 text-slate-400" />
+                  </div>
+                  <p className="text-sm text-slate-600 font-medium">No practice sessions yet</p>
+                  <p className="text-xs text-slate-500 mt-1">Complete interview rounds below to see your HiReady score</p>
+                </div>
+              )}
             </div>
           )}
 
