@@ -32,6 +32,7 @@ interface EntitledJob {
   interviewTypes: string[];
   companyName: string | null;
   claimedAt: string;
+  employerJobId: number | null;
   jobTitle: string | null;
   interviewPlan: any;
 }
@@ -99,7 +100,13 @@ export default function InterviewPracticePage() {
           if (entitledData.success && entitledData.jobTargets?.length > 0) {
             setEntitledJobs(entitledData.jobTargets);
             if (userSavedJobs.length === 0 && entitledData.jobTargets.length === 1) {
-              navigate(`/interview/config?setId=${entitledData.jobTargets[0].id}`);
+              const job = entitledData.jobTargets[0];
+              // Navigate to the pre-session page with employer job ID
+              if (job.employerJobId) {
+                navigate(`/interview/pre-session?employerJobId=${job.employerJobId}`);
+              } else {
+                navigate(`/interview/role/${job.id}`);
+              }
               return;
             }
             if (userSavedJobs.length === 0) {
@@ -213,7 +220,13 @@ export default function InterviewPracticePage() {
                 {entitledJobs.map((job) => (
                   <button
                     key={job.id}
-                    onClick={() => navigate(`/interview/config?setId=${job.id}`)}
+                    onClick={() => {
+                      if (job.employerJobId) {
+                        navigate(`/interview/pre-session?employerJobId=${job.employerJobId}`);
+                      } else {
+                        navigate(`/interview/role/${job.id}`);
+                      }
+                    }}
                     className="w-full bg-white rounded-2xl border-2 border-[#24c4b8]/30 p-5 text-left hover:border-[#24c4b8] hover:shadow-lg transition-all group"
                   >
                     <div className="flex items-center justify-between">
