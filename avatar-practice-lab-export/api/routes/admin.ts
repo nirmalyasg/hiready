@@ -18,10 +18,15 @@ import {
   sessionJourneyEvents,
   budgetGuards,
   budgetAlerts,
-  customScenarios
+  customScenarios,
+  employerCompanies,
+  employerJobs,
+  companyShareLinks,
+  interviewSets
 } from "../../shared/schema.js";
 import { eq, desc, sql, and, gte, lte, count, sum, avg } from "drizzle-orm";
 import { requireAdmin, populateUserRole } from "../middleware/auth.js";
+import { buildEmployerInterviewPlan } from "../lib/archetype-resolver.js";
 
 export const adminRouter = Router();
 
@@ -1508,5 +1513,220 @@ adminRouter.post("/execute-sql", async (req, res) => {
   } catch (error: any) {
     console.error("Error executing SQL:", error);
     res.status(500).json({ success: false, error: error.message || "Failed to execute SQL" });
+  }
+});
+
+function generateSlug(title: string, companyName: string): string {
+  const baseSlug = `${companyName}-${title}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .substring(0, 50);
+  const randomSuffix = Math.random().toString(36).substring(2, 8);
+  return `${baseSlug}-${randomSuffix}`;
+}
+
+function generateToken(): string {
+  return `st_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 15)}`;
+}
+
+adminRouter.get("/companies", requireAdmin, async (req, res) => {
+  try {
+    const companies = await db.select({
+      id: employerCompanies.id,
+      name: employerCompanies.name,
+      domain: employerCompanies.domain
+    }).from(employerCompanies).orderBy(desc(employerCompanies.createdAt));
+    
+    res.json({ success: true, companies });
+  } catch (error: any) {
+    console.error("Error fetching companies:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+adminRouter.get("/jobs", requireAdmin, async (req, res) => {
+  try {
+    const jobs = await db.execute(sql`
+      SELECT 
+        j.id,
+        j.company_id as "companyId",
+        c.name as "companyName",
+        j.title,
+        j.jd_text as "jdText",
+        j.status,
+        j.apply_link_slug as "applyLinkSlug",
+        j.candidate_count as "candidateCount",
+        j.generated_interview_plan as "generatedInterviewPlan",
+        j.created_at as "createdAt",
+        csl.share_token as "shareToken"
+      FROM employer_jobs j
+      LEFT JOIN employer_companies c ON j.company_id = c.id
+      LEFT JOIN interview_sets iset ON iset.job_description LIKE '%employerJobId:' || j.id || '%' OR iset.name = j.title
+      LEFT JOIN company_share_links csl ON csl.interview_set_id = iset.id AND csl.expires_at > NOW() AND csl.is_active = true
+      ORDER BY j.created_at DESC
+    `);
+    
+    res.json({ success: true, jobs: jobs.rows });
+  } catch (error: any) {
+    console.error("Error fetching admin jobs:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+adminRouter.post("/jobs", requireAdmin, async (req, res) => {
+  try {
+    const { companyId, companyName, title, jdText } = req.body;
+    
+    if (!title) {
+      return res.status(400).json({ success: false, error: "Job title is required" });
+    }
+    
+    let finalCompanyId = companyId;
+    let finalCompanyName = companyName || "Demo Company";
+    
+    if (!finalCompanyId && companyName) {
+      const [newCompany] = await db.insert(employerCompanies).values({
+        name: companyName,
+        plan: "trial"
+      }).returning();
+      finalCompanyId = newCompany.id;
+      finalCompanyName = newCompany.name;
+    } else if (!finalCompanyId) {
+      const [existingCompany] = await db.select().from(employerCompanies).limit(1);
+      if (existingCompany) {
+        finalCompanyId = existingCompany.id;
+        finalCompanyName = existingCompany.name;
+      } else {
+        const [newCompany] = await db.insert(employerCompanies).values({
+          name: "Demo Company",
+          plan: "trial"
+        }).returning();
+        finalCompanyId = newCompany.id;
+        finalCompanyName = newCompany.name;
+      }
+    } else {
+      const [company] = await db.select().from(employerCompanies).where(eq(employerCompanies.id, finalCompanyId)).limit(1);
+      if (company) {
+        finalCompanyName = company.name;
+      }
+    }
+
+    const applyLinkSlug = generateSlug(title, finalCompanyName);
+
+    let generatedInterviewPlan = null;
+    let roleArchetypeId = null;
+    let companyArchetype = null;
+    let archetypeConfidence = null;
+
+    if (jdText || title) {
+      try {
+        generatedInterviewPlan = await buildEmployerInterviewPlan(
+          title,
+          jdText || "",
+          finalCompanyName,
+          "mid"
+        );
+        
+        roleArchetypeId = generatedInterviewPlan.roleArchetype?.id || null;
+        companyArchetype = generatedInterviewPlan.companyArchetype?.type || null;
+        archetypeConfidence = generatedInterviewPlan.companyArchetype?.confidence || null;
+
+        console.log(`Generated admin interview plan for job "${title}": ${generatedInterviewPlan.phases?.length || 0} phases, ${generatedInterviewPlan.totalMins} mins`);
+      } catch (planError: any) {
+        console.error("Error generating interview plan:", planError);
+      }
+    }
+
+    const [job] = await db.insert(employerJobs).values({
+      companyId: finalCompanyId,
+      title,
+      jdText,
+      roleArchetypeId,
+      assessmentConfig: { 
+        interviewTypes: generatedInterviewPlan?.phases?.map((p: any) => p.category) || ["hr", "technical"], 
+        totalDuration: generatedInterviewPlan?.totalMins || 12,
+      },
+      applyLinkSlug,
+      status: "active",
+    }).returning();
+
+    await db.execute(sql`
+      UPDATE employer_jobs 
+      SET generated_interview_plan = ${JSON.stringify(generatedInterviewPlan)}::jsonb,
+          company_archetype = ${companyArchetype},
+          archetype_confidence = ${archetypeConfidence}
+      WHERE id = ${job.id}
+    `);
+
+    res.json({ 
+      success: true, 
+      job: {
+        ...job,
+        companyName: finalCompanyName,
+        generatedInterviewPlan,
+        shareToken: null
+      }
+    });
+  } catch (error: any) {
+    console.error("Error creating admin job:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+adminRouter.post("/jobs/:jobId/share-token", requireAdmin, async (req, res) => {
+  try {
+    const { jobId } = req.params;
+
+    const [job] = await db.select().from(employerJobs).where(eq(employerJobs.id, jobId)).limit(1);
+    if (!job) {
+      return res.status(404).json({ success: false, error: "Job not found" });
+    }
+
+    const [company] = await db.select().from(employerCompanies).where(eq(employerCompanies.id, job.companyId)).limit(1);
+
+    let interviewSetId: number;
+
+    const existingSet = await db.execute(sql`
+      SELECT id FROM interview_sets 
+      WHERE job_description LIKE ${'%employerJobId:' + jobId + '%'}
+      OR name = ${job.title}
+      LIMIT 1
+    `);
+
+    if (existingSet.rows.length > 0) {
+      interviewSetId = (existingSet.rows[0] as any).id;
+    } else {
+      const plan = job.assessmentConfig as any;
+      const [newSet] = await db.insert(interviewSets).values({
+        name: job.title,
+        description: `Interview practice for ${job.title}`,
+        jobDescription: `employerJobId:${jobId}`,
+        interviewTypes: plan?.interviewTypes || ["hr", "technical"],
+        visibility: "private",
+        priceCents: 0
+      }).returning();
+      interviewSetId = newSet.id;
+    }
+
+    const token = generateToken();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 90);
+
+    await db.insert(companyShareLinks).values({
+      interviewSetId,
+      shareToken: token,
+      companyName: company?.name || null,
+      description: `Access to ${job.title} interview practice`,
+      maxUses: 1000,
+      currentUses: 0,
+      expiresAt,
+      isActive: true
+    });
+
+    res.json({ success: true, token });
+  } catch (error: any) {
+    console.error("Error generating share token:", error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });

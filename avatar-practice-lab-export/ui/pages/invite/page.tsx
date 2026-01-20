@@ -1,20 +1,36 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, ArrowRight, Building2, Briefcase, Loader2, AlertCircle } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Building2, Briefcase, Loader2, AlertCircle, LogIn } from 'lucide-react';
 import { useValidateShareToken, useClaimShareToken } from '@/hooks/use-entitlements';
+import { useAuth } from '@/hooks/use-auth';
 import logoImg from '@/assets/logo.png';
 
 export default function InvitePage() {
   const { token } = useParams<{ token: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [claimed, setClaimed] = useState(false);
+  const { user, isLoading: authLoading } = useAuth();
 
   const { data: shareData, isLoading, error } = useValidateShareToken(token || null);
   const claimMutation = useClaimShareToken();
 
+  const autoClaim = searchParams.get('autoClaim') === 'true';
+
+  useEffect(() => {
+    if (autoClaim && user && token && shareData?.valid && !claimed) {
+      handleClaimAccess();
+    }
+  }, [autoClaim, user, token, shareData?.valid, claimed]);
+
   const handleClaimAccess = async () => {
     if (!token) return;
+
+    if (!user) {
+      navigate(`/login?returnUrl=${encodeURIComponent(`/invite/${token}?autoClaim=true`)}`);
+      return;
+    }
 
     try {
       await claimMutation.mutateAsync(token);
@@ -140,7 +156,7 @@ export default function InvitePage() {
 
           <Button 
             onClick={handleClaimAccess}
-            disabled={claimMutation.isPending}
+            disabled={claimMutation.isPending || authLoading}
             className="w-full bg-[#24c4b8] hover:bg-[#1db0a5] h-14 text-base font-semibold group"
           >
             {claimMutation.isPending ? (
@@ -148,16 +164,22 @@ export default function InvitePage() {
                 <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                 Claiming Access...
               </>
-            ) : (
+            ) : user ? (
               <>
                 Get Free Access
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              </>
+            ) : (
+              <>
+                <LogIn className="w-5 h-5 mr-2" />
+                Sign In to Get Access
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </>
             )}
           </Button>
 
           <p className="text-center text-white/40 text-sm mt-4">
-            You'll need to create a free account to access this content.
+            {user ? "Click above to unlock your free interview practice." : "You'll need to sign in or create a free account to access this content."}
           </p>
         </div>
       </div>

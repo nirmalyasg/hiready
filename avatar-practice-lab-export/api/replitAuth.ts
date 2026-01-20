@@ -5,6 +5,7 @@ import connectPg from "connect-pg-simple";
 import { getUserByUsername, getUserByEmail, createUser, getUserById } from "./storage.js";
 import { db } from "./db.js";
 import { userLoginEvents } from "../shared/schema.js";
+import { getUserRole } from "./middleware/auth.js";
 
 async function trackLoginEvent(
   authUserId: string,
@@ -164,9 +165,12 @@ export async function setupAuth(app: Express) {
 
       trackLoginEvent(user.id, "login", req);
 
+      const role = await getUserRole(user.id);
+
       return res.json({
         message: "Login successful",
         user: sessionUser,
+        role,
       });
     } catch (error) {
       console.error("Login error:", error);

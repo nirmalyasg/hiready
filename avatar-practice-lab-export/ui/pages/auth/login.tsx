@@ -34,6 +34,11 @@ export default function LoginPage() {
         return;
       }
 
+      if (data.role === 'admin') {
+        window.location.href = '/admin';
+        return;
+      }
+
       const sessionReturnTo = sessionStorage.getItem('returnTo');
       if (sessionReturnTo) {
         sessionStorage.removeItem('returnTo');

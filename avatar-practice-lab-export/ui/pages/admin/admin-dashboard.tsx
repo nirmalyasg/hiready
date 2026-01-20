@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAuth } from "@/hooks/useAuth";
+import a3cendLogo from "@/assets/a3cend-logo.png";
 import {
   Users,
   Activity,
@@ -18,6 +19,7 @@ import {
   AlertTriangle,
   Target,
   LogIn,
+  LogOut,
   Calendar,
   ChevronRight,
   Zap,
@@ -30,7 +32,10 @@ import {
   CheckCircle,
   XCircle,
   Filter,
-  Search
+  Search,
+  Briefcase,
+  Menu,
+  X
 } from "lucide-react";
 import {
   LineChart,
@@ -79,7 +84,7 @@ interface CostSummary {
   period: { days: number; startDate: string };
 }
 
-type Page = "overview" | "users" | "sessions" | "content" | "avatars" | "costs";
+type Page = "overview" | "users" | "sessions" | "content" | "avatars" | "costs" | "jobs";
 
 const COLORS = ["#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
 
@@ -164,58 +169,127 @@ export default function AdminDashboard() {
     { id: "sessions" as Page, label: "Sessions", icon: PlayCircle },
     { id: "content" as Page, label: "Content", icon: FileText },
     { id: "avatars" as Page, label: "Avatars", icon: Video },
-    { id: "costs" as Page, label: "Costs", icon: DollarSign }
+    { id: "costs" as Page, label: "Costs", icon: DollarSign },
+    { id: "jobs" as Page, label: "Jobs", icon: Briefcase }
   ];
 
-  return (
-    <div className="min-h-screen bg-slate-50 flex">
-      <aside className="w-56 bg-white border-r border-slate-200 flex flex-col">
-        <div className="p-5 border-b border-slate-200">
-          <Link to="/avatar/dashboard" className="flex items-center gap-2 text-slate-500 hover:text-slate-700 text-sm mb-3">
-            <ArrowLeft className="h-4 w-4" />
-            Back to App
-          </Link>
-          <h1 className="text-lg font-bold text-slate-900">Admin Console</h1>
-          <p className="text-xs text-slate-500">Practice Lab</p>
-        </div>
-        
-        <nav className="flex-1 p-3">
-          <ul className="space-y-0.5">
-            {navItems.map((item) => (
-              <li key={item.id}>
-                <button
-                  onClick={() => setActivePage(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm transition-colors ${
-                    activePage === item.id
-                      ? "bg-teal-50 text-teal-700 font-medium"
-                      : "text-slate-600 hover:bg-slate-100"
-                  }`}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </nav>
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-        <div className="p-4 border-t border-slate-200">
-          <div className="flex items-center gap-2">
-            <Badge className="bg-green-100 text-green-800 text-xs">Admin</Badge>
-            <span className="text-sm text-slate-600 truncate">{user?.username}</span>
+  return (
+    <div className="min-h-screen bg-[#f8f7fc]">
+      <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-3">
+              <Link to="/" className="flex items-center gap-3">
+                <img src={a3cendLogo} alt="A3CEND" className="h-8" />
+                <div className="h-6 w-px bg-gray-200" />
+                <span className="text-sm font-semibold text-[#000000] tracking-tight">Admin Console</span>
+              </Link>
+              <Badge className="bg-[#24c4b8]/10 text-[#24c4b8] border-[#24c4b8]/20 text-xs font-medium">Admin</Badge>
+            </div>
+            
+            <nav className="hidden md:flex items-center gap-1">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActivePage(item.id)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                      activePage === item.id 
+                        ? "bg-[#000000] text-white shadow-md" 
+                        : "text-gray-500 hover:text-[#000000] hover:bg-gray-50"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {item.label}
+                  </button>
+                );
+              })}
+            </nav>
+
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-3">
+                <div className="flex items-center gap-2.5 px-3 py-1.5 bg-gray-50 rounded-full">
+                  <div className="w-7 h-7 rounded-full bg-[#000000]/10 flex items-center justify-center">
+                    <User className="w-3.5 h-3.5 text-[#000000]" />
+                  </div>
+                  <span className="text-sm font-medium text-[#000000] hidden lg:block">
+                    {user?.username || 'Admin'}
+                  </span>
+                </div>
+                <button
+                  onClick={async () => {
+                    await fetch('/api/auth/logout', { method: 'POST' });
+                    window.location.href = '/';
+                  }}
+                  className="flex items-center justify-center w-9 h-9 text-gray-500 hover:text-[#cb6ce6] hover:bg-[#cb6ce6]/10 rounded-full transition-all duration-200"
+                  title="Sign out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden flex items-center justify-center w-10 h-10 text-[#000000] hover:bg-gray-50 rounded-xl transition-colors"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
         </div>
-      </aside>
+        
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-100 bg-white animate-in slide-in-from-top-2 duration-200">
+            <nav className="max-w-full mx-auto px-4 py-4 space-y-1">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActivePage(item.id);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                      activePage === item.id 
+                        ? "bg-[#000000] text-white shadow-md" 
+                        : "text-gray-500 hover:text-[#000000] hover:bg-gray-50"
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    {item.label}
+                  </button>
+                );
+              })}
+              
+              <div className="pt-3 mt-3 border-t border-gray-100">
+                <button
+                  onClick={async () => {
+                    await fetch('/api/auth/logout', { method: 'POST' });
+                    window.location.href = '/';
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#cb6ce6] hover:bg-[#cb6ce6]/10 transition-all duration-200"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Sign out
+                </button>
+              </div>
+            </nav>
+          </div>
+        )}
+      </header>
 
-      <main className="flex-1 overflow-auto">
-        <div className="p-6">
-          {activePage === "overview" && <OverviewPage />}
-          {activePage === "users" && <UsersPage />}
-          {activePage === "sessions" && <SessionsPage />}
-          {activePage === "content" && <ContentPage />}
-          {activePage === "avatars" && <AvatarsPage />}
-          {activePage === "costs" && <CostsPage />}
-        </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {activePage === "overview" && <OverviewPage />}
+        {activePage === "users" && <UsersPage />}
+        {activePage === "sessions" && <SessionsPage />}
+        {activePage === "content" && <ContentPage />}
+        {activePage === "avatars" && <AvatarsPage />}
+        {activePage === "costs" && <CostsPage />}
+        {activePage === "jobs" && <JobsPage />}
       </main>
     </div>
   );
@@ -1691,6 +1765,334 @@ function CostsPage() {
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+interface AdminJob {
+  id: string;
+  companyId: string;
+  companyName: string;
+  title: string;
+  jdText: string | null;
+  status: string;
+  applyLinkSlug: string;
+  candidateCount: number;
+  shareToken: string | null;
+  generatedInterviewPlan: any;
+  createdAt: string;
+}
+
+interface AdminCompany {
+  id: string;
+  name: string;
+  domain: string | null;
+}
+
+function JobsPage() {
+  const [jobs, setJobs] = useState<AdminJob[]>([]);
+  const [companies, setCompanies] = useState<AdminCompany[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<AdminJob | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [copiedToken, setCopiedToken] = useState<string | null>(null);
+  
+  const [newJob, setNewJob] = useState({
+    companyId: "",
+    companyName: "",
+    title: "",
+    jdText: ""
+  });
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  async function fetchData() {
+    setLoading(true);
+    try {
+      const [jobsRes, companiesRes] = await Promise.all([
+        fetch("/api/admin/jobs"),
+        fetch("/api/admin/companies")
+      ]);
+      
+      const jobsData = await jobsRes.json();
+      const companiesData = await companiesRes.json();
+      
+      if (jobsData.success) setJobs(jobsData.jobs);
+      if (companiesData.success) setCompanies(companiesData.companies);
+    } catch (err) {
+      console.error("Error fetching jobs:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function createJob() {
+    if (!newJob.title.trim()) return;
+    
+    setCreating(true);
+    try {
+      const res = await fetch("/api/admin/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyId: newJob.companyId || null,
+          companyName: newJob.companyName || "Demo Company",
+          title: newJob.title,
+          jdText: newJob.jdText
+        })
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        setJobs([data.job, ...jobs]);
+        setShowCreateDialog(false);
+        setNewJob({ companyId: "", companyName: "", title: "", jdText: "" });
+      }
+    } catch (err) {
+      console.error("Error creating job:", err);
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function generateShareToken(jobId: string) {
+    try {
+      const res = await fetch(`/api/admin/jobs/${jobId}/share-token`, {
+        method: "POST"
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        setJobs(jobs.map(j => j.id === jobId ? { ...j, shareToken: data.token } : j));
+      }
+    } catch (err) {
+      console.error("Error generating share token:", err);
+    }
+  }
+
+  function copyShareLink(job: AdminJob) {
+    const link = job.shareToken 
+      ? `${window.location.origin}/invite/${job.shareToken}`
+      : `${window.location.origin}/apply/${job.applyLinkSlug}`;
+    navigator.clipboard.writeText(link);
+    setCopiedToken(job.id);
+    setTimeout(() => setCopiedToken(null), 2000);
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-20">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">Job Management</h2>
+          <p className="text-slate-500 text-sm">Create jobs, generate interview plans, and share with candidates</p>
+        </div>
+        <Button onClick={() => setShowCreateDialog(true)} className="bg-[#24c4b8] hover:bg-[#1db0a5]">
+          <Briefcase className="h-4 w-4 mr-2" />
+          Add New Job
+        </Button>
+      </div>
+
+      {showCreateDialog && (
+        <Card className="border-2 border-[#24c4b8]/20">
+          <CardHeader>
+            <CardTitle className="text-base">Create New Job</CardTitle>
+            <CardDescription>Add a job description to generate an interview plan</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-slate-700 block mb-1">Company</label>
+                {companies.length > 0 ? (
+                  <select
+                    value={newJob.companyId}
+                    onChange={(e) => setNewJob({ ...newJob, companyId: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                  >
+                    <option value="">Select existing company...</option>
+                    {companies.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    value={newJob.companyName}
+                    onChange={(e) => setNewJob({ ...newJob, companyName: e.target.value })}
+                    placeholder="Enter company name"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                  />
+                )}
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700 block mb-1">Job Title</label>
+                <input
+                  type="text"
+                  value={newJob.title}
+                  onChange={(e) => setNewJob({ ...newJob, title: e.target.value })}
+                  placeholder="e.g., Senior Product Manager"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-slate-700 block mb-1">Job Description</label>
+              <textarea
+                value={newJob.jdText}
+                onChange={(e) => setNewJob({ ...newJob, jdText: e.target.value })}
+                placeholder="Paste the full job description here..."
+                rows={6}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
+              <Button 
+                onClick={createJob} 
+                disabled={creating || !newJob.title.trim()}
+                className="bg-[#24c4b8] hover:bg-[#1db0a5]"
+              >
+                {creating ? "Creating..." : "Create & Generate Interview Plan"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid gap-4">
+        {jobs.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Briefcase className="h-12 w-12 mx-auto text-slate-300 mb-4" />
+              <p className="text-slate-500">No jobs created yet. Add a job to get started.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          jobs.map((job) => (
+            <Card key={job.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="font-semibold text-lg text-slate-900">{job.title}</h3>
+                      <Badge className={`text-xs ${
+                        job.status === 'active' ? 'bg-green-100 text-green-700' :
+                        job.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-slate-100 text-slate-600'
+                      }`}>
+                        {job.status}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-slate-500 mb-3">{job.companyName || 'No company'}</p>
+                    
+                    {job.generatedInterviewPlan && (
+                      <div className="flex gap-2 flex-wrap mb-3">
+                        {job.generatedInterviewPlan.phases?.map((phase: any, idx: number) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {phase.name} ({phase.mins}min)
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center gap-4 text-xs text-slate-400">
+                      <span className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {job.candidateCount} candidates
+                      </span>
+                      <span>Created {new Date(job.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col items-end gap-2">
+                    {!job.shareToken ? (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => generateShareToken(job.id)}
+                      >
+                        Generate Link
+                      </Button>
+                    ) : (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => copyShareLink(job)}
+                        className="gap-2"
+                      >
+                        {copiedToken === job.id ? (
+                          <>
+                            <CheckCircle className="h-3 w-3 text-green-500" />
+                            Copied!
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="h-3 w-3" />
+                            Copy Link
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={() => setSelectedJob(selectedJob?.id === job.id ? null : job)}
+                    >
+                      {selectedJob?.id === job.id ? 'Hide Details' : 'View Details'}
+                    </Button>
+                  </div>
+                </div>
+                
+                {selectedJob?.id === job.id && (
+                  <div className="mt-4 pt-4 border-t border-slate-100">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="text-sm font-medium text-slate-700 mb-2">Job Description</h4>
+                        <div className="bg-slate-50 rounded-lg p-3 text-sm text-slate-600 max-h-40 overflow-y-auto">
+                          {job.jdText || 'No description provided'}
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-slate-700 mb-2">Generated Interview Plan</h4>
+                        {job.generatedInterviewPlan ? (
+                          <div className="bg-slate-50 rounded-lg p-3 text-sm space-y-2">
+                            <p><strong>Total Duration:</strong> {job.generatedInterviewPlan.totalMins || job.generatedInterviewPlan.totalMinutes} minutes</p>
+                            {job.generatedInterviewPlan.roleArchetype && (
+                              <p><strong>Role Type:</strong> {job.generatedInterviewPlan.roleArchetype.name || job.generatedInterviewPlan.roleArchetype.id}</p>
+                            )}
+                            <div>
+                              <strong>Phases:</strong>
+                              <ul className="list-disc list-inside mt-1">
+                                {job.generatedInterviewPlan.phases?.map((phase: any, idx: number) => (
+                                  <li key={idx}>{phase.name}: {phase.description}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="bg-slate-50 rounded-lg p-3 text-sm text-slate-400">
+                            No interview plan generated
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
     </div>
   );
 }

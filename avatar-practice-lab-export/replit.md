@@ -181,6 +181,28 @@ Comprehensive SEO page generation system for organic traffic acquisition with AI
 - Practice session starts from SEO pages
 - CTA click tracking for conversion optimization
 
+## Recent Changes (January 20, 2026)
+
+### Admin Job Management & Candidate Invite Flow
+Enhanced admin interface with job management capabilities:
+- **Admin Login Redirect**: Admin users (role="admin") are automatically redirected to /admin dashboard upon login
+- **Top Navigation Layout**: Admin dashboard now uses consistent top navigation header matching main app (replaced sidebar-only design)
+- **Jobs Tab**: New Jobs page for managing company job descriptions and interview sets
+- **Automatic Interview Plan Generation**: When admins add a job description, the system automatically generates an interview plan using `buildEmployerInterviewPlan()`
+- **Shareable Links**: Admins can generate share tokens for jobs that candidates can use to access interview practice
+- **Candidate Invite Flow**: The /invite/:token page handles login redirect with autoClaim parameter for seamless access granting
+- **Database Tables Used**: Uses `companyShareLinks` table (not `interviewSetShareTokens`) for share token management
+
+**API Endpoints**:
+- `GET /api/admin/jobs` - List all admin jobs with company info and share tokens
+- `POST /api/admin/jobs` - Create job with automatic interview plan generation
+- `POST /api/admin/jobs/:jobId/share-token` - Generate shareable link for candidates
+- `GET /api/admin/companies` - List employer companies for job creation
+
+**Frontend Components**:
+- `ui/pages/admin/admin-dashboard.tsx` - Main admin dashboard with Jobs, Scenarios, Personas tabs
+- `ui/pages/invite/page.tsx` - Candidate invite page with login redirect and auto-claim flow
+
 ## Recent Changes (January 9, 2026)
 
 ### Dynamic JD-Specific Assessment Dimensions
