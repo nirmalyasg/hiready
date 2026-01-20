@@ -1813,8 +1813,7 @@ adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
         u.id as "userId",
         u.username,
         u.email,
-        u.first_name as "firstName",
-        u.last_name as "lastName",
+        u.display_name as "displayName",
         csla.accessed_at as "claimedAt",
         jt.id as "jobTargetId",
         CASE 
@@ -1856,9 +1855,7 @@ adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
       JOIN company_share_link_access csla ON csla.user_id = u.id
       JOIN company_share_links csl ON csl.id = csla.share_link_id
       JOIN interview_sets iset ON iset.id = csl.interview_set_id
-      LEFT JOIN job_targets jt ON jt.user_id = u.id AND jt.source = 'company' AND jt.role_kit_id = (
-        SELECT rk.id FROM role_kits rk WHERE rk.name = ${job.title} LIMIT 1
-      )
+      LEFT JOIN job_targets jt ON jt.user_id = u.id::varchar AND jt.source = 'company'
       WHERE iset.job_description LIKE ${'%employerJobId:' + jobId + '%'} 
          OR iset.name = ${job.title}
       ORDER BY u.id, csla.accessed_at DESC

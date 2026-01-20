@@ -1811,12 +1811,9 @@ interface JobCandidate {
   userId: string;
   username: string;
   email: string;
-  firstName: string | null;
-  lastName: string | null;
+  displayName: string | null;
   claimedAt: string | null;
-  completedAt?: string | null;
   hireadyIndex: number | null;
-  overallScore?: number | null;
   sessionCount: number;
   lastSessionDate: string | null;
   status: 'completed' | 'in_progress' | 'not_started';
@@ -2325,9 +2322,7 @@ function JobsPage() {
                                 <td className="py-2 px-2">
                                   <div>
                                     <p className="font-medium text-slate-900">
-                                      {candidate.firstName && candidate.lastName 
-                                        ? `${candidate.firstName} ${candidate.lastName}` 
-                                        : candidate.username}
+                                      {candidate.displayName || candidate.username}
                                     </p>
                                     <p className="text-xs text-slate-400">{candidate.email}</p>
                                   </div>
