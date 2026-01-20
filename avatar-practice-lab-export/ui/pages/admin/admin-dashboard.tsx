@@ -94,6 +94,7 @@ export default function AdminDashboard() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
   const [activePage, setActivePage] = useState<Page>("overview");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     checkAdminAccess();
@@ -172,8 +173,6 @@ export default function AdminDashboard() {
     { id: "costs" as Page, label: "Costs", icon: DollarSign },
     { id: "jobs" as Page, label: "Jobs", icon: Briefcase }
   ];
-
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#f8f7fc]">

@@ -1588,7 +1588,7 @@ adminRouter.post("/jobs", requireAdmin, async (req, res) => {
     if (!finalCompanyId && companyName) {
       const [newCompany] = await db.insert(employerCompanies).values({
         name: companyName,
-        plan: "trial"
+        plan: "free"
       }).returning();
       finalCompanyId = newCompany.id;
       finalCompanyName = newCompany.name;
@@ -1600,7 +1600,7 @@ adminRouter.post("/jobs", requireAdmin, async (req, res) => {
       } else {
         const [newCompany] = await db.insert(employerCompanies).values({
           name: "Demo Company",
-          plan: "trial"
+          plan: "free"
         }).returning();
         finalCompanyId = newCompany.id;
         finalCompanyName = newCompany.name;
@@ -1614,10 +1614,10 @@ adminRouter.post("/jobs", requireAdmin, async (req, res) => {
 
     const applyLinkSlug = generateSlug(title, finalCompanyName);
 
-    let generatedInterviewPlan = null;
-    let roleArchetypeId = null;
-    let companyArchetype = null;
-    let archetypeConfidence = null;
+    let generatedInterviewPlan: any = null;
+    let roleArchetypeId: string | null = null;
+    let companyArchetype: string | null = null;
+    let archetypeConfidence: number | null = null;
 
     if (jdText || title) {
       try {
@@ -1628,11 +1628,12 @@ adminRouter.post("/jobs", requireAdmin, async (req, res) => {
           "mid"
         );
         
-        roleArchetypeId = generatedInterviewPlan.roleArchetype?.id || null;
-        companyArchetype = generatedInterviewPlan.companyArchetype?.type || null;
-        archetypeConfidence = generatedInterviewPlan.companyArchetype?.confidence || null;
-
-        console.log(`Generated admin interview plan for job "${title}": ${generatedInterviewPlan.phases?.length || 0} phases, ${generatedInterviewPlan.totalMins} mins`);
+        if (generatedInterviewPlan) {
+          roleArchetypeId = generatedInterviewPlan.roleArchetype?.id || null;
+          companyArchetype = generatedInterviewPlan.companyArchetype?.type || null;
+          archetypeConfidence = generatedInterviewPlan.companyArchetype?.confidence || null;
+          console.log(`Generated admin interview plan for job "${title}": ${generatedInterviewPlan.phases?.length || 0} phases, ${generatedInterviewPlan.totalMins} mins`);
+        }
       } catch (planError: any) {
         console.error("Error generating interview plan:", planError);
       }
