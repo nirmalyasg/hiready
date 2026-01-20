@@ -180,7 +180,7 @@ export async function calculateConsolidatedHireadyIndex(
       : data.totalScore / data.count;
     return {
       dimension,
-      score: Math.round(Math.min(5, weightedAvg) * 10) / 10,
+      score: normalizeScore(weightedAvg, data.maxScore),
       maxScore: data.maxScore,
       evidence: [...new Set(data.evidence)].slice(0, 3),
       weight: 1 / Object.keys(dimensionAggregates).length,

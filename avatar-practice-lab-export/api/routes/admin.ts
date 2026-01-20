@@ -1881,7 +1881,7 @@ adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
 });
 
 // Admin view of candidate job target and HiReady Index
-adminRouter.get("/candidate-report/:jobTargetId", requireAdmin, async (req: Request, res: Response) => {
+adminRouter.get("/candidate-report/:jobTargetId", requireAdmin, async (req, res) => {
   try {
     const { jobTargetId } = req.params;
 
