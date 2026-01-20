@@ -1820,12 +1820,15 @@ adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
           WHEN jt.id IS NOT NULL AND EXISTS (
             SELECT 1 FROM interview_sessions isess
             JOIN interview_configs ic ON ic.id = isess.interview_config_id
-            WHERE ic.job_target_id = jt.id AND isess.status = 'completed'
+            JOIN interview_analysis ia ON ia.interview_session_id = isess.id
+            WHERE ic.job_target_id = jt.id
           ) THEN 'completed'
           WHEN jt.id IS NOT NULL AND EXISTS (
-            SELECT 1 FROM interview_configs ic
+            SELECT 1 FROM interview_sessions isess
+            JOIN interview_configs ic ON ic.id = isess.interview_config_id
             WHERE ic.job_target_id = jt.id
           ) THEN 'in_progress'
+          WHEN jt.id IS NOT NULL THEN 'not_started'
           ELSE 'not_started'
         END as "status",
         COALESCE((
@@ -1842,7 +1845,14 @@ adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
           ORDER BY isess.created_at DESC 
           LIMIT 1
         ) as "lastSessionDate",
-        NULL::int as "hireadyIndex"
+        (
+          SELECT ROUND(AVG((elem->>'score')::numeric) * 12.5)::int
+          FROM interview_analysis ia
+          JOIN interview_sessions isess ON isess.id = ia.interview_session_id
+          JOIN interview_configs ic ON ic.id = isess.interview_config_id,
+          LATERAL jsonb_array_elements(ia.dimension_scores) AS elem
+          WHERE jt.id IS NOT NULL AND ic.job_target_id = jt.id
+        ) as "hireadyIndex"
       FROM users u
       JOIN company_share_link_access csla ON csla.user_id = u.id
       JOIN company_share_links csl ON csl.id = csla.share_link_id

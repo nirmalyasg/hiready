@@ -2313,7 +2313,8 @@ function JobsPage() {
                                 </span>
                               </th>
                               <th className="text-center py-2 px-2 font-medium text-slate-600">Status</th>
-                              <th className="text-right py-2 px-2 font-medium text-slate-600">Last Activity</th>
+                              <th className="text-center py-2 px-2 font-medium text-slate-600">Last Activity</th>
+                              <th className="text-right py-2 px-2 font-medium text-slate-600">Actions</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -2355,10 +2356,25 @@ function JobsPage() {
                                     <Badge className="bg-slate-100 text-slate-600 text-xs">Not Started</Badge>
                                   )}
                                 </td>
-                                <td className="text-right py-2 px-2 text-slate-500">
+                                <td className="text-center py-2 px-2 text-slate-500">
                                   {candidate.lastSessionDate 
                                     ? new Date(candidate.lastSessionDate).toLocaleDateString()
                                     : '—'}
+                                </td>
+                                <td className="text-right py-2 px-2">
+                                  {candidate.jobTargetId ? (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="text-xs text-[#24c4b8] hover:text-[#1db0a5] hover:bg-[#24c4b8]/10 gap-1"
+                                      onClick={() => window.open(`/jobs/${candidate.jobTargetId}`, '_blank')}
+                                    >
+                                      <ExternalLink className="h-3 w-3" />
+                                      View Report
+                                    </Button>
+                                  ) : (
+                                    <span className="text-xs text-slate-400">—</span>
+                                  )}
                                 </td>
                               </tr>
                             ))}
