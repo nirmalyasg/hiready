@@ -223,14 +223,14 @@ router.get("/share/validate/:token", async (req: Request, res: Response) => {
 router.post("/share/claim/:token", async (req: Request, res: Response) => {
   try {
     const authUserId = (req as any).user?.id;
+    const authUsername = (req as any).user?.username || 'user';
     if (!authUserId) {
       return res.status(401).json({ error: "Not authenticated" });
     }
 
-    const legacyUserId = await getLegacyUserId(authUserId);
-    if (!legacyUserId) {
-      return res.status(500).json({ error: "Failed to resolve user" });
-    }
+    // Use getOrCreateLegacyUser to ensure the user exists
+    const legacyUser = await storage.getOrCreateLegacyUser(authUserId, authUsername);
+    const legacyUserId = legacyUser.id;
 
     const { token } = req.params;
     const result = await validateShareToken(token);

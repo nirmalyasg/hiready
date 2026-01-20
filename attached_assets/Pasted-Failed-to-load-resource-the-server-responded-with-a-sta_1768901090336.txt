@@ -1,0 +1,38 @@
+Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+page.tsx:42 Failed to claim access: Error: Failed to claim access
+    at Object.mutationFn (use-entitlements.ts:123:15)
+handleClaimAccess @ page.tsx:42Understand this error
+/api/monetization/share/claim/st_mkmdv8bm_e41j12izahq:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+page.tsx:42 Failed to claim access: Error: Failed to claim access
+    at Object.mutationFn (use-entitlements.ts:123:15)
+handleClaimAccess @ page.tsx:42Understand this error
+/api/monetization/share/claim/st_mkmdv8bm_e41j12izahq:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+page.tsx:42 Failed to claim access: Error: Failed to claim access
+    at Object.mutationFn (use-entitlements.ts:123:15)
+handleClaimAccess @ page.tsx:42Understand this error
+use-entitlements.ts:117  POST https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/api/monetization/share/claim/st_mkmdv8bm_e41j12izahq 500 (Internal Server Error)
+mutationFn @ use-entitlements.ts:117
+fn @ @tanstack_react-query.js?v=57a8ee03:2010
+run @ @tanstack_react-query.js?v=57a8ee03:800
+start @ @tanstack_react-query.js?v=57a8ee03:843
+execute @ @tanstack_react-query.js?v=57a8ee03:2051
+await in execute
+mutate @ @tanstack_react-query.js?v=57a8ee03:2390
+handleClaimAccess @ page.tsx:36
+callCallback2 @ chunk-RPCDYKBN.js?v=57a8ee03:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=57a8ee03:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=57a8ee03:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=57a8ee03:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=57a8ee03:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=57a8ee03:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=57a8ee03:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=57a8ee03:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=57a8ee03:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=57a8ee03:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=57a8ee03:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=57a8ee03:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=57a8ee03:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=57a8ee03:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=57a8ee03:5449Understand this error
+page.tsx:42 Failed to claim access: Error: Failed to claim access
+    at Object.mutationFn (use-entitlements.ts:123:15)
