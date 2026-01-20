@@ -42,7 +42,8 @@ import {
   Edit2,
   Save,
   Link2,
-  Award
+  Award,
+  ExternalLink
 } from "lucide-react";
 import {
   LineChart,
