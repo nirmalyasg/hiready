@@ -7,7 +7,7 @@ import {
   paymentSubscriptions,
   userEntitlements
 } from "../../shared/schema.js";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql } from "drizzle-orm";
 import {
   getEntitlementStatus,
   checkInterviewAccess,
@@ -47,6 +47,50 @@ router.get("/entitlements", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error fetching entitlements:", error);
     res.status(500).json({ error: "Failed to fetch entitlements" });
+  }
+});
+
+router.get("/my-job-targets", async (req: Request, res: Response) => {
+  try {
+    const authUserId = (req as any).user?.id;
+    if (!authUserId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const legacyUserId = await getLegacyUserId(authUserId);
+    if (!legacyUserId) {
+      return res.status(500).json({ error: "Failed to resolve user" });
+    }
+
+    const entitledSets = await db.execute(sql`
+      SELECT DISTINCT 
+        iset.id,
+        iset.name,
+        iset.description,
+        iset.interview_types as "interviewTypes",
+        iset.job_description as "jobDescription",
+        csl.company_name as "companyName",
+        csla.accessed_at as "claimedAt",
+        ej.id as "employerJobId",
+        ej.title as "jobTitle",
+        ej.jd_text as "jdText",
+        ej.generated_interview_plan as "interviewPlan"
+      FROM company_share_link_access csla
+      JOIN company_share_links csl ON csla.share_link_id = csl.id
+      JOIN interview_sets iset ON csla.interview_set_id = iset.id
+      LEFT JOIN employer_jobs ej ON iset.job_description LIKE '%employerJobId:' || ej.id || '%'
+      WHERE csla.user_id = ${legacyUserId}
+      ORDER BY csla.accessed_at DESC
+    `);
+
+    res.json({ 
+      success: true, 
+      jobTargets: entitledSets.rows,
+      hasEntitledJobs: entitledSets.rows.length > 0
+    });
+  } catch (error) {
+    console.error("Error fetching job targets:", error);
+    res.status(500).json({ error: "Failed to fetch job targets" });
   }
 });
 

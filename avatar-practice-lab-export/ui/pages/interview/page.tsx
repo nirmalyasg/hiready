@@ -25,6 +25,17 @@ interface JobTarget {
   status: string;
 }
 
+interface EntitledJob {
+  id: number;
+  name: string;
+  description: string | null;
+  interviewTypes: string[];
+  companyName: string | null;
+  claimedAt: string;
+  jobTitle: string | null;
+  interviewPlan: any;
+}
+
 const domainColors: Record<string, string> = {
   software: "bg-slate-900",
   data: "bg-[#cb6ce6]",
@@ -53,21 +64,26 @@ export default function InterviewPracticePage() {
   
   const [savedJobs, setSavedJobs] = useState<JobTarget[]>([]);
   const [roleKits, setRoleKits] = useState<RoleKit[]>([]);
+  const [entitledJobs, setEntitledJobs] = useState<EntitledJob[]>([]);
+  const [hasEntitledJobsOnly, setHasEntitledJobsOnly] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [jobsRes, rolesRes] = await Promise.all([
+        const [jobsRes, rolesRes, entitledRes] = await Promise.all([
           fetch("/api/jobs"),
-          fetch("/api/interview/role-kits")
+          fetch("/api/interview/role-kits"),
+          fetch("/api/monetization/my-job-targets")
         ]);
 
+        let userSavedJobs: JobTarget[] = [];
         if (jobsRes.ok) {
           const jobsData = await jobsRes.json();
           if (jobsData.success) {
-            setSavedJobs(jobsData.jobs.filter((j: JobTarget) => j.status !== "archived").slice(0, 4));
+            userSavedJobs = jobsData.jobs.filter((j: JobTarget) => j.status !== "archived").slice(0, 4);
+            setSavedJobs(userSavedJobs);
           }
         }
 
@@ -77,6 +93,20 @@ export default function InterviewPracticePage() {
             setRoleKits(rolesData.roleKits.slice(0, 6));
           }
         }
+
+        if (entitledRes.ok) {
+          const entitledData = await entitledRes.json();
+          if (entitledData.success && entitledData.jobTargets?.length > 0) {
+            setEntitledJobs(entitledData.jobTargets);
+            if (userSavedJobs.length === 0 && entitledData.jobTargets.length === 1) {
+              navigate(`/interview/config?setId=${entitledData.jobTargets[0].id}`);
+              return;
+            }
+            if (userSavedJobs.length === 0) {
+              setHasEntitledJobsOnly(true);
+            }
+          }
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -84,7 +114,7 @@ export default function InterviewPracticePage() {
       }
     };
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const isUrl = (text: string) => {
     const trimmed = text.trim();
@@ -164,8 +194,64 @@ export default function InterviewPracticePage() {
     <SidebarLayout>
       <div className="min-h-screen bg-[#fbfbfc]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+
+          {/* Entitled Jobs Section - Shows for users who came via invite link */}
+          {entitledJobs.length > 0 && (
+            <section className="mb-8">
+              <div className="text-center mb-6">
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
+                  Your Interview Practice
+                </h1>
+                <p className="text-slate-500 text-sm sm:text-base">
+                  {hasEntitledJobsOnly 
+                    ? "You have access to the following job interview practice"
+                    : "Practice for your assigned job interviews"}
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {entitledJobs.map((job) => (
+                  <button
+                    key={job.id}
+                    onClick={() => navigate(`/interview/config?setId=${job.id}`)}
+                    className="w-full bg-white rounded-2xl border-2 border-[#24c4b8]/30 p-5 text-left hover:border-[#24c4b8] hover:shadow-lg transition-all group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-[#24c4b8]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <Briefcase className="w-6 h-6 text-[#24c4b8]" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-slate-900 text-lg group-hover:text-[#24c4b8] transition-colors">
+                            {job.jobTitle || job.name}
+                          </h3>
+                          {job.companyName && (
+                            <div className="flex items-center gap-2 text-slate-500 text-sm mt-0.5">
+                              <Building2 className="w-3.5 h-3.5" />
+                              <span>{job.companyName}</span>
+                            </div>
+                          )}
+                          {job.interviewTypes && job.interviewTypes.length > 0 && (
+                            <div className="flex gap-2 mt-2">
+                              {(job.interviewTypes as string[]).map((type, i) => (
+                                <span key={i} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full capitalize">
+                                  {type}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-[#24c4b8] group-hover:translate-x-1 transition-all" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
           
-          {/* Section 1: Add Job Input */}
+          {/* Section 1: Add Job Input - Hidden if user only has entitled jobs */}
+          {!hasEntitledJobsOnly && (
           <section className="text-center">
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
               What job are you preparing for?
@@ -222,15 +308,19 @@ export default function InterviewPracticePage() {
               </div>
             </div>
           </section>
+          )}
 
-          {/* Divider */}
+          {/* Divider - Hidden if user only has entitled jobs */}
+          {!hasEntitledJobsOnly && (
           <div className="flex items-center gap-4">
             <div className="flex-1 h-px bg-slate-200" />
             <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">or choose below</span>
             <div className="flex-1 h-px bg-slate-200" />
           </div>
+          )}
 
-          {/* Section 2: Target Jobs */}
+          {/* Section 2: Target Jobs - Hidden if user only has entitled jobs */}
+          {!hasEntitledJobsOnly && (
           <section>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -283,8 +373,10 @@ export default function InterviewPracticePage() {
               </div>
             )}
           </section>
+          )}
 
-          {/* Section 3: Role Library */}
+          {/* Section 3: Role Library - Hidden if user only has entitled jobs */}
+          {!hasEntitledJobsOnly && (
           <section>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -332,6 +424,7 @@ export default function InterviewPracticePage() {
               </div>
             )}
           </section>
+          )}
         </div>
       </div>
     </SidebarLayout>
