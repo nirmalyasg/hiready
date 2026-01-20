@@ -1556,7 +1556,14 @@ adminRouter.get("/jobs", requireAdmin, async (req, res) => {
         j.jd_text as "jdText",
         j.status,
         j.apply_link_slug as "applyLinkSlug",
-        j.candidate_count as "candidateCount",
+        COALESCE(
+          (SELECT COUNT(DISTINCT csla.user_id)::int 
+           FROM company_share_link_access csla
+           JOIN company_share_links csl2 ON csl2.id = csla.share_link_id
+           JOIN interview_sets iset2 ON iset2.id = csl2.interview_set_id
+           WHERE iset2.job_description LIKE '%employerJobId:' || j.id || '%' OR iset2.name = j.title
+          ), 0
+        ) as "candidateCount",
         j.generated_interview_plan as "generatedInterviewPlan",
         j.created_at as "createdAt",
         csl.share_token as "shareToken"
@@ -1797,11 +1804,9 @@ adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
       LIMIT 1
     `);
 
-    if (interviewSetResult.rows.length === 0) {
-      return res.json({ success: true, candidates: [] });
-    }
-
-    const interviewSetId = (interviewSetResult.rows[0] as any).id;
+    const interviewSetId = interviewSetResult.rows.length > 0 
+      ? (interviewSetResult.rows[0] as any).id 
+      : null;
 
     const candidates = await db.execute(sql`
       SELECT DISTINCT ON (u.id)
@@ -1810,63 +1815,53 @@ adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
         u.email,
         u.first_name as "firstName",
         u.last_name as "lastName",
-        (
-          SELECT s.ended_at 
-          FROM avatar_sessions s 
-          WHERE s.user_id = u.id 
-          AND s.ended_at IS NOT NULL
-          AND s.feedback_data IS NOT NULL
-          AND (s.interview_set_id = ${interviewSetId} OR s.metadata->>'interviewSetId' = ${interviewSetId.toString()})
-          ORDER BY s.ended_at DESC 
-          LIMIT 1
-        ) as "completedAt",
+        csla.accessed_at as "claimedAt",
+        jt.id as "jobTargetId",
+        CASE 
+          WHEN EXISTS (
+            SELECT 1 FROM interview_sessions isess
+            JOIN interview_configs ic ON ic.id = isess.interview_config_id
+            WHERE ic.job_target_id = jt.id AND isess.status = 'completed'
+          ) THEN 'completed'
+          WHEN EXISTS (
+            SELECT 1 FROM interview_configs ic
+            WHERE ic.job_target_id = jt.id
+          ) THEN 'in_progress'
+          ELSE 'not_started'
+        END as "status",
         (
           SELECT COUNT(*)::int 
-          FROM avatar_sessions s 
-          WHERE s.user_id = u.id 
-          AND (s.interview_set_id = ${interviewSetId} OR s.metadata->>'interviewSetId' = ${interviewSetId.toString()})
+          FROM interview_sessions isess
+          JOIN interview_configs ic ON ic.id = isess.interview_config_id
+          WHERE ic.job_target_id = jt.id
         ) as "sessionCount",
         (
-          SELECT s.created_at 
-          FROM avatar_sessions s 
-          WHERE s.user_id = u.id 
-          AND (s.interview_set_id = ${interviewSetId} OR s.metadata->>'interviewSetId' = ${interviewSetId.toString()})
-          ORDER BY s.created_at DESC 
+          SELECT isess.created_at 
+          FROM interview_sessions isess
+          JOIN interview_configs ic ON ic.id = isess.interview_config_id
+          WHERE ic.job_target_id = jt.id
+          ORDER BY isess.created_at DESC 
           LIMIT 1
         ) as "lastSessionDate",
         (
-          SELECT s.feedback_data->>'overallScore' 
-          FROM avatar_sessions s 
-          WHERE s.user_id = u.id 
-          AND s.feedback_data IS NOT NULL
-          AND (s.interview_set_id = ${interviewSetId} OR s.metadata->>'interviewSetId' = ${interviewSetId.toString()})
-          ORDER BY s.created_at DESC 
+          SELECT ia.overall_score
+          FROM interview_analysis ia
+          JOIN interview_sessions isess ON isess.id = ia.interview_session_id
+          JOIN interview_configs ic ON ic.id = isess.interview_config_id
+          WHERE ic.job_target_id = jt.id
+          ORDER BY ia.created_at DESC
           LIMIT 1
-        )::int as "overallScore",
-        (
-          SELECT ROUND((
-            COALESCE((s.feedback_data->>'technicalScore')::numeric, 0) * 0.3 +
-            COALESCE((s.feedback_data->>'communicationScore')::numeric, 0) * 0.25 +
-            COALESCE((s.feedback_data->>'structureScore')::numeric, 0) * 0.2 +
-            COALESCE((s.feedback_data->>'confidenceScore')::numeric, 0) * 0.15 +
-            COALESCE((s.feedback_data->>'relevanceScore')::numeric, 0) * 0.1
-          ))::int
-          FROM avatar_sessions s 
-          WHERE s.user_id = u.id 
-          AND s.feedback_data IS NOT NULL
-          AND (s.interview_set_id = ${interviewSetId} OR s.metadata->>'interviewSetId' = ${interviewSetId.toString()})
-          ORDER BY s.created_at DESC 
-          LIMIT 1
-        ) as "hireadyIndex"
-      FROM users u
-      LEFT JOIN user_entitlements ue ON ue.user_id = u.id AND ue.interview_set_id = ${interviewSetId}
-      WHERE ue.id IS NOT NULL
-      OR EXISTS (
-        SELECT 1 FROM avatar_sessions s 
-        WHERE s.user_id = u.id 
-        AND (s.interview_set_id = ${interviewSetId} OR s.metadata->>'interviewSetId' = ${interviewSetId.toString()})
+        )::int as "hireadyIndex"
+      FROM auth_users u
+      JOIN company_share_link_access csla ON csla.user_id = u.id
+      JOIN company_share_links csl ON csl.id = csla.share_link_id
+      JOIN interview_sets iset ON iset.id = csl.interview_set_id
+      LEFT JOIN job_targets jt ON jt.user_id = u.id AND jt.source = 'company' AND jt.role_kit_id = (
+        SELECT rk.id FROM role_kits rk WHERE rk.name = ${job.title} LIMIT 1
       )
-      ORDER BY u.id, "lastSessionDate" DESC NULLS LAST
+      WHERE iset.job_description LIKE ${'%employerJobId:' + jobId + '%'} 
+         OR iset.name = ${job.title}
+      ORDER BY u.id, csla.accessed_at DESC
     `);
 
     res.json({ success: true, candidates: candidates.rows });

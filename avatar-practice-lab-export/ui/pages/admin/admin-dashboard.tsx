@@ -1813,11 +1813,14 @@ interface JobCandidate {
   email: string;
   firstName: string | null;
   lastName: string | null;
-  completedAt: string | null;
+  claimedAt: string | null;
+  completedAt?: string | null;
   hireadyIndex: number | null;
-  overallScore: number | null;
+  overallScore?: number | null;
   sessionCount: number;
   lastSessionDate: string | null;
+  status: 'completed' | 'in_progress' | 'not_started';
+  jobTargetId: string | null;
 }
 
 function JobsPage() {
@@ -2304,6 +2307,7 @@ function JobsPage() {
                           <thead>
                             <tr className="border-b border-slate-100">
                               <th className="text-left py-2 px-2 font-medium text-slate-600">Candidate</th>
+                              <th className="text-center py-2 px-2 font-medium text-slate-600">Claimed</th>
                               <th className="text-center py-2 px-2 font-medium text-slate-600">Sessions</th>
                               <th className="text-center py-2 px-2 font-medium text-slate-600">
                                 <span className="flex items-center justify-center gap-1">
@@ -2328,6 +2332,11 @@ function JobsPage() {
                                     <p className="text-xs text-slate-400">{candidate.email}</p>
                                   </div>
                                 </td>
+                                <td className="text-center py-2 px-2 text-xs text-slate-500">
+                                  {candidate.claimedAt 
+                                    ? new Date(candidate.claimedAt).toLocaleDateString()
+                                    : '—'}
+                                </td>
                                 <td className="text-center py-2 px-2">{candidate.sessionCount}</td>
                                 <td className="text-center py-2 px-2">
                                   {candidate.hireadyIndex !== null ? (
@@ -2343,9 +2352,9 @@ function JobsPage() {
                                   )}
                                 </td>
                                 <td className="text-center py-2 px-2">
-                                  {candidate.completedAt ? (
+                                  {candidate.status === 'completed' ? (
                                     <Badge className="bg-green-100 text-green-700 text-xs">Completed</Badge>
-                                  ) : candidate.sessionCount > 0 ? (
+                                  ) : candidate.status === 'in_progress' ? (
                                     <Badge className="bg-yellow-100 text-yellow-700 text-xs">In Progress</Badge>
                                   ) : (
                                     <Badge className="bg-slate-100 text-slate-600 text-xs">Not Started</Badge>
