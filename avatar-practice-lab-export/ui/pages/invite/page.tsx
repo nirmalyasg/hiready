@@ -156,7 +156,7 @@ export default function InvitePage() {
 
           <Button 
             onClick={handleClaimAccess}
-            disabled={claimMutation.isPending || authLoading}
+            disabled={claimMutation.isPending}
             className="w-full bg-[#24c4b8] hover:bg-[#1db0a5] h-14 text-base font-semibold group"
           >
             {claimMutation.isPending ? (
