@@ -1,0 +1,33 @@
+react-router-dom.js?v=57a8ee03:4413 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+react-router-dom.js?v=57a8ee03:4413 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+2
+recharts.js?v=57a8ee03:8915 The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+api/admin/jobs/9d0d9…10da97/candidates:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+api/admin/jobs/9d0d9…10da97/candidates:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+api/admin/jobs/9d0d9…10da97/candidates:1 
+ Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+admin-dashboard.tsx:1980 
+ GET https://d1bb1e35-7df0-4766-bac4-7185ede4642a-00-18k20sb81pb5p.janeway.replit.dev/api/admin/jobs/9d0d9a50-0314-47d9-a637-00e55010da97/candidates 500 (Internal Server Error)
+fetchJobCandidates	@	admin-dashboard.tsx:1980
+onClick	@	admin-dashboard.tsx:2118
+
+﻿
+
+Press ctrl i to turn on code suggestions. Press ctrl x to disable code suggestions.
+ctrl
+i
+ to turn on code suggestions. Don't show again NEW
+
+MCP server
+Let your favourite coding agent debug your pages at runtime, using the Chrome DevTools MCP server.
+
+Improved trace sharing
+Optionally include resource content and script source maps in exported performance traces.
+
+Support for @starting-style
+Debug and identify CSS entry animations using the new adorner in the Elements panel.

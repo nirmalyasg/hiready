@@ -1817,40 +1817,32 @@ adminRouter.get("/jobs/:jobId/candidates", requireAdmin, async (req, res) => {
         csla.accessed_at as "claimedAt",
         jt.id as "jobTargetId",
         CASE 
-          WHEN EXISTS (
+          WHEN jt.id IS NOT NULL AND EXISTS (
             SELECT 1 FROM interview_sessions isess
             JOIN interview_configs ic ON ic.id = isess.interview_config_id
             WHERE ic.job_target_id = jt.id AND isess.status = 'completed'
           ) THEN 'completed'
-          WHEN EXISTS (
+          WHEN jt.id IS NOT NULL AND EXISTS (
             SELECT 1 FROM interview_configs ic
             WHERE ic.job_target_id = jt.id
           ) THEN 'in_progress'
           ELSE 'not_started'
         END as "status",
-        (
+        COALESCE((
           SELECT COUNT(*)::int 
           FROM interview_sessions isess
           JOIN interview_configs ic ON ic.id = isess.interview_config_id
-          WHERE ic.job_target_id = jt.id
-        ) as "sessionCount",
+          WHERE jt.id IS NOT NULL AND ic.job_target_id = jt.id
+        ), 0) as "sessionCount",
         (
           SELECT isess.created_at 
           FROM interview_sessions isess
           JOIN interview_configs ic ON ic.id = isess.interview_config_id
-          WHERE ic.job_target_id = jt.id
+          WHERE jt.id IS NOT NULL AND ic.job_target_id = jt.id
           ORDER BY isess.created_at DESC 
           LIMIT 1
         ) as "lastSessionDate",
-        (
-          SELECT ia.overall_score
-          FROM interview_analysis ia
-          JOIN interview_sessions isess ON isess.id = ia.interview_session_id
-          JOIN interview_configs ic ON ic.id = isess.interview_config_id
-          WHERE ic.job_target_id = jt.id
-          ORDER BY ia.created_at DESC
-          LIMIT 1
-        )::int as "hireadyIndex"
+        NULL::int as "hireadyIndex"
       FROM users u
       JOIN company_share_link_access csla ON csla.user_id = u.id
       JOIN company_share_links csl ON csl.id = csla.share_link_id
