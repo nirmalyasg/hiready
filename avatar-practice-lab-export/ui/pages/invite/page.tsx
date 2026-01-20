@@ -33,10 +33,16 @@ export default function InvitePage() {
     }
 
     try {
-      await claimMutation.mutateAsync(token);
+      const result = await claimMutation.mutateAsync(token);
       setClaimed(true);
       setTimeout(() => {
-        navigate(`/interview?setId=${shareData?.interviewSet?.id}`);
+        // If a job target was created, redirect to that job page
+        if (result?.jobTargetId) {
+          navigate(`/jobs/${result.jobTargetId}`);
+        } else {
+          // Fallback to interview page
+          navigate(`/interview`);
+        }
       }, 2000);
     } catch (err) {
       console.error('Failed to claim access:', err);

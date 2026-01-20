@@ -5,7 +5,10 @@ import {
   companyShareLinks,
   interviewSetPurchases,
   paymentSubscriptions,
-  userEntitlements
+  userEntitlements,
+  employerJobs,
+  employerCompanies,
+  jobTargets
 } from "../../shared/schema.js";
 import { eq, desc, and, sql } from "drizzle-orm";
 import {
@@ -239,15 +242,78 @@ router.post("/share/claim/:token", async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, reason: result.reason });
     }
 
+    // Grant share link access (for entitlement tracking)
     await grantShareLinkAccess(
       legacyUserId,
       result.shareLink!.id,
       result.interviewSet!.id
     );
 
+    // Find the employer job associated with this interview set
+    // The interview set's jobDescription field contains 'employerJobId:xxx'
+    let newJobTargetId: string | null = null;
+    const interviewSet = result.interviewSet!;
+    
+    // Try to find employer job ID from the interview set
+    const jobDescMatch = interviewSet.jobDescription?.match(/employerJobId:([a-f0-9-]+)/i);
+    
+    if (jobDescMatch) {
+      const employerJobId = jobDescMatch[1];
+      
+      // Fetch the employer job details
+      const [employerJob] = await db
+        .select({
+          id: employerJobs.id,
+          title: employerJobs.title,
+          jdText: employerJobs.jdText,
+          roleKitId: employerJobs.roleKitId,
+          roleArchetypeId: employerJobs.roleArchetypeId,
+          companyName: employerCompanies.name,
+        })
+        .from(employerJobs)
+        .leftJoin(employerCompanies, eq(employerJobs.companyId, employerCompanies.id))
+        .where(eq(employerJobs.id, employerJobId));
+      
+      if (employerJob) {
+        // Check if this job already exists in user's job targets
+        const existingJobTarget = await db
+          .select({ id: jobTargets.id })
+          .from(jobTargets)
+          .where(and(
+            eq(jobTargets.userId, authUserId),
+            eq(jobTargets.roleTitle, employerJob.title),
+            eq(jobTargets.companyName, employerJob.companyName || '')
+          ))
+          .limit(1);
+        
+        if (existingJobTarget.length > 0) {
+          // Job already exists, use existing one
+          newJobTargetId = existingJobTarget[0].id;
+        } else {
+          // Create a new job target for the user
+          const [newJobTarget] = await db
+            .insert(jobTargets)
+            .values({
+              userId: authUserId,
+              source: 'company',
+              roleTitle: employerJob.title,
+              companyName: employerJob.companyName || result.shareLink!.companyName,
+              jdText: employerJob.jdText,
+              roleKitId: employerJob.roleKitId,
+              roleArchetypeId: employerJob.roleArchetypeId,
+              status: 'saved',
+            })
+            .returning({ id: jobTargets.id });
+          
+          newJobTargetId = newJobTarget.id;
+        }
+      }
+    }
+
     res.json({
       success: true,
       interviewSetId: result.interviewSet!.id,
+      jobTargetId: newJobTargetId,
       message: "Access granted to interview set"
     });
   } catch (error) {

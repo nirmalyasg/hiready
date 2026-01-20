@@ -23,6 +23,7 @@ interface JobTarget {
   companyName: string | null;
   location: string | null;
   status: string;
+  source?: string;
 }
 
 interface EntitledJob {
@@ -98,18 +99,12 @@ export default function InterviewPracticePage() {
         if (entitledRes.ok) {
           const entitledData = await entitledRes.json();
           if (entitledData.success && entitledData.jobTargets?.length > 0) {
+            // Store entitled jobs for legacy support, but don't auto-redirect
+            // since claimed jobs now appear in regular job targets with source='company'
             setEntitledJobs(entitledData.jobTargets);
-            if (userSavedJobs.length === 0 && entitledData.jobTargets.length === 1) {
-              const job = entitledData.jobTargets[0];
-              // Navigate to the pre-session page with employer job ID
-              if (job.employerJobId) {
-                navigate(`/interview/pre-session?employerJobId=${job.employerJobId}`);
-              } else {
-                navigate(`/interview/role/${job.id}`);
-              }
-              return;
-            }
-            if (userSavedJobs.length === 0) {
+            // Only show entitled-only mode if there are no saved jobs AND no company-sourced jobs
+            const hasCompanyJobs = userSavedJobs.some((j: JobTarget) => j.source === 'company');
+            if (userSavedJobs.length === 0 && !hasCompanyJobs) {
               setHasEntitledJobsOnly(true);
             }
           }
@@ -366,9 +361,16 @@ export default function InterviewPracticePage() {
                         <Building2 className="w-4 h-4 text-[#24c4b8]" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-slate-900 truncate group-hover:text-[#24c4b8] text-sm">
-                          {job.roleTitle}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium text-slate-900 truncate group-hover:text-[#24c4b8] text-sm">
+                            {job.roleTitle}
+                          </h3>
+                          {job.source === 'company' && (
+                            <span className="px-1.5 py-0.5 text-[10px] font-medium bg-purple-100 text-purple-700 rounded">
+                              Invited
+                            </span>
+                          )}
+                        </div>
                         {job.companyName && (
                           <p className="text-xs text-slate-500 truncate">{job.companyName}</p>
                         )}

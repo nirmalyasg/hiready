@@ -128,6 +128,8 @@ export function useClaimShareToken() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entitlements'] });
       queryClient.invalidateQueries({ queryKey: ['accessCheck'] });
+      // Also invalidate jobs so the new job appears in the list
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
     }
   });
 }
