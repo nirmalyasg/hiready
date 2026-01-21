@@ -70,7 +70,7 @@ export function UpgradeModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader className="text-center pb-4">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-[#cb6ce6] to-[#24c4b8] rounded-2xl flex items-center justify-center mb-4">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-[#ee7e65] to-[#ee7e65] rounded-2xl flex items-center justify-center mb-4">
             <Lock className="w-8 h-8 text-white" />
           </div>
           <DialogTitle className="text-2xl font-bold text-[#000000]">{title}</DialogTitle>
@@ -80,14 +80,14 @@ export function UpgradeModal({
         </DialogHeader>
 
         <div className="grid gap-4 mt-4">
-          <div className="border-2 border-[#24c4b8] rounded-2xl p-6 bg-[#24c4b8]/5 relative">
-            <div className="absolute -top-3 left-4 bg-[#24c4b8] text-white text-xs font-bold px-3 py-1 rounded-full">
+          <div className="border-2 border-[#ee7e65] rounded-2xl p-6 bg-[#ee7e65]/5 relative">
+            <div className="absolute -top-3 left-4 bg-[#ee7e65] text-white text-xs font-bold px-3 py-1 rounded-full">
               BEST FOR THIS ROLE
             </div>
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Package className="w-5 h-5 text-[#24c4b8]" />
+                  <Package className="w-5 h-5 text-[#ee7e65]" />
                   <h3 className="font-bold text-lg text-[#000000]">Interview Set</h3>
                 </div>
                 <p className="text-sm text-gray-500 mb-3">
@@ -95,15 +95,15 @@ export function UpgradeModal({
                 </p>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#24c4b8]" />
+                    <Check className="w-4 h-4 text-[#ee7e65]" />
                     <span>All interview rounds (HR, Technical, Case)</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#24c4b8]" />
+                    <Check className="w-4 h-4 text-[#ee7e65]" />
                     <span>Detailed feedback & scoring</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#24c4b8]" />
+                    <Check className="w-4 h-4 text-[#ee7e65]" />
                     <span>Lifetime access to this set</span>
                   </li>
                 </ul>
@@ -115,18 +115,18 @@ export function UpgradeModal({
             </div>
             <Button 
               onClick={handlePurchaseSet}
-              className="w-full mt-4 bg-[#24c4b8] hover:bg-[#1db0a5] h-12 font-semibold group"
+              className="w-full mt-4 bg-[#ee7e65] hover:bg-[#e06d54] h-12 font-semibold group"
             >
               Buy This Set
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
 
-          <div className="border-2 border-[#cb6ce6]/30 rounded-2xl p-6 hover:border-[#cb6ce6] transition-colors">
+          <div className="border-2 border-[#ee7e65]/30 rounded-2xl p-6 hover:border-[#ee7e65] transition-colors">
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Crown className="w-5 h-5 text-[#cb6ce6]" />
+                  <Crown className="w-5 h-5 text-[#ee7e65]" />
                   <h3 className="font-bold text-lg text-[#000000]">Unlimited</h3>
                 </div>
                 <p className="text-sm text-gray-500 mb-3">
@@ -134,15 +134,15 @@ export function UpgradeModal({
                 </p>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#cb6ce6]" />
+                    <Check className="w-4 h-4 text-[#ee7e65]" />
                     <span>Unlimited interviews for all roles</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#cb6ce6]" />
+                    <Check className="w-4 h-4 text-[#ee7e65]" />
                     <span>All companies & interview types</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#cb6ce6]" />
+                    <Check className="w-4 h-4 text-[#ee7e65]" />
                     <span>Advanced analytics & progress tracking</span>
                   </li>
                 </ul>
@@ -155,7 +155,7 @@ export function UpgradeModal({
             <Button 
               onClick={handleSubscribe}
               variant="outline"
-              className="w-full mt-4 border-2 border-[#cb6ce6] text-[#cb6ce6] hover:bg-[#cb6ce6] hover:text-white h-12 font-semibold group"
+              className="w-full mt-4 border-2 border-[#ee7e65] text-[#ee7e65] hover:bg-[#ee7e65] hover:text-white h-12 font-semibold group"
             >
               Subscribe Now
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />

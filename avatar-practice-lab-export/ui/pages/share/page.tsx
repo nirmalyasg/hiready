@@ -165,7 +165,7 @@ export default function PublicSharePage() {
             <h2 className="text-xl font-bold text-gray-900 mb-2">Scorecard Not Found</h2>
             <p className="text-gray-600 mb-6">{error || "This scorecard may have been removed or expired."}</p>
             <Link to="/">
-              <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white">
+              <Button className="bg-[#ee7e65] hover:bg-[#e06d54] text-white">
                 Create Your Own
               </Button>
             </Link>
@@ -187,7 +187,7 @@ export default function PublicSharePage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
-            <Target className="w-5 h-5 text-[#24c4b8]" />
+            <Target className="w-5 h-5 text-[#ee7e65]" />
             <span className="text-white font-semibold">Hiready Index™</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">{data.role.name}</h1>
@@ -235,7 +235,7 @@ export default function PublicSharePage() {
               
               <div className="flex items-center gap-4 mt-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
-                  <Activity className="w-4 h-4 text-[#24c4b8]" />
+                  <Activity className="w-4 h-4 text-[#ee7e65]" />
                   <span>{data.totalSessions} sessions</span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -252,7 +252,7 @@ export default function PublicSharePage() {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-[#24c4b8]" />
+                <BarChart3 className="w-5 h-5 text-[#ee7e65]" />
                 Detailed Analysis by Interview Type
               </CardTitle>
             </CardHeader>
@@ -299,14 +299,14 @@ export default function PublicSharePage() {
                       <div className="p-6 space-y-6 border-t">
                         {/* JD-Specific Skills - Show first */}
                         {report.relevantSkills && report.relevantSkills.length > 0 && (
-                          <div className="p-4 bg-gradient-to-r from-[#24c4b8]/10 to-transparent rounded-lg border border-[#24c4b8]/20">
+                          <div className="p-4 bg-gradient-to-r from-[#ee7e65]/10 to-transparent rounded-lg border border-[#ee7e65]/20">
                             <h5 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                              <Target className="w-4 h-4 text-[#24c4b8]" />
+                              <Target className="w-4 h-4 text-[#ee7e65]" />
                               Skills Being Assessed
                             </h5>
                             <div className="flex flex-wrap gap-2">
                               {report.relevantSkills.map((skill, i) => (
-                                <Badge key={i} className="bg-[#24c4b8]/10 text-gray-700 border-[#24c4b8]/30">
+                                <Badge key={i} className="bg-[#ee7e65]/10 text-gray-700 border-[#ee7e65]/30">
                                   {skill}
                                 </Badge>
                               ))}
@@ -357,7 +357,7 @@ export default function PublicSharePage() {
                                   <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} tickFormatter={(val: number) => `${val}%`} />
                                   <Tooltip formatter={(value: number) => [`${value}%`, 'Score']} />
                                   {/* @ts-expect-error recharts type compatibility */}
-                                  <Line type="monotone" dataKey="score" stroke="#24c4b8" strokeWidth={2} dot={{ fill: '#24c4b8' }} />
+                                  <Line type="monotone" dataKey="score" stroke="#ee7e65" strokeWidth={2} dot={{ fill: '#ee7e65' }} />
                                 </LineChart>
                               </ResponsiveContainer>
                             </div>
@@ -433,7 +433,7 @@ export default function PublicSharePage() {
             Want to build your own interview readiness score?
           </p>
           <Link to="/">
-            <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white">
+            <Button className="bg-[#ee7e65] hover:bg-[#e06d54] text-white">
               Get Started Free
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>

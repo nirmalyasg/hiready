@@ -311,8 +311,8 @@ export default function AvatarSimulatorDashboard() {
 
   const getStatusBadge = (status: string) => {
     switch(status) {
-      case 'applied': return { label: 'Applied', bg: 'bg-[#cb6ce6]', text: 'text-white' };
-      case 'interview': return { label: 'Interviewing', bg: 'bg-[#24c4b8]', text: 'text-white' };
+      case 'applied': return { label: 'Applied', bg: 'bg-[#ee7e65]', text: 'text-white' };
+      case 'interview': return { label: 'Interviewing', bg: 'bg-[#ee7e65]', text: 'text-white' };
       case 'offer': return { label: 'Offer', bg: 'bg-emerald-500', text: 'text-white' };
       case 'rejected': return { label: 'Rejected', bg: 'bg-red-500', text: 'text-white' };
       case 'saved': return { label: 'Saved', bg: 'bg-[#000000]', text: 'text-white' };
@@ -348,7 +348,7 @@ export default function AvatarSimulatorDashboard() {
           <div className="bg-[#000000] rounded-2xl p-6 shadow-xl">
             <div className="grid grid-cols-3 gap-6 text-center">
               <div>
-                <p className="text-4xl font-bold text-[#24c4b8]">{readinessPercent}%</p>
+                <p className="text-4xl font-bold text-[#ee7e65]">{readinessPercent}%</p>
                 <p className="text-white/70 text-sm mt-1">Readiness</p>
               </div>
               <div className="border-x border-white/20">
@@ -365,7 +365,7 @@ export default function AvatarSimulatorDashboard() {
           {/* Action Buttons */}
           <div className="grid grid-cols-2 gap-4">
             <Link to="/interview" className="block">
-              <Button className="w-full h-12 bg-[#24c4b8] hover:bg-[#1db0a5] text-white font-semibold rounded-xl shadow-lg shadow-[#24c4b8]/25 gap-2">
+              <Button className="w-full h-12 bg-[#ee7e65] hover:bg-[#e06d54] text-white font-semibold rounded-xl shadow-lg shadow-[#ee7e65]/25 gap-2">
                 <Play className="w-5 h-5" />
                 Practice Interview
               </Button>
@@ -382,7 +382,7 @@ export default function AvatarSimulatorDashboard() {
           {activeJobs.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-4 h-4 text-[#24c4b8]" />
+                <Sparkles className="w-4 h-4 text-[#ee7e65]" />
                 <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Recommended Practice</h2>
               </div>
               <div className="space-y-3">
@@ -392,13 +392,13 @@ export default function AvatarSimulatorDashboard() {
                   
                   return (
                     <Link key={job.id} to={`/jobs/${job.id}`}>
-                      <div className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-lg hover:border-[#24c4b8]/30 transition-all duration-200 group">
+                      <div className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-lg hover:border-[#ee7e65]/30 transition-all duration-200 group">
                         <div className="flex items-start justify-between">
                           <div className="flex-1 min-w-0">
                             <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold ${statusBadge.bg} ${statusBadge.text} mb-2`}>
                               {statusBadge.label}
                             </span>
-                            <h3 className="font-semibold text-[#000000] group-hover:text-[#24c4b8] transition-colors">{job.roleTitle}</h3>
+                            <h3 className="font-semibold text-[#000000] group-hover:text-[#ee7e65] transition-colors">{job.roleTitle}</h3>
                             <p className="text-sm text-gray-500">{job.companyName || 'Company'}</p>
                           </div>
                           <div className="text-right flex items-center gap-3">
@@ -406,7 +406,7 @@ export default function AvatarSimulatorDashboard() {
                               <p className="text-lg font-bold text-[#000000]">{readiness}%</p>
                               <p className="text-xs text-gray-500">ready</p>
                             </div>
-                            <ChevronRight className="w-5 h-5 text-[#cb6ce6] group-hover:text-[#24c4b8] group-hover:translate-x-1 transition-all" />
+                            <ChevronRight className="w-5 h-5 text-[#ee7e65] group-hover:text-[#ee7e65] group-hover:translate-x-1 transition-all" />
                           </div>
                         </div>
                         {/* Progress Bar */}
@@ -431,7 +431,7 @@ export default function AvatarSimulatorDashboard() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-[#000000]">Your Skills</h2>
-                <Link to="/avatar/results" className="text-sm text-[#24c4b8] hover:text-[#1db0a5] font-medium flex items-center gap-1">
+                <Link to="/avatar/results" className="text-sm text-[#ee7e65] hover:text-[#e06d54] font-medium flex items-center gap-1">
                   View all <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -451,13 +451,13 @@ export default function AvatarSimulatorDashboard() {
                 {lowestSkill && lowestSkill.avgScore !== null && (
                   <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-4 border border-red-200">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded-full bg-[#24c4b8] flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-full bg-[#ee7e65] flex items-center justify-center">
                         <Target className="w-3 h-3 text-white" />
                       </div>
-                      <span className="text-xs font-semibold text-[#24c4b8] uppercase tracking-wide">Focus Area</span>
+                      <span className="text-xs font-semibold text-[#ee7e65] uppercase tracking-wide">Focus Area</span>
                     </div>
                     <h3 className="font-semibold text-[#000000] mb-1">{lowestSkill.skillName}</h3>
-                    <p className="text-2xl font-bold text-[#24c4b8]">{lowestSkill.avgScore.toFixed(1)}/5</p>
+                    <p className="text-2xl font-bold text-[#ee7e65]">{lowestSkill.avgScore.toFixed(1)}/5</p>
                   </div>
                 )}
               </div>
@@ -466,9 +466,9 @@ export default function AvatarSimulatorDashboard() {
 
           {/* AI Coaching Insights */}
           {aiInsights?.hasData && aiInsights.insights?.length > 0 && (
-            <div className="bg-gradient-to-r from-[#000000] to-[#1a0a2e] rounded-xl p-5 text-white">
+            <div className="bg-gradient-to-r from-[#000000] to-[#042c4c] rounded-xl p-5 text-white">
               <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-5 h-5 text-[#24c4b8]" />
+                <Sparkles className="w-5 h-5 text-[#ee7e65]" />
                 <h3 className="font-semibold">AI Coaching Insights</h3>
               </div>
               <div className="space-y-3">
@@ -477,7 +477,7 @@ export default function AvatarSimulatorDashboard() {
                     {insight.type === "strength" ? (
                       <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                     ) : insight.type === "weakness" ? (
-                      <Target className="w-5 h-5 text-[#24c4b8] flex-shrink-0" />
+                      <Target className="w-5 h-5 text-[#ee7e65] flex-shrink-0" />
                     ) : (
                       <TrendingUp className="w-5 h-5 text-blue-400 flex-shrink-0" />
                     )}
@@ -496,14 +496,14 @@ export default function AvatarSimulatorDashboard() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-[#000000]">Other Job Targets</h2>
-                <Link to="/jobs" className="text-sm text-[#24c4b8] hover:text-[#1db0a5] font-medium flex items-center gap-1">
+                <Link to="/jobs" className="text-sm text-[#ee7e65] hover:text-[#e06d54] font-medium flex items-center gap-1">
                   View all <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {activeJobs.slice(3, 7).map((job) => (
                   <Link key={job.id} to={`/jobs/${job.id}`}>
-                    <div className="bg-white rounded-lg border border-slate-200 p-3 hover:shadow-md hover:border-[#24c4b8]/30 transition-all">
+                    <div className="bg-white rounded-lg border border-slate-200 p-3 hover:shadow-md hover:border-[#ee7e65]/30 transition-all">
                       <p className="font-medium text-[#000000] text-sm truncate">{job.roleTitle}</p>
                       <p className="text-xs text-gray-500 truncate">{job.companyName}</p>
                     </div>
@@ -516,7 +516,7 @@ export default function AvatarSimulatorDashboard() {
           {/* Empty State */}
           {!hasActivity && (
             <div className="bg-white rounded-2xl border border-slate-200 p-10 text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#24c4b8] to-[#1db0a5] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#24c4b8]/30">
+              <div className="w-20 h-20 bg-gradient-to-br from-[#ee7e65] to-[#e06d54] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#ee7e65]/30">
                 <Play className="w-10 h-10 text-white" />
               </div>
               <h2 className="text-2xl font-bold text-[#000000] mb-3">Start Your Journey</h2>
@@ -525,7 +525,7 @@ export default function AvatarSimulatorDashboard() {
               </p>
               <div className="flex gap-4 justify-center">
                 <Link to="/interview">
-                  <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white font-semibold px-8 h-12 rounded-xl shadow-lg shadow-[#24c4b8]/25 gap-2">
+                  <Button className="bg-[#ee7e65] hover:bg-[#e06d54] text-white font-semibold px-8 h-12 rounded-xl shadow-lg shadow-[#ee7e65]/25 gap-2">
                     <Play className="w-5 h-5" />
                     Start Practice
                   </Button>

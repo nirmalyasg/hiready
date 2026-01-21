@@ -203,8 +203,8 @@ interface PracticeHistoryResponse {
 
 const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
   saved: { label: "Saved", bg: "bg-slate-100", text: "text-slate-600" },
-  applied: { label: "Applied", bg: "bg-[#cb6ce6]/20", text: "text-[#000000]" },
-  interview: { label: "Interviewing", bg: "bg-[#24c4b8]/10", text: "text-[#24c4b8]" },
+  applied: { label: "Applied", bg: "bg-[#ee7e65]/20", text: "text-[#000000]" },
+  interview: { label: "Interviewing", bg: "bg-[#ee7e65]/10", text: "text-[#ee7e65]" },
   offer: { label: "Offer", bg: "bg-emerald-100", text: "text-emerald-700" },
   rejected: { label: "Rejected", bg: "bg-red-100", text: "text-red-700" },
   archived: { label: "Archived", bg: "bg-gray-100", text: "text-gray-500" },
@@ -213,27 +213,27 @@ const statusConfig: Record<string, { label: string; bg: string; text: string }> 
 const categoryConfig: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
   hr_screening: { icon: <Phone className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
   hr: { icon: <Phone className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
-  hiring_manager: { icon: <User className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  hiring_manager: { icon: <User className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
   technical_interview: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
   technical: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
   coding: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
   coding_assessment: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
-  system_design: { icon: <Code className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  system_design: { icon: <Code className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
   sql: { icon: <Code className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
-  analytics: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  analytics: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
   ml: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
-  case_study: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
-  case: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
-  product: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
-  portfolio: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
-  sales_roleplay: { icon: <User className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
-  behavioral: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
+  case_study: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
+  case: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
+  product: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
+  portfolio: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
+  sales_roleplay: { icon: <User className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
+  behavioral: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
   culture_values: { icon: <Heart className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
   bar_raiser: { icon: <TrendingUp className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
   aptitude_assessment: { icon: <TrendingUp className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
   aptitude: { icon: <TrendingUp className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
-  group_discussion: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
-  group: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  group_discussion: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
+  group: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
 };
 
 export default function JobDetailPage() {
@@ -763,7 +763,7 @@ export default function JobDetailPage() {
                               : hasPracticed 
                                 ? 'bg-slate-800 hover:bg-slate-700 text-white' 
                                 : hasAccess
-                                  ? 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white'
+                                  ? 'bg-[#ee7e65] hover:bg-[#e06d54] text-white'
                                   : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
                           } disabled:opacity-70`}
                         >
@@ -801,11 +801,11 @@ export default function JobDetailPage() {
 
           {/* Practice Progress - Compact summary if available */}
           {practiceHistory && practiceHistory.summary.totalAttempts > 0 && (
-            <div className="bg-gradient-to-r from-[#24c4b8]/5 to-transparent rounded-lg border border-[#24c4b8]/20 p-4">
+            <div className="bg-gradient-to-r from-[#ee7e65]/5 to-transparent rounded-lg border border-[#ee7e65]/20 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-[#24c4b8]/10 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-[#24c4b8]" />
+                  <div className="w-10 h-10 rounded-lg bg-[#ee7e65]/10 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-[#ee7e65]" />
                   </div>
                   <div>
                     <p className="font-medium text-slate-900 text-sm">Practice Progress</p>
@@ -821,7 +821,7 @@ export default function JobDetailPage() {
                   onClick={() => job?.roleKitId && navigate(`/hiready-index?roleKitId=${job.roleKitId}`)}
                   variant="outline"
                   size="sm"
-                  className="text-xs border-[#24c4b8]/30 text-[#24c4b8] hover:bg-[#24c4b8]/10"
+                  className="text-xs border-[#ee7e65]/30 text-[#ee7e65] hover:bg-[#ee7e65]/10"
                 >
                   View HiReady Index
                   <ExternalLink className="w-3 h-3 ml-1" />
@@ -902,7 +902,7 @@ export default function JobDetailPage() {
                   </div>
                   {!job?.roleKitId && isAutoMapping && (
                     <div className="flex items-center gap-2 text-sm text-slate-500">
-                      <div className="w-4 h-4 border-2 border-[#24c4b8] border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-[#ee7e65] border-t-transparent rounded-full animate-spin" />
                       <span>Detecting role...</span>
                     </div>
                   )}

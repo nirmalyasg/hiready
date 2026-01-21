@@ -41,16 +41,16 @@ interface EntitledJob {
 
 const domainColors: Record<string, string> = {
   software: "bg-slate-900",
-  data: "bg-[#cb6ce6]",
-  product: "bg-[#24c4b8]",
+  data: "bg-[#ee7e65]",
+  product: "bg-[#ee7e65]",
   design: "bg-gray-500",
-  sales: "bg-[#24c4b8]",
+  sales: "bg-[#ee7e65]",
   marketing: "bg-slate-900",
-  customer_success: "bg-[#cb6ce6]",
+  customer_success: "bg-[#ee7e65]",
   operations: "bg-gray-500",
   consulting: "bg-slate-900",
-  finance: "bg-[#cb6ce6]",
-  hr: "bg-[#24c4b8]",
+  finance: "bg-[#ee7e65]",
+  hr: "bg-[#ee7e65]",
   recruiting: "bg-gray-500",
   engineering_management: "bg-slate-900",
 };
@@ -225,15 +225,15 @@ export default function InterviewPracticePage() {
                         navigate(`/interview/role/${job.id}`);
                       }
                     }}
-                    className="w-full bg-white rounded-xl border border-slate-200 p-4 text-left hover:border-[#24c4b8] hover:shadow-md transition-all group"
+                    className="w-full bg-white rounded-xl border border-slate-200 p-4 text-left hover:border-[#ee7e65] hover:shadow-md transition-all group"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 bg-[#24c4b8]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Briefcase className="w-5 h-5 text-[#24c4b8]" />
+                        <div className="w-10 h-10 bg-[#ee7e65]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Briefcase className="w-5 h-5 text-[#ee7e65]" />
                         </div>
                         <div className="min-w-0">
-                          <h3 className="font-semibold text-slate-900 text-base group-hover:text-[#24c4b8] transition-colors truncate">
+                          <h3 className="font-semibold text-slate-900 text-base group-hover:text-[#ee7e65] transition-colors truncate">
                             {job.jobTitle || job.name}
                           </h3>
                           {job.companyName && (
@@ -244,7 +244,7 @@ export default function InterviewPracticePage() {
                           )}
                         </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-[#24c4b8] group-hover:translate-x-1 transition-all flex-shrink-0" />
+                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-[#ee7e65] group-hover:translate-x-1 transition-all flex-shrink-0" />
                     </div>
                   </button>
                 ))}
@@ -269,7 +269,7 @@ export default function InterviewPracticePage() {
                 placeholder="Paste a job description or LinkedIn/Indeed URL..."
                 value={jobInput}
                 onChange={(e) => { setJobInput(e.target.value); setError(null); }}
-                className="min-h-[100px] resize-none border-slate-200 focus:border-[#24c4b8] focus:ring-[#24c4b8]/20 text-base text-slate-700 placeholder:text-slate-400 rounded-lg"
+                className="min-h-[100px] resize-none border-slate-200 focus:border-[#ee7e65] focus:ring-[#ee7e65]/20 text-base text-slate-700 placeholder:text-slate-400 rounded-lg"
               />
               
               {error && (
@@ -284,7 +284,7 @@ export default function InterviewPracticePage() {
                   disabled={!hasInput || isAdding}
                   className={`w-full h-12 rounded-xl text-base font-semibold transition-all ${
                     hasInput
-                      ? "bg-[#24c4b8] hover:bg-[#1db0a5] text-white"
+                      ? "bg-[#ee7e65] hover:bg-[#e06d54] text-white"
                       : "bg-slate-200 text-slate-400 cursor-not-allowed"
                   }`}
                 >
@@ -333,7 +333,7 @@ export default function InterviewPracticePage() {
               </div>
               <button
                 onClick={() => navigate("/jobs")}
-                className="text-sm text-[#24c4b8] font-medium hover:underline"
+                className="text-sm text-[#ee7e65] font-medium hover:underline"
               >
                 View All →
               </button>
@@ -345,15 +345,15 @@ export default function InterviewPracticePage() {
                   <button
                     key={job.id}
                     onClick={() => handleSelectJob(job)}
-                    className="group text-left bg-white border border-slate-200 rounded-xl p-3 hover:border-[#24c4b8] hover:shadow-md transition-all"
+                    className="group text-left bg-white border border-slate-200 rounded-xl p-3 hover:border-[#ee7e65] hover:shadow-md transition-all"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-[#24c4b8]/10 flex items-center justify-center flex-shrink-0">
-                        <Building2 className="w-4 h-4 text-[#24c4b8]" />
+                      <div className="w-9 h-9 rounded-lg bg-[#ee7e65]/10 flex items-center justify-center flex-shrink-0">
+                        <Building2 className="w-4 h-4 text-[#ee7e65]" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h3 className="font-medium text-slate-900 truncate group-hover:text-[#24c4b8] text-sm">
+                          <h3 className="font-medium text-slate-900 truncate group-hover:text-[#ee7e65] text-sm">
                             {job.roleTitle}
                           </h3>
                           {job.source === 'company' && (
@@ -366,7 +366,7 @@ export default function InterviewPracticePage() {
                           <p className="text-xs text-slate-500 truncate">{job.companyName}</p>
                         )}
                       </div>
-                      <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#24c4b8] flex-shrink-0" />
+                      <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#ee7e65] flex-shrink-0" />
                     </div>
                   </button>
                 ))}

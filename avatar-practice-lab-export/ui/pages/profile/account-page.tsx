@@ -77,32 +77,32 @@ export default function AccountPage() {
 
         {subscriptionLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-6 h-6 animate-spin text-[#24c4b8]" />
+            <Loader2 className="w-6 h-6 animate-spin text-[#ee7e65]" />
           </div>
         ) : (
           <div className="space-y-4">
             {/* Current Plan Card */}
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
               <div className="flex items-center gap-2 mb-4">
-                <CreditCard className="w-5 h-5 text-[#24c4b8]" />
+                <CreditCard className="w-5 h-5 text-[#ee7e65]" />
                 <h3 className="font-semibold text-[#000000]">Current Plan</h3>
               </div>
 
               <div className={`rounded-xl p-5 border ${
                 planInfo.name === 'Pro' ? 'bg-purple-50 border-purple-200' :
-                planInfo.name === 'Role Pack' ? 'bg-[#24c4b8]/10 border-[#24c4b8]/30' :
+                planInfo.name === 'Role Pack' ? 'bg-[#ee7e65]/10 border-[#ee7e65]/30' :
                 'bg-slate-50 border-slate-200'
               }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                       planInfo.name === 'Pro' ? 'bg-purple-100' :
-                      planInfo.name === 'Role Pack' ? 'bg-[#24c4b8]/20' :
+                      planInfo.name === 'Role Pack' ? 'bg-[#ee7e65]/20' :
                       'bg-slate-100'
                     }`}>
                       <planInfo.icon className={`w-6 h-6 ${
                         planInfo.name === 'Pro' ? 'text-purple-600' :
-                        planInfo.name === 'Role Pack' ? 'text-[#24c4b8]' :
+                        planInfo.name === 'Role Pack' ? 'text-[#ee7e65]' :
                         'text-slate-500'
                       }`} />
                     </div>
@@ -128,7 +128,7 @@ export default function AccountPage() {
                 {planInfo.name === 'Free' ? (
                   <button
                     onClick={() => navigate('/pricing')}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-[#24c4b8] to-[#1db0a5] rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[#24c4b8]/25"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-[#ee7e65] to-[#e06d54] rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-[#ee7e65]/25"
                   >
                     <Crown className="w-4 h-4" />
                     Upgrade to Pro

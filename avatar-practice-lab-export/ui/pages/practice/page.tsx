@@ -27,16 +27,16 @@ interface JobTarget {
 
 const domainColors: Record<string, string> = {
   software: "bg-slate-900",
-  data: "bg-[#cb6ce6]",
-  product: "bg-[#24c4b8]",
+  data: "bg-[#ee7e65]",
+  product: "bg-[#ee7e65]",
   design: "bg-gray-500",
-  sales: "bg-[#24c4b8]",
+  sales: "bg-[#ee7e65]",
   marketing: "bg-slate-900",
-  customer_success: "bg-[#cb6ce6]",
+  customer_success: "bg-[#ee7e65]",
   operations: "bg-gray-500",
   consulting: "bg-slate-900",
-  finance: "bg-[#cb6ce6]",
-  hr: "bg-[#24c4b8]",
+  finance: "bg-[#ee7e65]",
+  hr: "bg-[#ee7e65]",
   recruiting: "bg-gray-500",
   engineering_management: "bg-slate-900",
 };
@@ -158,7 +158,7 @@ export default function PracticePage() {
                   disabled={currentChars < minChars || isGenerating}
                   className={`w-full h-12 rounded-xl text-base font-semibold transition-all ${
                     currentChars >= minChars
-                      ? "bg-[#24c4b8] hover:bg-[#1db0a5] text-white"
+                      ? "bg-[#ee7e65] hover:bg-[#e06d54] text-white"
                       : "bg-pink-200 text-pink-700 cursor-not-allowed"
                   }`}
                 >
@@ -194,7 +194,7 @@ export default function PracticePage() {
           <section>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-[#24c4b8] flex items-center justify-center">
+                <div className="w-9 h-9 rounded-lg bg-[#ee7e65] flex items-center justify-center">
                   <Briefcase className="w-4 h-4 text-white" />
                 </div>
                 <div>
@@ -204,7 +204,7 @@ export default function PracticePage() {
               </div>
               <button 
                 onClick={() => navigate("/interview")}
-                className="text-sm text-[#24c4b8] font-medium hover:underline"
+                className="text-sm text-[#ee7e65] font-medium hover:underline"
               >
                 View all →
               </button>
@@ -216,21 +216,21 @@ export default function PracticePage() {
                   <button
                     key={job.id}
                     onClick={() => handleSelectJob(job)}
-                    className="group text-left bg-white border border-slate-200 rounded-xl p-3 hover:border-[#24c4b8] hover:shadow-md transition-all"
+                    className="group text-left bg-white border border-slate-200 rounded-xl p-3 hover:border-[#ee7e65] hover:shadow-md transition-all"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-[#24c4b8]/10 flex items-center justify-center flex-shrink-0">
-                        <Building2 className="w-4 h-4 text-[#24c4b8]" />
+                      <div className="w-9 h-9 rounded-lg bg-[#ee7e65]/10 flex items-center justify-center flex-shrink-0">
+                        <Building2 className="w-4 h-4 text-[#ee7e65]" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-slate-900 truncate group-hover:text-[#24c4b8] text-sm">
+                        <h3 className="font-medium text-slate-900 truncate group-hover:text-[#ee7e65] text-sm">
                           {job.roleTitle}
                         </h3>
                         {job.companyName && (
                           <p className="text-xs text-slate-500 truncate">{job.companyName}</p>
                         )}
                       </div>
-                      <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#24c4b8] flex-shrink-0" />
+                      <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#ee7e65] flex-shrink-0" />
                     </div>
                   </button>
                 ))}
@@ -238,14 +238,14 @@ export default function PracticePage() {
             ) : (
               <button
                 onClick={() => navigate("/interview")}
-                className="w-full text-left bg-white border-2 border-dashed border-slate-200 rounded-xl p-4 hover:border-[#24c4b8] hover:bg-[#24c4b8]/5 transition-all group"
+                className="w-full text-left bg-white border-2 border-dashed border-slate-200 rounded-xl p-4 hover:border-[#ee7e65] hover:bg-[#ee7e65]/5 transition-all group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-[#24c4b8]/10">
-                    <Briefcase className="w-4 h-4 text-slate-400 group-hover:text-[#24c4b8]" />
+                  <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-[#ee7e65]/10">
+                    <Briefcase className="w-4 h-4 text-slate-400 group-hover:text-[#ee7e65]" />
                   </div>
                   <div>
-                    <p className="font-medium text-slate-700 group-hover:text-[#24c4b8] text-sm">Add a target job</p>
+                    <p className="font-medium text-slate-700 group-hover:text-[#ee7e65] text-sm">Add a target job</p>
                     <p className="text-xs text-slate-500">Import from URL or paste description</p>
                   </div>
                 </div>

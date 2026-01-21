@@ -43,8 +43,8 @@ export default function MarketingNav() {
               to={link.to}
               className={`text-sm font-medium transition-colors ${
                 isActive(link.to)
-                  ? 'text-[#cb6ce6]'
-                  : 'text-gray-600 hover:text-[#cb6ce6]'
+                  ? 'text-[#ee7e65]'
+                  : 'text-gray-600 hover:text-[#ee7e65]'
               }`}
             >
               {link.label}
@@ -54,25 +54,25 @@ export default function MarketingNav() {
 
         <div className="hidden md:flex items-center gap-3">
           <Link to="/demo">
-            <Button variant="outline" size="sm" className="border-[#cb6ce6]/20 text-[#cb6ce6] hover:bg-[#cb6ce6]/5 gap-2 h-10 px-4">
+            <Button variant="outline" size="sm" className="border-[#ee7e65]/20 text-[#ee7e65] hover:bg-[#ee7e65]/5 gap-2 h-10 px-4">
               <Calendar className="w-4 h-4" />
               Book a Demo
             </Button>
           </Link>
           <Link to="/login">
-            <Button variant="ghost" size="sm" className="text-gray-600 hover:text-[#cb6ce6] h-10 px-4">
+            <Button variant="ghost" size="sm" className="text-gray-600 hover:text-[#ee7e65] h-10 px-4">
               Sign In
             </Button>
           </Link>
           <Link to="/readycheck">
-            <Button size="sm" className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white shadow-lg shadow-[#24c4b8]/25 border-0 h-10 px-5 font-semibold">
+            <Button size="sm" className="bg-[#ee7e65] hover:bg-[#e06d54] text-white shadow-lg shadow-[#ee7e65]/25 border-0 h-10 px-5 font-semibold">
               Start Preparing
             </Button>
           </Link>
         </div>
 
         <button 
-          className="md:hidden p-2 text-[#cb6ce6] hover:bg-gray-100 rounded-lg transition-colors"
+          className="md:hidden p-2 text-[#ee7e65] hover:bg-gray-100 rounded-lg transition-colors"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
         >
@@ -94,8 +94,8 @@ export default function MarketingNav() {
                   to={link.to}
                   className={`block py-3 px-4 rounded-xl text-base font-medium transition-colors ${
                     isActive(link.to)
-                      ? 'bg-[#cb6ce6]/5 text-[#cb6ce6]'
-                      : 'text-[#cb6ce6] hover:bg-gray-50'
+                      ? 'bg-[#ee7e65]/5 text-[#ee7e65]'
+                      : 'text-[#ee7e65] hover:bg-gray-50'
                   }`}
                 >
                   {link.label}
@@ -103,7 +103,7 @@ export default function MarketingNav() {
               ))}
               <Link
                 to="/demo"
-                className="block py-3 px-4 rounded-xl text-base font-medium text-[#cb6ce6] hover:bg-gray-50"
+                className="block py-3 px-4 rounded-xl text-base font-medium text-[#ee7e65] hover:bg-gray-50"
               >
                 Book a Demo
               </Link>
@@ -116,7 +116,7 @@ export default function MarketingNav() {
             </div>
             <div className="p-6 border-t border-gray-100">
               <Link to="/readycheck">
-                <Button className="w-full h-12 bg-[#24c4b8] hover:bg-[#1db0a5] text-white shadow-lg font-semibold text-base">
+                <Button className="w-full h-12 bg-[#ee7e65] hover:bg-[#e06d54] text-white shadow-lg font-semibold text-base">
                   Start Preparing
                 </Button>
               </Link>

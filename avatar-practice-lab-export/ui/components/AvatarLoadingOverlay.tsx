@@ -114,12 +114,12 @@ export default function AvatarLoadingOverlay({
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#04aac4] border-r-[#04aac4]/30"
+                  className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#ee7e65] border-r-[#ee7e65]/30"
                 />
                 <motion.div
                   animate={{ rotate: -360 }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-2 rounded-full border-4 border-transparent border-b-[#fa6793] border-l-[#fa6793]/30"
+                  className="absolute inset-2 rounded-full border-4 border-transparent border-b-[#f5a594] border-l-[#f5a594]/30"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <motion.div
@@ -152,7 +152,7 @@ export default function AvatarLoadingOverlay({
                     transition={{ duration: 0.3 }}
                     className="space-y-1"
                   >
-                    <p className="text-lg font-medium text-[#04aac4]">
+                    <p className="text-lg font-medium text-[#ee7e65]">
                       {currentStage.message}
                     </p>
                     <p className="text-sm text-slate-400">
@@ -166,7 +166,7 @@ export default function AvatarLoadingOverlay({
             <div className="w-full max-w-xs mx-auto mb-6">
               <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
                 <motion.div
-                  className="h-full bg-gradient-to-r from-[#04aac4] to-[#fa6793] rounded-full"
+                  className="h-full bg-gradient-to-r from-[#ee7e65] to-[#f5a594] rounded-full"
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.3 }}
@@ -184,7 +184,7 @@ export default function AvatarLoadingOverlay({
                   key={stage.id}
                   className={`w-2 h-2 rounded-full ${
                     index <= currentStageIndex
-                      ? "bg-[#04aac4]"
+                      ? "bg-[#ee7e65]"
                       : "bg-slate-600"
                   }`}
                   animate={{
@@ -231,7 +231,7 @@ export default function AvatarLoadingOverlay({
                 <span>AI Ready</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-500">
-                <div className="w-2 h-2 rounded-full bg-[#04aac4] animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-[#ee7e65] animate-pulse" />
                 <span>Secure Connection</span>
               </div>
             </motion.div>

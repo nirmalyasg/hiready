@@ -56,9 +56,9 @@ export default function MobileBottomNav() {
             >
               <div className={cn(
                 "p-1.5 rounded-lg transition-colors",
-                active && "bg-[#24c4b8]/10"
+                active && "bg-[#ee7e65]/10"
               )}>
-                <Icon className={cn("w-5 h-5", active && "text-[#24c4b8]")} />
+                <Icon className={cn("w-5 h-5", active && "text-[#ee7e65]")} />
               </div>
               <span className={cn(
                 "text-[10px] font-medium",

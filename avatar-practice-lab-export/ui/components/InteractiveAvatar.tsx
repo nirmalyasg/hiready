@@ -3164,7 +3164,7 @@ Please be conversational, helpful, and stay in character based on the provided c
                     <div className="flex flex-col gap-3">
                       <Button
                         onClick={handleRetrySession}
-                        className="bg-[#04aac4] hover:bg-[#04aac4]/80 text-white px-6 py-2 rounded-lg"
+                        className="bg-[#ee7e65] hover:bg-[#ee7e65]/80 text-white px-6 py-2 rounded-lg"
                         data-testid="button-retry-session"
                       >
                         Try Again

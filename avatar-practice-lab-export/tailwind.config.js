@@ -14,7 +14,7 @@ export default {
           accent: '#ee7e65',
           'accent-light': '#f5a594',
           muted: '#6c8194',
-          background: '#fbfbfc',
+          background: '#f8f9fb',
         }
       }
     },

@@ -414,7 +414,7 @@ export default function InterviewResultsPage() {
                       </Badge>
                     )}
                     <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-0.5 flex items-center gap-2">
-                      <InterviewIcon className="w-5 h-5 text-[#24c4b8]" />
+                      <InterviewIcon className="w-5 h-5 text-[#ee7e65]" />
                       {getInterviewTypeLabel(interviewType, interviewMode)}
                     </h2>
                     <p className="text-gray-600 text-sm">{practiceTitle}</p>
@@ -474,7 +474,7 @@ export default function InterviewResultsPage() {
                       onClick={handleRetake}
                       disabled={isRetaking || !configId}
                       size="sm"
-                      className="bg-[#cb6ce6] hover:bg-[#cb6ce6]/90 text-white gap-2"
+                      className="bg-[#ee7e65] hover:bg-[#ee7e65]/90 text-white gap-2"
                     >
                       <RotateCcw className={`w-4 h-4 ${isRetaking ? 'animate-spin' : ''}`} />
                       {isRetaking ? 'Starting...' : 'Retake'}
@@ -509,7 +509,7 @@ export default function InterviewResultsPage() {
                       to={`/interview/results?sessionId=${attempt.sessionId}`}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
                         attempt.sessionId === Number(sessionId)
-                          ? 'bg-[#24c4b8]/10 border border-[#24c4b8]/30'
+                          ? 'bg-[#ee7e65]/10 border border-[#ee7e65]/30'
                           : 'bg-gray-50 hover:bg-gray-100 border border-gray-100'
                       }`}
                     >
@@ -533,14 +533,14 @@ export default function InterviewResultsPage() {
             <Card className="border-gray-200">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Target className="w-5 h-5 text-[#24c4b8]" />
+                  <Target className="w-5 h-5 text-[#ee7e65]" />
                   Skills Assessed in This Interview
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="flex flex-wrap gap-2">
                   {skillsBeingAssessed.slice(0, 12).map((skill, idx) => (
-                    <Badge key={idx} variant="outline" className="bg-[#24c4b8]/5 border-[#24c4b8]/20 text-gray-700">
+                    <Badge key={idx} variant="outline" className="bg-[#ee7e65]/5 border-[#ee7e65]/20 text-gray-700">
                       {skill}
                     </Badge>
                   ))}
@@ -557,8 +557,8 @@ export default function InterviewResultsPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[#24c4b8]/10 flex items-center justify-center">
-                  <Activity className="w-5 h-5 text-[#24c4b8]" />
+                <div className="w-10 h-10 rounded-lg bg-[#ee7e65]/10 flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-[#ee7e65]" />
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-gray-900">{totalAttempts}</div>
@@ -610,7 +610,7 @@ export default function InterviewResultsPage() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-[#24c4b8]" />
+                  <TrendingUp className="w-5 h-5 text-[#ee7e65]" />
                   Progress Over Attempts
                 </CardTitle>
               </CardHeader>
@@ -631,7 +631,7 @@ export default function InterviewResultsPage() {
                         labelFormatter={(label: string) => `Attempt: ${label}`}
                       />
                       {/* @ts-expect-error recharts type compatibility */}
-                      <Line type="monotone" dataKey="score" stroke="#24c4b8" strokeWidth={2} dot={{ fill: '#24c4b8', strokeWidth: 2 }} />
+                      <Line type="monotone" dataKey="score" stroke="#ee7e65" strokeWidth={2} dot={{ fill: '#ee7e65', strokeWidth: 2 }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -642,7 +642,7 @@ export default function InterviewResultsPage() {
           <Card>
             <CardHeader className="pb-3 border-b">
               <CardTitle className="text-base flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-[#24c4b8]" />
+                <BarChart3 className="w-5 h-5 text-[#ee7e65]" />
                 Dimension Breakdown
               </CardTitle>
             </CardHeader>
@@ -664,8 +664,8 @@ export default function InterviewResultsPage() {
                   </div>
                   <p className="text-sm text-gray-600 mb-2">{dim.rationale}</p>
                   {dim.improvement && (
-                    <div className="flex items-start gap-2 p-2.5 bg-[#24c4b8]/5 rounded-lg border border-[#24c4b8]/10">
-                      <Lightbulb className="w-4 h-4 text-[#24c4b8] flex-shrink-0 mt-0.5" />
+                    <div className="flex items-start gap-2 p-2.5 bg-[#ee7e65]/5 rounded-lg border border-[#ee7e65]/10">
+                      <Lightbulb className="w-4 h-4 text-[#ee7e65] flex-shrink-0 mt-0.5" />
                       <p className="text-sm text-gray-700">{dim.improvement}</p>
                     </div>
                   )}
@@ -796,7 +796,7 @@ export default function InterviewResultsPage() {
                 </p>
               </div>
               <Link to={jobContext?.id ? `/jobs/${jobContext.id}` : "/interview"}>
-                <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white gap-2">
+                <Button className="bg-[#ee7e65] hover:bg-[#e06d54] text-white gap-2">
                   <Play className="w-4 h-4" />
                   Practice Again
                 </Button>

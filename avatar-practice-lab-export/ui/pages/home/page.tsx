@@ -36,19 +36,19 @@ export default function HomePage() {
       icon: GraduationCap, 
       title: 'Students & Fresh Grads', 
       desc: 'Nail your first job interview with AI-powered practice',
-      color: 'from-[#cb6ce6] to-[#cb6ce6]'
+      color: 'from-[#ee7e65] to-[#ee7e65]'
     },
     { 
       icon: Briefcase, 
       title: 'Career Switchers', 
       desc: 'Transition confidently with role-specific preparation',
-      color: 'from-[#24c4b8] to-[#1a9e94]'
+      color: 'from-[#ee7e65] to-[#d66352]'
     },
     { 
       icon: Building2, 
       title: 'Enterprise Teams', 
       desc: 'Scale interview prep across your entire organization',
-      color: 'from-[#cb6ce6] to-[#4a1578]'
+      color: 'from-[#ee7e65] to-[#031d33]'
     },
   ];
 
@@ -139,23 +139,23 @@ export default function HomePage() {
 
       {/* Hero Section - Split Layout */}
       <section className="pt-[100px] lg:pt-[120px] pb-0 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(203,108,230,0.2),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(36,196,184,0.1),transparent_50%)]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#042c4c] to-[#000000]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(238,126,101,0.2),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(118,140,156,0.1),transparent_50%)]" />
         
         <div className="max-w-7xl mx-auto px-6 lg:px-8 relative">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center py-16 lg:py-20">
             {/* Left: Content */}
             <div className="text-center lg:text-left">
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/90 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-white/20">
-                <Zap className="w-4 h-4 text-[#24c4b8]" />
+                <Zap className="w-4 h-4 text-[#ee7e65]" />
                 AI-Powered Interview Practice
               </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] mb-6 text-white tracking-tight">
                 Practice interviews.
                 <br />
-                <span className="text-[#24c4b8]">Land the job.</span>
+                <span className="text-[#ee7e65]">Land the job.</span>
               </h1>
               
               <p className="text-lg lg:text-xl text-white/70 mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
@@ -164,7 +164,7 @@ export default function HomePage() {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
                 <Link to="/readycheck">
-                  <Button size="lg" className="w-full sm:w-auto bg-[#24c4b8] hover:bg-[#1db0a5] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#24c4b8]/30 border-0 group">
+                  <Button size="lg" className="w-full sm:w-auto bg-[#ee7e65] hover:bg-[#e06d54] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 border-0 group">
                     Start Free Practice
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
@@ -173,15 +173,15 @@ export default function HomePage() {
               
               <div className="flex items-center gap-4 justify-center lg:justify-start text-white/60 text-sm">
                 <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
+                  <CheckCircle2 className="w-4 h-4 text-[#ee7e65]" />
                   <span>No credit card</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
+                  <CheckCircle2 className="w-4 h-4 text-[#ee7e65]" />
                   <span>3 free sessions</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
+                  <CheckCircle2 className="w-4 h-4 text-[#ee7e65]" />
                   <span>Setup in 60 seconds</span>
                 </div>
               </div>
@@ -191,7 +191,7 @@ export default function HomePage() {
             <div className="relative hidden lg:block">
               <div className="relative">
                 {/* Glow effect */}
-                <div className="absolute -inset-4 bg-gradient-to-r from-[#cb6ce6]/20 to-[#24c4b8]/20 rounded-3xl blur-2xl" />
+                <div className="absolute -inset-4 bg-gradient-to-r from-[#ee7e65]/20 to-[#ee7e65]/20 rounded-3xl blur-2xl" />
                 
                 {/* Main image container */}
                 <div className="relative bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-3 shadow-2xl">
@@ -204,7 +204,7 @@ export default function HomePage() {
                   {/* Floating score card */}
                   <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl p-4 shadow-2xl border border-gray-100">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-[#cb6ce6] to-[#cb6ce6] rounded-xl flex items-center justify-center">
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#ee7e65] to-[#ee7e65] rounded-xl flex items-center justify-center">
                         <TrendingUp className="w-6 h-6 text-white" />
                       </div>
                       <div>
@@ -215,7 +215,7 @@ export default function HomePage() {
                   </div>
                   
                   {/* Floating badge */}
-                  <div className="absolute -top-3 -right-3 bg-[#24c4b8] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
+                  <div className="absolute -top-3 -right-3 bg-[#ee7e65] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" />
                     Live Practice
                   </div>
@@ -237,7 +237,7 @@ export default function HomePage() {
           </p>
           <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-6">
             {companies.map((company) => (
-              <span key={company} className="text-xl font-semibold text-[#000000]/25 hover:text-[#cb6ce6]/60 transition-colors">
+              <span key={company} className="text-xl font-semibold text-[#000000]/25 hover:text-[#ee7e65]/60 transition-colors">
                 {company}
               </span>
             ))}
@@ -246,15 +246,15 @@ export default function HomePage() {
       </section>
 
       {/* Metrics Band */}
-      <section className="py-16 bg-[#f8f7fc]">
+      <section className="py-16 bg-[#f8f9fb]">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid md:grid-cols-3 gap-8">
             {metrics.map((metric, i) => {
               const Icon = metric.icon;
               return (
                 <div key={i} className="text-center">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-[#cb6ce6]/10 rounded-xl mb-4">
-                    <Icon className="w-6 h-6 text-[#cb6ce6]" />
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-[#ee7e65]/10 rounded-xl mb-4">
+                    <Icon className="w-6 h-6 text-[#ee7e65]" />
                   </div>
                   <div className="text-4xl font-bold text-[#000000] mb-1">{metric.value}</div>
                   <div className="text-gray-500">{metric.label}</div>
@@ -297,10 +297,10 @@ export default function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-20 bg-[#f8f7fc]">
+      <section className="py-20 bg-[#f8f9fb]">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">How It Works</span>
+            <span className="inline-block text-[#ee7e65] text-sm font-semibold tracking-wider uppercase mb-3">How It Works</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-[#000000] mb-4">
               Ready in 3 simple steps
             </h2>
@@ -309,16 +309,16 @@ export default function HomePage() {
           
           <div className="relative">
             {/* Connection line */}
-            <div className="hidden md:block absolute top-1/2 left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-[#cb6ce6]/20 via-[#cb6ce6]/20 to-[#24c4b8]/20 -translate-y-1/2" />
+            <div className="hidden md:block absolute top-1/2 left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-[#ee7e65]/20 via-[#ee7e65]/20 to-[#ee7e65]/20 -translate-y-1/2" />
             
             <div className="grid md:grid-cols-3 gap-8 relative">
               {steps.map((step, i) => {
                 const Icon = step.icon;
                 return (
                   <div key={i} className="relative text-center group">
-                    <div className="relative inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-xl shadow-[#cb6ce6]/5 mb-6 group-hover:shadow-2xl group-hover:shadow-[#24c4b8]/10 transition-all duration-300">
-                      <Icon className="w-9 h-9 text-[#cb6ce6] group-hover:text-[#24c4b8] transition-colors" />
-                      <div className="absolute -top-2 -right-2 w-7 h-7 bg-[#24c4b8] rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                    <div className="relative inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-xl shadow-[#ee7e65]/5 mb-6 group-hover:shadow-2xl group-hover:shadow-[#ee7e65]/10 transition-all duration-300">
+                      <Icon className="w-9 h-9 text-[#ee7e65] group-hover:text-[#ee7e65] transition-colors" />
+                      <div className="absolute -top-2 -right-2 w-7 h-7 bg-[#ee7e65] rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg">
                         {step.num.replace('0', '')}
                       </div>
                     </div>
@@ -332,7 +332,7 @@ export default function HomePage() {
           
           <div className="text-center mt-12">
             <Link to="/readycheck">
-              <Button size="lg" className="bg-[#9b4dca] hover:bg-[#8a3db8] text-white px-8 h-14 text-base font-semibold shadow-xl group">
+              <Button size="lg" className="bg-[#768c9c] hover:bg-[#8a3db8] text-white px-8 h-14 text-base font-semibold shadow-xl group">
                 Try It Now — It's Free
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -345,7 +345,7 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">Features</span>
+            <span className="inline-block text-[#ee7e65] text-sm font-semibold tracking-wider uppercase mb-3">Features</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-[#000000] mb-4">
               Everything you need to ace interviews
             </h2>
@@ -355,8 +355,8 @@ export default function HomePage() {
             {features.map((feature, i) => {
               const Icon = feature.icon;
               return (
-                <div key={i} className="group bg-[#f8f7fc] rounded-2xl p-7 border border-gray-100 hover:bg-white hover:border-[#cb6ce6]/20 hover:shadow-xl transition-all duration-300">
-                  <div className="w-12 h-12 bg-[#cb6ce6] rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#24c4b8] transition-colors duration-300">
+                <div key={i} className="group bg-[#f8f9fb] rounded-2xl p-7 border border-gray-100 hover:bg-white hover:border-[#ee7e65]/20 hover:shadow-xl transition-all duration-300">
+                  <div className="w-12 h-12 bg-[#ee7e65] rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#ee7e65] transition-colors duration-300">
                     <Icon className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-lg font-bold text-[#000000] mb-2">{feature.title}</h3>
@@ -369,15 +369,15 @@ export default function HomePage() {
       </section>
 
       {/* Readiness Score Showcase */}
-      <section className="py-24 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000] relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(203,108,230,0.1),transparent_70%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(36,196,184,0.08),transparent_50%)]" />
+      <section className="py-24 bg-gradient-to-br from-[#000000] via-[#042c4c] to-[#000000] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(238,126,101,0.1),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(118,140,156,0.08),transparent_50%)]" />
         
         <div className="max-w-5xl mx-auto px-6 relative">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur text-white/90 px-4 py-2 rounded-full text-sm font-semibold mb-6 border border-white/20">
-                <BarChart3 className="w-4 h-4 text-[#24c4b8]" />
+                <BarChart3 className="w-4 h-4 text-[#ee7e65]" />
                 HIREADY INDEX
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-5 leading-tight">
@@ -395,7 +395,7 @@ export default function HomePage() {
                   'Communication Style'
                 ].map((skill, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#24c4b8]" />
+                    <CheckCircle2 className="w-5 h-5 text-[#ee7e65]" />
                     <span className="text-white/80">{skill}</span>
                   </div>
                 ))}
@@ -419,11 +419,11 @@ export default function HomePage() {
                     <div key={i}>
                       <div className="flex justify-between text-sm mb-1.5">
                         <span className="text-gray-500 font-medium">{item.skill}</span>
-                        <span className="text-[#cb6ce6] font-bold">{item.value}</span>
+                        <span className="text-[#ee7e65] font-bold">{item.value}</span>
                       </div>
                       <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div 
-                          className="h-2 bg-gradient-to-r from-[#cb6ce6] to-[#24c4b8] rounded-full" 
+                          className="h-2 bg-gradient-to-r from-[#ee7e65] to-[#ee7e65] rounded-full" 
                           style={{ width: `${item.value}%` }}
                         />
                       </div>
@@ -433,7 +433,7 @@ export default function HomePage() {
                 
                 <div className="mt-6 pt-6 border-t border-gray-100">
                   <Link to="/readycheck" className="block">
-                    <Button className="w-full bg-[#24c4b8] hover:bg-[#1db0a5] text-white h-12 font-semibold shadow-lg shadow-[#24c4b8]/25">
+                    <Button className="w-full bg-[#ee7e65] hover:bg-[#e06d54] text-white h-12 font-semibold shadow-lg shadow-[#ee7e65]/25">
                       Get Your Score
                     </Button>
                   </Link>
@@ -441,8 +441,8 @@ export default function HomePage() {
               </div>
               
               {/* Decorative elements */}
-              <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#cb6ce6]/20 rounded-full blur-2xl" />
-              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-[#24c4b8]/20 rounded-full blur-2xl" />
+              <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#ee7e65]/20 rounded-full blur-2xl" />
+              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-[#ee7e65]/20 rounded-full blur-2xl" />
             </div>
           </div>
         </div>
@@ -452,7 +452,7 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">Success Stories</span>
+            <span className="inline-block text-[#ee7e65] text-sm font-semibold tracking-wider uppercase mb-3">Success Stories</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-[#000000] mb-4">
               Real results from real candidates
             </h2>
@@ -460,7 +460,7 @@ export default function HomePage() {
           
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((t, i) => (
-              <div key={i} className="bg-[#f8f7fc] rounded-2xl p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
+              <div key={i} className="bg-[#f8f9fb] rounded-2xl p-8 border border-gray-100 hover:shadow-xl transition-all duration-300">
                 <div className="flex gap-1 mb-4">
                   {[...Array(t.rating)].map((_, j) => (
                     <Star key={j} className="w-5 h-5 text-amber-400 fill-amber-400" />
@@ -468,7 +468,7 @@ export default function HomePage() {
                 </div>
                 <p className="text-[#000000] mb-6 leading-relaxed text-lg">"{t.quote}"</p>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#cb6ce6] to-[#cb6ce6] rounded-full flex items-center justify-center text-white font-bold">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#ee7e65] to-[#ee7e65] rounded-full flex items-center justify-center text-white font-bold">
                     {t.avatar}
                   </div>
                   <div>
@@ -483,34 +483,34 @@ export default function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-24 bg-gradient-to-b from-[#f8f7fc] to-white">
+      <section className="py-24 bg-gradient-to-b from-[#f8f9fb] to-white">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#24c4b8] to-[#1a9e94] rounded-2xl mb-6 shadow-xl shadow-[#24c4b8]/30">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#ee7e65] to-[#d66352] rounded-2xl mb-6 shadow-xl shadow-[#ee7e65]/30">
             <Award className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-[#000000] mb-5">
-            Your next interview could be <span className="text-[#24c4b8]">the one.</span>
+            Your next interview could be <span className="text-[#ee7e65]">the one.</span>
           </h2>
           <p className="text-gray-500 mb-10 text-lg max-w-lg mx-auto">
             Start practicing now — it only takes 10 minutes to see where you stand.
           </p>
           <Link to="/readycheck">
-            <Button size="lg" className="bg-[#9b4dca] hover:bg-[#8a3db8] text-white px-12 h-16 text-lg font-semibold shadow-xl shadow-[#9b4dca]/20 group">
+            <Button size="lg" className="bg-[#768c9c] hover:bg-[#8a3db8] text-white px-12 h-16 text-lg font-semibold shadow-xl shadow-[#768c9c]/20 group">
               Start Free Practice
               <ArrowRight className="w-6 h-6 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
           <p className="text-sm text-gray-500 mt-8 flex items-center justify-center gap-6">
             <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
+              <CheckCircle2 className="w-4 h-4 text-[#ee7e65]" />
               No credit card
             </span>
             <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
+              <CheckCircle2 className="w-4 h-4 text-[#ee7e65]" />
               3 free sessions
             </span>
             <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
+              <CheckCircle2 className="w-4 h-4 text-[#ee7e65]" />
               Cancel anytime
             </span>
           </p>

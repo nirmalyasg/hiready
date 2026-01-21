@@ -94,7 +94,7 @@ interface CostSummary {
 
 type Page = "overview" | "users" | "sessions" | "content" | "avatars" | "costs" | "jobs";
 
-const COLORS = ["#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
+const COLORS = ["#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#ee7e65", "#ec4899"];
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -183,7 +183,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f8f7fc]">
+    <div className="min-h-screen bg-[#f8f9fb]">
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
         <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
                 <div className="h-6 w-px bg-gray-200" />
                 <span className="text-sm font-semibold text-[#000000] tracking-tight">Admin Console</span>
               </Link>
-              <Badge className="bg-[#24c4b8]/10 text-[#24c4b8] border-[#24c4b8]/20 text-xs font-medium">Admin</Badge>
+              <Badge className="bg-[#ee7e65]/10 text-[#ee7e65] border-[#ee7e65]/20 text-xs font-medium">Admin</Badge>
             </div>
             
             <nav className="hidden md:flex items-center gap-1">
@@ -231,7 +231,7 @@ export default function AdminDashboard() {
                     await fetch('/api/auth/logout', { method: 'POST' });
                     window.location.href = '/';
                   }}
-                  className="flex items-center justify-center w-9 h-9 text-gray-500 hover:text-[#cb6ce6] hover:bg-[#cb6ce6]/10 rounded-full transition-all duration-200"
+                  className="flex items-center justify-center w-9 h-9 text-gray-500 hover:text-[#ee7e65] hover:bg-[#ee7e65]/10 rounded-full transition-all duration-200"
                   title="Sign out"
                 >
                   <LogOut className="w-4 h-4" />
@@ -278,7 +278,7 @@ export default function AdminDashboard() {
                     await fetch('/api/auth/logout', { method: 'POST' });
                     window.location.href = '/';
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#cb6ce6] hover:bg-[#cb6ce6]/10 transition-all duration-200"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#ee7e65] hover:bg-[#ee7e65]/10 transition-all duration-200"
                 >
                   <LogOut className="w-5 h-5" />
                   Sign out
@@ -2030,7 +2030,7 @@ function JobsPage() {
           <h2 className="text-2xl font-bold text-slate-900">Job Management</h2>
           <p className="text-slate-500 text-sm">Create jobs, generate interview plans, and share with candidates</p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)} className="bg-[#24c4b8] hover:bg-[#1db0a5]">
+        <Button onClick={() => setShowCreateDialog(true)} className="bg-[#ee7e65] hover:bg-[#e06d54]">
           <Briefcase className="h-4 w-4 mr-2" />
           Add New Job
         </Button>
@@ -2068,7 +2068,7 @@ function JobsPage() {
       </Card>
 
       {showCreateDialog && (
-        <Card className="border-2 border-[#24c4b8]/20">
+        <Card className="border-2 border-[#ee7e65]/20">
           <CardHeader>
             <CardTitle className="text-base">Create New Job</CardTitle>
             <CardDescription>Add a job description to generate an interview plan</CardDescription>
@@ -2124,7 +2124,7 @@ function JobsPage() {
               <Button 
                 onClick={createJob} 
                 disabled={creating || !newJob.title.trim()}
-                className="bg-[#24c4b8] hover:bg-[#1db0a5]"
+                className="bg-[#ee7e65] hover:bg-[#e06d54]"
               >
                 {creating ? "Creating..." : "Create & Generate Interview Plan"}
               </Button>
@@ -2171,7 +2171,7 @@ function JobsPage() {
                     
                     <div className="flex items-center gap-4 text-xs text-slate-400">
                       <button 
-                        className="flex items-center gap-1 hover:text-[#24c4b8] transition-colors cursor-pointer"
+                        className="flex items-center gap-1 hover:text-[#ee7e65] transition-colors cursor-pointer"
                         onClick={() => fetchJobCandidates(job.id)}
                       >
                         <Users className="h-3 w-3" />
@@ -2185,7 +2185,7 @@ function JobsPage() {
                     {!job.shareToken ? (
                       <Button 
                         size="sm" 
-                        className="bg-[#24c4b8] hover:bg-[#1db0a5] gap-2"
+                        className="bg-[#ee7e65] hover:bg-[#e06d54] gap-2"
                         onClick={() => generateShareToken(job.id)}
                       >
                         <Link2 className="h-3 w-3" />
@@ -2195,7 +2195,7 @@ function JobsPage() {
                       <div className="flex flex-col items-end gap-1">
                         <Button 
                           size="sm" 
-                          className={`gap-2 ${copiedToken === job.id ? 'bg-green-500 hover:bg-green-600' : 'bg-[#24c4b8] hover:bg-[#1db0a5]'}`}
+                          className={`gap-2 ${copiedToken === job.id ? 'bg-green-500 hover:bg-green-600' : 'bg-[#ee7e65] hover:bg-[#e06d54]'}`}
                           onClick={() => copyShareLink(job)}
                         >
                           {copiedToken === job.id ? (
@@ -2248,7 +2248,7 @@ function JobsPage() {
                         </Button>
                         <Button 
                           size="sm" 
-                          className="bg-[#24c4b8] hover:bg-[#1db0a5] gap-1"
+                          className="bg-[#ee7e65] hover:bg-[#e06d54] gap-1"
                           onClick={() => saveInterviewPlan(job.id)}
                           disabled={savingPlan}
                         >
@@ -2423,7 +2423,7 @@ function JobsPage() {
                                     <Button
                                       size="sm"
                                       variant="ghost"
-                                      className="text-xs text-[#24c4b8] hover:text-[#1db0a5] hover:bg-[#24c4b8]/10 gap-1"
+                                      className="text-xs text-[#ee7e65] hover:text-[#e06d54] hover:bg-[#ee7e65]/10 gap-1"
                                       onClick={() => setViewingCandidateReport(candidate.jobTargetId)}
                                     >
                                       <BarChart3 className="h-3 w-3" />
@@ -2508,8 +2508,8 @@ function JobsPage() {
                   {/* Candidate Info */}
                   <div className="bg-slate-50 rounded-lg p-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-[#24c4b8]/20 rounded-full flex items-center justify-center">
-                        <User className="h-6 w-6 text-[#24c4b8]" />
+                      <div className="w-12 h-12 bg-[#ee7e65]/20 rounded-full flex items-center justify-center">
+                        <User className="h-6 w-6 text-[#ee7e65]" />
                       </div>
                       <div>
                         <h4 className="font-medium text-slate-900">
@@ -2533,7 +2533,7 @@ function JobsPage() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <h4 className="font-semibold text-slate-900 flex items-center gap-2">
-                          <Award className="h-5 w-5 text-[#24c4b8]" />
+                          <Award className="h-5 w-5 text-[#ee7e65]" />
                           HiReady Index
                         </h4>
                         <div className={`text-2xl font-bold ${

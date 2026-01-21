@@ -126,7 +126,7 @@ export default function ProfilePage() {
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-[#000000] flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-[#24c4b8] to-[#1db0a5] rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-[#ee7e65] to-[#e06d54] rounded-lg flex items-center justify-center">
                 <FileText className="w-4 h-4 text-white" />
               </div>
               My Resume
@@ -142,7 +142,7 @@ export default function ProfilePage() {
 
           {docsLoading ? (
             <div className="flex items-center justify-center py-6">
-              <Loader2 className="w-5 h-5 animate-spin text-[#cb6ce6]" />
+              <Loader2 className="w-5 h-5 animate-spin text-[#ee7e65]" />
             </div>
           ) : latestResume ? (
             <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-xl p-4 border border-slate-200">
@@ -186,7 +186,7 @@ export default function ProfilePage() {
           ) : (
             <div className="text-center py-8">
               <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                <FileText className="w-7 h-7 text-[#cb6ce6]" />
+                <FileText className="w-7 h-7 text-[#ee7e65]" />
               </div>
               <p className="text-gray-500 mb-4">
                 No resume uploaded yet
@@ -194,7 +194,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-[#24c4b8] rounded-xl hover:bg-[#1db0a5] transition-colors shadow-lg shadow-[#24c4b8]/25 disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-[#ee7e65] rounded-xl hover:bg-[#e06d54] transition-colors shadow-lg shadow-[#ee7e65]/25 disabled:opacity-50"
               >
                 {isUploading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -203,7 +203,7 @@ export default function ProfilePage() {
                 )}
                 Upload Resume
               </button>
-              <p className="text-xs text-[#cb6ce6] mt-3">
+              <p className="text-xs text-[#ee7e65] mt-3">
                 PDF, DOC, DOCX, or TXT
               </p>
             </div>
@@ -232,14 +232,14 @@ export default function ProfilePage() {
             {extractedProfile.skills && extractedProfile.skills.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <Code className="w-4 h-4 text-[#24c4b8]" />
+                  <Code className="w-4 h-4 text-[#ee7e65]" />
                   <p className="text-sm font-semibold text-slate-700">Skills</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {extractedProfile.skills.map((skill, idx) => (
                     <span
                       key={idx}
-                      className="px-3 py-1.5 bg-[#24c4b8]/10 text-[#24c4b8] rounded-full text-sm font-medium"
+                      className="px-3 py-1.5 bg-[#ee7e65]/10 text-[#ee7e65] rounded-full text-sm font-medium"
                     >
                       {skill}
                     </span>
@@ -252,7 +252,7 @@ export default function ProfilePage() {
             {extractedProfile.workHistory && extractedProfile.workHistory.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <Briefcase className="w-4 h-4 text-[#cb6ce6]" />
+                  <Briefcase className="w-4 h-4 text-[#ee7e65]" />
                   <p className="text-sm font-semibold text-slate-700">Work Experience</p>
                 </div>
                 <div className="space-y-3">
@@ -271,7 +271,7 @@ export default function ProfilePage() {
                         <ul className="mt-2 space-y-1">
                           {job.highlights.slice(0, 3).map((highlight, hIdx) => (
                             <li key={hIdx} className="text-sm text-slate-600 flex items-start gap-2">
-                              <span className="text-[#24c4b8] mt-1">•</span>
+                              <span className="text-[#ee7e65] mt-1">•</span>
                               {highlight}
                             </li>
                           ))}
@@ -329,7 +329,7 @@ export default function ProfilePage() {
 
             {profileLoading && (
               <div className="flex items-center justify-center py-4">
-                <Loader2 className="w-5 h-5 animate-spin text-[#cb6ce6]" />
+                <Loader2 className="w-5 h-5 animate-spin text-[#ee7e65]" />
               </div>
             )}
           </div>

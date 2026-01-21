@@ -81,8 +81,8 @@ export default function ReadycheckPage() {
   return (
     <div className="min-h-screen bg-[#000000] flex flex-col relative overflow-hidden">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')]" />
-      <div className="absolute top-20 right-10 w-80 h-80 bg-[#24c4b8]/15 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 left-10 w-80 h-80 bg-[#cb6ce6]/10 rounded-full blur-3xl" />
+      <div className="absolute top-20 right-10 w-80 h-80 bg-[#ee7e65]/15 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 left-10 w-80 h-80 bg-[#ee7e65]/10 rounded-full blur-3xl" />
       
       <header className="p-4 sm:p-6 relative">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
@@ -103,7 +103,7 @@ export default function ReadycheckPage() {
         <div className="w-full max-w-xl">
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur text-white px-4 py-2 rounded-full text-sm font-medium mb-5 border border-white/20">
-              <Zap className="w-4 h-4 text-[#24c4b8]" />
+              <Zap className="w-4 h-4 text-[#ee7e65]" />
               Free AI Interview Practice
             </div>
             <h1 className="text-3xl sm:text-5xl font-bold text-white mb-4 leading-tight">
@@ -123,7 +123,7 @@ export default function ReadycheckPage() {
                   setError("");
                 }}
                 placeholder="Paste job description or LinkedIn job URL here..."
-                className="w-full h-40 sm:h-48 p-4 border-2 border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#000000]/10 focus:border-[#000000] text-[#000000] placeholder:text-[#cb6ce6] text-sm transition-all bg-[#fbfbfc]"
+                className="w-full h-40 sm:h-48 p-4 border-2 border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#000000]/10 focus:border-[#000000] text-[#000000] placeholder:text-[#ee7e65] text-sm transition-all bg-[#fbfbfc]"
               />
               
               {inputValue && (
@@ -131,7 +131,7 @@ export default function ReadycheckPage() {
                   <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                     inputType === "linkedin" 
                       ? "bg-blue-100 text-blue-700" 
-                      : "bg-[#24c4b8]/10 text-[#24c4b8]"
+                      : "bg-[#ee7e65]/10 text-[#ee7e65]"
                   }`}>
                     {inputType === "linkedin" ? <LinkIcon className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
                     {inputType === "linkedin" ? "LinkedIn URL" : "Job Description"}
@@ -150,7 +150,7 @@ export default function ReadycheckPage() {
             <Button 
               onClick={handleStart}
               disabled={isProcessing}
-              className="w-full mt-5 h-14 bg-[#24c4b8] hover:bg-[#1db0a5] text-white text-base font-semibold shadow-lg shadow-[#24c4b8]/25 group"
+              className="w-full mt-5 h-14 bg-[#ee7e65] hover:bg-[#e06d54] text-white text-base font-semibold shadow-lg shadow-[#ee7e65]/25 group"
             >
               {isProcessing ? (
                 <>

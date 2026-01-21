@@ -22,19 +22,19 @@ export default function EnterprisePage() {
       title: 'Campus Recruiting', 
       desc: 'Prepare candidates at scale before they interview with your company',
       icon: Award,
-      color: 'from-[#cb6ce6] to-[#cb6ce6]'
+      color: 'from-[#ee7e65] to-[#ee7e65]'
     },
     { 
       title: 'Internal Mobility', 
       desc: 'Help employees prepare for internal role transitions',
       icon: TrendingUp,
-      color: 'from-[#24c4b8] to-[#1a9e94]'
+      color: 'from-[#ee7e65] to-[#d66352]'
     },
     { 
       title: 'L&D Programs', 
       desc: 'Integrate interview practice into your learning curriculum',
       icon: Target,
-      color: 'from-[#9b4dca] to-[#cb6ce6]'
+      color: 'from-[#768c9c] to-[#ee7e65]'
     },
   ];
 
@@ -52,20 +52,20 @@ export default function EnterprisePage() {
 
       {/* Hero Section */}
       <section className="pt-[100px] lg:pt-[120px] pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(203,108,230,0.2),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(36,196,184,0.1),transparent_50%)]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#042c4c] to-[#000000]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(238,126,101,0.2),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(118,140,156,0.1),transparent_50%)]" />
         
         <div className="max-w-5xl mx-auto text-center relative px-6">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/90 px-4 py-2 rounded-full text-sm font-medium mb-8 border border-white/20">
-            <Building2 className="w-4 h-4 text-[#24c4b8]" />
+            <Building2 className="w-4 h-4 text-[#ee7e65]" />
             Enterprise Solutions
           </div>
           
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-white tracking-tight">
             Interview prep at
             <br />
-            <span className="text-[#24c4b8]">enterprise scale</span>
+            <span className="text-[#ee7e65]">enterprise scale</span>
           </h1>
           
           <p className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed">
@@ -74,7 +74,7 @@ export default function EnterprisePage() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Link to="/demo">
-              <Button size="lg" className="w-full sm:w-auto bg-[#24c4b8] hover:bg-[#1db0a5] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#24c4b8]/30 group">
+              <Button size="lg" className="w-full sm:w-auto bg-[#ee7e65] hover:bg-[#e06d54] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 group">
                 Book a Demo
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -89,15 +89,15 @@ export default function EnterprisePage() {
 
           <div className="flex items-center gap-6 justify-center text-white/60 text-sm">
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
+              <CheckCircle2 className="w-4 h-4 text-[#ee7e65]" />
               <span>Custom implementation</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
+              <CheckCircle2 className="w-4 h-4 text-[#ee7e65]" />
               <span>Dedicated support</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
+              <CheckCircle2 className="w-4 h-4 text-[#ee7e65]" />
               <span>SLA guaranteed</span>
             </div>
           </div>
@@ -110,7 +110,7 @@ export default function EnterprisePage() {
           <div className="grid md:grid-cols-3 gap-8">
             {stats.map((stat, i) => (
               <div key={i} className="text-center">
-                <div className="text-4xl sm:text-5xl font-bold text-[#cb6ce6] mb-2">{stat.value}</div>
+                <div className="text-4xl sm:text-5xl font-bold text-[#ee7e65] mb-2">{stat.value}</div>
                 <div className="text-gray-500">{stat.label}</div>
               </div>
             ))}
@@ -119,12 +119,12 @@ export default function EnterprisePage() {
       </section>
 
       {/* Trusted By */}
-      <section className="py-12 px-6 bg-[#f8f7fc] border-b border-gray-100">
+      <section className="py-12 px-6 bg-[#f8f9fb] border-b border-gray-100">
         <div className="max-w-5xl mx-auto">
           <p className="text-center text-gray-500 text-sm mb-6">Trusted by leading organizations</p>
           <div className="flex flex-wrap justify-center gap-8 items-center">
             {logos.map((logo, i) => (
-              <div key={i} className="text-[#000000]/25 font-bold text-lg hover:text-[#cb6ce6]/50 transition-colors">{logo}</div>
+              <div key={i} className="text-[#000000]/25 font-bold text-lg hover:text-[#ee7e65]/50 transition-colors">{logo}</div>
             ))}
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function EnterprisePage() {
       <section className="py-20 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">Features</span>
+            <span className="inline-block text-[#ee7e65] text-sm font-semibold tracking-wider uppercase mb-3">Features</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-[#000000] mb-4">
               Built for enterprise needs
             </h2>
@@ -144,8 +144,8 @@ export default function EnterprisePage() {
             {features.map((feature, i) => {
               const Icon = feature.icon;
               return (
-                <div key={i} className="bg-[#f8f7fc] rounded-2xl p-6 border border-gray-100 hover:border-[#cb6ce6]/30 hover:shadow-xl hover:-translate-y-1 transition-all group">
-                  <div className="w-12 h-12 bg-[#cb6ce6] rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#24c4b8] transition-colors">
+                <div key={i} className="bg-[#f8f9fb] rounded-2xl p-6 border border-gray-100 hover:border-[#ee7e65]/30 hover:shadow-xl hover:-translate-y-1 transition-all group">
+                  <div className="w-12 h-12 bg-[#ee7e65] rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#ee7e65] transition-colors">
                     <Icon className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="font-bold text-[#000000] text-lg mb-2">{feature.title}</h3>
@@ -158,10 +158,10 @@ export default function EnterprisePage() {
       </section>
 
       {/* Use Cases */}
-      <section className="py-20 px-6 bg-[#f8f7fc]">
+      <section className="py-20 px-6 bg-[#f8f9fb]">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">Use Cases</span>
+            <span className="inline-block text-[#ee7e65] text-sm font-semibold tracking-wider uppercase mb-3">Use Cases</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-[#000000] mb-4">
               How enterprises use Hiready
             </h2>
@@ -186,9 +186,9 @@ export default function EnterprisePage() {
 
       {/* CTA Section */}
       <section className="py-24 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(203,108,230,0.1),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(36,196,184,0.08),transparent_50%)]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#042c4c] to-[#000000]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(238,126,101,0.1),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(118,140,156,0.08),transparent_50%)]" />
         
         <div className="max-w-3xl mx-auto text-center relative">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-5">
@@ -199,7 +199,7 @@ export default function EnterprisePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/demo">
-              <Button size="lg" className="w-full sm:w-auto bg-[#24c4b8] hover:bg-[#1db0a5] text-white px-10 h-14 text-base font-semibold shadow-xl shadow-[#24c4b8]/30 group">
+              <Button size="lg" className="w-full sm:w-auto bg-[#ee7e65] hover:bg-[#e06d54] text-white px-10 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 group">
                 Book a Demo
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>

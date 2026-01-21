@@ -23,7 +23,7 @@ const interviewModeOptions = [
     label: "Case & Problem Solving", 
     description: "Structured thinking for ambiguous problems",
     icon: Briefcase,
-    color: "bg-[#cb6ce6]",
+    color: "bg-[#ee7e65]",
     interviewMode: "case_problem_solving",
     duration: "15 min",
     includes: ["Business Cases", "Product Cases", "Analytics Cases", "Strategy"],
@@ -34,7 +34,7 @@ const interviewModeOptions = [
     label: "Behavioral and Leadership", 
     description: "Past behavior, judgment, ownership and leadership",
     icon: MessageSquare,
-    color: "bg-[#24c4b8]",
+    color: "bg-[#ee7e65]",
     interviewMode: "behavioral",
     duration: "15 min",
     includes: ["STAR Stories", "Conflict Handling", "Leadership", "Failure Stories"],
@@ -96,14 +96,14 @@ export default function PracticeByTypePage() {
                 <button
                   key={mode.id}
                   onClick={() => handleInterviewMode(mode)}
-                  className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 hover:border-[#24c4b8] hover:shadow-lg transition-all duration-200"
+                  className="group text-left bg-white border-2 border-slate-200 rounded-2xl p-5 hover:border-[#ee7e65] hover:shadow-lg transition-all duration-200"
                 >
                   <div className="flex items-start gap-4">
                     <div className={`w-12 h-12 rounded-xl ${mode.color} flex items-center justify-center flex-shrink-0`}>
                       <Icon className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-slate-900 mb-1 group-hover:text-[#24c4b8] transition-colors">
+                      <h3 className="text-lg font-semibold text-slate-900 mb-1 group-hover:text-[#ee7e65] transition-colors">
                         {mode.label}
                       </h3>
                       <p className="text-sm text-slate-500 mb-3">{mode.description}</p>
@@ -121,7 +121,7 @@ export default function PracticeByTypePage() {
                           <Clock className="w-3 h-3" />
                           {mode.duration}
                         </span>
-                        <span className="text-sm font-medium text-[#24c4b8] flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-sm font-medium text-[#ee7e65] flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           Start Practice
                           <ArrowRight className="w-4 h-4" />
                         </span>
@@ -138,7 +138,7 @@ export default function PracticeByTypePage() {
               Not sure which type to practice? 
               <button 
                 onClick={() => navigate("/interview")}
-                className="ml-1 text-[#24c4b8] font-medium hover:underline"
+                className="ml-1 text-[#ee7e65] font-medium hover:underline"
               >
                 Browse role-specific practice plans
               </button>

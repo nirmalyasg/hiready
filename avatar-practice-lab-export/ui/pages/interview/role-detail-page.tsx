@@ -122,27 +122,27 @@ const levelConfig: Record<string, { label: string; bg: string; text: string }> =
 const categoryConfig: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
   hr_screening: { icon: <Phone className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
   hr: { icon: <Phone className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
-  hiring_manager: { icon: <User className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  hiring_manager: { icon: <User className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
   technical_interview: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
   technical: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
   coding: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
   coding_assessment: { icon: <Code className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
-  system_design: { icon: <Code className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  system_design: { icon: <Code className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
   sql: { icon: <Code className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
-  analytics: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  analytics: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
   ml: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
-  case_study: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
-  case: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
-  product: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
-  portfolio: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
-  sales_roleplay: { icon: <User className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
-  behavioral: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#24c4b8]", bg: "bg-[#24c4b8]/10" },
+  case_study: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
+  case: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
+  product: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
+  portfolio: { icon: <Briefcase className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
+  sales_roleplay: { icon: <User className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
+  behavioral: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
   culture_values: { icon: <Heart className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
   bar_raiser: { icon: <TrendingUp className="w-4 h-4" />, color: "text-[#000000]", bg: "bg-[#000000]/10" },
   aptitude: { icon: <TrendingUp className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
   aptitude_assessment: { icon: <TrendingUp className="w-4 h-4" />, color: "text-gray-500", bg: "bg-gray-500/10" },
-  group: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
-  group_discussion: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#cb6ce6]", bg: "bg-[#cb6ce6]/10" },
+  group: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
+  group_discussion: { icon: <MessageCircle className="w-4 h-4" />, color: "text-[#ee7e65]", bg: "bg-[#ee7e65]/10" },
 };
 
 export default function RoleDetailPage() {
@@ -432,7 +432,7 @@ export default function RoleDetailPage() {
               className={`w-full h-14 font-semibold rounded-xl shadow-lg text-base gap-2 ${
                 isFreeTierExhausted
                   ? 'bg-[#ee7e65] hover:bg-[#e06c52] text-white shadow-[#ee7e65]/25'
-                  : 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white shadow-[#24c4b8]/25'
+                  : 'bg-[#ee7e65] hover:bg-[#e06d54] text-white shadow-[#ee7e65]/25'
               }`}
             >
               {startingRoundId === practiceOptions[0]?.id ? (
@@ -456,11 +456,11 @@ export default function RoleDetailPage() {
 
           {/* Practice Progress - matches job detail page */}
           {hasPracticeHistory && (
-            <div className="bg-gradient-to-r from-[#24c4b8]/5 to-transparent rounded-lg border border-[#24c4b8]/20 p-4">
+            <div className="bg-gradient-to-r from-[#ee7e65]/5 to-transparent rounded-lg border border-[#ee7e65]/20 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-[#24c4b8]/10 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-[#24c4b8]" />
+                  <div className="w-10 h-10 rounded-lg bg-[#ee7e65]/10 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-[#ee7e65]" />
                   </div>
                   <div>
                     <p className="font-medium text-slate-900 text-sm">Practice Progress</p>
@@ -476,7 +476,7 @@ export default function RoleDetailPage() {
                   onClick={() => navigate(`/hiready-index?roleKitId=${roleKit.id}`)}
                   size="sm"
                   variant="outline"
-                  className="h-8 px-3 text-xs border-[#24c4b8]/30 text-[#24c4b8] hover:bg-[#24c4b8]/10"
+                  className="h-8 px-3 text-xs border-[#ee7e65]/30 text-[#ee7e65] hover:bg-[#ee7e65]/10"
                 >
                   <BarChart3 className="w-3.5 h-3.5 mr-1.5" />
                   View Progress
@@ -578,7 +578,7 @@ export default function RoleDetailPage() {
                             ? 'bg-[#ee7e65] hover:bg-[#e06c52] text-white'
                             : hasAttempted 
                               ? 'bg-slate-800 hover:bg-slate-700 text-white' 
-                              : 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white'
+                              : 'bg-[#ee7e65] hover:bg-[#e06d54] text-white'
                         } disabled:opacity-70`}
                       >
                         {startingRoundId === option.id ? (

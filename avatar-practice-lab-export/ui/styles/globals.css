@@ -3,31 +3,34 @@
 @tailwind utilities;
 
 :root {
-  --background: #f5f7fb;
-  --foreground: #000000;
+  /* Brand colors */
+  --brand-dark: #042c4c;
+  --brand-primary: #042c4c;
+  --brand-accent: #ee7e65;
+  --brand-accent-light: #f5a594;
+  --brand-light: #768c9c;
+  --brand-muted: #6c8194;
+  --brand-background: #f8f9fb;
+  
+  /* Theme colors mapped to brand */
+  --background: #f8f9fb;
+  --foreground: #042c4c;
   --card-background: #ffffff;
-  --card-foreground: #000000;
-  --primary: #6366f1;
+  --card-foreground: #042c4c;
+  --primary: #042c4c;
   --primary-foreground: #ffffff;
-  --secondary: #64748b;
+  --secondary: #768c9c;
   --secondary-foreground: #ffffff;
-  --accent: #8b5cf6;
+  --accent: #ee7e65;
   --accent-foreground: #ffffff;
-  --accent-light: #a78bfa;
+  --accent-light: #f5a594;
   --muted: #f1f5f9;
-  --muted-foreground: #64748b;
+  --muted-foreground: #6c8194;
   --border: #e2e8f0;
-  --ring: #6366f1;
+  --ring: #ee7e65;
   --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
-  
-  /* Vibrant accent colors */
-  --electric-teal: #14b8a6;
-  --aurora-violet: #8b5cf6;
-  --coral-punch: #f97316;
-  --ocean-blue: #3b82f6;
-  --rose-pink: #ec4899;
 }
 
 * {

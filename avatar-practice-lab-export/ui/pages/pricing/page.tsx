@@ -106,20 +106,20 @@ export default function PricingPage() {
 
       {/* Hero Section */}
       <section className="pt-[100px] lg:pt-[120px] pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(203,108,230,0.2),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(36,196,184,0.1),transparent_50%)]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#042c4c] to-[#000000]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(238,126,101,0.2),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(118,140,156,0.1),transparent_50%)]" />
         
         <div className="max-w-4xl mx-auto text-center relative px-6">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/90 px-4 py-2 rounded-full text-sm font-medium mb-8 border border-white/20">
-            <Crown className="w-4 h-4 text-[#24c4b8]" />
+            <Crown className="w-4 h-4 text-[#ee7e65]" />
             Pricing Plans
           </div>
           
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-white tracking-tight">
             Simple, transparent
             <br />
-            <span className="text-[#24c4b8]">pricing</span>
+            <span className="text-[#ee7e65]">pricing</span>
           </h1>
           
           <p className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto leading-relaxed mb-10">
@@ -128,7 +128,7 @@ export default function PricingPage() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Link to="/readycheck">
-              <Button size="lg" className="w-full sm:w-auto bg-[#24c4b8] hover:bg-[#1db0a5] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#24c4b8]/30 group">
+              <Button size="lg" className="w-full sm:w-auto bg-[#ee7e65] hover:bg-[#e06d54] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 group">
                 Start Free
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -143,15 +143,15 @@ export default function PricingPage() {
 
           <div className="flex items-center gap-6 justify-center text-white/60 text-sm">
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
+              <CheckCircle2 className="w-4 h-4 text-[#ee7e65]" />
               <span>No hidden fees</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
+              <CheckCircle2 className="w-4 h-4 text-[#ee7e65]" />
               <span>Cancel anytime</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
+              <CheckCircle2 className="w-4 h-4 text-[#ee7e65]" />
               <span>Student discounts</span>
             </div>
           </div>
@@ -159,7 +159,7 @@ export default function PricingPage() {
       </section>
 
       {/* Pricing Cards */}
-      <section className="py-16 px-6 bg-[#f8f7fc]">
+      <section className="py-16 px-6 bg-[#f8f9fb]">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {plans.map((plan, i) => {
@@ -169,19 +169,19 @@ export default function PricingPage() {
                   key={i} 
                   className={`rounded-2xl p-8 border-2 transition-all hover:shadow-xl hover:-translate-y-1 relative bg-white ${
                     plan.popular 
-                      ? 'border-[#24c4b8] shadow-xl shadow-[#24c4b8]/10' 
+                      ? 'border-[#ee7e65] shadow-xl shadow-[#ee7e65]/10' 
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
                   {plan.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#24c4b8] text-white text-xs font-bold px-4 py-1 rounded-full">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#ee7e65] text-white text-xs font-bold px-4 py-1 rounded-full">
                       MOST POPULAR
                     </div>
                   )}
                   
                   <div className="flex items-center gap-3 mb-4">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      plan.popular ? 'bg-[#24c4b8]' : 'bg-[#cb6ce6]'
+                      plan.popular ? 'bg-[#ee7e65]' : 'bg-[#ee7e65]'
                     }`}>
                       <Icon className="w-5 h-5 text-white" />
                     </div>
@@ -200,7 +200,7 @@ export default function PricingPage() {
                   <ul className="space-y-3 mb-8">
                     {plan.features.map((feature, j) => (
                       <li key={j} className="flex items-start gap-3">
-                        <Check className="w-5 h-5 text-[#24c4b8] flex-shrink-0 mt-0.5" />
+                        <Check className="w-5 h-5 text-[#ee7e65] flex-shrink-0 mt-0.5" />
                         <span className="text-[#000000] text-sm">{feature}</span>
                       </li>
                     ))}
@@ -210,8 +210,8 @@ export default function PricingPage() {
                     <Button 
                       className={`w-full h-12 font-semibold group ${
                         plan.popular 
-                          ? 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white shadow-lg shadow-[#24c4b8]/25' 
-                          : 'bg-[#cb6ce6] hover:bg-[#a855f7] text-white'
+                          ? 'bg-[#ee7e65] hover:bg-[#e06d54] text-white shadow-lg shadow-[#ee7e65]/25' 
+                          : 'bg-[#ee7e65] hover:bg-[#e06d54] text-white'
                       }`}
                     >
                       {plan.cta}
@@ -229,7 +229,7 @@ export default function PricingPage() {
       <section className="py-20 px-6 bg-white">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <span className="inline-block text-[#cb6ce6] text-sm font-semibold tracking-wider uppercase mb-3">FAQ</span>
+            <span className="inline-block text-[#ee7e65] text-sm font-semibold tracking-wider uppercase mb-3">FAQ</span>
             <h2 className="text-3xl font-bold text-[#000000]">
               Frequently Asked Questions
             </h2>
@@ -237,7 +237,7 @@ export default function PricingPage() {
           
           <div className="space-y-4">
             {faqs.map((faq, i) => (
-              <div key={i} className="bg-[#f8f7fc] rounded-2xl p-6 border border-gray-100 hover:border-[#cb6ce6]/30 transition-all">
+              <div key={i} className="bg-[#f8f9fb] rounded-2xl p-6 border border-gray-100 hover:border-[#ee7e65]/30 transition-all">
                 <h3 className="font-semibold text-[#000000] mb-2">{faq.q}</h3>
                 <p className="text-gray-500">{faq.a}</p>
               </div>
@@ -248,9 +248,9 @@ export default function PricingPage() {
 
       {/* CTA Section */}
       <section className="py-24 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(203,108,230,0.1),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(36,196,184,0.08),transparent_50%)]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#042c4c] to-[#000000]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(238,126,101,0.1),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(118,140,156,0.08),transparent_50%)]" />
         
         <div className="max-w-3xl mx-auto text-center relative">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-5">
@@ -260,7 +260,7 @@ export default function PricingPage() {
             Contact our team for enterprise pricing and custom packages.
           </p>
           <Link to="/demo">
-            <Button size="lg" className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white px-10 h-14 text-base font-semibold shadow-xl shadow-[#24c4b8]/30 gap-2 group">
+            <Button size="lg" className="bg-[#ee7e65] hover:bg-[#e06d54] text-white px-10 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 gap-2 group">
               <Calendar className="w-4 h-4" />
               Book a Demo
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

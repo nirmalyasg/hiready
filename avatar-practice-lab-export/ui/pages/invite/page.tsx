@@ -53,7 +53,7 @@ export default function InvitePage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-[#24c4b8] animate-spin mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 text-[#ee7e65] animate-spin mx-auto mb-4" />
           <p className="text-white/70">Validating your invite...</p>
         </div>
       </div>
@@ -72,7 +72,7 @@ export default function InvitePage() {
             This invite link is no longer valid. It may have expired or reached its usage limit.
           </p>
           <Link to="/">
-            <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white">
+            <Button className="bg-[#ee7e65] hover:bg-[#e06d54] text-white">
               Go to Homepage
             </Button>
           </Link>
@@ -85,8 +85,8 @@ export default function InvitePage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#000000] via-[#000000] to-[#000000] flex items-center justify-center px-6">
         <div className="max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-[#24c4b8]/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="w-8 h-8 text-[#24c4b8]" />
+          <div className="w-16 h-16 bg-[#ee7e65]/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-8 h-8 text-[#ee7e65]" />
           </div>
           <h1 className="text-2xl font-bold text-white mb-3">Access Granted!</h1>
           <p className="text-white/60 mb-4">
@@ -105,7 +105,7 @@ export default function InvitePage() {
       <div className="max-w-lg w-full">
         <div className="text-center mb-8">
           <img src={logoImg} alt="Hiready" className="h-10 mx-auto mb-8 brightness-0 invert" />
-          <div className="inline-flex items-center gap-2 bg-[#24c4b8]/20 text-[#24c4b8] px-4 py-2 rounded-full text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 bg-[#ee7e65]/20 text-[#ee7e65] px-4 py-2 rounded-full text-sm font-medium mb-6">
             <Building2 className="w-4 h-4" />
             Company Invite
           </div>
@@ -119,8 +119,8 @@ export default function InvitePage() {
 
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
           <div className="flex items-center gap-4 mb-6 pb-6 border-b border-white/10">
-            <div className="w-12 h-12 bg-[#cb6ce6]/20 rounded-xl flex items-center justify-center">
-              <Briefcase className="w-6 h-6 text-[#cb6ce6]" />
+            <div className="w-12 h-12 bg-[#ee7e65]/20 rounded-xl flex items-center justify-center">
+              <Briefcase className="w-6 h-6 text-[#ee7e65]" />
             </div>
             <div>
               <h2 className="font-bold text-white text-lg">{shareData.interviewSet?.name}</h2>
@@ -136,23 +136,23 @@ export default function InvitePage() {
             </h3>
             {(shareData.interviewSet?.interviewTypes as string[] || ['HR', 'Technical', 'Case Study']).map((type: string, i: number) => (
               <div key={i} className="flex items-center gap-3">
-                <CheckCircle2 className="w-5 h-5 text-[#24c4b8]" />
+                <CheckCircle2 className="w-5 h-5 text-[#ee7e65]" />
                 <span className="text-white/80">{type} Interview Practice</span>
               </div>
             ))}
             <div className="flex items-center gap-3">
-              <CheckCircle2 className="w-5 h-5 text-[#24c4b8]" />
+              <CheckCircle2 className="w-5 h-5 text-[#ee7e65]" />
               <span className="text-white/80">Detailed feedback & scoring</span>
             </div>
             <div className="flex items-center gap-3">
-              <CheckCircle2 className="w-5 h-5 text-[#24c4b8]" />
+              <CheckCircle2 className="w-5 h-5 text-[#ee7e65]" />
               <span className="text-white/80">Personalized improvement tips</span>
             </div>
           </div>
 
-          <div className="bg-[#24c4b8]/10 rounded-xl p-4 mb-6 flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#24c4b8]/20 rounded-lg flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-[#24c4b8]" />
+          <div className="bg-[#ee7e65]/10 rounded-xl p-4 mb-6 flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#ee7e65]/20 rounded-lg flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-[#ee7e65]" />
             </div>
             <div>
               <p className="text-sm text-white/60">Sponsored by</p>
@@ -163,7 +163,7 @@ export default function InvitePage() {
           <Button 
             onClick={handleClaimAccess}
             disabled={claimMutation.isPending}
-            className="w-full bg-[#24c4b8] hover:bg-[#1db0a5] h-14 text-base font-semibold group"
+            className="w-full bg-[#ee7e65] hover:bg-[#e06d54] h-14 text-base font-semibold group"
           >
             {claimMutation.isPending ? (
               <>

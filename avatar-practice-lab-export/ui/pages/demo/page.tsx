@@ -61,15 +61,15 @@ export default function DemoPage() {
         <MarketingNav />
         <div className="pt-[120px] flex items-center justify-center px-6 min-h-screen">
           <div className="max-w-md text-center">
-            <div className="w-20 h-20 bg-[#24c4b8]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-10 h-10 text-[#24c4b8]" />
+            <div className="w-20 h-20 bg-[#ee7e65]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-10 h-10 text-[#ee7e65]" />
             </div>
             <h1 className="text-3xl font-bold text-[#000000] mb-4">Thank You!</h1>
             <p className="text-gray-500 mb-8">
               We've received your demo request. Our team will reach out within 24 hours to schedule a personalized demo.
             </p>
             <Link to="/">
-              <Button className="bg-[#cb6ce6] hover:bg-[#b85fd4] text-white">
+              <Button className="bg-[#ee7e65] hover:bg-[#e06d54] text-white">
                 Back to Home
               </Button>
             </Link>
@@ -85,19 +85,19 @@ export default function DemoPage() {
 
       {/* Hero Section */}
       <section className="pt-[100px] lg:pt-[120px] pb-16 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(203,108,230,0.2),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(36,196,184,0.1),transparent_50%)]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#000000] via-[#042c4c] to-[#000000]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(238,126,101,0.2),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(118,140,156,0.1),transparent_50%)]" />
         
         <div className="max-w-5xl mx-auto text-center relative px-6">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/90 px-4 py-2 rounded-full text-sm font-medium mb-8 border border-white/20">
-            <Building2 className="w-4 h-4 text-[#24c4b8]" />
+            <Building2 className="w-4 h-4 text-[#ee7e65]" />
             Enterprise Solutions
           </div>
           
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-white tracking-tight">
             Book a
-            <span className="text-[#24c4b8]"> personalized demo</span>
+            <span className="text-[#ee7e65]"> personalized demo</span>
           </h1>
           
           <p className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto leading-relaxed mb-10">
@@ -106,7 +106,7 @@ export default function DemoPage() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <a href="#demo-form">
-              <Button size="lg" className="w-full sm:w-auto bg-[#24c4b8] hover:bg-[#1db0a5] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#24c4b8]/30 group">
+              <Button size="lg" className="w-full sm:w-auto bg-[#ee7e65] hover:bg-[#e06d54] text-white px-8 h-14 text-base font-semibold shadow-xl shadow-[#ee7e65]/30 group">
                 Request a Demo
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -121,11 +121,11 @@ export default function DemoPage() {
           
           <div className="flex items-center gap-6 justify-center text-white/60 text-sm">
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
+              <CheckCircle2 className="w-4 h-4 text-[#ee7e65]" />
               <span>Free consultation</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#24c4b8]" />
+              <CheckCircle2 className="w-4 h-4 text-[#ee7e65]" />
               <span>Response within 24h</span>
             </div>
           </div>
@@ -147,7 +147,7 @@ export default function DemoPage() {
                   const Icon = benefit.icon;
                   return (
                     <div key={i} className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-[#cb6ce6] rounded-xl flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 bg-[#ee7e65] rounded-xl flex items-center justify-center flex-shrink-0">
                         <Icon className="w-6 h-6 text-white" />
                       </div>
                       <div>
@@ -159,9 +159,9 @@ export default function DemoPage() {
                 })}
               </div>
 
-              <div className="bg-[#f8f7fc] rounded-2xl p-6 border border-gray-100">
+              <div className="bg-[#f8f9fb] rounded-2xl p-6 border border-gray-100">
                 <div className="flex items-center gap-2 mb-3">
-                  <CheckCircle2 className="w-5 h-5 text-[#24c4b8]" />
+                  <CheckCircle2 className="w-5 h-5 text-[#ee7e65]" />
                   <span className="font-semibold text-[#000000]">Quick Response</span>
                 </div>
                 <p className="text-gray-500 text-sm">
@@ -185,7 +185,7 @@ export default function DemoPage() {
                       required
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc]"
+                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all bg-[#f8f9fb]"
                       placeholder="John Smith"
                     />
                   </div>
@@ -202,7 +202,7 @@ export default function DemoPage() {
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc]"
+                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all bg-[#f8f9fb]"
                       placeholder="john@company.com"
                     />
                   </div>
@@ -219,7 +219,7 @@ export default function DemoPage() {
                       required
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc]"
+                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all bg-[#f8f9fb]"
                       placeholder="Acme Inc"
                     />
                   </div>
@@ -235,7 +235,7 @@ export default function DemoPage() {
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc]"
+                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all bg-[#f8f9fb]"
                       placeholder="+1 (555) 123-4567"
                     />
                   </div>
@@ -248,7 +248,7 @@ export default function DemoPage() {
                   <select
                     value={formData.teamSize}
                     onChange={(e) => setFormData({ ...formData, teamSize: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#000000] focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc]"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[#000000] focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all bg-[#f8f9fb]"
                   >
                     <option value="">Select team size</option>
                     {teamSizeOptions.map(option => (
@@ -267,7 +267,7 @@ export default function DemoPage() {
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       rows={4}
-                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#cb6ce6]/20 focus:border-[#cb6ce6] transition-all bg-[#f8f7fc] resize-none"
+                      className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-[#000000] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] transition-all bg-[#f8f9fb] resize-none"
                       placeholder="Tell us about your needs..."
                     />
                   </div>
@@ -276,7 +276,7 @@ export default function DemoPage() {
                 <Button
                   type="submit"
                   disabled={submitMutation.isPending}
-                  className="w-full bg-[#24c4b8] hover:bg-[#1db0a5] text-white h-14 rounded-xl font-semibold shadow-lg shadow-[#24c4b8]/25 flex items-center justify-center gap-2 text-base"
+                  className="w-full bg-[#ee7e65] hover:bg-[#e06d54] text-white h-14 rounded-xl font-semibold shadow-lg shadow-[#ee7e65]/25 flex items-center justify-center gap-2 text-base"
                 >
                   {submitMutation.isPending ? (
                     'Submitting...'

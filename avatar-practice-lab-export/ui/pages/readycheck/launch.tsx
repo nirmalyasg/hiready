@@ -110,7 +110,7 @@ export default function ReadycheckLaunchPage() {
           <p className="text-gray-600 mb-6">{error}</p>
           <Button 
             onClick={() => navigate("/readycheck")}
-            className="bg-[#24c4b8] hover:bg-[#1db0a5]"
+            className="bg-[#ee7e65] hover:bg-[#e06d54]"
           >
             Try Again
           </Button>

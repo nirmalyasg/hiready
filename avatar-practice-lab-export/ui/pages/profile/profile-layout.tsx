@@ -27,7 +27,7 @@ export default function ProfileLayout({ children, activeTab }: ProfileLayoutProp
     return (
       <SidebarLayout>
         <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-[#24c4b8]" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#ee7e65]" />
         </div>
       </SidebarLayout>
     );
@@ -42,7 +42,7 @@ export default function ProfileLayout({ children, activeTab }: ProfileLayoutProp
     <SidebarLayout>
       <div className="min-h-screen bg-[#fbfbfc]">
         {/* Header */}
-        <div className="bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000] text-white">
+        <div className="bg-gradient-to-br from-[#000000] via-[#042c4c] to-[#000000] text-white">
           <div className="max-w-2xl mx-auto px-4 py-8">
             <div className="flex items-center gap-4">
               <div className="relative">
@@ -53,11 +53,11 @@ export default function ProfileLayout({ children, activeTab }: ProfileLayoutProp
                     className="w-16 h-16 rounded-full object-cover ring-4 ring-white/20"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#24c4b8] to-[#1db0a5] flex items-center justify-center ring-4 ring-white/20">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#ee7e65] to-[#e06d54] flex items-center justify-center ring-4 ring-white/20">
                     <User className="w-8 h-8 text-white" />
                   </div>
                 )}
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#24c4b8] rounded-full flex items-center justify-center border-2 border-[#000000]">
+                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#ee7e65] rounded-full flex items-center justify-center border-2 border-[#000000]">
                   <Sparkles className="w-3 h-3 text-white" />
                 </div>
               </div>
@@ -89,7 +89,7 @@ export default function ProfileLayout({ children, activeTab }: ProfileLayoutProp
                     onClick={() => navigate(tab.path)}
                     className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
                       isActive
-                        ? 'border-[#24c4b8] text-[#24c4b8]'
+                        ? 'border-[#ee7e65] text-[#ee7e65]'
                         : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                   >

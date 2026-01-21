@@ -93,7 +93,7 @@ export default function SettingsPage() {
                         <button
                           onClick={() => item.onChange(!item.value)}
                           className={`relative w-12 h-7 rounded-full transition-colors ${
-                            item.value ? 'bg-[#24c4b8]' : 'bg-slate-300'
+                            item.value ? 'bg-[#ee7e65]' : 'bg-slate-300'
                           }`}
                         >
                           <span

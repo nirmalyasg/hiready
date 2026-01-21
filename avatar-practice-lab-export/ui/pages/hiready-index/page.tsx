@@ -347,7 +347,7 @@ export default function HireadyIndexPage() {
                 Complete at least one interview practice session to see your Hiready Index.
               </p>
               <Link to="/interview">
-                <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white">
+                <Button className="bg-[#ee7e65] hover:bg-[#e06d54] text-white">
                   Start Your First Interview
                 </Button>
               </Link>
@@ -369,7 +369,7 @@ export default function HireadyIndexPage() {
       <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <Target className="w-8 h-8 text-[#24c4b8]" />
+            <Target className="w-8 h-8 text-[#ee7e65]" />
             Hiready Index
           </h1>
           <p className="text-gray-600 mt-1">Your complete interview readiness report</p>
@@ -398,7 +398,7 @@ export default function HireadyIndexPage() {
               {roles.roleKits.length > 0 && (
                 <div className="mb-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <Sparkles className="w-4 h-4 text-[#24c4b8]" />
+                    <Sparkles className="w-4 h-4 text-[#ee7e65]" />
                     <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Pre-built Roles</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -410,12 +410,12 @@ export default function HireadyIndexPage() {
                           onClick={() => handleRoleSelect(role)}
                           className={`group relative flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
                             isSelected
-                              ? 'border-[#24c4b8] bg-gradient-to-br from-[#24c4b8]/10 to-[#24c4b8]/5 shadow-sm'
+                              ? 'border-[#ee7e65] bg-gradient-to-br from-[#ee7e65]/10 to-[#ee7e65]/5 shadow-sm'
                               : 'border-gray-100 bg-gray-50/50 hover:border-gray-200 hover:bg-gray-50'
                           }`}
                         >
                           <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${
-                            isSelected ? 'bg-[#24c4b8] shadow-sm' : 'bg-white border border-gray-200 group-hover:border-gray-300'
+                            isSelected ? 'bg-[#ee7e65] shadow-sm' : 'bg-white border border-gray-200 group-hover:border-gray-300'
                           }`}>
                             <Briefcase className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-gray-500'}`} />
                           </div>
@@ -427,7 +427,7 @@ export default function HireadyIndexPage() {
                             </div>
                           </div>
                           {isSelected && (
-                            <div className="w-5 h-5 rounded-full bg-[#24c4b8] flex items-center justify-center flex-shrink-0">
+                            <div className="w-5 h-5 rounded-full bg-[#ee7e65] flex items-center justify-center flex-shrink-0">
                               <Check className="w-3 h-3 text-white" />
                             </div>
                           )}
@@ -496,7 +496,7 @@ export default function HireadyIndexPage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No Data for This Role</h3>
               <p className="text-gray-600 mb-4">You haven't practiced for this role yet.</p>
               <Link to="/interview">
-                <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white">
+                <Button className="bg-[#ee7e65] hover:bg-[#e06d54] text-white">
                   Start Practicing
                 </Button>
               </Link>
@@ -579,8 +579,8 @@ export default function HireadyIndexPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <Card className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-[#24c4b8]/10 flex items-center justify-center">
-                    <Activity className="w-5 h-5 text-[#24c4b8]" />
+                  <div className="w-10 h-10 rounded-lg bg-[#ee7e65]/10 flex items-center justify-center">
+                    <Activity className="w-5 h-5 text-[#ee7e65]" />
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-gray-900">{fullReport.capabilityMilestones.practiceVolume}</div>
@@ -635,7 +635,7 @@ export default function HireadyIndexPage() {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-[#24c4b8]" />
+                    <TrendingUp className="w-5 h-5 text-[#ee7e65]" />
                     Progress Over Time
                   </CardTitle>
                 </CardHeader>
@@ -647,8 +647,8 @@ export default function HireadyIndexPage() {
                       <AreaChart data={fullReport.sessionScoreHistory}>
                         <defs>
                           <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#24c4b8" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#24c4b8" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="#ee7e65" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#ee7e65" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -670,7 +670,7 @@ export default function HireadyIndexPage() {
                         <ReferenceLine y={75} stroke="#059669" strokeDasharray="3 3" label={{ value: 'Ready', position: 'right', fontSize: 10 }} />
                         <ReferenceLine y={55} stroke="#3B82F6" strokeDasharray="3 3" />
                         {/* @ts-expect-error recharts type compatibility */}
-                        <Area type="monotone" dataKey="score" stroke="#24c4b8" strokeWidth={2} fillOpacity={1} fill="url(#colorScore)" />
+                        <Area type="monotone" dataKey="score" stroke="#ee7e65" strokeWidth={2} fillOpacity={1} fill="url(#colorScore)" />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -725,7 +725,7 @@ export default function HireadyIndexPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-[#24c4b8]" />
+                  <BarChart3 className="w-5 h-5 text-[#ee7e65]" />
                   Detailed Analysis by Interview Type
                 </CardTitle>
               </CardHeader>
@@ -780,14 +780,14 @@ export default function HireadyIndexPage() {
                         <div className="p-6 space-y-6 border-t">
                           {/* JD-Specific Skills - Show first */}
                           {report.relevantSkills.length > 0 && (
-                            <div className="p-4 bg-gradient-to-r from-[#24c4b8]/10 to-transparent rounded-lg border border-[#24c4b8]/20">
+                            <div className="p-4 bg-gradient-to-r from-[#ee7e65]/10 to-transparent rounded-lg border border-[#ee7e65]/20">
                               <h5 className="text-sm font-semibold text-[#042c4c] mb-3 flex items-center gap-2">
-                                <Target className="w-4 h-4 text-[#24c4b8]" />
+                                <Target className="w-4 h-4 text-[#ee7e65]" />
                                 Skills Being Assessed
                               </h5>
                               <div className="flex flex-wrap gap-2">
                                 {report.relevantSkills.map((skill, i) => (
-                                  <Badge key={i} className="bg-[#24c4b8]/10 text-[#042c4c] border-[#24c4b8]/30 hover:bg-[#24c4b8]/20">
+                                  <Badge key={i} className="bg-[#ee7e65]/10 text-[#042c4c] border-[#ee7e65]/30 hover:bg-[#ee7e65]/20">
                                     {skill}
                                   </Badge>
                                 ))}
@@ -838,7 +838,7 @@ export default function HireadyIndexPage() {
                                     <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} tickFormatter={(val: number) => `${val}%`} />
                                     <Tooltip formatter={(value: number) => [`${value}%`, 'Score']} />
                                     {/* @ts-expect-error recharts type compatibility */}
-                                    <Line type="monotone" dataKey="score" stroke="#24c4b8" strokeWidth={2} dot={{ fill: '#24c4b8' }} />
+                                    <Line type="monotone" dataKey="score" stroke="#ee7e65" strokeWidth={2} dot={{ fill: '#ee7e65' }} />
                                   </LineChart>
                                 </ResponsiveContainer>
                               </div>
@@ -921,7 +921,7 @@ export default function HireadyIndexPage() {
                                       )}
                                       <Link
                                         to={attempt.resultsUrl}
-                                        className="text-[#24c4b8] hover:underline flex items-center gap-1 text-sm"
+                                        className="text-[#ee7e65] hover:underline flex items-center gap-1 text-sm"
                                       >
                                         View <ExternalLink className="w-3 h-3" />
                                       </Link>
@@ -941,11 +941,11 @@ export default function HireadyIndexPage() {
             </Card>
 
             {/* CTA */}
-            <Card className="border-[#24c4b8]/30 bg-gradient-to-r from-[#24c4b8]/5 to-transparent">
+            <Card className="border-[#ee7e65]/30 bg-gradient-to-r from-[#ee7e65]/5 to-transparent">
               <CardContent className="p-6">
                 <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-[#24c4b8]/10 flex items-center justify-center">
-                    <Play className="w-6 h-6 text-[#24c4b8]" />
+                  <div className="w-12 h-12 rounded-full bg-[#ee7e65]/10 flex items-center justify-center">
+                    <Play className="w-6 h-6 text-[#ee7e65]" />
                   </div>
                   <div className="flex-1 text-center sm:text-left">
                     <h3 className="font-semibold text-gray-900">
@@ -964,7 +964,7 @@ export default function HireadyIndexPage() {
                     </p>
                   </div>
                   <Link to="/interview">
-                    <Button className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white">
+                    <Button className="bg-[#ee7e65] hover:bg-[#e06d54] text-white">
                       Continue Practicing
                       <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>

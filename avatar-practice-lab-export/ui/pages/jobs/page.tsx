@@ -48,8 +48,8 @@ interface JobTarget {
 
 const statusConfig: Record<string, { label: string; bg: string; text: string; border: string }> = {
   saved: { label: "Saved", bg: "bg-[#000000]", text: "text-white", border: "border-[#000000]" },
-  applied: { label: "Applied", bg: "bg-[#cb6ce6]", text: "text-white", border: "border-[#cb6ce6]" },
-  interview: { label: "Interviewing", bg: "bg-[#24c4b8]", text: "text-white", border: "border-[#24c4b8]" },
+  applied: { label: "Applied", bg: "bg-[#ee7e65]", text: "text-white", border: "border-[#ee7e65]" },
+  interview: { label: "Interviewing", bg: "bg-[#ee7e65]", text: "text-white", border: "border-[#ee7e65]" },
   offer: { label: "Offer", bg: "bg-emerald-500", text: "text-white", border: "border-emerald-500" },
   rejected: { label: "Rejected", bg: "bg-red-500", text: "text-white", border: "border-red-500" },
   archived: { label: "Archived", bg: "bg-slate-400", text: "text-white", border: "border-slate-400" },
@@ -187,15 +187,15 @@ export default function JobsPage() {
   return (
     <SidebarLayout>
       <div className="min-h-screen bg-[#fbfbfc]">
-        <div className="bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000] text-white">
+        <div className="bg-gradient-to-br from-[#000000] via-[#042c4c] to-[#000000] text-white">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-[#24c4b8] rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-[#ee7e65] rounded-lg flex items-center justify-center">
                     <Briefcase className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-[#24c4b8] text-sm font-semibold uppercase tracking-wide">Job Tracker</span>
+                  <span className="text-[#ee7e65] text-sm font-semibold uppercase tracking-wide">Job Tracker</span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-bold">Your Job Targets</h1>
                 <p className="text-white/70 mt-2 text-sm sm:text-base">
@@ -208,7 +208,7 @@ export default function JobsPage() {
                   <p className="text-white/60 text-xs">Active</p>
                 </div>
                 <div className="text-center border-x border-white/20 px-4">
-                  <p className="text-2xl font-bold text-[#24c4b8]">{interviewingJobs.length}</p>
+                  <p className="text-2xl font-bold text-[#ee7e65]">{interviewingJobs.length}</p>
                   <p className="text-white/60 text-xs">Interviewing</p>
                 </div>
                 <div className="text-center">
@@ -224,13 +224,13 @@ export default function JobsPage() {
           <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-4 sm:p-6 border border-slate-100">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#cb6ce6]" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#ee7e65]" />
                 <Input
                   type="text"
                   placeholder="Search jobs..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-12 bg-[#fbfbfc] rounded-xl border-slate-200 focus:border-[#24c4b8] focus:ring-[#24c4b8]/20 text-[#000000]"
+                  className="pl-12 h-12 bg-[#fbfbfc] rounded-xl border-slate-200 focus:border-[#ee7e65] focus:ring-[#ee7e65]/20 text-[#000000]"
                 />
               </div>
               <Dialog open={addDialogOpen} onOpenChange={(open) => { 
@@ -238,7 +238,7 @@ export default function JobsPage() {
                 if (!open) resetDialog();
               }}>
                 <DialogTrigger asChild>
-                  <Button className="h-12 px-6 gap-2 bg-[#24c4b8] hover:bg-[#1db0a5] text-white font-semibold rounded-xl shadow-lg shadow-[#24c4b8]/25">
+                  <Button className="h-12 px-6 gap-2 bg-[#ee7e65] hover:bg-[#e06d54] text-white font-semibold rounded-xl shadow-lg shadow-[#ee7e65]/25">
                     <Plus className="w-5 h-5" />
                     Add Job
                   </Button>
@@ -266,7 +266,7 @@ export default function JobsPage() {
           ) : filteredJobs.length === 0 ? (
             <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm">
               <div className="w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Briefcase className="w-8 h-8 text-[#cb6ce6]" />
+                <Briefcase className="w-8 h-8 text-[#ee7e65]" />
               </div>
               <h3 className="text-xl font-bold text-[#000000] mb-2">
                 {searchQuery ? "No matching jobs" : "No jobs yet"}
@@ -279,7 +279,7 @@ export default function JobsPage() {
               {!searchQuery && (
                 <Button 
                   onClick={() => setAddDialogOpen(true)}
-                  className="bg-[#24c4b8] hover:bg-[#1db0a5] text-white rounded-xl px-6"
+                  className="bg-[#ee7e65] hover:bg-[#e06d54] text-white rounded-xl px-6"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Your First Job
@@ -295,17 +295,17 @@ export default function JobsPage() {
                 return (
                   <div
                     key={job.id}
-                    className="bg-white rounded-xl border border-slate-200 p-5 hover:border-[#24c4b8]/40 hover:shadow-lg hover:shadow-[#24c4b8]/5 transition-all duration-200 cursor-pointer group"
+                    className="bg-white rounded-xl border border-slate-200 p-5 hover:border-[#ee7e65]/40 hover:shadow-lg hover:shadow-[#ee7e65]/5 transition-all duration-200 cursor-pointer group"
                     onClick={() => navigate(`/jobs/${job.id}`)}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-[#000000] to-[#1a0a2e] rounded-xl flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#000000] to-[#042c4c] rounded-xl flex items-center justify-center flex-shrink-0">
                         <Building2 className="w-6 h-6 text-white" />
                       </div>
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-bold text-[#000000] truncate group-hover:text-[#24c4b8] transition-colors">
+                          <h3 className="font-bold text-[#000000] truncate group-hover:text-[#ee7e65] transition-colors">
                             {job.roleTitle}
                           </h3>
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${status.bg} ${status.text}`}>
@@ -341,7 +341,7 @@ export default function JobsPage() {
                         </div>
                       </div>
                       
-                      <ChevronRight className="w-5 h-5 text-[#cb6ce6] flex-shrink-0 group-hover:text-[#24c4b8] group-hover:translate-x-1 transition-all" />
+                      <ChevronRight className="w-5 h-5 text-[#ee7e65] flex-shrink-0 group-hover:text-[#ee7e65] group-hover:translate-x-1 transition-all" />
                     </div>
                   </div>
                 );
@@ -359,32 +359,32 @@ export default function JobsPage() {
         <div className="space-y-3 pt-2">
           <button
             onClick={() => setAddMode("url")}
-            className="w-full p-4 border border-slate-200 rounded-xl text-left hover:bg-slate-50 hover:border-[#24c4b8]/30 transition-all group"
+            className="w-full p-4 border border-slate-200 rounded-xl text-left hover:bg-slate-50 hover:border-[#ee7e65]/30 transition-all group"
           >
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#000000] to-[#1a0a2e] rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#000000] to-[#042c4c] rounded-lg flex items-center justify-center">
                 <Link2 className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-[#000000] group-hover:text-[#24c4b8] transition-colors">Import from URL</p>
+                <p className="font-semibold text-[#000000] group-hover:text-[#ee7e65] transition-colors">Import from URL</p>
                 <p className="text-sm text-gray-500">LinkedIn, Indeed, Glassdoor...</p>
               </div>
-              <ChevronRight className="w-5 h-5 text-[#cb6ce6]" />
+              <ChevronRight className="w-5 h-5 text-[#ee7e65]" />
             </div>
           </button>
           <button
             onClick={() => setAddMode("manual")}
-            className="w-full p-4 border border-slate-200 rounded-xl text-left hover:bg-slate-50 hover:border-[#24c4b8]/30 transition-all group"
+            className="w-full p-4 border border-slate-200 rounded-xl text-left hover:bg-slate-50 hover:border-[#ee7e65]/30 transition-all group"
           >
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#24c4b8] to-[#1db0a5] rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#ee7e65] to-[#e06d54] rounded-lg flex items-center justify-center">
                 <ClipboardPaste className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-[#000000] group-hover:text-[#24c4b8] transition-colors">Enter manually</p>
+                <p className="font-semibold text-[#000000] group-hover:text-[#ee7e65] transition-colors">Enter manually</p>
                 <p className="text-sm text-gray-500">Type or paste job details</p>
               </div>
-              <ChevronRight className="w-5 h-5 text-[#cb6ce6]" />
+              <ChevronRight className="w-5 h-5 text-[#ee7e65]" />
             </div>
           </button>
         </div>
@@ -408,7 +408,7 @@ export default function JobsPage() {
             <Button 
               onClick={handleParseUrl}
               disabled={isParsingUrl || !pastedUrl.trim()}
-              className="flex-1 h-11 rounded-xl bg-[#24c4b8] hover:bg-[#1db0a5] shadow-lg shadow-[#24c4b8]/25"
+              className="flex-1 h-11 rounded-xl bg-[#ee7e65] hover:bg-[#e06d54] shadow-lg shadow-[#ee7e65]/25"
             >
               {isParsingUrl ? "Importing..." : "Import"}
             </Button>
@@ -443,7 +443,7 @@ export default function JobsPage() {
           value={pastedJD}
           onChange={(e) => setPastedJD(e.target.value)}
           placeholder="Paste job description (optional)"
-          className="w-full h-24 p-4 border border-slate-200 rounded-xl resize-none focus:ring-2 focus:ring-[#24c4b8]/20 focus:border-[#24c4b8] text-[#000000] placeholder:text-[#cb6ce6]"
+          className="w-full h-24 p-4 border border-slate-200 rounded-xl resize-none focus:ring-2 focus:ring-[#ee7e65]/20 focus:border-[#ee7e65] text-[#000000] placeholder:text-[#ee7e65]"
         />
         <div className="flex gap-3">
           <Button variant="outline" onClick={() => setAddMode(null)} className="flex-1 h-11 rounded-xl border-slate-200">
@@ -452,7 +452,7 @@ export default function JobsPage() {
           <Button 
             onClick={handleAddJob}
             disabled={isSubmitting || !newJob.roleTitle.trim()}
-            className="flex-1 h-11 rounded-xl bg-[#24c4b8] hover:bg-[#1db0a5] shadow-lg shadow-[#24c4b8]/25"
+            className="flex-1 h-11 rounded-xl bg-[#ee7e65] hover:bg-[#e06d54] shadow-lg shadow-[#ee7e65]/25"
           >
             {isSubmitting ? "Adding..." : "Add Job"}
           </Button>

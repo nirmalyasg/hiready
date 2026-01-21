@@ -238,11 +238,11 @@ export default function DynamicSeoPage() {
   }
 
   const pageTypeIcons: Record<string, React.ReactNode> = {
-    pillar: <Target className="w-8 h-8 text-[#24c4b8]" />,
-    role_prep: <Briefcase className="w-8 h-8 text-[#24c4b8]" />,
-    company_prep: <Building2 className="w-8 h-8 text-[#24c4b8]" />,
-    company_role: <Sparkles className="w-8 h-8 text-[#24c4b8]" />,
-    skill_practice: <Target className="w-8 h-8 text-[#24c4b8]" />
+    pillar: <Target className="w-8 h-8 text-[#ee7e65]" />,
+    role_prep: <Briefcase className="w-8 h-8 text-[#ee7e65]" />,
+    company_prep: <Building2 className="w-8 h-8 text-[#ee7e65]" />,
+    company_role: <Sparkles className="w-8 h-8 text-[#ee7e65]" />,
+    skill_practice: <Target className="w-8 h-8 text-[#ee7e65]" />
   };
 
   const howItWorksSteps = [
@@ -273,9 +273,9 @@ export default function DynamicSeoPage() {
             <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
               <Link to="/" className="text-2xl font-bold">Hiready</Link>
               <nav className="hidden md:flex items-center gap-6">
-                <Link to="/mock-interview" className="hover:text-[#24c4b8] transition-colors">Mock Interview</Link>
-                <Link to="/interview-preparation" className="hover:text-[#24c4b8] transition-colors">Interview Prep</Link>
-                <Link to="/readycheck" className="bg-[#24c4b8] hover:bg-[#24c4b8] px-4 py-2 rounded-lg transition-colors">
+                <Link to="/mock-interview" className="hover:text-[#ee7e65] transition-colors">Mock Interview</Link>
+                <Link to="/interview-preparation" className="hover:text-[#ee7e65] transition-colors">Interview Prep</Link>
+                <Link to="/readycheck" className="bg-[#ee7e65] hover:bg-[#ee7e65] px-4 py-2 rounded-lg transition-colors">
                   Start Free Practice
                 </Link>
               </nav>
@@ -284,14 +284,14 @@ export default function DynamicSeoPage() {
 
           <section className="bg-gradient-to-br from-[#000000] via-[#000000]/90 to-[#000000] text-white py-20 md:py-28 relative overflow-hidden">
             <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-20 left-10 w-72 h-72 bg-[#24c4b8] rounded-full blur-3xl"></div>
-              <div className="absolute bottom-10 right-20 w-96 h-96 bg-[#24c4b8] rounded-full blur-3xl"></div>
+              <div className="absolute top-20 left-10 w-72 h-72 bg-[#ee7e65] rounded-full blur-3xl"></div>
+              <div className="absolute bottom-10 right-20 w-96 h-96 bg-[#ee7e65] rounded-full blur-3xl"></div>
             </div>
             <div className="max-w-6xl mx-auto px-4 relative z-10">
               <div className="max-w-3xl">
                 <div className="flex items-center gap-2 mb-4">
-                  <Sparkles className="w-5 h-5 text-[#24c4b8]" />
-                  <span className="text-[#24c4b8] font-medium text-sm uppercase tracking-wider">AI-Powered Practice</span>
+                  <Sparkles className="w-5 h-5 text-[#ee7e65]" />
+                  <span className="text-[#ee7e65] font-medium text-sm uppercase tracking-wider">AI-Powered Practice</span>
                 </div>
                 <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
                   {page.h1}
@@ -302,7 +302,7 @@ export default function DynamicSeoPage() {
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button 
                     onClick={() => trackAndNavigate('/readycheck', 'practice_start')}
-                    className="bg-[#24c4b8] hover:bg-[#24c4b8] text-white font-semibold py-4 px-8 rounded-xl text-lg flex items-center justify-center gap-2 shadow-lg shadow-[#24c4b8]/30"
+                    className="bg-[#ee7e65] hover:bg-[#ee7e65] text-white font-semibold py-4 px-8 rounded-xl text-lg flex items-center justify-center gap-2 shadow-lg shadow-[#ee7e65]/30"
                   >
                     <Play className="w-5 h-5" />
                     Start Free Practice
@@ -341,8 +341,8 @@ export default function DynamicSeoPage() {
               <div className="grid md:grid-cols-3 gap-8">
                 {howItWorksSteps.map((step, index) => (
                   <div key={index} className="relative">
-                    <div className="bg-white rounded-2xl p-8 border-2 border-[#768c9c]/20 hover:border-[#24c4b8]/30 hover:shadow-xl transition-all group">
-                      <div className="w-14 h-14 bg-gradient-to-br from-[#24c4b8] to-[#24c4b8] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <div className="bg-white rounded-2xl p-8 border-2 border-[#768c9c]/20 hover:border-[#ee7e65]/30 hover:shadow-xl transition-all group">
+                      <div className="w-14 h-14 bg-gradient-to-br from-[#ee7e65] to-[#ee7e65] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <step.icon className="w-7 h-7 text-white" />
                       </div>
                       <div className="absolute -top-3 -left-3 w-8 h-8 bg-[#000000] rounded-full flex items-center justify-center text-white font-bold text-sm">
@@ -412,7 +412,7 @@ export default function DynamicSeoPage() {
                         </div>
                         <Button 
                           onClick={() => handleCtaClick(section)}
-                          className="bg-[#24c4b8] hover:bg-[#24c4b8] text-white font-semibold py-3 px-8 rounded-xl flex items-center gap-2 whitespace-nowrap"
+                          className="bg-[#ee7e65] hover:bg-[#ee7e65] text-white font-semibold py-3 px-8 rounded-xl flex items-center gap-2 whitespace-nowrap"
                         >
                           Start Practice Now
                           <ArrowRight className="w-5 h-5" />
@@ -434,7 +434,7 @@ export default function DynamicSeoPage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
                   onClick={() => trackAndNavigate('/readycheck', 'practice_start')}
-                  className="bg-[#24c4b8] hover:bg-[#24c4b8] text-white font-semibold py-4 px-10 rounded-xl text-lg flex items-center justify-center gap-2 shadow-lg"
+                  className="bg-[#ee7e65] hover:bg-[#ee7e65] text-white font-semibold py-4 px-10 rounded-xl text-lg flex items-center justify-center gap-2 shadow-lg"
                 >
                   <Play className="w-5 h-5" />
                   Start Free Practice
@@ -463,9 +463,9 @@ export default function DynamicSeoPage() {
                     <Link 
                       key={index}
                       to={`/${link.slug}`}
-                      className="group bg-white p-6 rounded-xl border-2 border-[#768c9c]/20 hover:border-[#24c4b8] hover:shadow-lg transition-all"
+                      className="group bg-white p-6 rounded-xl border-2 border-[#768c9c]/20 hover:border-[#ee7e65] hover:shadow-lg transition-all"
                     >
-                      <span className="text-[#000000] group-hover:text-[#24c4b8] font-semibold text-lg flex items-center gap-2">
+                      <span className="text-[#000000] group-hover:text-[#ee7e65] font-semibold text-lg flex items-center gap-2">
                         {link.anchorText}
                         <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </span>
@@ -521,7 +521,7 @@ export default function DynamicSeoPage() {
           <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#768c9c]/20 shadow-lg md:hidden z-50">
             <Button 
               onClick={() => trackAndNavigate('/readycheck', 'practice_start')}
-              className="w-full bg-[#24c4b8] hover:bg-[#24c4b8] text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2"
+              className="w-full bg-[#ee7e65] hover:bg-[#ee7e65] text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2"
             >
               <Play className="w-5 h-5" />
               Start Free Practice
@@ -539,9 +539,9 @@ export default function DynamicSeoPage() {
           <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
             <Link to="/" className="text-2xl font-bold">Hiready</Link>
             <nav className="hidden md:flex items-center gap-6">
-              <Link to="/mock-interview" className="hover:text-[#24c4b8] transition-colors">Mock Interview</Link>
-              <Link to="/interview-preparation" className="hover:text-[#24c4b8] transition-colors">Interview Prep</Link>
-              <Link to="/readycheck" className="bg-[#24c4b8] hover:bg-[#24c4b8] px-4 py-2 rounded-lg transition-colors">
+              <Link to="/mock-interview" className="hover:text-[#ee7e65] transition-colors">Mock Interview</Link>
+              <Link to="/interview-preparation" className="hover:text-[#ee7e65] transition-colors">Interview Prep</Link>
+              <Link to="/readycheck" className="bg-[#ee7e65] hover:bg-[#ee7e65] px-4 py-2 rounded-lg transition-colors">
                 Start Practice
               </Link>
             </nav>
@@ -580,7 +580,7 @@ export default function DynamicSeoPage() {
               </div>
               <Button 
                 onClick={() => trackAndNavigate('/readycheck', 'practice_start')}
-                className="bg-[#24c4b8] hover:bg-[#24c4b8] text-white font-semibold py-3 px-6 rounded-xl flex items-center gap-2"
+                className="bg-[#ee7e65] hover:bg-[#ee7e65] text-white font-semibold py-3 px-6 rounded-xl flex items-center gap-2"
               >
                 <Play className="w-5 h-5" />
                 Start Practice
@@ -606,11 +606,11 @@ export default function DynamicSeoPage() {
                 </div>
 
                 {section.isCta && (
-                  <Card className="mt-6 border-2 border-[#24c4b8] bg-gradient-to-r from-[#000000] to-[#000000]/90">
+                  <Card className="mt-6 border-2 border-[#ee7e65] bg-gradient-to-r from-[#000000] to-[#000000]/90">
                     <CardContent className="p-6">
                       <Button 
                         onClick={() => handleCtaClick(section)}
-                        className="w-full md:w-auto bg-[#24c4b8] hover:bg-[#24c4b8] text-white font-semibold py-3 px-8 rounded-lg flex items-center justify-center gap-2"
+                        className="w-full md:w-auto bg-[#ee7e65] hover:bg-[#ee7e65] text-white font-semibold py-3 px-8 rounded-lg flex items-center justify-center gap-2"
                       >
                         Start Practice Now
                         <ArrowRight className="w-5 h-5" />
@@ -630,9 +630,9 @@ export default function DynamicSeoPage() {
                   <Link 
                     key={index}
                     to={`/${link.slug}`}
-                    className="group p-4 border border-[#768c9c]/20 rounded-lg hover:border-[#24c4b8] hover:shadow-md transition-all"
+                    className="group p-4 border border-[#768c9c]/20 rounded-lg hover:border-[#ee7e65] hover:shadow-md transition-all"
                   >
-                    <span className="text-[#000000] group-hover:text-[#24c4b8] font-medium flex items-center gap-2">
+                    <span className="text-[#000000] group-hover:text-[#ee7e65] font-medium flex items-center gap-2">
                       {link.anchorText}
                       <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </span>
@@ -688,7 +688,7 @@ export default function DynamicSeoPage() {
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#768c9c]/20 shadow-lg md:hidden z-50">
           <Button 
             onClick={() => trackAndNavigate('/readycheck', 'practice_start')}
-            className="w-full bg-[#24c4b8] hover:bg-[#24c4b8] text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2"
+            className="w-full bg-[#ee7e65] hover:bg-[#ee7e65] text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2"
           >
             <Play className="w-5 h-5" />
             Start Practice

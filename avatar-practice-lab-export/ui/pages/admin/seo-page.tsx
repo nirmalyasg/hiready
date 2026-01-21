@@ -171,18 +171,18 @@ export default function SeoAdminPage() {
   };
 
   const pageTypeColors: Record<string, string> = {
-    pillar: 'bg-[#cb6ce6]',
-    role_prep: 'bg-[#24c4b8]',
+    pillar: 'bg-[#ee7e65]',
+    role_prep: 'bg-[#ee7e65]',
     company_prep: 'bg-[#e2a9f1]',
-    company_role: 'bg-[#cb6ce6]',
-    skill_practice: 'bg-[#24c4b8]'
+    company_role: 'bg-[#ee7e65]',
+    skill_practice: 'bg-[#ee7e65]'
   };
 
   if (loading && !pages.length) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-[#cb6ce6]" />
+          <Loader2 className="w-10 h-10 animate-spin text-[#ee7e65]" />
           <p className="text-black/60">Loading SEO dashboard...</p>
         </div>
       </div>
@@ -200,7 +200,7 @@ export default function SeoAdminPage() {
               </Link>
               <div className="h-6 w-px bg-white/20"></div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-[#cb6ce6] bg-[#cb6ce6]/20 px-2 py-0.5 rounded">ADMIN</span>
+                <span className="text-xs font-medium text-[#ee7e65] bg-[#ee7e65]/20 px-2 py-0.5 rounded">ADMIN</span>
                 <span className="text-sm text-white/80">Console</span>
               </div>
             </div>
@@ -213,7 +213,7 @@ export default function SeoAdminPage() {
             </nav>
           </div>
         </div>
-        <div className="h-1 bg-gradient-to-r from-[#cb6ce6] via-[#24c4b8] to-[#e2a9f1]"></div>
+        <div className="h-1 bg-gradient-to-r from-[#ee7e65] via-[#ee7e65] to-[#e2a9f1]"></div>
       </header>
 
       <div className="bg-white border-b border-black/10">
@@ -244,7 +244,7 @@ export default function SeoAdminPage() {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {analytics && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-            <div className="bg-gradient-to-br from-[#cb6ce6] to-[#e2a9f1] rounded-2xl p-5 text-white">
+            <div className="bg-gradient-to-br from-[#ee7e65] to-[#e2a9f1] rounded-2xl p-5 text-white">
               <div className="flex items-center justify-between mb-3">
                 <FileText className="w-6 h-6 opacity-80" />
                 <Layers className="w-5 h-5 opacity-60" />
@@ -253,7 +253,7 @@ export default function SeoAdminPage() {
               <p className="text-white/80 text-sm mt-1">Total Pages</p>
             </div>
             
-            <div className="bg-gradient-to-br from-[#24c4b8] to-[#3dd9cd] rounded-2xl p-5 text-white">
+            <div className="bg-gradient-to-br from-[#ee7e65] to-[#3dd9cd] rounded-2xl p-5 text-white">
               <div className="flex items-center justify-between mb-3">
                 <Check className="w-6 h-6 opacity-80" />
                 <TrendingUp className="w-5 h-5 opacity-60" />
@@ -271,7 +271,7 @@ export default function SeoAdminPage() {
               <p className="text-white/60 text-sm mt-1">Total Views</p>
             </div>
             
-            <div className="bg-gradient-to-br from-[#e2a9f1] to-[#cb6ce6] rounded-2xl p-5 text-white">
+            <div className="bg-gradient-to-br from-[#e2a9f1] to-[#ee7e65] rounded-2xl p-5 text-white">
               <div className="flex items-center justify-between mb-3">
                 <MousePointerClick className="w-6 h-6 opacity-80" />
                 <Zap className="w-5 h-5 opacity-60" />
@@ -284,15 +284,15 @@ export default function SeoAdminPage() {
 
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-1 h-6 bg-[#24c4b8] rounded-full"></div>
+            <div className="w-1 h-6 bg-[#ee7e65] rounded-full"></div>
             <h2 className="text-xl font-bold text-black">Generate Pages</h2>
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="border border-black/10 rounded-2xl p-6 hover:border-[#cb6ce6]/40 transition-colors">
+            <div className="border border-black/10 rounded-2xl p-6 hover:border-[#ee7e65]/40 transition-colors">
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 bg-[#cb6ce6]/10 rounded-xl flex items-center justify-center">
-                  <Target className="w-5 h-5 text-[#cb6ce6]" />
+                <div className="w-10 h-10 bg-[#ee7e65]/10 rounded-xl flex items-center justify-center">
+                  <Target className="w-5 h-5 text-[#ee7e65]" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-black">Pillar Pages</h3>
@@ -303,7 +303,7 @@ export default function SeoAdminPage() {
                 <button 
                   onClick={() => generatePage('pillar', 'mock-interview')}
                   disabled={!!generating}
-                  className="w-full py-3 px-4 bg-[#24c4b8] hover:bg-[#1fb3a7] text-white font-medium rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 bg-[#ee7e65] hover:bg-[#1fb3a7] text-white font-medium rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {generating === 'mock-interview' && <Loader2 className="w-4 h-4 animate-spin" />}
                   Mock Interview Page
@@ -311,7 +311,7 @@ export default function SeoAdminPage() {
                 <button 
                   onClick={() => generatePage('pillar', 'interview-preparation')}
                   disabled={!!generating}
-                  className="w-full py-3 px-4 bg-[#24c4b8] hover:bg-[#1fb3a7] text-white font-medium rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 bg-[#ee7e65] hover:bg-[#1fb3a7] text-white font-medium rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {generating === 'interview-preparation' && <Loader2 className="w-4 h-4 animate-spin" />}
                   Interview Preparation Page
@@ -319,10 +319,10 @@ export default function SeoAdminPage() {
               </div>
             </div>
 
-            <div className="border border-black/10 rounded-2xl p-6 hover:border-[#cb6ce6]/40 transition-colors">
+            <div className="border border-black/10 rounded-2xl p-6 hover:border-[#ee7e65]/40 transition-colors">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-10 h-10 bg-[#e2a9f1]/20 rounded-xl flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-[#cb6ce6]" />
+                  <Zap className="w-5 h-5 text-[#ee7e65]" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-black">Batch Generate</h3>
@@ -333,7 +333,7 @@ export default function SeoAdminPage() {
                 <button 
                   onClick={() => generatePage('batch', 'role_prep')}
                   disabled={!!generating}
-                  className="w-full py-3 px-4 border-2 border-[#cb6ce6] text-[#cb6ce6] hover:bg-[#cb6ce6] hover:text-white font-medium rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 border-2 border-[#ee7e65] text-[#ee7e65] hover:bg-[#ee7e65] hover:text-white font-medium rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {generating === 'role_prep' && <Loader2 className="w-4 h-4 animate-spin" />}
                   Role Pages (5)
@@ -341,7 +341,7 @@ export default function SeoAdminPage() {
                 <button 
                   onClick={() => generatePage('batch', 'company_prep')}
                   disabled={!!generating}
-                  className="w-full py-3 px-4 border-2 border-[#cb6ce6] text-[#cb6ce6] hover:bg-[#cb6ce6] hover:text-white font-medium rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 border-2 border-[#ee7e65] text-[#ee7e65] hover:bg-[#ee7e65] hover:text-white font-medium rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {generating === 'company_prep' && <Loader2 className="w-4 h-4 animate-spin" />}
                   Company Pages (5)
@@ -349,7 +349,7 @@ export default function SeoAdminPage() {
                 <button 
                   onClick={() => generatePage('batch', 'skill_practice')}
                   disabled={!!generating}
-                  className="w-full py-3 px-4 border-2 border-[#cb6ce6] text-[#cb6ce6] hover:bg-[#cb6ce6] hover:text-white font-medium rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 border-2 border-[#ee7e65] text-[#ee7e65] hover:bg-[#ee7e65] hover:text-white font-medium rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {generating === 'skill_practice' && <Loader2 className="w-4 h-4 animate-spin" />}
                   Skill Pages (5)
@@ -357,10 +357,10 @@ export default function SeoAdminPage() {
               </div>
             </div>
 
-            <div className="border border-black/10 rounded-2xl p-6 hover:border-[#cb6ce6]/40 transition-colors">
+            <div className="border border-black/10 rounded-2xl p-6 hover:border-[#ee7e65]/40 transition-colors">
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 bg-[#24c4b8]/10 rounded-xl flex items-center justify-center">
-                  <Building2 className="w-5 h-5 text-[#24c4b8]" />
+                <div className="w-10 h-10 bg-[#ee7e65]/10 rounded-xl flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-[#ee7e65]" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-black">Individual Pages</h3>
@@ -369,7 +369,7 @@ export default function SeoAdminPage() {
               </div>
               <div className="space-y-3">
                 <select 
-                  className="w-full p-3 border-2 border-black/10 rounded-xl text-black bg-white focus:border-[#24c4b8] focus:outline-none transition-colors"
+                  className="w-full p-3 border-2 border-black/10 rounded-xl text-black bg-white focus:border-[#ee7e65] focus:outline-none transition-colors"
                   onChange={(e) => e.target.value && generatePage('role', e.target.value)}
                   disabled={!!generating}
                   defaultValue=""
@@ -380,7 +380,7 @@ export default function SeoAdminPage() {
                   ))}
                 </select>
                 <select 
-                  className="w-full p-3 border-2 border-black/10 rounded-xl text-black bg-white focus:border-[#24c4b8] focus:outline-none transition-colors"
+                  className="w-full p-3 border-2 border-black/10 rounded-xl text-black bg-white focus:border-[#ee7e65] focus:outline-none transition-colors"
                   onChange={(e) => e.target.value && generatePage('company', e.target.value)}
                   disabled={!!generating}
                   defaultValue=""
@@ -398,13 +398,13 @@ export default function SeoAdminPage() {
         <div>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-1 h-6 bg-[#cb6ce6] rounded-full"></div>
+              <div className="w-1 h-6 bg-[#ee7e65] rounded-full"></div>
               <h2 className="text-xl font-bold text-black">All SEO Pages</h2>
               <span className="text-sm text-black/40">({pages.length} pages)</span>
             </div>
             <div className="flex gap-3">
               <select 
-                className="py-2 px-4 border border-black/10 rounded-xl text-sm bg-white focus:border-[#cb6ce6] focus:outline-none"
+                className="py-2 px-4 border border-black/10 rounded-xl text-sm bg-white focus:border-[#ee7e65] focus:outline-none"
                 value={filter.status || ''}
                 onChange={(e) => setFilter({ ...filter, status: e.target.value || undefined })}
               >
@@ -414,7 +414,7 @@ export default function SeoAdminPage() {
                 <option value="archived">Archived</option>
               </select>
               <select 
-                className="py-2 px-4 border border-black/10 rounded-xl text-sm bg-white focus:border-[#cb6ce6] focus:outline-none"
+                className="py-2 px-4 border border-black/10 rounded-xl text-sm bg-white focus:border-[#ee7e65] focus:outline-none"
                 value={filter.pageType || ''}
                 onChange={(e) => setFilter({ ...filter, pageType: e.target.value || undefined })}
               >
@@ -463,9 +463,9 @@ export default function SeoAdminPage() {
                     <td className="p-4">
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
                         page.status === 'published' 
-                          ? 'bg-[#24c4b8]/10 text-[#24c4b8]' 
+                          ? 'bg-[#ee7e65]/10 text-[#ee7e65]' 
                           : page.status === 'draft' 
-                            ? 'bg-[#cb6ce6]/10 text-[#cb6ce6]' 
+                            ? 'bg-[#ee7e65]/10 text-[#ee7e65]' 
                             : 'bg-black/5 text-black/40'
                       }`}>
                         {page.status === 'published' && <Check className="w-3 h-3" />}
@@ -476,7 +476,7 @@ export default function SeoAdminPage() {
                       <span className="text-sm font-medium text-black">{page.viewCount}</span>
                     </td>
                     <td className="p-4 text-right">
-                      <span className="text-sm font-medium text-[#cb6ce6]">{page.practiceStarts}</span>
+                      <span className="text-sm font-medium text-[#ee7e65]">{page.practiceStarts}</span>
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -485,7 +485,7 @@ export default function SeoAdminPage() {
                           className={`px-4 py-2 rounded-lg text-xs font-medium transition-colors ${
                             page.status === 'published'
                               ? 'border border-black/20 text-black/60 hover:bg-black/5'
-                              : 'bg-[#24c4b8] text-white hover:bg-[#1fb3a7]'
+                              : 'bg-[#ee7e65] text-white hover:bg-[#1fb3a7]'
                           }`}
                         >
                           {page.status === 'published' ? 'Unpublish' : 'Publish'}
@@ -509,7 +509,7 @@ export default function SeoAdminPage() {
             {pages.length === 0 && (
               <div className="text-center py-16">
                 <div className="w-16 h-16 bg-[#e2a9f1]/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <FileText className="w-8 h-8 text-[#cb6ce6]" />
+                  <FileText className="w-8 h-8 text-[#ee7e65]" />
                 </div>
                 <p className="text-black/60 mb-2">No SEO pages found</p>
                 <p className="text-sm text-black/40">Generate some pages to get started</p>
