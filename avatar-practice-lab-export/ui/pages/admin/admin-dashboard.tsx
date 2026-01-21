@@ -2036,6 +2036,37 @@ function JobsPage() {
         </Button>
       </div>
 
+      {/* Job Screening Agent Section */}
+      <Card className="border-2 border-[#cb6ce6]/20 bg-gradient-to-r from-[#cb6ce6]/5 to-transparent">
+        <CardContent className="p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[#cb6ce6] rounded-xl flex items-center justify-center">
+                <Search className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-900">Job Screening Agent</h3>
+                <p className="text-sm text-slate-500">Automatically discover job openings from Coresignal API</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Link to="/admin/job-screening/catalog">
+                <Button variant="outline" className="border-[#cb6ce6]/30 text-[#cb6ce6] hover:bg-[#cb6ce6]/10">
+                  <Search className="h-4 w-4 mr-2" />
+                  Job Catalog
+                </Button>
+              </Link>
+              <Link to="/admin/job-screening/agents">
+                <Button className="bg-[#cb6ce6] hover:bg-[#b85ed4]">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Manage Agents
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {showCreateDialog && (
         <Card className="border-2 border-[#24c4b8]/20">
           <CardHeader>

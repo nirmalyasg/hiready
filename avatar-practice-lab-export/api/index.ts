@@ -16,6 +16,7 @@ import leadsRouter from "./routes/leads.js";
 import seoRouter from "./routes/seo.js";
 import monetizationRouter from "./routes/monetization.js";
 import stripePaymentsRouter from "./routes/stripe-payments.js";
+import { jobScreeningRouter } from "./routes/job-screening.js";
 import { setupAuth } from "./replitAuth.js";
 import dotenv from "dotenv";
 
@@ -175,6 +176,18 @@ async function startServer() {
 
   // Mount Stripe payment routes
   app.use("/api/stripe", stripePaymentsRouter);
+
+  // Middleware to populate req.user from session for job screening routes
+  app.use("/api/job-screening", (req, res, next) => {
+    const sessionUser = (req.session as any)?.user;
+    if (sessionUser) {
+      req.user = sessionUser;
+    }
+    next();
+  });
+
+  // Mount job screening agent routes (discovery, catalog, agents)
+  app.use("/api/job-screening", jobScreeningRouter);
 
   // Health check
   app.get("/health", (req, res) => {

@@ -20,7 +20,7 @@ export default function MobileBottomNav() {
   
   const isActive = (path: string) => {
     const pathname = location.pathname;
-    
+
     if (path === "/avatar/dashboard") {
       return pathname === "/avatar/dashboard";
     }

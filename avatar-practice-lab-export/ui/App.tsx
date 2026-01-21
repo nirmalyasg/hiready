@@ -64,6 +64,8 @@ import CompanyLoginPage from './pages/company/login';
 import DynamicSeoPage from './pages/seo/dynamic-page';
 import SeoAdminPage from './pages/admin/seo-page';
 import InvitePage from './pages/invite/page';
+import JobScreeningAgentsPage from './pages/job-screening/agents-page';
+import JobCatalogPage from './pages/job-screening/catalog-page';
 
 export default function App() {
   return (
@@ -97,6 +99,8 @@ export default function App() {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/users/:userId" element={<UserDetailPage />} />
         <Route path="/admin/database" element={<DatabaseAdminPage />} />
+        <Route path="/admin/job-screening/agents" element={<JobScreeningAgentsPage />} />
+        <Route path="/admin/job-screening/catalog" element={<JobCatalogPage />} />
         <Route path="/interview" element={<ProtectedRoute><InterviewPracticePage /></ProtectedRoute>} />
         <Route path="/interview/roles" element={<ProtectedRoute><InterviewRolesPage /></ProtectedRoute>} />
         <Route path="/interview/role/:roleId" element={<ProtectedRoute><InterviewRoleDetailPage /></ProtectedRoute>} />

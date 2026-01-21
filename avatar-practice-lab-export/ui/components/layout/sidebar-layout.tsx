@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  Home, 
-  Target, 
-  BarChart3, 
-  User, 
-  LogOut, 
+import {
+  Home,
+  Target,
+  BarChart3,
+  User,
+  LogOut,
   ChevronLeft,
   Briefcase,
   Award,
