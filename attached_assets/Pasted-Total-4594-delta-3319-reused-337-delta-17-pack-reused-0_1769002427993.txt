@@ -1,0 +1,139 @@
+Total 4594 (delta 3319), reused 337 (delta 17), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (3319/3319), done.
+remote: warning: See https://gh.io/lfs for more information.
+remote: warning: File avatar-practice-lab-export/api/uploads/file-1767524721962-772968345.wav is 87.69 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB
+remote: warning: GH001: Large files detected. You may want to try Git Large File Storage - https://git-lfs.github.com.
+remote: error: GH013: Repository rule violations found for refs/heads/main.
+remote: 
+remote: - GITHUB PUSH PROTECTION
+remote:   —————————————————————————————————————————
+remote:     Resolve the following violations before pushing again
+remote: 
+remote:     - Push cannot contain secrets
+remote: 
+remote:     
+remote:      (?) Learn how to resolve a blocked push
+remote:      https://docs.github.com/code-security/secret-scanning/working-with-secret-scanning-and-push-protection/working-with-push-protection-from-the-command-line#resolving-a-blocked-push
+remote:     
+remote:     
+remote:       —— Google Cloud Service Account Credentials ——————————
+remote:        locations:
+remote:          - commit: b79bf617d9b15f08ff9b2b1f786f9cb86252155c
+remote:            path: attached_assets/Pasted--type-service-account-project-id-practice-lab-484710-pr_1768735360249.txt:1
+remote:     
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:        https://github.com/nirmalyasg/hiready/security/secret-scanning/unblock-secret/38ZLcv8D5bj0JjXU0MVSU7O84l7
+remote:     
+remote:     
+remote:       —— Amazon AWS Access Key ID ——————————————————————————
+remote:        locations:
+remote:          - commit: 596874c789f17e6e9176ce9ef3bc548f76a86f2d
+remote:            path: .replit:69
+remote:          - commit: c9ee611dc22f3ee208c795eb4db05601ef35da49
+remote:            path: .replit:69
+remote:          - commit: 7f52878ad76244381b53c3cff7b14f70cdee0bed
+remote:            path: .replit:69
+remote:          - commit: 30a853db30a649d8b0ba2a81e3f1043417cbe8f6
+remote:            path: .replit:69
+remote:          - commit: 8d53f4557bf9b261111e784e92ce4ec636077e8c
+remote:            path: .replit:69
+remote:     
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:        https://github.com/nirmalyasg/hiready/security/secret-scanning/unblock-secret/38ZLcoHY59m2Sipwd868y2oQZaV
+remote:     
+remote:     
+remote:       —— Amazon AWS Secret Access Key ——————————————————————
+remote:        locations:
+remote:          - commit: 596874c789f17e6e9176ce9ef3bc548f76a86f2d
+remote:            path: .replit:70
+remote:          - commit: c9ee611dc22f3ee208c795eb4db05601ef35da49
+remote:            path: .replit:70
+remote:          - commit: 7f52878ad76244381b53c3cff7b14f70cdee0bed
+remote:            path: .replit:70
+remote:          - commit: 30a853db30a649d8b0ba2a81e3f1043417cbe8f6
+remote:            path: .replit:70
+remote:          - commit: 8d53f4557bf9b261111e784e92ce4ec636077e8c
+remote:            path: .replit:70
+remote:     
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:        https://github.com/nirmalyasg/hiready/security/secret-scanning/unblock-secret/38ZLct7Hsb6Jlxom6N2TGncwY3l
+remote:     
+remote: 
+remote: 
+To https://github.com/nirmalyasg/hiready
+ ! [remote rejected] main -> main (push declined due to repository rule violations)
+error: failed to push some refs to 'https://github.com/nirmalyasg/hiready'
+~/workspace$ git remote remove origin
+git remote add origin https://github.com/nirmalyasg/hiready.git
+git push -u origin main --force
+Enumerating objects: 4595, done.
+Counting objects: 100% (4595/4595), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (4333/4333), done.
+Writing objects: 100% (4594/4594), 77.95 MiB | 4.54 MiB/s, done.
+Total 4594 (delta 3320), reused 337 (delta 17), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (3320/3320), done.
+remote: warning: See https://gh.io/lfs for more information.
+remote: warning: File avatar-practice-lab-export/api/uploads/file-1767524721962-772968345.wav is 87.69 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB
+remote: warning: GH001: Large files detected. You may want to try Git Large File Storage - https://git-lfs.github.com.
+remote: error: GH013: Repository rule violations found for refs/heads/main.
+remote: 
+remote: - GITHUB PUSH PROTECTION
+remote:   —————————————————————————————————————————
+remote:     Resolve the following violations before pushing again
+remote: 
+remote:     - Push cannot contain secrets
+remote: 
+remote:     
+remote:      (?) Learn how to resolve a blocked push
+remote:      https://docs.github.com/code-security/secret-scanning/working-with-secret-scanning-and-push-protection/working-with-push-protection-from-the-command-line#resolving-a-blocked-push
+remote:     
+remote:     
+remote:       —— Google Cloud Service Account Credentials ——————————
+remote:        locations:
+remote:          - commit: b79bf617d9b15f08ff9b2b1f786f9cb86252155c
+remote:            path: attached_assets/Pasted--type-service-account-project-id-practice-lab-484710-pr_1768735360249.txt:1
+remote:     
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:        https://github.com/nirmalyasg/hiready/security/secret-scanning/unblock-secret/38ZLcv8D5bj0JjXU0MVSU7O84l7
+remote:     
+remote:     
+remote:       —— Amazon AWS Access Key ID ——————————————————————————
+remote:        locations:
+remote:          - commit: 596874c789f17e6e9176ce9ef3bc548f76a86f2d
+remote:            path: .replit:69
+remote:          - commit: 7f52878ad76244381b53c3cff7b14f70cdee0bed
+remote:            path: .replit:69
+remote:          - commit: 30a853db30a649d8b0ba2a81e3f1043417cbe8f6
+remote:            path: .replit:69
+remote:          - commit: fafd8a967b986e83d2da780356de798584a46309
+remote:            path: .replit:69
+remote:          - commit: 8020bceeaf639aac8b711c5206cf7b85803950de
+remote:            path: .replit:69
+remote:     
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:        https://github.com/nirmalyasg/hiready/security/secret-scanning/unblock-secret/38ZLcoHY59m2Sipwd868y2oQZaV
+remote:     
+remote:     
+remote:       —— Amazon AWS Secret Access Key ——————————————————————
+remote:        locations:
+remote:          - commit: 596874c789f17e6e9176ce9ef3bc548f76a86f2d
+remote:            path: .replit:70
+remote:          - commit: 7f52878ad76244381b53c3cff7b14f70cdee0bed
+remote:            path: .replit:70
+remote:          - commit: 30a853db30a649d8b0ba2a81e3f1043417cbe8f6
+remote:            path: .replit:70
+remote:          - commit: fafd8a967b986e83d2da780356de798584a46309
+remote:            path: .replit:70
+remote:          - commit: 8020bceeaf639aac8b711c5206cf7b85803950de
+remote:            path: .replit:70
+remote:     
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:        https://github.com/nirmalyasg/hiready/security/secret-scanning/unblock-secret/38ZLct7Hsb6Jlxom6N2TGncwY3l
+remote:     
+remote: 
+remote: 
+To https://github.com/nirmalyasg/hiready.git
+ ! [remote rejected] main -> main (push declined due to repository rule violations)
+error: failed to push some refs to 'https://github.com/nirmalyasg/hiready.git'
+~/workspace$ 
