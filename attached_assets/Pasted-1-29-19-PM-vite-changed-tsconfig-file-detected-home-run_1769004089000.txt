@@ -1,0 +1,219 @@
+1:29:19 PM [vite] changed tsconfig file detected: /home/runner/workspace/avatar-practice-lab-export/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+1:29:19 PM [vite] page reload index.html
+1:29:19 PM [vite] hmr update /ui/pages/practice/pre-session/page.tsx, /ui/styles/globals.css, /ui/pages/assessment-session/assessment-roleplay-session-page.tsx
+1:29:19 PM [vite] hmr update /ui/styles/globals.css, /ui/pages/assessment-session/assessment-roleplay-session-page.tsx
+1:29:19 PM [vite] page reload tailwind.config.js
+1:29:19 PM [vite] hmr update /ui/App.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] page reload ui/assets.d.ts
+1:29:19 PM [vite] hmr update /ui/pages/admin/admin-dashboard.tsx, /ui/styles/globals.css, /ui/components/layout/modern-dashboard-layout.tsx
+1:29:19 PM [vite] hmr update /ui/pages/enterprise/page.tsx, /ui/styles/globals.css, /ui/pages/features/page.tsx, /ui/pages/auth/register.tsx, /ui/pages/auth/login.tsx, /ui/pages/home/page.tsx, /ui/pages/demo/page.tsx, /ui/pages/pricing/page.tsx, /ui/pages/admin/seo-page.tsx, /ui/pages/invite/page.tsx, /ui/pages/readycheck/page.tsx, /ui/components/layout/marketing-nav.tsx, /ui/components/layout/sidebar-layout.tsx
+1:29:19 PM [vite] hmr update /ui/pages/home/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/AvatarLoadingOverlay.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/InteractiveAvatar.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] page reload ui/components/InteractiveAvatarCode.tsx
+1:29:19 PM [vite] page reload ui/components/InteractiveAvatarTextInput.tsx
+1:29:19 PM [vite] hmr update /ui/components/MeetingLobby.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/PdfSlideViewer.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/PersonaOverlaySelector.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] page reload ui/components/PresentationAvatar.tsx
+1:29:19 PM [vite] page reload ui/components/QueueStatusBanner.tsx
+1:29:19 PM [vite] page reload ui/components/SessionCleanup.tsx
+1:29:19 PM [vite] hmr update /ui/components/SessionTimer.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] page reload ui/components/VoiceParticipant.tsx
+1:29:19 PM [vite] hmr update /ui/components/ai-session-analysis/analytics-dashboard.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ai-session-analysis/skill-assessment-display.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/auth/ProtectedRoute.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] page reload ui/components/avatar-roleplay/BottomToolbar.tsx
+1:29:19 PM [vite] page reload ui/components/createScenario.tsx
+1:29:19 PM [vite] page reload ui/components/hiready/HireadyIndexCard.tsx
+1:29:19 PM [vite] hmr update /ui/components/interview/InlineCaseStudyPanel.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/interview/InlineCodingPanel.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/interview/case-study-panel.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/interview/coding-panel.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] page reload ui/components/interview/index.ts
+1:29:19 PM [vite] hmr update /ui/components/interview/interview-session-layout.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/interview/phase-indicator.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/interview/split-panel-layout.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/job-target-selector.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/layout/marketing-nav.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/layout/mobile-bottom-nav.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/layout/modern-dashboard-layout.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/layout/sidebar-layout.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/monetization/access-gate.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/monetization/upgrade-modal.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/purchase-modal.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/accordion.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/badge.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/button.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/card.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/dialog.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/dropdown-menu.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/input.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/label.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/loading-spinner.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/progress.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/select.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/separator.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/spinner.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/tabs.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/textarea.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/components/ui/voice-input.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/contexts/AvatarSessionContext.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/contexts/EventContext.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/contexts/InterviewEventBusContext.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/contexts/RealtimeSessionPrewarmContext.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/contexts/TranscriptContext.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/hooks/use-auth.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/styles/globals.css, /ui/pages/assessment-session/assessment-roleplay-session-page.tsx, /ui/pages/practice/presentation/avatar-select-page.tsx, /ui/pages/practice/explore/page.tsx, /ui/pages/practice/avatar-select/page.tsx, /ui/pages/practice/pre-session/page.tsx
+1:29:19 PM [vite] hmr update /ui/styles/globals.css, /ui/pages/invite/page.tsx
+1:29:19 PM [vite] hmr update /ui/styles/globals.css, /ui/pages/assessment-session/assessment-roleplay-session-page.tsx, /ui/pages/practice/presentation/session-page.tsx, /ui/pages/interview/pre-session/page.tsx, /ui/pages/interview/continuous-session/page.tsx, /ui/pages/interview/config/page.tsx, /ui/pages/exercise-mode/case-study/session-page.tsx, /ui/pages/exercise-mode/coding-lab/session-page.tsx
+1:29:19 PM [vite] hmr update /ui/styles/globals.css, /ui/pages/assessment-session/assessment-roleplay-session-page.tsx
+1:29:19 PM [vite] hmr update /ui/styles/globals.css, /ui/pages/profile/account-page.tsx, /ui/pages/admin/admin-dashboard.tsx, /ui/pages/profile/page.tsx, /ui/pages/invite/page.tsx, /ui/pages/practice/custom-scenario/page.tsx, /ui/pages/profile/profile-layout.tsx
+1:29:19 PM [vite] hmr update /ui/styles/globals.css, /ui/pages/assessment-session/assessment-roleplay-session-page.tsx, /ui/pages/practice/presentation/session-page.tsx, /ui/pages/interview/continuous-session/page.tsx, /ui/pages/exercise-mode/case-study/session-page.tsx, /ui/pages/exercise-mode/coding-lab/session-page.tsx
+1:29:19 PM [vite] hmr update /ui/styles/globals.css, /ui/pages/assessment-session/assessment-roleplay-session-page.tsx, /ui/pages/practice/presentation/session-page.tsx, /ui/pages/interview/continuous-session/page.tsx, /ui/pages/exercise-mode/case-study/session-page.tsx, /ui/pages/exercise-mode/coding-lab/session-page.tsx (x2)
+1:29:19 PM [vite] page reload ui/lib/audioUtils.ts
+1:29:19 PM [vite] page reload ui/lib/authUtils.ts
+1:29:19 PM [vite] page reload ui/lib/codecUtils.ts
+1:29:19 PM [vite] hmr update /ui/pages/session-analysis/session-analysis-page.tsx, /ui/styles/globals.css, /ui/pages/practice/custom-scenario/page.tsx, /ui/pages/practice/pre-session/page.tsx, /ui/pages/assessment-session/assessment-roleplay-session-page.tsx
+1:29:19 PM [vite] page reload ui/lib/detect-language.ts
+1:29:19 PM [vite] page reload ui/lib/guardrails.ts
+1:29:19 PM [vite] page reload ui/lib/interview-layout-utils.ts
+1:29:19 PM [vite] hmr update /ui/styles/globals.css, /ui/pages/assessment-session/assessment-roleplay-session-page.tsx
+1:29:19 PM [vite] page reload ui/lib/role-level-mapping.ts
+1:29:19 PM [vite] page reload ui/lib/types.ts
+1:29:19 PM [vite] hmr update /ui/styles/globals.css, /ui/pages/assessment-session/assessment-roleplay-session-page.tsx, /ui/pages/practice/scenario-details/page.tsx, /ui/pages/practice/presentation/session-page.tsx, /ui/pages/interview/continuous-session/page.tsx, /ui/pages/practice/pre-session/page.tsx, /ui/pages/exercise-mode/case-study/session-page.tsx, /ui/pages/exercise-mode/coding-lab/session-page.tsx
+1:29:19 PM [vite] hmr update /ui/styles/globals.css, /ui/pages/assessment-session/assessment-roleplay-session-page.tsx
+1:29:19 PM [vite] page reload ui/lib/roleplay/roleplayAgent.ts
+1:29:19 PM [vite] page reload ui/main.tsx
+1:29:19 PM [vite] hmr update /ui/pages/admin/admin-dashboard.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/admin/database-admin.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] page reload ui/pages/admin/page.tsx
+1:29:19 PM [vite] page reload ui/pages/admin/personas-page.tsx
+1:29:19 PM [vite] page reload ui/pages/admin/scenarios-page.tsx
+1:29:19 PM [vite] hmr update /ui/pages/admin/seo-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] page reload ui/pages/admin/tones-page.tsx
+1:29:19 PM [vite] hmr update /ui/pages/admin/user-detail-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/apply/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/assessment-session/assessment-roleplay-session-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/assessment-session/micro-assessment-session-analysis-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] page reload ui/pages/assessment-session/recommended-scenarios-page.tsx
+1:29:19 PM [vite] page reload ui/pages/assessment-session/roleplay-scenarios-page.tsx
+1:29:19 PM [vite] hmr update /ui/pages/auth/login.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/auth/register.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/company/login.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/company/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/dashboard/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/demo/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/enterprise/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] page reload ui/pages/error.tsx
+1:29:19 PM [vite] hmr update /ui/pages/exercise-mode/case-study/avatar-select-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/exercise-mode/case-study/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/exercise-mode/case-study/results-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/exercise-mode/case-study/session-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/exercise-mode/coding-lab/avatar-select-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/exercise-mode/coding-lab/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/exercise-mode/coding-lab/results-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/exercise-mode/coding-lab/session-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/exercise-mode/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/features/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/hiready-index/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/home/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/interview/by-type-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/interview/config/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/interview/continuous-session/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/interview/custom/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/interview/mode-setup/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/interview/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/interview/pre-session/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/interview/results/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/interview/role-detail-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/interview/roles-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/invite/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/jobs/detail-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/jobs/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] page reload ui/pages/onboarding/page.tsx
+1:29:19 PM [vite] page reload ui/pages/page.tsx
+1:29:19 PM [vite] hmr update /ui/pages/practice/avatar-select/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/practice/custom-scenario/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/practice/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/practice/explore/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/practice/intent-entry/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/practice/pre-session/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/practice/scenario-details/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/practice/session/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/practice/presentation/avatar-select-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/practice/presentation/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/practice/presentation/results-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/practice/presentation/session-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/pricing/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/profile/account-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/profile/profile-layout.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/profile/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] page reload ui/pages/profile/settings-page.tsx
+1:29:19 PM [vite] hmr update /ui/pages/readycheck/launch.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/readycheck/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/results/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/results/public-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/seo/dynamic-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] hmr update /ui/pages/session-analysis/session-analysis-page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] page reload ui/pages/session-results/error.tsx
+1:29:19 PM [vite] page reload ui/pages/session-results/page.tsx
+1:29:19 PM [vite] hmr update /ui/pages/share/page.tsx, /ui/styles/globals.css
+1:29:19 PM [vite] page reload ui/pages/tables/page.tsx
+1:29:19 PM [vite] page reload ui/pages/test-recording/page.tsx
+1:29:19 PM [vite] hmr update /ui/styles/globals.css
+1:29:19 PM [vite] page reload ui/types/avatar-roleplay-types.ts
+1:29:19 PM [vite] vite.config.ts changed, restarting server...
+1:29:19 PM [vite] server restarted.
+
+  ➜  Local:   http://localhost:5000/
+  ➜  Network: use --host to expose
+(!) Could not auto-determine entry point from rollupOptions or html files and there are no explicit optimizeDeps.include patterns. Skipping dependency pre-bundling.
+1:29:20 PM [vite] page reload index.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
