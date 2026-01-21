@@ -647,6 +647,5 @@ export default function JobScreeningAgentsPage() {
           )}
         </div>
       </div>
-    </div>
   );
 }

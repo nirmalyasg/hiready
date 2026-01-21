@@ -723,6 +723,5 @@ export default function JobCatalogPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
   );
 }
