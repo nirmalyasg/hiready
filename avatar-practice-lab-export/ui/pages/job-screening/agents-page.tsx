@@ -20,7 +20,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
-import SidebarLayout from "@/components/layout/sidebar-layout";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import {
   Dialog,
@@ -253,26 +254,38 @@ export default function JobScreeningAgentsPage() {
   };
 
   return (
-    <SidebarLayout>
-      <div className="min-h-screen bg-[#fbfbfc]">
-        {/* Header */}
-        <div className="bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000] text-white">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-[#cb6ce6] rounded-lg flex items-center justify-center">
-                    <Bot className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-[#cb6ce6] text-sm font-semibold uppercase tracking-wide">
-                    Job Discovery
-                  </span>
+    <div className="min-h-screen bg-[#fbfbfc]">
+      {/* Back Navigation */}
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-40">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3">
+          <Link
+            to="/admin"
+            className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Admin Dashboard
+          </Link>
+        </div>
+      </div>
+
+      {/* Header */}
+      <div className="bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000] text-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 bg-[#cb6ce6] rounded-lg flex items-center justify-center">
+                  <Bot className="w-4 h-4 text-white" />
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-bold">Screening Agents</h1>
-                <p className="text-white/70 mt-2 text-sm sm:text-base">
-                  Set up agents to automatically find job openings that match your criteria
-                </p>
+                <span className="text-[#cb6ce6] text-sm font-semibold uppercase tracking-wide">
+                  Job Discovery
+                </span>
               </div>
+              <h1 className="text-2xl sm:text-3xl font-bold">Screening Agents</h1>
+              <p className="text-white/70 mt-2 text-sm sm:text-base">
+                Set up agents to automatically find job openings that match your criteria
+              </p>
+            </div>
               {stats && (
                 <div className="grid grid-cols-3 gap-4 bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3">
                   <div className="text-center">
@@ -298,7 +311,7 @@ export default function JobScreeningAgentsPage() {
           <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-4 sm:p-6 border border-slate-100">
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
               <Button
-                onClick={() => navigate("/job-screening/catalog")}
+                onClick={() => navigate("/admin/job-screening/catalog")}
                 variant="outline"
                 className="h-12 px-6 gap-2 rounded-xl border-slate-200 hover:border-[#24c4b8]"
               >
@@ -634,6 +647,6 @@ export default function JobScreeningAgentsPage() {
           )}
         </div>
       </div>
-    </SidebarLayout>
+    </div>
   );
 }

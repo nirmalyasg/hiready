@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Target, BarChart3, Briefcase, Award, Search } from "lucide-react";
+import { Home, Target, BarChart3, Briefcase, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -10,9 +10,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { path: "/interview", icon: Target, label: "Practice" },
-  { path: "/job-screening/catalog", icon: Search, label: "Discover" },
-  { path: "/jobs", icon: Briefcase, label: "My Jobs" },
+  { path: "/jobs", icon: Briefcase, label: "Jobs" },
   { path: "/hiready-index", icon: Award, label: "Score" },
+  { path: "/avatar/dashboard", icon: Home, label: "Dashboard" },
 ];
 
 export default function MobileBottomNav() {
@@ -33,10 +33,7 @@ export default function MobileBottomNav() {
       return pathname.startsWith("/hiready-index");
     }
     if (path === "/jobs") {
-      return pathname.startsWith("/jobs") && !pathname.startsWith("/job-screening");
-    }
-    if (path === "/job-screening/catalog") {
-      return pathname.startsWith("/job-screening");
+      return pathname.startsWith("/jobs");
     }
     return false;
   };

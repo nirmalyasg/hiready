@@ -99,6 +99,8 @@ export default function App() {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/users/:userId" element={<UserDetailPage />} />
         <Route path="/admin/database" element={<DatabaseAdminPage />} />
+        <Route path="/admin/job-screening/agents" element={<JobScreeningAgentsPage />} />
+        <Route path="/admin/job-screening/catalog" element={<JobCatalogPage />} />
         <Route path="/interview" element={<ProtectedRoute><InterviewPracticePage /></ProtectedRoute>} />
         <Route path="/interview/roles" element={<ProtectedRoute><InterviewRolesPage /></ProtectedRoute>} />
         <Route path="/interview/role/:roleId" element={<ProtectedRoute><InterviewRoleDetailPage /></ProtectedRoute>} />
@@ -122,8 +124,6 @@ export default function App() {
         <Route path="/profile/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
         <Route path="/jobs" element={<ProtectedRoute><JobsPage /></ProtectedRoute>} />
         <Route path="/jobs/:jobId" element={<ProtectedRoute><JobDetailPage /></ProtectedRoute>} />
-        <Route path="/job-screening/agents" element={<ProtectedRoute><JobScreeningAgentsPage /></ProtectedRoute>} />
-        <Route path="/job-screening/catalog" element={<ProtectedRoute><JobCatalogPage /></ProtectedRoute>} />
         <Route path="/hiready-index" element={<ProtectedRoute><HireadyIndexPage /></ProtectedRoute>} />
         <Route path="/share/:shareToken" element={<PublicSharePage />} />
         <Route path="/results/:shareToken" element={<PublicResultsPage />} />

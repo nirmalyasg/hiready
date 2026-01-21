@@ -23,7 +23,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import SidebarLayout from "@/components/layout/sidebar-layout";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import {
   Dialog,
@@ -250,26 +251,38 @@ export default function JobCatalogPage() {
     searchQuery || locationFilter || experienceMin || experienceMax || employmentType || remoteOnly;
 
   return (
-    <SidebarLayout>
-      <div className="min-h-screen bg-[#fbfbfc]">
-        {/* Header */}
-        <div className="bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000] text-white">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-[#24c4b8] rounded-lg flex items-center justify-center">
-                    <Briefcase className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-[#24c4b8] text-sm font-semibold uppercase tracking-wide">
-                    Discover
-                  </span>
+    <div className="min-h-screen bg-[#fbfbfc]">
+      {/* Back Navigation */}
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-40">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3">
+          <Link
+            to="/admin"
+            className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Admin Dashboard
+          </Link>
+        </div>
+      </div>
+
+      {/* Header */}
+      <div className="bg-gradient-to-br from-[#000000] via-[#1a0a2e] to-[#000000] text-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 bg-[#24c4b8] rounded-lg flex items-center justify-center">
+                  <Briefcase className="w-4 h-4 text-white" />
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-bold">Job Catalog</h1>
-                <p className="text-white/70 mt-2 text-sm sm:text-base">
-                  Browse jobs discovered by your screening agents
-                </p>
+                <span className="text-[#24c4b8] text-sm font-semibold uppercase tracking-wide">
+                  Discover
+                </span>
               </div>
+              <h1 className="text-2xl sm:text-3xl font-bold">Job Catalog</h1>
+              <p className="text-white/70 mt-2 text-sm sm:text-base">
+                Browse jobs discovered by your screening agents
+              </p>
+            </div>
               <div className="grid grid-cols-2 gap-4 bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-white">{pagination.total}</p>
@@ -314,7 +327,7 @@ export default function JobCatalogPage() {
                   )}
                 </Button>
                 <Button
-                  onClick={() => navigate("/job-screening/agents")}
+                  onClick={() => navigate("/admin/job-screening/agents")}
                   variant="outline"
                   className="h-12 px-4 gap-2 rounded-xl border-slate-200 hover:border-[#cb6ce6]"
                 >
@@ -429,7 +442,7 @@ export default function JobCatalogPage() {
               </p>
               {!hasActiveFilters && (
                 <Button
-                  onClick={() => navigate("/job-screening/agents")}
+                  onClick={() => navigate("/admin/job-screening/agents")}
                   className="bg-[#cb6ce6] hover:bg-[#b85ed4] text-white rounded-xl px-6"
                 >
                   <Bot className="w-4 h-4 mr-2" />
@@ -710,6 +723,6 @@ export default function JobCatalogPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </SidebarLayout>
+    </div>
   );
 }

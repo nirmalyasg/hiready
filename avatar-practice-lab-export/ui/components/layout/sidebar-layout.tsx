@@ -11,9 +11,7 @@ import {
   Award,
   Layers,
   TrendingUp,
-  Users,
-  Bot,
-  Search
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -47,16 +45,9 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       ]
     },
     {
-      title: 'DISCOVER',
-      items: [
-        { href: '/job-screening/catalog', label: 'Job Catalog', icon: Search },
-        { href: '/job-screening/agents', label: 'Agents', icon: Bot },
-      ]
-    },
-    {
       title: 'PREPARE',
       items: [
-        { href: '/jobs', label: 'My Jobs', icon: Briefcase },
+        { href: '/jobs', label: 'Jobs', icon: Briefcase },
         { href: '/interview/roles', label: 'Roles', icon: Users },
         { href: '/interview/by-type', label: 'By Type', icon: Layers },
       ]
