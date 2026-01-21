@@ -841,6 +841,183 @@ export const userSkillPatterns = pgTable("user_skill_patterns", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// =====================
+// Job Screening Agent Tables
+// =====================
+
+// Job Screening Agents - User-configured search agents for job discovery
+export const jobScreeningAgents = pgTable("job_screening_agents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => authUsers.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+
+  // Search criteria
+  searchKeywords: text("search_keywords").array(), // Array of role/title keywords
+  locations: text("locations").array(), // Array of locations
+  experienceMin: integer("experience_min").default(0),
+  experienceMax: integer("experience_max").default(99),
+  companySizes: text("company_sizes").array(), // small, medium, large, enterprise
+  industries: text("industries").array(),
+  jobTypes: text("job_types").array(), // full-time, part-time, contract, remote
+  excludedCompanies: text("excluded_companies").array(),
+
+  // Agent settings
+  isActive: boolean("is_active").default(true),
+  runFrequency: varchar("run_frequency", { length: 50 }).default("daily"), // daily, weekly, manual
+  lastRunAt: timestamp("last_run_at"),
+  nextRunAt: timestamp("next_run_at"),
+
+  // Statistics
+  totalJobsFound: integer("total_jobs_found").default(0),
+  jobsFoundLastRun: integer("jobs_found_last_run").default(0),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Job Catalog - Discovered jobs from external sources
+export const jobCatalog = pgTable("job_catalog", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+
+  // Source information
+  source: varchar("source", { length: 50 }).notNull().default("coresignal"),
+  externalId: varchar("external_id", { length: 255 }),
+  sourceUrl: text("source_url"),
+
+  // Job details
+  roleTitle: text("role_title").notNull(),
+  companyName: text("company_name"),
+  companyId: varchar("company_id", { length: 255 }),
+  companyLogoUrl: text("company_logo_url"),
+  companySize: varchar("company_size", { length: 50 }),
+  companyIndustry: text("company_industry"),
+
+  // Location
+  location: text("location"),
+  city: text("city"),
+  country: text("country"),
+  isRemote: boolean("is_remote").default(false),
+
+  // Job specifics
+  jobDescription: text("job_description"),
+  experienceRequired: text("experience_required"),
+  experienceYearsMin: integer("experience_years_min"),
+  experienceYearsMax: integer("experience_years_max"),
+  employmentType: varchar("employment_type", { length: 50 }),
+  salaryMin: integer("salary_min"),
+  salaryMax: integer("salary_max"),
+  salaryCurrency: varchar("salary_currency", { length: 10 }),
+
+  // Skills and requirements
+  requiredSkills: text("required_skills").array(),
+  preferredSkills: text("preferred_skills").array(),
+
+  // AI-parsed fields
+  jdParsed: jsonb("jd_parsed").$type<{
+    requiredSkills?: string[];
+    preferredSkills?: string[];
+    experienceLevel?: string;
+    responsibilities?: string[];
+    companyContext?: string;
+    focusAreas?: string[];
+  }>(),
+
+  // Metadata
+  postedAt: timestamp("posted_at"),
+  expiresAt: timestamp("expires_at"),
+  discoveredAt: timestamp("discovered_at").defaultNow().notNull(),
+  lastSeenAt: timestamp("last_seen_at").defaultNow().notNull(),
+  isActive: boolean("is_active").default(true),
+
+  // Deduplication
+  fingerprint: varchar("fingerprint", { length: 255 }),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Agent-Job relationship - Which agent found which jobs
+export const jobScreeningAgentResults = pgTable("job_screening_agent_results", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  agentId: varchar("agent_id")
+    .notNull()
+    .references(() => jobScreeningAgents.id, { onDelete: "cascade" }),
+  jobCatalogId: varchar("job_catalog_id")
+    .notNull()
+    .references(() => jobCatalog.id, { onDelete: "cascade" }),
+  discoveredAt: timestamp("discovered_at").defaultNow().notNull(),
+});
+
+// User Job Catalog Interactions - Track user interest in catalog jobs
+export const userJobCatalogInteractions = pgTable("user_job_catalog_interactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => authUsers.id, { onDelete: "cascade" }),
+  jobCatalogId: varchar("job_catalog_id")
+    .notNull()
+    .references(() => jobCatalog.id, { onDelete: "cascade" }),
+
+  // Interaction types
+  isSaved: boolean("is_saved").default(false),
+  isHidden: boolean("is_hidden").default(false),
+  isApplied: boolean("is_applied").default(false),
+  notes: text("notes"),
+
+  // If user saved to their job targets
+  jobTargetId: varchar("job_target_id").references(() => jobTargets.id, { onDelete: "set null" }),
+
+  viewedAt: timestamp("viewed_at"),
+  savedAt: timestamp("saved_at"),
+  appliedAt: timestamp("applied_at"),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Relations for Job Screening Agent tables
+export const jobScreeningAgentsRelations = relations(jobScreeningAgents, ({ one, many }) => ({
+  user: one(authUsers, {
+    fields: [jobScreeningAgents.userId],
+    references: [authUsers.id],
+  }),
+  results: many(jobScreeningAgentResults),
+}));
+
+export const jobCatalogRelations = relations(jobCatalog, ({ many }) => ({
+  agentResults: many(jobScreeningAgentResults),
+  userInteractions: many(userJobCatalogInteractions),
+}));
+
+export const jobScreeningAgentResultsRelations = relations(jobScreeningAgentResults, ({ one }) => ({
+  agent: one(jobScreeningAgents, {
+    fields: [jobScreeningAgentResults.agentId],
+    references: [jobScreeningAgents.id],
+  }),
+  job: one(jobCatalog, {
+    fields: [jobScreeningAgentResults.jobCatalogId],
+    references: [jobCatalog.id],
+  }),
+}));
+
+export const userJobCatalogInteractionsRelations = relations(userJobCatalogInteractions, ({ one }) => ({
+  user: one(authUsers, {
+    fields: [userJobCatalogInteractions.userId],
+    references: [authUsers.id],
+  }),
+  job: one(jobCatalog, {
+    fields: [userJobCatalogInteractions.jobCatalogId],
+    references: [jobCatalog.id],
+  }),
+  jobTarget: one(jobTargets, {
+    fields: [userJobCatalogInteractions.jobTargetId],
+    references: [jobTargets.id],
+  }),
+}));
+
 // Interview Configs - User's chosen interview settings for a session
 export const interviewConfigs = pgTable("interview_configs", {
   id: serial("id").primaryKey(),
@@ -2492,6 +2669,12 @@ export const insertPresentationFeedbackSchema = createInsertSchema(presentationF
 export const insertJobTargetSchema = createInsertSchema(jobTargets).omit({ createdAt: true, updatedAt: true });
 export const insertUserSkillPatternSchema = createInsertSchema(userSkillPatterns).omit({ id: true, createdAt: true, updatedAt: true });
 
+// Job Screening Agent Insert Schemas
+export const insertJobScreeningAgentSchema = createInsertSchema(jobScreeningAgents).omit({ createdAt: true, updatedAt: true });
+export const insertJobCatalogSchema = createInsertSchema(jobCatalog).omit({ createdAt: true, updatedAt: true });
+export const insertJobScreeningAgentResultSchema = createInsertSchema(jobScreeningAgentResults);
+export const insertUserJobCatalogInteractionSchema = createInsertSchema(userJobCatalogInteractions).omit({ createdAt: true, updatedAt: true });
+
 // Interview Practice Lab Insert Schemas
 export const insertRoleKitSchema = createInsertSchema(roleKits).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertInterviewRubricSchema = createInsertSchema(interviewRubrics).omit({ id: true, createdAt: true, updatedAt: true });
@@ -2575,6 +2758,16 @@ export type JobTarget = typeof jobTargets.$inferSelect;
 export type InsertJobTarget = z.infer<typeof insertJobTargetSchema>;
 export type UserSkillPattern = typeof userSkillPatterns.$inferSelect;
 export type InsertUserSkillPattern = z.infer<typeof insertUserSkillPatternSchema>;
+
+// Job Screening Agent Types
+export type JobScreeningAgent = typeof jobScreeningAgents.$inferSelect;
+export type InsertJobScreeningAgent = z.infer<typeof insertJobScreeningAgentSchema>;
+export type JobCatalogEntry = typeof jobCatalog.$inferSelect;
+export type InsertJobCatalogEntry = z.infer<typeof insertJobCatalogSchema>;
+export type JobScreeningAgentResult = typeof jobScreeningAgentResults.$inferSelect;
+export type InsertJobScreeningAgentResult = z.infer<typeof insertJobScreeningAgentResultSchema>;
+export type UserJobCatalogInteraction = typeof userJobCatalogInteractions.$inferSelect;
+export type InsertUserJobCatalogInteraction = z.infer<typeof insertUserJobCatalogInteractionSchema>;
 
 // Interview Practice Lab Types
 export type RoleKit = typeof roleKits.$inferSelect;

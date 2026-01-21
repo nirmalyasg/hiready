@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  Home, 
-  Target, 
-  BarChart3, 
-  User, 
-  LogOut, 
+import {
+  Home,
+  Target,
+  BarChart3,
+  User,
+  LogOut,
   ChevronLeft,
   Briefcase,
   Award,
   Layers,
   TrendingUp,
-  Users
+  Users,
+  Bot,
+  Search
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
@@ -45,9 +47,16 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       ]
     },
     {
+      title: 'DISCOVER',
+      items: [
+        { href: '/job-screening/catalog', label: 'Job Catalog', icon: Search },
+        { href: '/job-screening/agents', label: 'Agents', icon: Bot },
+      ]
+    },
+    {
       title: 'PREPARE',
       items: [
-        { href: '/jobs', label: 'Jobs', icon: Briefcase },
+        { href: '/jobs', label: 'My Jobs', icon: Briefcase },
         { href: '/interview/roles', label: 'Roles', icon: Users },
         { href: '/interview/by-type', label: 'By Type', icon: Layers },
       ]

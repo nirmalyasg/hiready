@@ -64,6 +64,8 @@ import CompanyLoginPage from './pages/company/login';
 import DynamicSeoPage from './pages/seo/dynamic-page';
 import SeoAdminPage from './pages/admin/seo-page';
 import InvitePage from './pages/invite/page';
+import JobScreeningAgentsPage from './pages/job-screening/agents-page';
+import JobCatalogPage from './pages/job-screening/catalog-page';
 
 export default function App() {
   return (
@@ -120,6 +122,8 @@ export default function App() {
         <Route path="/profile/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
         <Route path="/jobs" element={<ProtectedRoute><JobsPage /></ProtectedRoute>} />
         <Route path="/jobs/:jobId" element={<ProtectedRoute><JobDetailPage /></ProtectedRoute>} />
+        <Route path="/job-screening/agents" element={<ProtectedRoute><JobScreeningAgentsPage /></ProtectedRoute>} />
+        <Route path="/job-screening/catalog" element={<ProtectedRoute><JobCatalogPage /></ProtectedRoute>} />
         <Route path="/hiready-index" element={<ProtectedRoute><HireadyIndexPage /></ProtectedRoute>} />
         <Route path="/share/:shareToken" element={<PublicSharePage />} />
         <Route path="/results/:shareToken" element={<PublicResultsPage />} />
