@@ -36,6 +36,7 @@ interface EntitledJob {
   employerJobId: number | null;
   jobTitle: string | null;
   interviewPlan: any;
+  jobTargetId: string | null;
 }
 
 const domainColors: Record<string, string> = {
@@ -200,14 +201,14 @@ export default function InterviewPracticePage() {
           {/* Entitled Jobs Section - Shows for users who came via invite link */}
           {entitledJobs.length > 0 && (
             <section className="mb-8">
-              <div className="text-center mb-6">
-                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-                  Your Interview Practice
-                </h1>
-                <p className="text-slate-500 text-sm sm:text-base">
-                  {hasEntitledJobsOnly 
-                    ? "You have access to the following job interview practice"
-                    : "Practice for your assigned job interviews"}
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-slate-900 mb-2">
+                  {hasEntitledJobsOnly ? "Your Assigned Jobs" : "Assigned Jobs"}
+                </h2>
+                <p className="text-slate-600 text-sm">
+                  {hasEntitledJobsOnly
+                    ? "Start practicing for your assigned interviews"
+                    : "Jobs assigned to you by employers"}
                 </p>
               </div>
 
@@ -216,41 +217,34 @@ export default function InterviewPracticePage() {
                   <button
                     key={job.id}
                     onClick={() => {
-                      if (job.employerJobId) {
+                      if (job.jobTargetId) {
+                        navigate(`/jobs/${job.jobTargetId}`);
+                      } else if (job.employerJobId) {
                         navigate(`/interview/pre-session?employerJobId=${job.employerJobId}`);
                       } else {
                         navigate(`/interview/role/${job.id}`);
                       }
                     }}
-                    className="w-full bg-white rounded-2xl border-2 border-[#24c4b8]/30 p-5 text-left hover:border-[#24c4b8] hover:shadow-lg transition-all group"
+                    className="w-full bg-white rounded-xl border border-slate-200 p-4 text-left hover:border-[#24c4b8] hover:shadow-md transition-all group"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-[#24c4b8]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <Briefcase className="w-6 h-6 text-[#24c4b8]" />
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 bg-[#24c4b8]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Briefcase className="w-5 h-5 text-[#24c4b8]" />
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-900 text-lg group-hover:text-[#24c4b8] transition-colors">
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-slate-900 text-base group-hover:text-[#24c4b8] transition-colors truncate">
                             {job.jobTitle || job.name}
                           </h3>
                           {job.companyName && (
-                            <div className="flex items-center gap-2 text-slate-500 text-sm mt-0.5">
-                              <Building2 className="w-3.5 h-3.5" />
-                              <span>{job.companyName}</span>
-                            </div>
-                          )}
-                          {job.interviewTypes && job.interviewTypes.length > 0 && (
-                            <div className="flex gap-2 mt-2">
-                              {(job.interviewTypes as string[]).map((type, i) => (
-                                <span key={i} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full capitalize">
-                                  {type}
-                                </span>
-                              ))}
+                            <div className="flex items-center gap-1.5 text-slate-500 text-sm mt-0.5">
+                              <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
+                              <span className="truncate">{job.companyName}</span>
                             </div>
                           )}
                         </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-[#24c4b8] group-hover:translate-x-1 transition-all" />
+                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-[#24c4b8] group-hover:translate-x-1 transition-all flex-shrink-0" />
                     </div>
                   </button>
                 ))}
@@ -260,20 +254,22 @@ export default function InterviewPracticePage() {
           
           {/* Section 1: Add Job Input - Hidden if user only has entitled jobs */}
           {!hasEntitledJobsOnly && (
-          <section className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-              What job are you preparing for?
-            </h1>
-            <p className="text-slate-500 text-sm sm:text-base mb-6">
-              Paste a job description or enter a job listing URL
-            </p>
+          <section>
+            <div className="text-center mb-6">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
+                Add a Job to Practice For
+              </h1>
+              <p className="text-slate-600 text-sm sm:text-base">
+                Paste a job description or URL to get started
+              </p>
+            </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm">
+            <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 shadow-sm">
               <Textarea
-                placeholder="Paste job description or enter URL (e.g., https://linkedin.com/jobs/...)"
+                placeholder="Paste a job description or LinkedIn/Indeed URL..."
                 value={jobInput}
                 onChange={(e) => { setJobInput(e.target.value); setError(null); }}
-                className="min-h-[120px] resize-none border-slate-200 focus:border-[#24c4b8] focus:ring-[#24c4b8]/20 text-base text-slate-700 placeholder:text-slate-400 rounded-xl"
+                className="min-h-[100px] resize-none border-slate-200 focus:border-[#24c4b8] focus:ring-[#24c4b8]/20 text-base text-slate-700 placeholder:text-slate-400 rounded-lg"
               />
               
               {error && (
@@ -322,7 +318,7 @@ export default function InterviewPracticePage() {
           {!hasEntitledJobsOnly && (
           <div className="flex items-center gap-4">
             <div className="flex-1 h-px bg-slate-200" />
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">or choose below</span>
+            <span className="text-xs text-slate-400">or</span>
             <div className="flex-1 h-px bg-slate-200" />
           </div>
           )}
@@ -331,20 +327,15 @@ export default function InterviewPracticePage() {
           {!hasEntitledJobsOnly && (
           <section>
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-[#24c4b8] flex items-center justify-center">
-                  <Briefcase className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-base font-bold text-slate-900">Your Target Jobs</h2>
-                  <p className="text-xs text-slate-500">Practice for specific positions</p>
-                </div>
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">Your Jobs</h2>
+                <p className="text-sm text-slate-600">Practice for specific positions</p>
               </div>
-              <button 
+              <button
                 onClick={() => navigate("/jobs")}
                 className="text-sm text-[#24c4b8] font-medium hover:underline"
               >
-                Manage →
+                View All →
               </button>
             </div>
 
@@ -394,20 +385,15 @@ export default function InterviewPracticePage() {
           {!hasEntitledJobsOnly && (
           <section>
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-slate-900 flex items-center justify-center">
-                  <Target className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-base font-bold text-slate-900">Role Library</h2>
-                  <p className="text-xs text-slate-500">General interview practice by role</p>
-                </div>
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">Practice by Role</h2>
+                <p className="text-sm text-slate-600">General interview templates</p>
               </div>
-              <button 
+              <button
                 onClick={() => navigate("/interview/roles")}
                 className="text-sm text-slate-600 font-medium hover:underline"
               >
-                Browse all →
+                View All →
               </button>
             </div>
 

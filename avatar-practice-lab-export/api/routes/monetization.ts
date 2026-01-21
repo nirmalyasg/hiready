@@ -66,7 +66,7 @@ router.get("/my-job-targets", async (req: Request, res: Response) => {
     }
 
     const entitledSets = await db.execute(sql`
-      SELECT DISTINCT 
+      SELECT DISTINCT
         iset.id,
         iset.name,
         iset.description,
@@ -77,11 +77,17 @@ router.get("/my-job-targets", async (req: Request, res: Response) => {
         ej.id as "employerJobId",
         ej.title as "jobTitle",
         ej.jd_text as "jdText",
-        ej.generated_interview_plan as "interviewPlan"
+        ej.generated_interview_plan as "interviewPlan",
+        jt.id as "jobTargetId"
       FROM company_share_link_access csla
       JOIN company_share_links csl ON csla.share_link_id = csl.id
       JOIN interview_sets iset ON csla.interview_set_id = iset.id
       LEFT JOIN employer_jobs ej ON iset.job_description LIKE '%employerJobId:' || ej.id || '%'
+      LEFT JOIN employer_companies ec ON ej.company_id = ec.id
+      LEFT JOIN job_targets jt ON jt.user_id = ${authUserId}
+        AND jt.source = 'company'
+        AND jt.role_title = ej.title
+        AND jt.company_name = COALESCE(ec.name, csl.company_name)
       WHERE csla.user_id = ${legacyUserId}
       ORDER BY csla.accessed_at DESC
     `);
