@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Building2, MapPin, Sparkles, Play, FileText, Code, CheckCircle2, AlertCircle, MoreVertical, Trash2, ChevronDown, ChevronUp, Phone, User, Briefcase, MessageCircle, Heart, TrendingUp, ExternalLink, Lock, Crown, Clock, Target, BarChart3, RotateCcw, Loader2, Zap } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, Play, FileText, Code, CheckCircle2, AlertCircle, MoreVertical, Trash2, ChevronDown, ChevronUp, Phone, User, Briefcase, MessageCircle, Heart, TrendingUp, ExternalLink, Clock, Target, BarChart3, RotateCcw, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SidebarLayout from "@/components/layout/sidebar-layout";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -243,8 +243,7 @@ export default function JobDetailPage() {
   const [practiceOptions, setPracticeOptions] = useState<PracticeOption[]>([]);
   const [companyData, setCompanyData] = useState<CompanyData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isParsing, setIsParsing] = useState(false);
-  const [jdExpanded, setJdExpanded] = useState(false);
+  const [jdExpanded, setJdExpanded] = useState(true);
   const [requirementsExpanded, setRequirementsExpanded] = useState(true);
   const [entitlements, setEntitlements] = useState<Entitlements | null>(null);
   const [roleKits, setRoleKits] = useState<RoleKit[]>([]);
@@ -293,6 +292,19 @@ export default function JobDetailPage() {
         
         if (jobData.success) {
           setJob(jobData.job);
+          
+          // Auto-trigger JD parsing if we have JD text but no parsed data
+          if (jobData.job.jdText && !jobData.job.jdParsed) {
+            // Parse in background without blocking UI
+            fetch(`/api/jobs/job-targets/${jobData.job.id}/parse`, { method: "POST" })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  setJob(prev => prev ? { ...prev, jdParsed: data.parsed } : null);
+                }
+              })
+              .catch(err => console.error("Background JD parse error:", err));
+          }
         }
         
         if (optionsData.success) {
@@ -400,25 +412,6 @@ export default function JobDetailPage() {
       console.error("Error updating role kit:", error);
     } finally {
       setIsSavingRole(false);
-    }
-  };
-
-  const handleParseJD = async () => {
-    if (!job || !job.jdText) return;
-    
-    setIsParsing(true);
-    try {
-      const response = await fetch(`/api/jobs/job-targets/${job.id}/parse`, {
-        method: "POST",
-      });
-      const data = await response.json();
-      if (data.success) {
-        setJob(prev => prev ? { ...prev, jdParsed: data.parsed } : null);
-      }
-    } catch (error) {
-      console.error("Error parsing JD:", error);
-    } finally {
-      setIsParsing(false);
     }
   };
 
@@ -651,7 +644,7 @@ export default function JobDetailPage() {
             </div>
           </div>
 
-          {/* Free Trial Exhausted Banner */}
+          {/* Free Trial Exhausted Banner - SINGLE upgrade prompt */}
           {isFreeTierExhausted && (
             <div className="bg-gradient-to-r from-[#ee7e65]/10 to-[#ee7e65]/5 border border-[#ee7e65]/30 rounded-xl p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -673,340 +666,8 @@ export default function JobDetailPage() {
               </Button>
             </div>
           )}
-          
-          {/* Quick Practice CTA */}
-          {practiceOptions.length > 0 && (
-            <Button
-              onClick={() => handleStartPracticeOption(practiceOptions[0])}
-              className={`w-full h-14 font-semibold rounded-xl shadow-lg text-base gap-2 ${
-                isFreeTierExhausted
-                  ? 'bg-[#ee7e65] hover:bg-[#e06c52] text-white shadow-[#ee7e65]/25'
-                  : 'bg-[#24c4b8] hover:bg-[#1db0a5] text-white shadow-[#24c4b8]/25'
-              }`}
-            >
-              {isFreeTierExhausted ? (
-                <>
-                  <Zap className="w-5 h-5" />
-                  Upgrade to Practice
-                </>
-              ) : (
-                <>
-                  <Play className="w-5 h-5" />
-                  Start Practice Session
-                </>
-              )}
-            </Button>
-          )}
 
-        {/* Content */}
-        <div className="space-y-4">
-          {!job.jdParsed && job.jdText && (
-            <div className="bg-white rounded-lg border border-slate-200 p-4">
-              <div className="flex items-center gap-3">
-                <Sparkles className="w-5 h-5 text-slate-400" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-slate-900 text-sm">Analyze job description</p>
-                  <p className="text-xs text-slate-500">Extract skills and requirements</p>
-                </div>
-                <Button
-                  onClick={handleParseJD}
-                  size="sm"
-                  className="h-8 px-3 bg-[#24c4b8] hover:bg-[#1db0a5] text-white text-sm"
-                  disabled={isParsing}
-                >
-                  {isParsing ? "..." : "Analyze"}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-              <h2 className="font-medium text-slate-900 text-sm">Practice Role</h2>
-              {job?.roleKitId && (
-                <button 
-                  onClick={() => setShowRoleSelector(!showRoleSelector)}
-                  className="text-xs text-slate-500 hover:text-slate-700 font-medium"
-                >
-                  {showRoleSelector ? "Cancel" : "Change"}
-                </button>
-              )}
-            </div>
-            <div className="p-3">
-              {showRoleSelector ? (
-                <div className="space-y-2">
-                  <p className="text-xs text-slate-500 mb-2">Select the role that best matches this job for accurate practice:</p>
-                  <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
-                    {roleKits.map((kit) => (
-                      <button
-                        key={kit.id}
-                        onClick={() => handleUpdateRoleKit(kit.id)}
-                        disabled={isSavingRole}
-                        className={`p-2 text-left rounded-lg border text-sm transition-all ${
-                          job?.roleKitId === kit.id
-                            ? "border-slate-900 bg-slate-50 text-slate-900"
-                            : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-900"
-                        }`}
-                      >
-                        <span className="font-medium block truncate">{kit.name}</span>
-                        {kit.category && (
-                          <span className="text-xs text-slate-500 block truncate">{kit.category}</span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    job?.roleKitId ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
-                  }`}>
-                    {job?.roleKitId ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-slate-900 text-sm truncate">
-                        {job?.roleKitId 
-                          ? roleKits.find(k => k.id === job.roleKitId)?.name || "Role Detected"
-                          : "Role selection required"}
-                      </p>
-                      {job?.roleKitId && job?.roleKitMatchConfidence && (
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                          job.roleKitMatchConfidence === "high" 
-                            ? "bg-emerald-100 text-emerald-700" 
-                            : job.roleKitMatchConfidence === "medium"
-                              ? "bg-amber-100 text-amber-700"
-                              : "bg-slate-100 text-slate-600"
-                        }`}>
-                          {job.roleKitMatchConfidence === "high" ? "Best Match" : 
-                           job.roleKitMatchConfidence === "medium" ? "Good Match" : "Suggested"}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-slate-500">
-                      {job?.roleKitId 
-                        ? "Auto-detected from your job description"
-                        : "Please select a role to continue practicing"}
-                    </p>
-                  </div>
-                  {!job?.roleKitId && isAutoMapping && (
-                    <div className="flex items-center gap-2 text-sm text-slate-500">
-                      <div className="w-4 h-4 border-2 border-[#24c4b8] border-t-transparent rounded-full animate-spin" />
-                      <span>Detecting role...</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {accessCheck && !accessCheck.hasAccess && (
-            <div className="bg-white rounded-lg border border-slate-200 p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <Lock className="w-4 h-4 text-slate-400" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm text-slate-900">Unlock Practice</p>
-                  <p className="text-xs text-slate-500">Upgrade to continue practicing</p>
-                </div>
-              </div>
-              <Button
-                onClick={() => setShowUpgradeModal(true)}
-                size="sm"
-                className="h-8 px-3 text-xs bg-[#24c4b8] hover:bg-[#1db0a5] text-white"
-              >
-                Upgrade
-              </Button>
-            </div>
-          )}
-
-          {practiceHistory && practiceHistory.summary.totalAttempts > 0 && (
-            <div className="bg-gradient-to-r from-[#24c4b8]/5 to-transparent rounded-lg border border-[#24c4b8]/20 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-[#24c4b8]/10 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-[#24c4b8]" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-slate-900 text-sm">Practice Progress</p>
-                    <p className="text-xs text-slate-500">
-                      {practiceHistory.summary.totalAttempts} total sessions
-                      {practiceHistory.summary.averageScore !== null && (
-                        <> • Avg: {practiceHistory.summary.averageScore}%</>
-                      )}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => job?.roleKitId && navigate(`/hiready-index?roleKitId=${job.roleKitId}`)}
-                  variant="outline"
-                  size="sm"
-                  className="text-xs border-[#24c4b8]/30 text-[#24c4b8] hover:bg-[#24c4b8]/10"
-                >
-                  View HiReady Index
-                  <ExternalLink className="w-3 h-3 ml-1" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* HiReady Performance Summary for Company-Source Jobs */}
-          {hireadyData && (job?.source === 'company' || hireadyData.totalSessions > 0) && (
-            <div className="mb-4 bg-gradient-to-br from-purple-50 to-white rounded-xl border border-purple-100 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
-                    <BarChart3 className="w-4 h-4 text-purple-600" />
-                  </div>
-                  <div>
-                    <h2 className="text-sm font-semibold text-slate-900">Your Performance</h2>
-                    <p className="text-xs text-slate-500">HiReady Index for this role</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                    hireadyData.status === 'completed' ? 'bg-green-100 text-green-700' :
-                    hireadyData.status === 'in_progress' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-slate-100 text-slate-600'
-                  }`}>
-                    {hireadyData.status === 'completed' ? 'Completed' :
-                     hireadyData.status === 'in_progress' ? 'In Progress' : 'Not Started'}
-                  </span>
-                </div>
-              </div>
-
-              {hireadyData.hireadyIndex ? (
-                <div className="space-y-4">
-                  {/* Overall Score */}
-                  <div className="flex items-center gap-4">
-                    <div className="flex-shrink-0">
-                      <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold border-4 ${
-                        hireadyData.hireadyIndex.overallScore >= 80 ? 'border-green-400 text-green-600 bg-green-50' :
-                        hireadyData.hireadyIndex.overallScore >= 60 ? 'border-yellow-400 text-yellow-600 bg-yellow-50' :
-                        'border-red-400 text-red-600 bg-red-50'
-                      }`}>
-                        {hireadyData.hireadyIndex.overallScore}
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-900">HiReady Index</p>
-                      <p className={`text-xs font-medium ${
-                        hireadyData.hireadyIndex.readinessLevel === 'interview_ready' ? 'text-green-600' :
-                        hireadyData.hireadyIndex.readinessLevel === 'almost_ready' ? 'text-yellow-600' :
-                        'text-red-600'
-                      }`}>
-                        {hireadyData.hireadyIndex.readinessLevel === 'interview_ready' ? 'Interview Ready' :
-                         hireadyData.hireadyIndex.readinessLevel === 'almost_ready' ? 'Almost Ready' :
-                         hireadyData.hireadyIndex.readinessLevel === 'needs_work' ? 'Needs Work' : 'Not Ready'}
-                      </p>
-                      <p className="text-xs text-slate-500 mt-1">
-                        Based on {hireadyData.analyzedSessions} analyzed session{hireadyData.analyzedSessions !== 1 ? 's' : ''}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Dimension Scores */}
-                  {hireadyData.hireadyIndex.dimensionScores && hireadyData.hireadyIndex.dimensionScores.length > 0 && (
-                    <div className="grid grid-cols-2 gap-2">
-                      {hireadyData.hireadyIndex.dimensionScores.slice(0, 6).map((dim, idx) => (
-                        <div key={idx} className="bg-white rounded-lg p-2 border border-slate-100">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-slate-600 truncate">{dim.dimension}</span>
-                            <span className={`text-xs font-semibold ${
-                              dim.score >= 80 ? 'text-green-600' :
-                              dim.score >= 60 ? 'text-yellow-600' : 'text-red-500'
-                            }`}>{dim.score}%</span>
-                          </div>
-                          <div className="mt-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full rounded-full ${
-                                dim.score >= 80 ? 'bg-green-500' :
-                                dim.score >= 60 ? 'bg-yellow-500' : 'bg-red-500'
-                              }`}
-                              style={{ width: `${dim.score}%` }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Strengths and Improvements */}
-                  {((hireadyData.hireadyIndex.strengths && hireadyData.hireadyIndex.strengths.length > 0) || 
-                    (hireadyData.hireadyIndex.improvements && hireadyData.hireadyIndex.improvements.length > 0)) && (
-                  <div className="grid grid-cols-2 gap-3">
-                    {hireadyData.hireadyIndex.strengths && hireadyData.hireadyIndex.strengths.length > 0 && (
-                      <div>
-                        <p className="text-xs font-medium text-green-700 mb-1">Strengths</p>
-                        <ul className="space-y-1">
-                          {hireadyData.hireadyIndex.strengths.slice(0, 3).map((s, i) => (
-                            <li key={i} className="text-xs text-slate-600 flex items-start gap-1">
-                              <CheckCircle2 className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />
-                              <span className="line-clamp-2">{s}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {hireadyData.hireadyIndex.improvements && hireadyData.hireadyIndex.improvements.length > 0 && (
-                      <div>
-                        <p className="text-xs font-medium text-amber-700 mb-1">Areas to Improve</p>
-                        <ul className="space-y-1">
-                          {hireadyData.hireadyIndex.improvements.slice(0, 3).map((s, i) => (
-                            <li key={i} className="text-xs text-slate-600 flex items-start gap-1">
-                              <AlertCircle className="w-3 h-3 text-amber-500 mt-0.5 flex-shrink-0" />
-                              <span className="line-clamp-2">{s}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                  )}
-
-                  {/* Session Breakdown with Links */}
-                  {hireadyData.hireadyIndex.sessionBreakdown && hireadyData.hireadyIndex.sessionBreakdown.length > 0 && (
-                    <div>
-                      <p className="text-xs font-medium text-slate-700 mb-2">Recent Sessions</p>
-                      <div className="space-y-1">
-                        {hireadyData.hireadyIndex.sessionBreakdown.slice(0, 3).map((session, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => navigate(`/interview/results?sessionId=${session.sessionId}`)}
-                            className="w-full flex items-center justify-between p-2 bg-white rounded-lg border border-slate-100 hover:border-purple-200 hover:bg-purple-50/50 transition-colors group"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-medium text-slate-700 group-hover:text-purple-700">{session.interviewType}</span>
-                              <span className="text-[10px] text-slate-400">
-                                {new Date(session.date).toLocaleDateString()}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className={`text-xs font-semibold ${
-                                session.score >= 80 ? 'text-green-600' :
-                                session.score >= 60 ? 'text-yellow-600' : 'text-red-500'
-                              }`}>{session.score}%</span>
-                              <ExternalLink className="w-3 h-3 text-slate-300 group-hover:text-purple-500" />
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-6">
-                  <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                    <Play className="w-5 h-5 text-slate-400" />
-                  </div>
-                  <p className="text-sm text-slate-600 font-medium">No practice sessions yet</p>
-                  <p className="text-xs text-slate-500 mt-1">Complete interview rounds below to see your HiReady score</p>
-                </div>
-              )}
-            </div>
-          )}
-
+          {/* Interview Rounds - PRIMARY SECTION - Moved to top */}
           {practiceOptions.length > 0 && (
             <div className="mb-4">
               <div className="flex items-center justify-between mb-3">
@@ -1137,6 +798,118 @@ export default function JobDetailPage() {
               </div>
             </div>
           )}
+
+          {/* Practice Progress - Compact summary if available */}
+          {practiceHistory && practiceHistory.summary.totalAttempts > 0 && (
+            <div className="bg-gradient-to-r from-[#24c4b8]/5 to-transparent rounded-lg border border-[#24c4b8]/20 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-[#24c4b8]/10 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-[#24c4b8]" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-slate-900 text-sm">Practice Progress</p>
+                    <p className="text-xs text-slate-500">
+                      {practiceHistory.summary.totalAttempts} total sessions
+                      {practiceHistory.summary.averageScore !== null && (
+                        <> • Avg: {practiceHistory.summary.averageScore}%</>
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => job?.roleKitId && navigate(`/hiready-index?roleKitId=${job.roleKitId}`)}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs border-[#24c4b8]/30 text-[#24c4b8] hover:bg-[#24c4b8]/10"
+                >
+                  View HiReady Index
+                  <ExternalLink className="w-3 h-3 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Practice Role - Collapsible when role is auto-detected */}
+          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="font-medium text-slate-900 text-sm">Practice Role</h2>
+              {job?.roleKitId && (
+                <button 
+                  onClick={() => setShowRoleSelector(!showRoleSelector)}
+                  className="text-xs text-slate-500 hover:text-slate-700 font-medium"
+                >
+                  {showRoleSelector ? "Cancel" : "Change"}
+                </button>
+              )}
+            </div>
+            <div className="p-3">
+              {showRoleSelector ? (
+                <div className="space-y-2">
+                  <p className="text-xs text-slate-500 mb-2">Select the role that best matches this job:</p>
+                  <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
+                    {roleKits.map((kit) => (
+                      <button
+                        key={kit.id}
+                        onClick={() => handleUpdateRoleKit(kit.id)}
+                        disabled={isSavingRole}
+                        className={`p-2 text-left rounded-lg border text-sm transition-all ${
+                          job?.roleKitId === kit.id
+                            ? "border-slate-900 bg-slate-50 text-slate-900"
+                            : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-900"
+                        }`}
+                      >
+                        <span className="font-medium block truncate">{kit.name}</span>
+                        {kit.category && (
+                          <span className="text-xs text-slate-500 block truncate">{kit.category}</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                    job?.roleKitId ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
+                  }`}>
+                    {job?.roleKitId ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-slate-900 text-sm truncate">
+                        {job?.roleKitId 
+                          ? roleKits.find(k => k.id === job.roleKitId)?.name || "Role Detected"
+                          : "Role selection required"}
+                      </p>
+                      {job?.roleKitId && job?.roleKitMatchConfidence && (
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                          job.roleKitMatchConfidence === "high" 
+                            ? "bg-emerald-100 text-emerald-700" 
+                            : job.roleKitMatchConfidence === "medium"
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-slate-100 text-slate-600"
+                        }`}>
+                          {job.roleKitMatchConfidence === "high" ? "Best Match" : 
+                           job.roleKitMatchConfidence === "medium" ? "Good Match" : "Suggested"}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      {job?.roleKitId 
+                        ? "Auto-detected from your job description"
+                        : "Please select a role to continue practicing"}
+                    </p>
+                  </div>
+                  {!job?.roleKitId && isAutoMapping && (
+                    <div className="flex items-center gap-2 text-sm text-slate-500">
+                      <div className="w-4 h-4 border-2 border-[#24c4b8] border-t-transparent rounded-full animate-spin" />
+                      <span>Detecting role...</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
 
           {parsed && (
             <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
@@ -1275,7 +1048,7 @@ export default function JobDetailPage() {
               )}
             </div>
           )}
-        </div>
+
         </div>
       </div>
 
