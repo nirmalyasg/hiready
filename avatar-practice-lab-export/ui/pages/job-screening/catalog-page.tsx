@@ -18,7 +18,14 @@ import {
   Laptop,
   Bot,
   X,
-  Play
+  Play,
+  Check,
+  Square,
+  CheckSquare,
+  Globe,
+  Link2,
+  Copy,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,6 +80,13 @@ interface JobCatalogEntry {
   } | null;
 }
 
+interface PublicJobPage {
+  id: string;
+  slug: string;
+  roleTitle: string;
+  companyName: string | null;
+}
+
 interface Pagination {
   page: number;
   limit: number;
@@ -100,6 +114,12 @@ export default function JobCatalogPage() {
   const [savingJobId, setSavingJobId] = useState<string | null>(null);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Multi-select state
+  const [selectedJobIds, setSelectedJobIds] = useState<Set<string>>(new Set());
+  const [isGeneratingPages, setIsGeneratingPages] = useState(false);
+  const [generatedPages, setGeneratedPages] = useState<PublicJobPage[]>([]);
+  const [showGeneratedPagesModal, setShowGeneratedPagesModal] = useState(false);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
@@ -142,9 +162,66 @@ export default function JobCatalogPage() {
     fetchJobs(1);
   }, [searchQuery, locationFilter, experienceMin, experienceMax, employmentType, remoteOnly]);
 
+  // Clear selection when filters change
+  useEffect(() => {
+    setSelectedJobIds(new Set());
+  }, [searchQuery, locationFilter, experienceMin, experienceMax, employmentType, remoteOnly]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     fetchJobs(1);
+  };
+
+  const toggleJobSelection = (jobId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedJobIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(jobId)) {
+        newSet.delete(jobId);
+      } else {
+        newSet.add(jobId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedJobIds.size === jobs.length) {
+      setSelectedJobIds(new Set());
+    } else {
+      setSelectedJobIds(new Set(jobs.map((j) => j.id)));
+    }
+  };
+
+  const handleGeneratePublicPages = async () => {
+    if (selectedJobIds.size === 0) return;
+
+    try {
+      setIsGeneratingPages(true);
+      const response = await fetch("/api/job-screening/public-pages/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobIds: Array.from(selectedJobIds) }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setGeneratedPages(data.pages);
+        setShowGeneratedPagesModal(true);
+        setSelectedJobIds(new Set());
+      } else {
+        console.error("Failed to generate pages:", data.error);
+      }
+    } catch (error) {
+      console.error("Error generating public pages:", error);
+    } finally {
+      setIsGeneratingPages(false);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
   };
 
   const handleSaveToTargets = async (job: JobCatalogEntry) => {
@@ -156,7 +233,6 @@ export default function JobCatalogPage() {
       const data = await response.json();
 
       if (data.success) {
-        // Update local state
         setJobs(
           jobs.map((j) =>
             j.id === job.id
@@ -174,7 +250,6 @@ export default function JobCatalogPage() {
           )
         );
 
-        // Update selected job if open
         if (selectedJob?.id === job.id) {
           setSelectedJob({
             ...selectedJob,
@@ -421,6 +496,46 @@ export default function JobCatalogPage() {
           </div>
         </div>
 
+        {/* Multi-select Action Bar */}
+        {selectedJobIds.size > 0 && (
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 mt-4">
+            <div className="bg-[#cb6ce6] rounded-xl p-4 flex items-center justify-between shadow-lg shadow-[#cb6ce6]/25">
+              <div className="flex items-center gap-3 text-white">
+                <CheckSquare className="w-5 h-5" />
+                <span className="font-medium">
+                  {selectedJobIds.size} job{selectedJobIds.size > 1 ? "s" : ""} selected
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  onClick={() => setSelectedJobIds(new Set())}
+                  className="text-white hover:bg-white/20"
+                >
+                  Clear
+                </Button>
+                <Button
+                  onClick={handleGeneratePublicPages}
+                  disabled={isGeneratingPages}
+                  className="bg-white text-[#cb6ce6] hover:bg-white/90 gap-2"
+                >
+                  {isGeneratingPages ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Globe className="w-4 h-4" />
+                      Generate Public Pages
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Jobs List */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           {isLoading ? (
@@ -452,14 +567,48 @@ export default function JobCatalogPage() {
             </div>
           ) : (
             <>
+              {/* Select All Header */}
+              <div className="flex items-center justify-between mb-4">
+                <button
+                  onClick={toggleSelectAll}
+                  className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900"
+                >
+                  {selectedJobIds.size === jobs.length ? (
+                    <CheckSquare className="w-5 h-5 text-[#cb6ce6]" />
+                  ) : (
+                    <Square className="w-5 h-5" />
+                  )}
+                  {selectedJobIds.size === jobs.length ? "Deselect All" : "Select All"}
+                </button>
+                <span className="text-sm text-slate-500">
+                  Showing {jobs.length} of {pagination.total} jobs
+                </span>
+              </div>
+
               <div className="space-y-3">
                 {jobs.map((job) => (
                   <div
                     key={job.id}
-                    className="bg-white rounded-xl border border-slate-200 p-5 hover:border-[#24c4b8]/40 hover:shadow-lg hover:shadow-[#24c4b8]/5 transition-all duration-200 cursor-pointer group"
+                    className={`bg-white rounded-xl border p-5 hover:shadow-lg transition-all duration-200 cursor-pointer group ${
+                      selectedJobIds.has(job.id)
+                        ? "border-[#cb6ce6] shadow-md shadow-[#cb6ce6]/10"
+                        : "border-slate-200 hover:border-[#24c4b8]/40 hover:shadow-[#24c4b8]/5"
+                    }`}
                     onClick={() => setSelectedJob(job)}
                   >
                     <div className="flex items-start gap-4">
+                      {/* Checkbox */}
+                      <button
+                        onClick={(e) => toggleJobSelection(job.id, e)}
+                        className="mt-1 flex-shrink-0"
+                      >
+                        {selectedJobIds.has(job.id) ? (
+                          <CheckSquare className="w-5 h-5 text-[#cb6ce6]" />
+                        ) : (
+                          <Square className="w-5 h-5 text-slate-300 group-hover:text-slate-400" />
+                        )}
+                      </button>
+
                       <div className="w-12 h-12 bg-gradient-to-br from-[#000000] to-[#1a0a2e] rounded-xl flex items-center justify-center flex-shrink-0">
                         {job.companyLogoUrl ? (
                           <img
@@ -720,6 +869,75 @@ export default function JobCatalogPage() {
                 </div>
               </>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Generated Pages Modal */}
+        <Dialog open={showGeneratedPagesModal} onOpenChange={setShowGeneratedPagesModal}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-[#24c4b8] rounded-xl flex items-center justify-center">
+                  <Globe className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl">Public Pages Generated!</DialogTitle>
+                  <p className="text-sm text-slate-500 mt-1">
+                    {generatedPages.length} public job page{generatedPages.length > 1 ? "s" : ""} created
+                  </p>
+                </div>
+              </div>
+            </DialogHeader>
+
+            <div className="mt-4 space-y-3 max-h-80 overflow-y-auto">
+              {generatedPages.map((page) => (
+                <div
+                  key={page.id}
+                  className="bg-slate-50 rounded-xl p-4 flex items-center justify-between"
+                >
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-medium text-slate-900 truncate">{page.roleTitle}</h4>
+                    {page.companyName && (
+                      <p className="text-sm text-slate-500 truncate">{page.companyName}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 ml-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(`${window.location.origin}/careers/${page.slug}`)}
+                      className="h-9 w-9 p-0"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(`/careers/${page.slug}`, "_blank")}
+                      className="h-9 gap-2"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      View
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end gap-3 mt-4 pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => setShowGeneratedPagesModal(false)}
+              >
+                Close
+              </Button>
+              <Button
+                onClick={() => navigate("/admin/job-screening/public-pages")}
+                className="bg-[#cb6ce6] hover:bg-[#b85ed4]"
+              >
+                Manage All Pages
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

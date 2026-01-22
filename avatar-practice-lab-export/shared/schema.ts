@@ -1018,6 +1018,96 @@ export const userJobCatalogInteractionsRelations = relations(userJobCatalogInter
   }),
 }));
 
+// Public Job Pages - Individual public pages for jobs with practice links
+export const publicJobPages = pgTable("public_job_pages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+
+  // Source reference
+  jobCatalogId: varchar("job_catalog_id").references(() => jobCatalog.id, { onDelete: "set null" }),
+
+  // URL slug for public access
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+
+  // Job details (copied from catalog for independence)
+  roleTitle: text("role_title").notNull(),
+  companyName: text("company_name"),
+  companyLogoUrl: text("company_logo_url"),
+  companyIndustry: text("company_industry"),
+  location: text("location"),
+  isRemote: boolean("is_remote").default(false),
+  jobDescription: text("job_description"),
+  experienceRequired: text("experience_required"),
+  employmentType: varchar("employment_type", { length: 50 }),
+  salaryMin: integer("salary_min"),
+  salaryMax: integer("salary_max"),
+  salaryCurrency: varchar("salary_currency", { length: 10 }),
+  requiredSkills: text("required_skills").array(),
+
+  // Page settings
+  isPublished: boolean("is_published").default(true),
+  customTitle: text("custom_title"),
+  customDescription: text("custom_description"),
+  practiceCtaText: varchar("practice_cta_text", { length: 255 }).default("Practice for This Interview"),
+
+  // Creator tracking
+  createdBy: varchar("created_by").references(() => authUsers.id, { onDelete: "set null" }),
+
+  // Analytics
+  viewCount: integer("view_count").default(0),
+  practiceClickCount: integer("practice_click_count").default(0),
+
+  // Timestamps
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Public Job Page Analytics - Track views and interactions
+export const publicJobPageAnalytics = pgTable("public_job_page_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  jobPageId: varchar("job_page_id")
+    .notNull()
+    .references(() => publicJobPages.id, { onDelete: "cascade" }),
+
+  // Event type
+  eventType: varchar("event_type", { length: 50 }).notNull(),
+
+  // Optional user reference
+  userId: varchar("user_id").references(() => authUsers.id, { onDelete: "set null" }),
+
+  // Session tracking
+  sessionId: varchar("session_id"),
+  ipHash: varchar("ip_hash", { length: 64 }),
+  userAgent: text("user_agent"),
+  referrer: text("referrer"),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Relations for Public Job Pages
+export const publicJobPagesRelations = relations(publicJobPages, ({ one, many }) => ({
+  jobCatalog: one(jobCatalog, {
+    fields: [publicJobPages.jobCatalogId],
+    references: [jobCatalog.id],
+  }),
+  creator: one(authUsers, {
+    fields: [publicJobPages.createdBy],
+    references: [authUsers.id],
+  }),
+  analytics: many(publicJobPageAnalytics),
+}));
+
+export const publicJobPageAnalyticsRelations = relations(publicJobPageAnalytics, ({ one }) => ({
+  jobPage: one(publicJobPages, {
+    fields: [publicJobPageAnalytics.jobPageId],
+    references: [publicJobPages.id],
+  }),
+  user: one(authUsers, {
+    fields: [publicJobPageAnalytics.userId],
+    references: [authUsers.id],
+  }),
+}));
+
 // Interview Configs - User's chosen interview settings for a session
 export const interviewConfigs = pgTable("interview_configs", {
   id: serial("id").primaryKey(),
@@ -2674,6 +2764,8 @@ export const insertJobScreeningAgentSchema = createInsertSchema(jobScreeningAgen
 export const insertJobCatalogSchema = createInsertSchema(jobCatalog).omit({ createdAt: true, updatedAt: true });
 export const insertJobScreeningAgentResultSchema = createInsertSchema(jobScreeningAgentResults);
 export const insertUserJobCatalogInteractionSchema = createInsertSchema(userJobCatalogInteractions).omit({ createdAt: true, updatedAt: true });
+export const insertPublicJobPageSchema = createInsertSchema(publicJobPages).omit({ createdAt: true, updatedAt: true });
+export const insertPublicJobPageAnalyticsSchema = createInsertSchema(publicJobPageAnalytics).omit({ createdAt: true });
 
 // Interview Practice Lab Insert Schemas
 export const insertRoleKitSchema = createInsertSchema(roleKits).omit({ id: true, createdAt: true, updatedAt: true });
@@ -2767,6 +2859,10 @@ export type InsertJobCatalogEntry = z.infer<typeof insertJobCatalogSchema>;
 export type JobScreeningAgentResult = typeof jobScreeningAgentResults.$inferSelect;
 export type InsertJobScreeningAgentResult = z.infer<typeof insertJobScreeningAgentResultSchema>;
 export type UserJobCatalogInteraction = typeof userJobCatalogInteractions.$inferSelect;
+export type PublicJobPage = typeof publicJobPages.$inferSelect;
+export type InsertPublicJobPage = z.infer<typeof insertPublicJobPageSchema>;
+export type PublicJobPageAnalytics = typeof publicJobPageAnalytics.$inferSelect;
+export type InsertPublicJobPageAnalytics = z.infer<typeof insertPublicJobPageAnalyticsSchema>;
 export type InsertUserJobCatalogInteraction = z.infer<typeof insertUserJobCatalogInteractionSchema>;
 
 // Interview Practice Lab Types

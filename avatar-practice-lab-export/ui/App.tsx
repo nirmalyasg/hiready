@@ -66,6 +66,7 @@ import SeoAdminPage from './pages/admin/seo-page';
 import InvitePage from './pages/invite/page';
 import JobScreeningAgentsPage from './pages/job-screening/agents-page';
 import JobCatalogPage from './pages/job-screening/catalog-page';
+import PublicJobPage from './pages/careers/job-page';
 
 export default function App() {
   return (
@@ -101,6 +102,7 @@ export default function App() {
         <Route path="/admin/database" element={<DatabaseAdminPage />} />
         <Route path="/admin/job-screening/agents" element={<JobScreeningAgentsPage />} />
         <Route path="/admin/job-screening/catalog" element={<JobCatalogPage />} />
+        <Route path="/careers/:slug" element={<PublicJobPage />} />
         <Route path="/interview" element={<ProtectedRoute><InterviewPracticePage /></ProtectedRoute>} />
         <Route path="/interview/roles" element={<ProtectedRoute><InterviewRolesPage /></ProtectedRoute>} />
         <Route path="/interview/role/:roleId" element={<ProtectedRoute><InterviewRoleDetailPage /></ProtectedRoute>} />

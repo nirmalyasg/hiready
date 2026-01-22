@@ -13,13 +13,15 @@ import {
   jobScreeningAgentResults,
   userJobCatalogInteractions,
   jobTargets,
+  publicJobPages,
+  publicJobPageAnalytics,
 } from "../../shared/schema.js";
 import { requireAuth } from "../middleware/auth.js";
-import coresignalService, {
+import jobSearchService, {
   generateJobFingerprint,
   parseExperienceYears,
   extractSkillsFromDescription,
-} from "../lib/coresignal-service.js";
+} from "../lib/job-search-service.js";
 
 const router = Router();
 
@@ -223,10 +225,10 @@ router.post("/agents/:agentId/run", requireAuth, async (req, res) => {
     // Search for each keyword/location combination
     for (const keyword of keywords.length ? keywords : ['']) {
       for (const location of locations.length ? locations : ['']) {
-        const searchResult = await coresignalService.searchJobs({
-          title: keyword || undefined,
-          keyword: keyword || undefined,
+        const searchResult = await jobSearchService.searchJobs({
+          query: keyword || undefined,
           location: location || undefined,
+          remote: agent.jobTypes?.includes('remote'),
           limit: 50,
         });
 
@@ -277,7 +279,7 @@ router.post("/agents/:agentId/run", requireAuth, async (req, res) => {
               const [newJob] = await db
                 .insert(jobCatalog)
                 .values({
-                  source: "coresignal",
+                  source: searchResult.source || "job_search",
                   externalId: job.id,
                   sourceUrl: job.url,
                   roleTitle: job.title,
@@ -690,9 +692,8 @@ router.post("/search-preview", requireAuth, async (req, res) => {
   try {
     const { keywords, location, experienceLevel, employmentType, limit = 10 } = req.body;
 
-    const searchResult = await coresignalService.searchJobs({
-      title: keywords,
-      keyword: keywords,
+    const searchResult = await jobSearchService.searchJobs({
+      query: keywords,
       location,
       experienceLevel,
       employmentType,
@@ -768,6 +769,311 @@ router.get("/stats", requireAuth, async (req, res) => {
   } catch (error) {
     console.error("[Job Screening] Error fetching stats:", error);
     res.status(500).json({ success: false, error: "Failed to fetch stats" });
+  }
+});
+
+// =====================
+// Public Job Pages
+// =====================
+
+/**
+ * Generate a URL-friendly slug from job details
+ */
+function generateSlug(roleTitle: string, companyName?: string | null): string {
+  const parts = [roleTitle];
+  if (companyName) parts.push(companyName);
+
+  const baseSlug = parts
+    .join('-')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 50);
+
+  // Add a short random suffix to ensure uniqueness
+  const suffix = Math.random().toString(36).substring(2, 8);
+  return `${baseSlug}-${suffix}`;
+}
+
+/**
+ * Generate public pages from selected catalog jobs
+ */
+router.post("/public-pages/generate", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const { jobIds } = req.body;
+
+    if (!jobIds || !Array.isArray(jobIds) || jobIds.length === 0) {
+      return res.status(400).json({ success: false, error: "No jobs selected" });
+    }
+
+    // Fetch the catalog jobs
+    const catalogJobs = await db
+      .select()
+      .from(jobCatalog)
+      .where(inArray(jobCatalog.id, jobIds));
+
+    if (catalogJobs.length === 0) {
+      return res.status(404).json({ success: false, error: "No jobs found" });
+    }
+
+    const createdPages: any[] = [];
+
+    for (const job of catalogJobs) {
+      // Check if a public page already exists for this catalog job
+      const [existingPage] = await db
+        .select()
+        .from(publicJobPages)
+        .where(eq(publicJobPages.jobCatalogId, job.id));
+
+      if (existingPage) {
+        createdPages.push(existingPage);
+        continue;
+      }
+
+      // Generate a unique slug
+      const slug = generateSlug(job.roleTitle, job.companyName);
+
+      // Create the public page
+      const [newPage] = await db
+        .insert(publicJobPages)
+        .values({
+          jobCatalogId: job.id,
+          slug,
+          roleTitle: job.roleTitle,
+          companyName: job.companyName,
+          companyLogoUrl: job.companyLogoUrl,
+          companyIndustry: job.companyIndustry,
+          location: job.location,
+          isRemote: job.isRemote,
+          jobDescription: job.jobDescription,
+          experienceRequired: job.experienceRequired,
+          employmentType: job.employmentType,
+          salaryMin: job.salaryMin,
+          salaryMax: job.salaryMax,
+          salaryCurrency: job.salaryCurrency,
+          requiredSkills: job.requiredSkills,
+          isPublished: true,
+          publishedAt: new Date(),
+          createdBy: userId,
+        })
+        .returning();
+
+      createdPages.push(newPage);
+    }
+
+    res.json({
+      success: true,
+      pages: createdPages,
+      message: `Created ${createdPages.length} public job pages`,
+    });
+  } catch (error) {
+    console.error("[Job Screening] Error generating public pages:", error);
+    res.status(500).json({ success: false, error: "Failed to generate public pages" });
+  }
+});
+
+/**
+ * Get all public job pages (admin view)
+ */
+router.get("/public-pages", requireAuth, async (req, res) => {
+  try {
+    const { page = "1", limit = "20", search } = req.query;
+
+    const pageNum = parseInt(page as string) || 1;
+    const limitNum = Math.min(parseInt(limit as string) || 20, 100);
+    const offset = (pageNum - 1) * limitNum;
+
+    let conditions = [];
+
+    if (search) {
+      const searchTerm = `%${search}%`;
+      conditions.push(
+        or(
+          ilike(publicJobPages.roleTitle, searchTerm),
+          ilike(publicJobPages.companyName, searchTerm)
+        )!
+      );
+    }
+
+    // Get total count
+    const [countResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(publicJobPages)
+      .where(conditions.length > 0 ? and(...conditions) : undefined);
+
+    const total = Number(countResult?.count || 0);
+
+    // Get pages
+    const pages = await db
+      .select()
+      .from(publicJobPages)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(publicJobPages.createdAt))
+      .limit(limitNum)
+      .offset(offset);
+
+    res.json({
+      success: true,
+      pages,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    });
+  } catch (error) {
+    console.error("[Job Screening] Error fetching public pages:", error);
+    res.status(500).json({ success: false, error: "Failed to fetch public pages" });
+  }
+});
+
+/**
+ * Get a single public job page by slug (public endpoint)
+ */
+router.get("/public-pages/by-slug/:slug", async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    const [page] = await db
+      .select()
+      .from(publicJobPages)
+      .where(and(eq(publicJobPages.slug, slug), eq(publicJobPages.isPublished, true)));
+
+    if (!page) {
+      return res.status(404).json({ success: false, error: "Page not found" });
+    }
+
+    // Increment view count
+    await db
+      .update(publicJobPages)
+      .set({ viewCount: sql`${publicJobPages.viewCount} + 1` })
+      .where(eq(publicJobPages.id, page.id));
+
+    // Record analytics
+    const userAgent = req.headers["user-agent"] || "";
+    const referrer = req.headers["referer"] || "";
+
+    await db.insert(publicJobPageAnalytics).values({
+      jobPageId: page.id,
+      eventType: "view",
+      userAgent,
+      referrer,
+    });
+
+    res.json({ success: true, page });
+  } catch (error) {
+    console.error("[Job Screening] Error fetching public page:", error);
+    res.status(500).json({ success: false, error: "Failed to fetch page" });
+  }
+});
+
+/**
+ * Record a practice click event for analytics
+ */
+router.post("/public-pages/:pageId/practice-click", async (req, res) => {
+  try {
+    const { pageId } = req.params;
+
+    // Increment click count
+    await db
+      .update(publicJobPages)
+      .set({ practiceClickCount: sql`${publicJobPages.practiceClickCount} + 1` })
+      .where(eq(publicJobPages.id, pageId));
+
+    // Record analytics
+    const userAgent = req.headers["user-agent"] || "";
+    const referrer = req.headers["referer"] || "";
+
+    await db.insert(publicJobPageAnalytics).values({
+      jobPageId: pageId,
+      eventType: "practice_click",
+      userAgent,
+      referrer,
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("[Job Screening] Error recording practice click:", error);
+    res.status(500).json({ success: false, error: "Failed to record click" });
+  }
+});
+
+/**
+ * Update a public job page
+ */
+router.put("/public-pages/:pageId", requireAuth, async (req, res) => {
+  try {
+    const { pageId } = req.params;
+    const updates = req.body;
+
+    const [page] = await db
+      .update(publicJobPages)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(publicJobPages.id, pageId))
+      .returning();
+
+    if (!page) {
+      return res.status(404).json({ success: false, error: "Page not found" });
+    }
+
+    res.json({ success: true, page });
+  } catch (error) {
+    console.error("[Job Screening] Error updating public page:", error);
+    res.status(500).json({ success: false, error: "Failed to update page" });
+  }
+});
+
+/**
+ * Delete a public job page
+ */
+router.delete("/public-pages/:pageId", requireAuth, async (req, res) => {
+  try {
+    const { pageId } = req.params;
+
+    await db.delete(publicJobPages).where(eq(publicJobPages.id, pageId));
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("[Job Screening] Error deleting public page:", error);
+    res.status(500).json({ success: false, error: "Failed to delete page" });
+  }
+});
+
+/**
+ * Toggle publish status of a public job page
+ */
+router.post("/public-pages/:pageId/toggle-publish", requireAuth, async (req, res) => {
+  try {
+    const { pageId } = req.params;
+
+    const [existing] = await db
+      .select()
+      .from(publicJobPages)
+      .where(eq(publicJobPages.id, pageId));
+
+    if (!existing) {
+      return res.status(404).json({ success: false, error: "Page not found" });
+    }
+
+    const [page] = await db
+      .update(publicJobPages)
+      .set({
+        isPublished: !existing.isPublished,
+        publishedAt: !existing.isPublished ? new Date() : null,
+        updatedAt: new Date(),
+      })
+      .where(eq(publicJobPages.id, pageId))
+      .returning();
+
+    res.json({ success: true, page });
+  } catch (error) {
+    console.error("[Job Screening] Error toggling publish status:", error);
+    res.status(500).json({ success: false, error: "Failed to toggle publish status" });
   }
 });
 
