@@ -75,6 +75,36 @@ import {
   type SkillCoverageMatrix,
 } from "../lib/interview-intelligence.js";
 
+// Import enhanced frameworks for interview planning
+import {
+  BEHAVIORAL_COMPETENCIES,
+  LEADERSHIP_COMPETENCIES,
+  getCompetenciesForInterviewType,
+  buildInterviewAssessmentFramework,
+} from "../lib/competency-frameworks.js";
+
+import {
+  extractEnhancedJDContext,
+  getRecommendedInterviewTypes,
+  getCompetenciesToAssess,
+  type EnhancedJDContext,
+} from "../lib/jd-context-extractor.js";
+
+import {
+  generateBehavioralQuestions,
+  generateLeadershipQuestions,
+  generateTechnicalQuestions,
+  generateDomainQuestions,
+  generateQuestionPlan,
+  type GeneratedQuestion,
+  type QuestionPlan,
+} from "../lib/question-generators.js";
+
+import {
+  buildEnhancedPlanGeneratorPrompt,
+  buildCompetencyBasedEvaluatorPrompt,
+} from "../lib/interview-plan-prompts.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -3517,16 +3547,347 @@ interviewRouter.post("/intelligence/plan/generate", requireAuth, async (req: Req
   }
 });
 
+// =====================
+// Enhanced Competency-Based Plan Generation
+// =====================
+
+/**
+ * Generate an enhanced interview plan using competency frameworks
+ * Supports: behavioral (10 competencies), leadership (8 competencies),
+ * technical (coding, case study, system design), domain (company, market, industry)
+ */
+interviewRouter.post("/intelligence/plan/competency-based", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const {
+      interviewType,
+      seniority = "mid",
+      jobTargetId,
+      roleKitId,
+      jdText,
+      companyName,
+      roleTitle,
+      specificCompetencies,
+      count = 5
+    } = req.body;
+
+    if (!interviewType) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required field: interviewType"
+      });
+    }
+
+    // Build enhanced JD context if job target is provided
+    let enhancedContext: EnhancedJDContext | undefined;
+    let parsedSkills: string[] = [];
+    let parsedResponsibilities: string[] = [];
+
+    if (jobTargetId) {
+      const [job] = await db.select().from(jobTargets).where(eq(jobTargets.id, jobTargetId));
+      if (job?.jdParsed) {
+        parsedSkills = (job.jdParsed as any).requiredSkills || [];
+        parsedResponsibilities = (job.jdParsed as any).responsibilities || [];
+      }
+      if (job) {
+        enhancedContext = await extractEnhancedJDContext({
+          jdText: job.jdRaw || jdText || "",
+          companyName: job.companyName || companyName,
+          roleTitle: job.roleTitle || roleTitle,
+          parsedSkills,
+          parsedResponsibilities
+        });
+      }
+    } else if (jdText) {
+      enhancedContext = await extractEnhancedJDContext({
+        jdText,
+        companyName,
+        roleTitle,
+        parsedSkills,
+        parsedResponsibilities
+      });
+    }
+
+    // Generate question plan using competency frameworks
+    const questionPlan = await generateQuestionPlan({
+      interviewType,
+      seniority: seniority as "entry" | "mid" | "senior" | "staff",
+      jdContext: enhancedContext,
+      companyName: enhancedContext?.company.name || companyName,
+      roleTitle: enhancedContext?.role.title || roleTitle,
+      specificCompetencies,
+      count
+    });
+
+    // Get competencies to assess based on interview type
+    const competencies = enhancedContext
+      ? getCompetenciesToAssess(enhancedContext)
+      : getCompetenciesForInterviewType(interviewType, seniority as any);
+
+    // Build assessment framework
+    const assessmentFramework = buildInterviewAssessmentFramework(
+      interviewType,
+      seniority as "entry" | "mid" | "senior" | "staff",
+      enhancedContext?.leadershipSignals.isLeadershipRole || false
+    );
+
+    res.json({
+      success: true,
+      plan: questionPlan,
+      enhancedContext,
+      competencies,
+      assessmentFramework,
+      recommendedInterviewTypes: enhancedContext ? getRecommendedInterviewTypes(enhancedContext) : [interviewType]
+    });
+  } catch (error: any) {
+    console.error("Error generating competency-based plan:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * Generate behavioral questions based on the 10 competency framework
+ */
+interviewRouter.post("/intelligence/questions/behavioral", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const {
+      seniority = "mid",
+      jobTargetId,
+      companyName,
+      roleTitle,
+      specificCompetencies,
+      count = 5
+    } = req.body;
+
+    let enhancedContext: EnhancedJDContext | undefined;
+
+    if (jobTargetId) {
+      const [job] = await db.select().from(jobTargets).where(eq(jobTargets.id, jobTargetId));
+      if (job) {
+        enhancedContext = await extractEnhancedJDContext({
+          jdText: job.jdRaw || "",
+          companyName: job.companyName || companyName,
+          roleTitle: job.roleTitle || roleTitle,
+          parsedSkills: (job.jdParsed as any)?.requiredSkills || [],
+          parsedResponsibilities: (job.jdParsed as any)?.responsibilities || []
+        });
+      }
+    }
+
+    const questions = await generateBehavioralQuestions({
+      interviewType: "behavioral",
+      seniority: seniority as "entry" | "mid" | "senior" | "staff",
+      jdContext: enhancedContext,
+      companyName: enhancedContext?.company.name || companyName,
+      roleTitle: enhancedContext?.role.title || roleTitle,
+      specificCompetencies,
+      count
+    });
+
+    res.json({
+      success: true,
+      questions,
+      competencyFramework: "behavioral_10",
+      competenciesCovered: [...new Set(questions.filter(q => q.competencyId).map(q => q.competencyId!))]
+    });
+  } catch (error: any) {
+    console.error("Error generating behavioral questions:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * Generate leadership questions based on the 8 competency framework
+ */
+interviewRouter.post("/intelligence/questions/leadership", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const {
+      seniority = "senior",
+      jobTargetId,
+      companyName,
+      roleTitle,
+      specificCompetencies,
+      count = 5
+    } = req.body;
+
+    let enhancedContext: EnhancedJDContext | undefined;
+
+    if (jobTargetId) {
+      const [job] = await db.select().from(jobTargets).where(eq(jobTargets.id, jobTargetId));
+      if (job) {
+        enhancedContext = await extractEnhancedJDContext({
+          jdText: job.jdRaw || "",
+          companyName: job.companyName || companyName,
+          roleTitle: job.roleTitle || roleTitle,
+          parsedSkills: (job.jdParsed as any)?.requiredSkills || [],
+          parsedResponsibilities: (job.jdParsed as any)?.responsibilities || []
+        });
+      }
+    }
+
+    const questions = await generateLeadershipQuestions({
+      interviewType: "leadership",
+      seniority: seniority as "entry" | "mid" | "senior" | "staff",
+      jdContext: enhancedContext,
+      companyName: enhancedContext?.company.name || companyName,
+      roleTitle: enhancedContext?.role.title || roleTitle,
+      specificCompetencies,
+      count
+    });
+
+    res.json({
+      success: true,
+      questions,
+      competencyFramework: "leadership_8",
+      competenciesCovered: [...new Set(questions.filter(q => q.competencyId).map(q => q.competencyId!))],
+      leadershipSignals: enhancedContext?.leadershipSignals
+    });
+  } catch (error: any) {
+    console.error("Error generating leadership questions:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * Generate domain/functional questions based on company, market, and industry context
+ */
+interviewRouter.post("/intelligence/questions/domain", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const {
+      seniority = "mid",
+      jobTargetId,
+      companyName,
+      roleTitle,
+      count = 5
+    } = req.body;
+
+    let enhancedContext: EnhancedJDContext | undefined;
+
+    if (jobTargetId) {
+      const [job] = await db.select().from(jobTargets).where(eq(jobTargets.id, jobTargetId));
+      if (job) {
+        enhancedContext = await extractEnhancedJDContext({
+          jdText: job.jdRaw || "",
+          companyName: job.companyName || companyName,
+          roleTitle: job.roleTitle || roleTitle,
+          parsedSkills: (job.jdParsed as any)?.requiredSkills || [],
+          parsedResponsibilities: (job.jdParsed as any)?.responsibilities || []
+        });
+      }
+    }
+
+    const questions = await generateDomainQuestions({
+      interviewType: "domain",
+      seniority: seniority as "entry" | "mid" | "senior" | "staff",
+      jdContext: enhancedContext,
+      companyName: enhancedContext?.company.name || companyName,
+      roleTitle: enhancedContext?.role.title || roleTitle,
+      count
+    });
+
+    res.json({
+      success: true,
+      questions,
+      domainContext: {
+        company: enhancedContext?.company,
+        market: enhancedContext?.market,
+        role: enhancedContext?.role
+      }
+    });
+  } catch (error: any) {
+    console.error("Error generating domain questions:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * Get competency frameworks for a specific interview type
+ */
+interviewRouter.get("/intelligence/competency-frameworks/:interviewType", async (req: Request, res: Response) => {
+  try {
+    const { interviewType } = req.params;
+    const { seniority = "mid" } = req.query;
+
+    const framework = buildInterviewAssessmentFramework(
+      interviewType,
+      seniority as "entry" | "mid" | "senior" | "staff",
+      interviewType === "leadership"
+    );
+
+    let competencyList;
+    if (interviewType === "behavioral") {
+      competencyList = BEHAVIORAL_COMPETENCIES.dimensions.map(d => ({
+        id: d.id,
+        name: d.name,
+        description: d.description,
+        weight: d.assessmentWeight
+      }));
+    } else if (interviewType === "leadership") {
+      competencyList = LEADERSHIP_COMPETENCIES.dimensions.map(d => ({
+        id: d.id,
+        name: d.name,
+        description: d.description,
+        weight: d.assessmentWeight
+      }));
+    }
+
+    res.json({
+      success: true,
+      interviewType,
+      seniority,
+      framework,
+      competencies: competencyList
+    });
+  } catch (error: any) {
+    console.error("Error fetching competency frameworks:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * Extract enhanced context from a job description
+ */
+interviewRouter.post("/intelligence/jd/analyze", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { jdText, companyName, roleTitle } = req.body;
+
+    if (!jdText) {
+      return res.status(400).json({ success: false, error: "Missing jdText" });
+    }
+
+    const enhancedContext = await extractEnhancedJDContext({
+      jdText,
+      companyName,
+      roleTitle,
+      parsedSkills: [],
+      parsedResponsibilities: []
+    });
+
+    const recommendedTypes = getRecommendedInterviewTypes(enhancedContext);
+    const competenciesToAssess = getCompetenciesToAssess(enhancedContext);
+
+    res.json({
+      success: true,
+      context: enhancedContext,
+      recommendedInterviewTypes: recommendedTypes,
+      competenciesToAssess,
+      interviewFocus: enhancedContext.interviewFocus
+    });
+  } catch (error: any) {
+    console.error("Error analyzing JD:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 interviewRouter.post("/intelligence/answer/classify", requireAuth, async (req: Request, res: Response) => {
   try {
     const { answer, question, context } = req.body;
-    
+
     if (!answer || !question) {
       return res.status(400).json({ success: false, error: "Missing answer or question" });
     }
-    
+
     const classification = await classifyAnswer(answer, question, context || {});
-    
+
     res.json({ success: true, classification });
   } catch (error: any) {
     console.error("Error classifying answer:", error);
