@@ -13,6 +13,25 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { RealtimeAgent } from '@openai/agents/realtime';
 
+interface TechnicalRouting {
+  exerciseType: "coding" | "case_study" | "hybrid" | "discussion";
+  confidence: "high" | "medium" | "low";
+  rationale: string;
+  matchedSignals: string[];
+}
+
+interface TechnicalChallenge {
+  challengeId: string;
+  challengeType: "coding" | "case_study";
+  exerciseId?: number;
+  caseTemplateId?: number;
+  title: string;
+  description: string;
+  difficulty: "easy" | "medium" | "hard";
+  skillTags: string[];
+  estimatedDuration: number;
+}
+
 interface InterviewSession {
   id: number;
   status: string;
@@ -26,6 +45,8 @@ interface InterviewSession {
     puzzles?: any[];
     interviewerTone?: string;
     keyQuestions?: string[];
+    technicalRouting?: TechnicalRouting;
+    technicalChallenge?: TechnicalChallenge;
   };
 }
 
@@ -259,8 +280,25 @@ After they work on it, discuss their approach and solution.
 `;
     }
 
-    if ((interviewType === 'hiring_manager' || interviewType === 'panel' || interviewType === 'case_study' || interviewType === 'case') && plan.caseStudy) {
-      const caseStudy = plan.caseStudy;
+    // Check for technical routing to determine exercise type
+    const technicalRouting = plan.technicalRouting;
+    const technicalChallenge = plan.technicalChallenge;
+
+    if (technicalRouting && technicalRouting.exerciseType !== 'discussion') {
+      prompt += `
+TECHNICAL EXERCISE TYPE: ${technicalRouting.exerciseType.toUpperCase()}
+Confidence: ${technicalRouting.confidence}
+Rationale: ${technicalRouting.rationale}
+`;
+    }
+
+    if ((interviewType === 'hiring_manager' || interviewType === 'panel' || interviewType === 'case_study' || interviewType === 'case' || technicalRouting?.exerciseType === 'case_study') && (plan.caseStudy || technicalChallenge?.challengeType === 'case_study')) {
+      const caseStudy = plan.caseStudy || {
+        title: technicalChallenge?.title,
+        prompt: technicalChallenge?.description,
+        caseType: 'strategy',
+        difficulty: technicalChallenge?.difficulty,
+      };
       prompt += `
 CASE STUDY (introduce when appropriate):
 When you want to present the case study, say something natural like "I'd like to walk through a scenario with you..."
@@ -328,19 +366,59 @@ IMPORTANT BEHAVIOR:
         }, 2000);
       }
 
-      const isCodingType = config?.interviewType === 'technical' || config?.interviewMode === 'coding_technical';
-      const codingProblem = interviewSession?.plan?.codingProblem || 
+      // ============================================================
+      // Technical Interview Routing: Use routing to determine exercise type
+      // ============================================================
+      const technicalRouting = interviewSession?.plan?.technicalRouting;
+      const technicalChallenge = interviewSession?.plan?.technicalChallenge;
+
+      // Determine if this is a coding-focused or case study-focused session
+      const routedExerciseType = technicalRouting?.exerciseType || null;
+      const isCodingType =
+        routedExerciseType === 'coding' ||
+        (routedExerciseType === 'hybrid' && technicalChallenge?.challengeType === 'coding') ||
+        config?.interviewType === 'technical' ||
+        config?.interviewMode === 'coding_technical';
+
+      const isCaseStudyType =
+        routedExerciseType === 'case_study' ||
+        (routedExerciseType === 'hybrid' && technicalChallenge?.challengeType === 'case_study') ||
+        config?.interviewType === 'hiring_manager' ||
+        config?.interviewType === 'panel' ||
+        config?.interviewType === 'case_study' ||
+        config?.interviewType === 'case' ||
+        config?.interviewMode === 'case_problem_solving';
+
+      console.log('[ContinuousSession] Technical routing:', {
+        routedExerciseType,
+        technicalChallenge: technicalChallenge?.challengeType,
+        isCodingType,
+        isCaseStudyType,
+        interviewType: config?.interviewType,
+        interviewMode: config?.interviewMode,
+      });
+
+      // Handle coding exercise
+      const codingProblem = interviewSession?.plan?.codingProblem ||
         (interviewSession?.plan?.codingProblems && interviewSession.plan.codingProblems[0]);
-      
-      if (codingProblem && isCodingType) {
-        const problem = codingProblem;
+
+      if (isCodingType && (codingProblem || technicalChallenge?.challengeType === 'coding')) {
+        const problem = codingProblem || {
+          id: technicalChallenge?.challengeId,
+          title: technicalChallenge?.title || 'Coding Exercise',
+          description: technicalChallenge?.description || 'Complete the coding challenge',
+          difficulty: technicalChallenge?.difficulty || 'medium',
+          language: 'javascript',
+        };
+
         let starterCode = '';
         if (typeof problem.starterCode === 'string') {
           starterCode = problem.starterCode;
         } else if (problem.starterCode && typeof problem.starterCode === 'object') {
           starterCode = problem.starterCode[problem.language] || problem.starterCode.javascript || Object.values(problem.starterCode)[0] || '';
         }
-        
+
+        console.log('[ContinuousSession] Starting coding challenge from routing:', problem);
         startCodingChallenge({
           id: problem.id || 'interview-problem',
           title: problem.title || 'Coding Problem',
@@ -354,41 +432,53 @@ IMPORTANT BEHAVIOR:
         });
       }
 
-      // Check for case study data and trigger panel
-      const effectiveInterviewType = config?.interviewType || (interviewSession as any)?.config?.interviewType;
-      const effectiveInterviewMode = config?.interviewMode || (interviewSession as any)?.config?.interviewMode;
-      const isCaseStudyType = effectiveInterviewType === 'hiring_manager' || effectiveInterviewType === 'panel' || effectiveInterviewType === 'case_study' || effectiveInterviewType === 'case' || effectiveInterviewMode === 'case_problem_solving';
-      
-      if (interviewSession?.plan?.caseStudy && isCaseStudyType) {
-        const caseStudy = interviewSession.plan.caseStudy;
-        console.log('[ContinuousSession] Starting case study panel:', caseStudy);
-        startCaseStudyChallenge({
-          id: caseStudy.id || 'interview-case',
-          title: caseStudy.title || 'Case Study',
-          prompt: caseStudy.prompt || caseStudy.description || '',
-          context: caseStudy.context || '',
-          scenario: caseStudy.scenario || '',
-          caseType: caseStudy.caseType || caseStudy.category || 'strategy',
-          difficulty: caseStudy.difficulty || 'Medium',
-          evaluationFocus: caseStudy.evaluationFocus || caseStudy.evaluationCriteria || [],
-          expectedDurationMinutes: caseStudy.expectedDurationMinutes || caseStudy.timeLimit || 15,
-          materials: caseStudy.materials || [],
-          hints: caseStudy.hints || [],
-          sampleApproach: caseStudy.sampleApproach || '',
-        });
-      } else if (isCaseStudyType) {
-        // Case study type but no caseStudy data - create default panel
-        console.log('[ContinuousSession] Case study type detected but no data, creating default panel');
-        startCaseStudyChallenge({
-          id: 'default-case',
-          title: 'Business Case Study',
-          prompt: 'You will be presented with a business problem to analyze. Structure your approach, identify key factors, and present your recommendations.',
-          context: 'Business strategy and problem-solving',
-          caseType: 'strategy',
-          difficulty: 'Medium',
-          evaluationFocus: ['Problem structuring', 'Analytical thinking', 'Communication', 'Recommendations'],
-          expectedDurationMinutes: 30,
-        });
+      // Handle case study exercise
+      if (isCaseStudyType && !isCodingType) {
+        const caseStudy = interviewSession?.plan?.caseStudy;
+
+        if (caseStudy) {
+          console.log('[ContinuousSession] Starting case study panel from routing:', caseStudy);
+          startCaseStudyChallenge({
+            id: caseStudy.id || 'interview-case',
+            title: caseStudy.title || 'Case Study',
+            prompt: caseStudy.prompt || caseStudy.description || '',
+            context: caseStudy.context || '',
+            scenario: caseStudy.scenario || '',
+            caseType: caseStudy.caseType || caseStudy.category || 'strategy',
+            difficulty: caseStudy.difficulty || 'Medium',
+            evaluationFocus: caseStudy.evaluationFocus || caseStudy.evaluationCriteria || [],
+            expectedDurationMinutes: caseStudy.expectedDurationMinutes || caseStudy.timeLimit || 15,
+            materials: caseStudy.materials || [],
+            hints: caseStudy.hints || [],
+            sampleApproach: caseStudy.sampleApproach || '',
+          });
+        } else if (technicalChallenge?.challengeType === 'case_study') {
+          // Use technical challenge data for case study
+          console.log('[ContinuousSession] Starting case study from technical challenge:', technicalChallenge);
+          startCaseStudyChallenge({
+            id: technicalChallenge.challengeId || 'routed-case',
+            title: technicalChallenge.title || 'Case Study',
+            prompt: technicalChallenge.description || 'Analyze the business scenario and present your recommendations.',
+            context: 'Business strategy and problem-solving',
+            caseType: 'strategy',
+            difficulty: technicalChallenge.difficulty || 'Medium',
+            evaluationFocus: technicalChallenge.skillTags || ['Problem structuring', 'Analytical thinking', 'Communication'],
+            expectedDurationMinutes: technicalChallenge.estimatedDuration || 20,
+          });
+        } else {
+          // Case study type but no caseStudy data - create default panel
+          console.log('[ContinuousSession] Case study type detected but no data, creating default panel');
+          startCaseStudyChallenge({
+            id: 'default-case',
+            title: 'Business Case Study',
+            prompt: 'You will be presented with a business problem to analyze. Structure your approach, identify key factors, and present your recommendations.',
+            context: 'Business strategy and problem-solving',
+            caseType: 'strategy',
+            difficulty: 'Medium',
+            evaluationFocus: ['Problem structuring', 'Analytical thinking', 'Communication', 'Recommendations'],
+            expectedDurationMinutes: 30,
+          });
+        }
       }
 
     } catch (err) {

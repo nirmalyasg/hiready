@@ -24,6 +24,7 @@ import {
   userSkillMemory,
   jobPracticeLinks,
   codingExercises,
+  caseTemplates,
   roleTaskBlueprints,
   roleInterviewStructureDefaults,
   interviewAssignments,
@@ -104,6 +105,14 @@ import {
   buildEnhancedPlanGeneratorPrompt,
   buildCompetencyBasedEvaluatorPrompt,
 } from "../lib/interview-plan-prompts.js";
+
+import {
+  routeTechnicalInterview,
+  routeAndSelectExercise,
+  enrichPhasesWithExercises,
+  type TechnicalExerciseRouting,
+  type TechnicalPhaseChallenge,
+} from "../lib/technical-interview-router.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -1190,22 +1199,124 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
     });
     
     const rawPlanJson = JSON.parse(response.choices[0].message.content || "{}");
-    
+
     // Normalize exercise content: populate both singular and array fields
     const normalizedPlan = normalizePlanExercises(rawPlanJson, planContext.interviewMode);
     const mappedPlanJson = mapPhasesToFrontendFormat(normalizedPlan);
-    
+
+    // ============================================================
+    // Technical Interview Routing: Enrich phases with exercises
+    // ============================================================
+    // For technical interview components, determine if it should be
+    // a coding exercise or case study based on role and details
+    let technicalRouting: TechnicalExerciseRouting | null = null;
+    let enrichedPlanJson = mappedPlanJson;
+
+    // Check if this interview has a technical component that needs exercise routing
+    const hasTechnicalComponent =
+      config.interviewMode === "coding_technical" ||
+      config.interviewMode === "case_problem_solving" ||
+      config.interviewType === "technical" ||
+      config.interviewType === "coding" ||
+      config.interviewType === "case_study" ||
+      mappedPlanJson?.phases?.some((p: any) => {
+        const name = (p.name || "").toLowerCase();
+        const type = (p.phaseType || "").toLowerCase();
+        return name.includes("technical") || name.includes("coding") ||
+               name.includes("case") || name.includes("problem solving") ||
+               type === "coding" || type === "case_study" || type === "technical";
+      });
+
+    if (hasTechnicalComponent) {
+      // Get JD text for skill analysis
+      let jdTextForRouting: string | null = null;
+      if (jdParsed) {
+        jdTextForRouting = JSON.stringify(jdParsed);
+      } else if (jobTargetData?.description) {
+        jdTextForRouting = jobTargetData.description;
+      }
+
+      // Get skills from role kit or JD
+      const skillsForRouting = roleKitData?.skillsFocus as string[] || [];
+
+      // Route technical interview to determine exercise type
+      const { routing, challenge } = await routeAndSelectExercise({
+        roleArchetypeId: config.roleArchetypeId,
+        roleCategory: roleKitData?.roleCategory || roleArchetypeData?.roleCategory,
+        roleKitId: config.roleKitId,
+        jobTargetId: config.jobTargetId,
+        interviewMode: config.interviewMode,
+        skills: skillsForRouting,
+        jdText: jdTextForRouting,
+        seniority: config.seniority as "entry" | "mid" | "senior",
+      });
+
+      technicalRouting = routing;
+
+      // Enrich phases with exercise challenges
+      if (mappedPlanJson?.phases && Array.isArray(mappedPlanJson.phases)) {
+        const enrichedPhases = await enrichPhasesWithExercises(
+          mappedPlanJson.phases,
+          {
+            roleArchetypeId: config.roleArchetypeId,
+            roleCategory: roleKitData?.roleCategory || roleArchetypeData?.roleCategory,
+            roleKitId: config.roleKitId,
+            interviewMode: config.interviewMode,
+            skills: skillsForRouting,
+            jdText: jdTextForRouting,
+            seniority: config.seniority as "entry" | "mid" | "senior",
+          }
+        );
+
+        enrichedPlanJson = {
+          ...mappedPlanJson,
+          phases: enrichedPhases,
+          technicalRouting: {
+            exerciseType: routing.exerciseType,
+            confidence: routing.confidence,
+            rationale: routing.rationale,
+            matchedSignals: routing.matchedSignals,
+          },
+        };
+
+        // If a challenge was selected, add it to the plan
+        if (challenge) {
+          enrichedPlanJson.technicalChallenge = challenge;
+
+          // Also attach to the appropriate phase
+          const technicalPhaseIndex = enrichedPhases.findIndex((p: any) => {
+            const name = (p.name || "").toLowerCase();
+            const type = (p.phaseType || "").toLowerCase();
+            return name.includes("technical") || name.includes("coding") ||
+                   name.includes("case") || name.includes("problem solving") ||
+                   type === "coding" || type === "case_study" || type === "technical";
+          });
+
+          if (technicalPhaseIndex >= 0) {
+            enrichedPlanJson.phases[technicalPhaseIndex].challenge = {
+              challengeId: challenge.challengeId,
+              challengeType: challenge.challengeType,
+              skillTags: challenge.skillTags,
+            };
+            enrichedPlanJson.phases[technicalPhaseIndex].phaseType = challenge.challengeType;
+          }
+        }
+      }
+
+      console.log(`[Technical Routing] Config ${configId}: ${routing.exerciseType} (${routing.confidence}) - ${routing.rationale}`);
+    }
+
     const [plan] = await db
       .insert(interviewPlans)
       .values({
         interviewConfigId: configId,
-        planJson: mappedPlanJson,
+        planJson: enrichedPlanJson,
         version: 1,
         createdAt: new Date(),
       })
       .returning();
-    
-    res.json({ success: true, plan });
+
+    res.json({ success: true, plan, technicalRouting });
   } catch (error: any) {
     console.error("Error generating plan:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -1215,16 +1326,150 @@ interviewRouter.post("/config/:id/plan", requireAuth, async (req: Request, res: 
 interviewRouter.get("/plan/:id", requireAuth, async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
-    
+
     const [plan] = await db.select().from(interviewPlans).where(eq(interviewPlans.id, id));
-    
+
     if (!plan) {
       return res.status(404).json({ success: false, error: "Plan not found" });
     }
-    
+
     res.json({ success: true, plan });
   } catch (error: any) {
     console.error("Error fetching plan:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ===================================================================
+// Technical Interview Routing Endpoint
+// ===================================================================
+
+/**
+ * Get technical exercise routing for a given context
+ * This endpoint determines whether a technical interview should be
+ * a coding exercise or case study based on role/JD analysis
+ */
+interviewRouter.post("/technical-routing", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const {
+      roleArchetypeId,
+      roleCategory,
+      roleKitId,
+      jobTargetId,
+      interviewMode,
+      skills,
+      jdText,
+      seniority,
+    } = req.body;
+
+    // Get additional context if roleKitId or jobTargetId provided
+    let resolvedRoleCategory = roleCategory;
+    let resolvedSkills = skills || [];
+    let resolvedJdText = jdText;
+
+    if (roleKitId && !roleCategory) {
+      const [kit] = await db.select().from(roleKits).where(eq(roleKits.id, roleKitId));
+      if (kit) {
+        resolvedRoleCategory = kit.roleCategory;
+        resolvedSkills = (kit.skillsFocus as string[]) || [];
+      }
+    }
+
+    if (jobTargetId && !jdText) {
+      const [job] = await db.select().from(jobTargets).where(eq(jobTargets.id, jobTargetId));
+      if (job?.jdText) {
+        resolvedJdText = job.jdText;
+      }
+    }
+
+    // Route the technical interview
+    const { routing, challenge } = await routeAndSelectExercise({
+      roleArchetypeId,
+      roleCategory: resolvedRoleCategory,
+      roleKitId,
+      jobTargetId,
+      interviewMode,
+      skills: resolvedSkills,
+      jdText: resolvedJdText,
+      seniority: seniority || "mid",
+    });
+
+    res.json({
+      success: true,
+      routing,
+      challenge,
+    });
+  } catch (error: any) {
+    console.error("Error routing technical interview:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * Get exercise details for a specific challenge
+ */
+interviewRouter.get("/exercise/:type/:id", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { type, id } = req.params;
+    const exerciseId = parseInt(id);
+
+    if (type === "coding") {
+      const [exercise] = await db
+        .select()
+        .from(codingExercises)
+        .where(eq(codingExercises.id, exerciseId));
+
+      if (!exercise) {
+        return res.status(404).json({ success: false, error: "Coding exercise not found" });
+      }
+
+      res.json({
+        success: true,
+        exercise: {
+          id: exercise.id,
+          name: exercise.name,
+          activityType: exercise.activityType,
+          language: exercise.language,
+          difficulty: exercise.difficulty,
+          codeSnippet: exercise.codeSnippet,
+          bugDescription: exercise.bugDescription,
+          expectedBehavior: exercise.expectedBehavior,
+          expectedSignals: exercise.expectedSignals,
+          edgeCases: exercise.edgeCases,
+          probingQuestions: exercise.probingQuestions,
+          tags: exercise.tags,
+        },
+        type: "coding",
+      });
+    } else if (type === "case") {
+      const [template] = await db
+        .select()
+        .from(caseTemplates)
+        .where(eq(caseTemplates.id, exerciseId));
+
+      if (!template) {
+        return res.status(404).json({ success: false, error: "Case template not found" });
+      }
+
+      res.json({
+        success: true,
+        exercise: {
+          id: template.id,
+          name: template.name,
+          description: template.description,
+          caseType: template.caseType,
+          difficulty: template.difficulty,
+          backgroundMaterials: template.backgroundMaterials,
+          businessContext: template.businessContext,
+          questions: template.questions,
+        },
+        type: "case_study",
+      });
+    } else {
+      return res.status(400).json({ success: false, error: "Invalid exercise type. Use 'coding' or 'case'" });
+    }
+  } catch (error: any) {
+    console.error("Error fetching exercise:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
